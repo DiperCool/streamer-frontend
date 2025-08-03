@@ -1,0 +1,5 @@
+schema: local.graphql
+extensions:
+  endpoints:
+    One:
+      url: https://localhost:5001/graphql
