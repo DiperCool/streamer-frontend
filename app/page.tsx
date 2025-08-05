@@ -1,31 +1,22 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Crown, Users, Trophy, Zap } from "lucide-react"
 import { useAuth0 } from "@auth0/auth0-react"
 
-export default function LoginPage() {
-  const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0()
-  const router = useRouter()
-
-
+export default function HomePage() {
+  const { isAuthenticated, isLoading } = useAuth0()
 
   if (isLoading) {
     return (
-     <div></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+      </div>
     )
   }
 
-  if (isAuthenticated) {
-    return null
-  }
-
   return (
-    <div>
-
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
+      <p className="text-gray-400">This is the home page.</p>
     </div>
   )
 }

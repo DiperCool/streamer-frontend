@@ -31,7 +31,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
         </Button>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex-1 flex justify-center">
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
@@ -39,7 +39,9 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
             className="w-96 bg-gray-800 border-gray-700 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
           />
         </div>
-        
+      </div>
+
+      <div className="flex items-center space-x-4">
         <Button variant="ghost" className="text-gray-300 hover:text-white">
           Log In
         </Button>

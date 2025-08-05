@@ -1,7 +1,8 @@
 import type React from "react"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import {App} from "@/components/App";
+import { App } from "@/components/App"
+import { MainLayout } from "@/components/layout/main-layout"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -14,7 +15,9 @@ export default function RootLayout({
       <html lang="en">
       <body className={inter.className}>
       <App>
-        {children}
+        <MainLayout>
+          {children}
+        </MainLayout>
       </App>
       </body>
       </html>
