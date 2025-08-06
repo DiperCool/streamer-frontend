@@ -1,0 +1,114 @@
+# This file was generated. Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+"The purpose of the `cost` directive is to define a `weight` for GraphQL types, fields, and arguments. Static analysis can use these weights when calculating the overall cost of a query or response."
+directive @cost(
+    "The `weight` argument defines what value to add to the overall cost for every appearance, or possible appearance, of a type, field, argument, etc."
+    weight: String!
+) on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | ENUM | INPUT_FIELD_DEFINITION
+
+type Mutation {
+    updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
+    updateBio(input: UpdateBioInput!): UpdateBioResponse!
+    updateChannelBanner(input: UpdateChannelBannerInput!): UpdateChannelBannerResponse!
+    updateOfflineBanner(input: UpdateOfflineBannerInput!): UpdateOfflineBannerResponse!
+    updateProfile(input: UpdateProfileInput!): UpdateProfileResponse!
+    upload(input: UploadFileInput!): UploadFileResponse!
+}
+
+type ProfileDto {
+    bio: String
+    channelBanner: String
+    discord: String
+    instagram: String
+    offlineStreamBanner: String
+    streamer: StreamerDto!
+    streamerId: String!
+    youtube: String
+}
+
+type Query {
+    me: StreamerDto!
+    profile(streamerId: String!): ProfileDto!
+    streamer(userName: String!): StreamerDto!
+}
+
+type StreamerDto {
+    avatar: String
+    email: String!
+    followers: Long!
+    id: String!
+    userName: String!
+}
+
+type UpdateAvatarResponse {
+    file: String!
+}
+
+type UpdateBioResponse {
+    id: UUID!
+}
+
+type UpdateChannelBannerResponse {
+    id: UUID!
+}
+
+type UpdateOfflineBannerResponse {
+    id: UUID!
+}
+
+type UpdateProfileResponse {
+    id: UUID!
+}
+
+type UploadFileResponse {
+    fileName: String!
+}
+
+"Defines when a policy shall be executed."
+enum ApplyPolicy {
+    "After the resolver was executed."
+    AFTER_RESOLVER
+    "Before the resolver was executed."
+    BEFORE_RESOLVER
+    "The policy is applied in the validation step before the execution."
+    VALIDATION
+}
+
+"The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1."
+scalar Long
+
+scalar UUID
+
+"The `Upload` scalar type represents a file upload."
+scalar Upload
+
+input UpdateAvatarInput {
+    file: String!
+}
+
+input UpdateBioInput {
+    bio: String!
+}
+
+input UpdateChannelBannerInput {
+    channelBanner: String!
+}
+
+input UpdateOfflineBannerInput {
+    offlineBanner: String!
+}
+
+input UpdateProfileInput {
+    discord: String
+    instagram: String
+    youtube: String
+}
+
+input UploadFileInput {
+    file: Upload!
+}

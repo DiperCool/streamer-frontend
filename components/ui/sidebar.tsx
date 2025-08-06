@@ -74,7 +74,7 @@ const SidebarNavItem = React.forwardRef<
     )}
     {...props}
   >
-    {icon && <span className="mr-3 h-4 w-4">{icon}</span>}
+    {icon && <span className="mr-3 h-4 w-4 flex items-center justify-center">{icon}</span>}
     {children}
   </Button>
 ))
