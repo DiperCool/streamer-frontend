@@ -89,7 +89,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
             <p className="text-gray-400">{streamer.followers} followers</p>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col items-end space-y-2"> {/* Changed to flex-col and added space-y */}
           {isCurrentUserProfile && (
             <Link href="/settings/profile" passHref>
               <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
@@ -98,12 +98,14 @@ export default function StreamerProfilePage({ params }: { params: { username: st
               </Button>
             </Link>
           )}
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Share2 className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Settings className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center space-x-4"> {/* New div for icons */}
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Share2 className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
