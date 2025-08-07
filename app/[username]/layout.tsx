@@ -2,8 +2,8 @@
 
 import React from "react"
 import Image from "next/image"
-import { useRouter, useSearchParams } from "next/navigation" // Import useRouter and useSearchParams
-import {useGetProfileQuery, useGetMeQuery, useGetStreamerQuery} from "@/graphql/__generated__/graphql"
+import { usePathname } from "next/navigation"
+import { useGetProfileQuery, useGetStreamerQuery } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -11,28 +11,30 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageSquare, Share2, Settings, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import { StreamerAboutSection } from "@/components/streamer-about-section"
 
-export default function StreamerProfilePage({ params }: { params: { username: string } }) {
+export default function StreamerProfileLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: { username: string }
+}) {
   const { username } = params
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const initialTab = searchParams.get("tab") || "home" // Get initial tab from URL or default to 'home'
-  const [activeTab, setActiveTab] = React.useState(initialTab);
+  const pathname = usePathname()
 
-  const { data: currentUserData, loading: currentUserLoading } = useGetStreamerQuery({
-    variables:{
-      userName: username
-    }
+  const { data: streamerData, loading: streamerLoading } = useGetStreamerQuery({
+    variables: {
+      userName: username,
+    },
   })
   const { data: profileData, loading: profileLoading } = useGetProfileQuery({
     variables: {
-      streamerId: currentUserData?.streamer.id ?? "",
+      streamerId: streamerData?.streamer.id ?? "",
     },
-    skip: !currentUserData?.streamer.id,
+    skip: !streamerData?.streamer.id,
   })
 
-  if (currentUserLoading || profileLoading) {
+  if (streamerLoading || profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
@@ -41,8 +43,8 @@ export default function StreamerProfilePage({ params }: { params: { username: st
   }
 
   const streamerProfile = profileData?.profile
-  const streamer = currentUserData?.streamer
-  const isCurrentUserProfile = currentUserData?.streamer.id === streamer?.id
+  const streamer = streamerData?.streamer
+  const isCurrentUserProfile = streamerData?.streamer.id === streamer?.id // This logic might need adjustment if 'me' query is available
 
   if (!streamer || !streamerProfile) {
     return (
@@ -55,10 +57,15 @@ export default function StreamerProfilePage({ params }: { params: { username: st
   const bannerImage = streamerProfile.offlineStreamBanner || streamerProfile.channelBanner || "/placeholder.jpg"
   const avatarImage = streamer.avatar || "/placeholder-user.jpg"
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value)
-    router.push(`/${username}?tab=${value}`) // Update URL with the new tab value
-  }
+  // Determine the active tab based on the current pathname
+  const getActiveTab = () => {
+    if (pathname.endsWith('/about')) return 'about';
+    if (pathname.endsWith('/videos')) return 'videos';
+    if (pathname.endsWith('/clips')) return 'clips';
+    return 'home'; // Default to home
+  };
+
+  const activeTab = getActiveTab();
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -125,41 +132,32 @@ export default function StreamerProfilePage({ params }: { params: { username: st
 
       {/* Navigation Tabs */}
       <div className="container mx-auto px-4 border-b border-gray-800">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs value={activeTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-gray-900" currentValue={activeTab}>
-            <TabsTrigger value="home">
-              Home
-            </TabsTrigger>
-            <TabsTrigger value="about">
-              About
-            </TabsTrigger>
-            <TabsTrigger value="videos">
-              Videos
-            </TabsTrigger>
-            <TabsTrigger value="clips">
-              Clips
-            </TabsTrigger>
+            <Link href={`/${username}/home`} passHref legacyBehavior>
+              <TabsTrigger value="home">
+                Home
+              </TabsTrigger>
+            </Link>
+            <Link href={`/${username}/about`} passHref legacyBehavior>
+              <TabsTrigger value="about">
+                About
+              </TabsTrigger>
+            </Link>
+            <Link href={`/${username}/videos`} passHref legacyBehavior>
+              <TabsTrigger value="videos">
+                Videos
+              </TabsTrigger>
+            </Link>
+            <Link href={`/${username}/clips`} passHref legacyBehavior>
+              <TabsTrigger value="clips">
+                Clips
+              </TabsTrigger>
+            </Link>
           </TabsList>
-
-          <TabsContent value="home" className="py-8">
-            <h2 className="text-2xl font-semibold">Home Content</h2>
-            <p className="text-gray-400">This is the home section for {streamer.userName}.</p>
-          </TabsContent>
-          <TabsContent value="about" className="py-8">
-            {streamer && streamerProfile && (
-              <StreamerAboutSection streamer={streamer} profile={streamerProfile} />
-            )}
-          </TabsContent>
-          <TabsContent value="videos" className="py-8">
-            <h2 className="text-2xl font-semibold">Videos Content</h2>
-            <p className="text-gray-400">This is the videos section for {streamer.userName}.</p>
-          </TabsContent>
-          <TabsContent value="clips" className="py-8">
-            <h2 className="text-2xl font-semibold">Clips Content</h2>
-            <p className="text-gray-400">This is the clips section for {streamer.userName}.</p>
-          </TabsContent>
         </Tabs>
       </div>
+      {children} {/* This is where the nested page content will be rendered */}
     </div>
   )
 }

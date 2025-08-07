@@ -27,7 +27,7 @@ const TabsList = React.forwardRef<
         width: activeTab.offsetWidth,
       });
     }
-  }, [currentValue]); // Dependency changed to currentValue to trigger update on tab change
+  }, [currentValue, children]); // Dependency changed to currentValue and children to trigger update on tab change or children change
 
   return (
     <TabsPrimitive.List
