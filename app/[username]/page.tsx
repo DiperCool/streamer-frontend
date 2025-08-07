@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageSquare, Share2, Settings, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import { StreamerAboutSection } from "@/components/streamer-about-section" // Import the new component
+import { StreamerAboutSection } from "@/src/components/streamer-about-section"
 
 export default function StreamerProfilePage({ params }: { params: { username: string } }) {
   const { username } = params
@@ -138,7 +138,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
           </TabsContent>
           <TabsContent value="about" className="py-8">
             {streamer && streamerProfile && (
-              <StreamerAboutSection streamer={streamer} profile={streamerProfile} />
+              <StreamerAboutSection streamer={streamer} profile={{streamerId: streamer.id ,...streamerProfile}} />
             )}
           </TabsContent>
           <TabsContent value="videos" className="py-8">
