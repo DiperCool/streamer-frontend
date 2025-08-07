@@ -1,4 +1,3 @@
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
@@ -14,7 +13,7 @@ import {
 import z from "zod";
 import {Textarea} from "@/components/ui/textarea";
 export const profileSchema = z.object({
-    bio: z.string().optional(),
+    bio: z.string().max(300,"Bio link must be at most 300 characters").optional(),
 });
 type ProfileForm = z.infer<typeof profileSchema>;
 interface UpdateBioProps {
@@ -56,6 +55,9 @@ export const UpdateBio: FC<UpdateBioProps> = ({ profile, refetch }) => {
                 placeholder="Tell us about yourself..."
                 className="bg-gray-700 border-gray-600 text-white focus:border-green-500 min-h-[120px]"
             />
+            {errors.bio && (
+                <p className="text-red-500 text-sm mt-1">{errors.bio.message}</p>
+            )}
             <div className="flex justify-end space-x-2">
                 <Button onClick={()=>{
                     reset()
