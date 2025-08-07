@@ -16,7 +16,7 @@ export default function SettingsProfilePage() {
 
           {/* Navigation Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full"> {/* Make Tabs controlled */}
-            <TabsList className="grid w-full grid-cols-7 bg-gray-900 mb-8" currentValue={activeTab}> {/* Pass activeTabValue */}
+            <TabsList className="bg-gray-900 mb-8" currentValue={activeTab}> {/* Pass activeTabValue */}
               <TabsTrigger value="profile">
                 Profile
               </TabsTrigger>

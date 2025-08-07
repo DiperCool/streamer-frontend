@@ -137,8 +137,8 @@ export default function StreamerProfileLayout({
       {/* Navigation Tabs */}
       <div className="container mx-auto px-4 border-b border-gray-800">
         <Tabs value={activeTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-900" currentValue={activeTab}>
-            <Link href={`/${username}`} passHref> {/* Link to root for home */}
+          <TabsList className="bg-gray-900" currentValue={activeTab}>
+            <Link href={`/${username}`} passHref>
               <TabsTrigger value="home">
                 Home
               </TabsTrigger>
