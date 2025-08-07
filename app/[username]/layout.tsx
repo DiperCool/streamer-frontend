@@ -59,10 +59,14 @@ export default function StreamerProfileLayout({
 
   // Determine the active tab based on the current pathname
   const getActiveTab = () => {
-    if (pathname.endsWith('/about')) return 'about';
-    if (pathname.endsWith('/videos')) return 'videos';
-    if (pathname.endsWith('/clips')) return 'clips';
-    return 'home'; // Default to home
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
+
+    if (lastSegment === username) return 'home'; // If URL is just /username, it's home
+    if (lastSegment === 'about') return 'about';
+    if (lastSegment === 'videos') return 'videos';
+    if (lastSegment === 'clips') return 'clips';
+    return 'home'; // Default to home if no specific tab is found
   };
 
   const activeTab = getActiveTab();
@@ -134,7 +138,7 @@ export default function StreamerProfileLayout({
       <div className="container mx-auto px-4 border-b border-gray-800">
         <Tabs value={activeTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-gray-900" currentValue={activeTab}>
-            <Link href={`/${username}/home`} passHref legacyBehavior>
+            <Link href={`/${username}`} passHref legacyBehavior> {/* Link to root for home */}
               <TabsTrigger value="home">
                 Home
               </TabsTrigger>
