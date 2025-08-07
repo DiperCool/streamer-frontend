@@ -1,7 +1,8 @@
 "use client"
 
-import React from "react" // Import React for useState
+import React from "react"
 import Image from "next/image"
+import { useRouter, useSearchParams } from "next/navigation" // Import useRouter and useSearchParams
 import {useGetProfileQuery, useGetMeQuery, useGetStreamerQuery} from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,11 +11,14 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageSquare, Share2, Settings, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import { StreamerAboutSection } from "@/src/components/streamer-about-section"
+import { StreamerAboutSection } from "@/components/streamer-about-section"
 
 export default function StreamerProfilePage({ params }: { params: { username: string } }) {
   const { username } = params
-  const [activeTab, setActiveTab] = React.useState("home"); // Add state for active tab
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get("tab") || "home" // Get initial tab from URL or default to 'home'
+  const [activeTab, setActiveTab] = React.useState(initialTab);
 
   const { data: currentUserData, loading: currentUserLoading } = useGetStreamerQuery({
     variables:{
@@ -37,7 +41,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
   }
 
   const streamerProfile = profileData?.profile
-  const streamer = currentUserData?.streamer // Use streamer from currentUserData
+  const streamer = currentUserData?.streamer
   const isCurrentUserProfile = currentUserData?.streamer.id === streamer?.id
 
   if (!streamer || !streamerProfile) {
@@ -50,6 +54,11 @@ export default function StreamerProfilePage({ params }: { params: { username: st
 
   const bannerImage = streamerProfile.offlineStreamBanner || streamerProfile.channelBanner || "/placeholder.jpg"
   const avatarImage = streamer.avatar || "/placeholder-user.jpg"
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    router.push(`/${username}?tab=${value}`) // Update URL with the new tab value
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -116,8 +125,8 @@ export default function StreamerProfilePage({ params }: { params: { username: st
 
       {/* Navigation Tabs */}
       <div className="container mx-auto px-4 border-b border-gray-800">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full"> {/* Make Tabs controlled */}
-          <TabsList className="grid w-full grid-cols-4 bg-gray-900" currentValue={activeTab}> {/* Pass activeTabValue */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-gray-900" currentValue={activeTab}>
             <TabsTrigger value="home">
               Home
             </TabsTrigger>
@@ -138,7 +147,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
           </TabsContent>
           <TabsContent value="about" className="py-8">
             {streamer && streamerProfile && (
-              <StreamerAboutSection streamer={streamer} profile={{streamerId: streamer.id ,...streamerProfile}} />
+              <StreamerAboutSection streamer={streamer} profile={streamerProfile} />
             )}
           </TabsContent>
           <TabsContent value="videos" className="py-8">
