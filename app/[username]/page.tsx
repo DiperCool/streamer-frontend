@@ -11,9 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageSquare, Share2, Settings, ExternalLink } from "lucide-react"
 import Link from "next/link"
 
-export default function StreamerProfilePage() {
-  const router = useRouter()
-  const { username } = router.query as { username: string } // Get username from dynamic route
+export default function StreamerProfilePage({ params }: { params: { username: string } }) {
+  // const router = useRouter() // useRouter is not needed for accessing dynamic route params in App Router
+  const { username } = params // Get username from dynamic route params
 
   const { data: currentUserData, loading: currentUserLoading } = useGetMeQuery()
   const { data: profileData, loading: profileLoading } = useGetProfileQuery({
