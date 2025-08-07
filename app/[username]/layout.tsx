@@ -138,22 +138,22 @@ export default function StreamerProfileLayout({
       <div className="container mx-auto px-4 border-b border-gray-800">
         <Tabs value={activeTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-gray-900" currentValue={activeTab}>
-            <Link href={`/${username}`} passHref legacyBehavior> {/* Link to root for home */}
+            <Link href={`/${username}`} passHref> {/* Link to root for home */}
               <TabsTrigger value="home">
                 Home
               </TabsTrigger>
             </Link>
-            <Link href={`/${username}/about`} passHref legacyBehavior>
+            <Link href={`/${username}/about`} passHref>
               <TabsTrigger value="about">
                 About
               </TabsTrigger>
             </Link>
-            <Link href={`/${username}/videos`} passHref legacyBehavior>
+            <Link href={`/${username}/videos`} passHref>
               <TabsTrigger value="videos">
                 Videos
               </TabsTrigger>
             </Link>
-            <Link href={`/${username}/clips`} passHref legacyBehavior>
+            <Link href={`/${username}/clips`} passHref>
               <TabsTrigger value="clips">
                 Clips
               </TabsTrigger>
