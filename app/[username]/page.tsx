@@ -53,7 +53,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Banner Section */}
-      <div className="relative w-full h-48 md:h-64 lg:h-80 bg-gray-800 overflow-hidden">
+      <div className="relative w-full h-24 md:h-32 lg:h-40 bg-gray-800 overflow-hidden">
         <Image
           src={getMinioUrl(bannerImage)}
           alt="Channel Banner"
