@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import React from "react" // Import React for useState
 import Image from "next/image"
 import {useGetProfileQuery, useGetMeQuery, useGetStreamerQuery} from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
@@ -12,8 +12,8 @@ import { MessageSquare, Share2, Settings, ExternalLink } from "lucide-react"
 import Link from "next/link"
 
 export default function StreamerProfilePage({ params }: { params: { username: string } }) {
-  // const router = useRouter() // useRouter is not needed for accessing dynamic route params in App Router
-  const { username } = params // Get username from dynamic route params
+  const { username } = params
+  const [activeTab, setActiveTab] = React.useState("home"); // Add state for active tab
 
   const { data: currentUserData, loading: currentUserLoading } = useGetStreamerQuery({
     variables:{
@@ -22,7 +22,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
   })
   const { data: profileData, loading: profileLoading } = useGetProfileQuery({
     variables: {
-      streamerId: currentUserData?.streamer.id ?? "", // Assuming username can be used as streamerId for now
+      streamerId: currentUserData?.streamer.id ?? "",
     },
     skip: !currentUserData?.streamer.id,
   })
@@ -93,7 +93,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
             <p className="text-gray-400">{streamer.followers} followers</p>
           </div>
         </div>
-        <div className="flex flex-col items-end space-y-2"> {/* Changed to flex-col and added space-y */}
+        <div className="flex flex-col items-end space-y-2">
           {isCurrentUserProfile && (
             <Link href="/settings/profile" passHref>
               <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
@@ -102,7 +102,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
               </Button>
             </Link>
           )}
-          <div className="flex items-center space-x-4"> {/* New div for icons */}
+          <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <Share2 className="w-5 h-5" />
             </Button>
@@ -115,8 +115,8 @@ export default function StreamerProfilePage({ params }: { params: { username: st
 
       {/* Navigation Tabs */}
       <div className="container mx-auto px-4 border-b border-gray-800">
-        <Tabs defaultValue="home" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-900">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full"> {/* Make Tabs controlled */}
+          <TabsList className="grid w-full grid-cols-4 bg-gray-900" currentValue={activeTab}> {/* Pass activeTabValue */}
             <TabsTrigger value="home">
               Home
             </TabsTrigger>

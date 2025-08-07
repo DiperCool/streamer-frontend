@@ -7,14 +7,19 @@ import { cn } from "@/lib/utils"
 
 const Tabs = TabsPrimitive.Root
 
+interface TabsListProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
+  currentValue?: string; // Add prop to receive the current active tab value
+}
+
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, children, ...props }, ref) => {
+  TabsListProps // Use the new interface
+>(({ className, children, currentValue, ...props }, ref) => {
   const [indicatorStyle, setIndicatorStyle] = React.useState({ left: 0, width: 0 });
   const listRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    // Find the active tab based on data-state
     const activeTab = listRef.current?.querySelector("[data-state='active']");
     if (activeTab instanceof HTMLElement) {
       setIndicatorStyle({
@@ -22,7 +27,7 @@ const TabsList = React.forwardRef<
         width: activeTab.offsetWidth,
       });
     }
-  }, [children]); // Re-calculate when children (tabs) change, or when active tab changes (implicitly via data-state)
+  }, [currentValue]); // Dependency changed to currentValue to trigger update on tab change
 
   return (
     <TabsPrimitive.List
@@ -60,7 +65,7 @@ const TabsTrigger = React.forwardRef<
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       "relative rounded-none text-white hover:text-white",
-      "data-[state=active]:text-white", // Keep text white when active
+      "data-[state=active]:text-white",
       className
     )}
     {...props}
