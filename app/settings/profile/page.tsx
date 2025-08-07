@@ -13,8 +13,8 @@ export default function SettingsProfilePage() {
 
           {/* Navigation Tabs */}
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-7 bg-gray-800 mb-8">
-              <TabsTrigger value="profile" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+            <TabsList className="grid w-full grid-cols-7 bg-gray-900 mb-8">
+              <TabsTrigger value="profile">
                 Profile
               </TabsTrigger>
             </TabsList>
