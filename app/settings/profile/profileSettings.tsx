@@ -29,7 +29,7 @@ export const ProfileSettings = () => {
     const { data: streamer, loading: streamerLoadig  } = useGetMeQuery();
     const { data: profile, refetch } = useGetProfileQuery({
         variables:{
-            streamerId: streamer?.me.id
+            streamerId: streamer?.me.id ?? ""
         },
         skip: !streamer?.me.id
     })
@@ -61,42 +61,44 @@ export const ProfileSettings = () => {
                                     {streamer.me.followers} Followers
                                 </Badge>
                             </div>
-                            <p className="text-gray-400">{streamer?.me.userName}'s Kick Channel</p>
+
+                            {/* Social Media Links */}
+                            {(streamerProfile.instagram || streamerProfile.youtube || streamerProfile.discord) && (
+                                <div className="flex items-center space-x-4 mb-2">
+                                    {streamerProfile.instagram && (
+                                        <SocialMediaLink
+                                            platform="instagram"
+                                            username={streamerProfile.instagram}
+                                            href={`https://instagram.com/${streamerProfile.instagram}`}
+                                        />
+                                    )}
+
+                                    {streamerProfile.youtube && (
+                                        <SocialMediaLink
+                                            platform="youtube"
+                                            username={streamerProfile.youtube}
+                                            href={`https://youtube.com/${streamerProfile.youtube}`}
+                                        />
+                                    )}
+
+                                    {streamerProfile.discord && (
+                                        <SocialMediaLink
+                                            platform="discord"
+                                            username={streamerProfile.discord}
+                                            href={`https://discord.gg/${streamerProfile.discord}`}
+                                        />
+                                    )}
+                                </div>
+                            )}
+
+                            <p className="text-gray-400">{streamer?.me.userName}{profile?.profile.bio}</p>
                         </div>
                     </div>
-                    
-                    {/* Social Media Links */}
-                    {(streamerProfile.instagram || streamerProfile.youtube || streamerProfile.discord) && (
-                        <div className="flex items-center space-x-4 mb-6">
-                            {streamerProfile.instagram && (
-                                <SocialMediaLink
-                                    platform="instagram"
-                                    username={streamerProfile.instagram}
-                                    href={`https://instagram.com/${streamerProfile.instagram}`}
-                                />
-                            )}
-                            
-                            {streamerProfile.youtube && (
-                                <SocialMediaLink
-                                    platform="youtube"
-                                    username={streamerProfile.youtube}
-                                    href={`https://youtube.com/${streamerProfile.youtube}`}
-                                />
-                            )}
-                            
-                            {streamerProfile.discord && (
-                                <SocialMediaLink
-                                    platform="discord"
-                                    username={streamerProfile.discord}
-                                    href={`https://discord.gg/${streamerProfile.discord}`}
-                                />
-                            )}
-                        </div>
-                    )}
-                    
-                    <UpdateAvatar refetch={refetch}/>
+
+                    <UpdateAvatar refetch={refetch} />
                 </CardContent>
             </Card>
+
 
             <UpdateChannelBanner refetch={refetch} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
 
