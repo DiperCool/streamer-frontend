@@ -117,16 +117,16 @@ export default function StreamerProfilePage({ params }: { params: { username: st
       <div className="container mx-auto px-4 border-b border-gray-800">
         <Tabs defaultValue="home" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-gray-900">
-            <TabsTrigger value="home" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+            <TabsTrigger value="home">
               Home
             </TabsTrigger>
-            <TabsTrigger value="about" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+            <TabsTrigger value="about">
               About
             </TabsTrigger>
-            <TabsTrigger value="videos" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+            <TabsTrigger value="videos">
               Videos
             </TabsTrigger>
-            <TabsTrigger value="clips" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+            <TabsTrigger value="clips">
               Clips
             </TabsTrigger>
           </TabsList>

@@ -14,7 +14,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center justify-start bg-gray-800 text-gray-400", // Removed rounded-md and p-1
+      "inline-flex h-10 items-center justify-start bg-gray-900 text-gray-400", // Changed to bg-gray-900
       className
     )}
     {...props}
@@ -30,9 +30,9 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      "relative rounded-none text-white hover:text-white", // Inactive text is white, hover is also white, removed rounding
-      "data-[state=active]:text-white", // Active text is white
-      "data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-green-500 data-[state=active]:after:w-full", // Green underline
+      "relative rounded-none text-white hover:text-white",
+      "data-[state=active]:text-white",
+      "data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-green-500 data-[state=active]:after:w-full",
       className
     )}
     {...props}
