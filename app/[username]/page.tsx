@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { useGetProfileQuery, useGetMeQuery } from "@/graphql/__generated__/graphql"
+import {useGetProfileQuery, useGetMeQuery, useGetStreamerQuery} from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -15,12 +15,16 @@ export default function StreamerProfilePage({ params }: { params: { username: st
   // const router = useRouter() // useRouter is not needed for accessing dynamic route params in App Router
   const { username } = params // Get username from dynamic route params
 
-  const { data: currentUserData, loading: currentUserLoading } = useGetMeQuery()
+  const { data: currentUserData, loading: currentUserLoading } = useGetStreamerQuery({
+    variables:{
+      userName: username
+    }
+  })
   const { data: profileData, loading: profileLoading } = useGetProfileQuery({
     variables: {
-      streamerId: username, // Assuming username can be used as streamerId for now
+      streamerId: currentUserData?.streamer.id ?? "", // Assuming username can be used as streamerId for now
     },
-    skip: !username,
+    skip: !currentUserData?.streamer.id,
   })
 
   if (currentUserLoading || profileLoading) {
@@ -33,7 +37,7 @@ export default function StreamerProfilePage({ params }: { params: { username: st
 
   const streamerProfile = profileData?.profile
   const streamer = streamerProfile?.streamer
-  const isCurrentUserProfile = currentUserData?.me.id === streamer?.id
+  const isCurrentUserProfile = currentUserData?.streamer.id === streamer?.id
 
   if (!streamer || !streamerProfile) {
     return (
