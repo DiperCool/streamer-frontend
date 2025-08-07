@@ -47,6 +47,9 @@ const TabsList = React.forwardRef<
       {...props}
     >
       {children}
+      {/* Grey separator line */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gray-700" />
+      {/* Green animated indicator */}
       <div
         className="absolute bottom-0 h-[2px] bg-green-500 transition-all duration-300 ease-in-out"
         style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
