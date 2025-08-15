@@ -275,6 +275,30 @@ export type GetMyEmailQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetMyEmailQuery = { __typename?: 'Query', myEmail: { __typename?: 'GetEmailResponse', email: string } };
 
+export type UpdateStreamSettingsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UpdateStreamSettingsMutation = { __typename?: 'Mutation', updateStreamSettings: { __typename?: 'UpdateStreamSettingsResponse', id: any } };
+
+export type GetCurrentStreamQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: any, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: any } | null } };
+
+export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetStreamSettingsQuery = { __typename?: 'Query', streamSettings: { __typename?: 'StreamSettingsDto', id: any, streamKey: string, streamUrl: string } };
+
+export type StreamerUpdatedSubscriptionVariables = Exact<{
+  streamId: Scalars['UUID']['input'];
+}>;
+
+
+export type StreamerUpdatedSubscription = { __typename?: 'Subscription', streamerUpdated: { __typename?: 'StreamDto', id: any, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: any } | null } };
+
 
 export const UploadFileDocument = gql`
     mutation UploadFile($input: UploadFileInput!) {
@@ -649,3 +673,164 @@ export type GetMyEmailQueryHookResult = ReturnType<typeof useGetMyEmailQuery>;
 export type GetMyEmailLazyQueryHookResult = ReturnType<typeof useGetMyEmailLazyQuery>;
 export type GetMyEmailSuspenseQueryHookResult = ReturnType<typeof useGetMyEmailSuspenseQuery>;
 export type GetMyEmailQueryResult = Apollo.QueryResult<GetMyEmailQuery, GetMyEmailQueryVariables>;
+export const UpdateStreamSettingsDocument = gql`
+    mutation UpdateStreamSettings {
+  updateStreamSettings {
+    id
+  }
+}
+    `;
+export type UpdateStreamSettingsMutationFn = Apollo.MutationFunction<UpdateStreamSettingsMutation, UpdateStreamSettingsMutationVariables>;
+
+/**
+ * __useUpdateStreamSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateStreamSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateStreamSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateStreamSettingsMutation, { data, loading, error }] = useUpdateStreamSettingsMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUpdateStreamSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateStreamSettingsMutation, UpdateStreamSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateStreamSettingsMutation, UpdateStreamSettingsMutationVariables>(UpdateStreamSettingsDocument, options);
+      }
+export type UpdateStreamSettingsMutationHookResult = ReturnType<typeof useUpdateStreamSettingsMutation>;
+export type UpdateStreamSettingsMutationResult = Apollo.MutationResult<UpdateStreamSettingsMutation>;
+export type UpdateStreamSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateStreamSettingsMutation, UpdateStreamSettingsMutationVariables>;
+export const GetCurrentStreamDocument = gql`
+    query GetCurrentStream($streamerId: String!) {
+  currentStream(streamerId: $streamerId) {
+    id
+    active
+    title
+    currentViewers
+    streamer {
+      id
+      userName
+      avatar
+      followers
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCurrentStreamQuery__
+ *
+ * To run a query within a React component, call `useGetCurrentStreamQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCurrentStreamQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCurrentStreamQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useGetCurrentStreamQuery(baseOptions: Apollo.QueryHookOptions<GetCurrentStreamQuery, GetCurrentStreamQueryVariables> & ({ variables: GetCurrentStreamQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCurrentStreamQuery, GetCurrentStreamQueryVariables>(GetCurrentStreamDocument, options);
+      }
+export function useGetCurrentStreamLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCurrentStreamQuery, GetCurrentStreamQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCurrentStreamQuery, GetCurrentStreamQueryVariables>(GetCurrentStreamDocument, options);
+        }
+export function useGetCurrentStreamSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCurrentStreamQuery, GetCurrentStreamQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCurrentStreamQuery, GetCurrentStreamQueryVariables>(GetCurrentStreamDocument, options);
+        }
+export type GetCurrentStreamQueryHookResult = ReturnType<typeof useGetCurrentStreamQuery>;
+export type GetCurrentStreamLazyQueryHookResult = ReturnType<typeof useGetCurrentStreamLazyQuery>;
+export type GetCurrentStreamSuspenseQueryHookResult = ReturnType<typeof useGetCurrentStreamSuspenseQuery>;
+export type GetCurrentStreamQueryResult = Apollo.QueryResult<GetCurrentStreamQuery, GetCurrentStreamQueryVariables>;
+export const GetStreamSettingsDocument = gql`
+    query GetStreamSettings {
+  streamSettings {
+    id
+    streamKey
+    streamUrl
+  }
+}
+    `;
+
+/**
+ * __useGetStreamSettingsQuery__
+ *
+ * To run a query within a React component, call `useGetStreamSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetStreamSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetStreamSettingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetStreamSettingsQuery(baseOptions?: Apollo.QueryHookOptions<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>(GetStreamSettingsDocument, options);
+      }
+export function useGetStreamSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>(GetStreamSettingsDocument, options);
+        }
+export function useGetStreamSettingsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>(GetStreamSettingsDocument, options);
+        }
+export type GetStreamSettingsQueryHookResult = ReturnType<typeof useGetStreamSettingsQuery>;
+export type GetStreamSettingsLazyQueryHookResult = ReturnType<typeof useGetStreamSettingsLazyQuery>;
+export type GetStreamSettingsSuspenseQueryHookResult = ReturnType<typeof useGetStreamSettingsSuspenseQuery>;
+export type GetStreamSettingsQueryResult = Apollo.QueryResult<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>;
+export const StreamerUpdatedDocument = gql`
+    subscription StreamerUpdated($streamId: UUID!) {
+  streamerUpdated(streamId: $streamId) {
+    id
+    active
+    title
+    currentViewers
+    streamer {
+      id
+      userName
+      avatar
+      followers
+    }
+  }
+}
+    `;
+
+/**
+ * __useStreamerUpdatedSubscription__
+ *
+ * To run a query within a React component, call `useStreamerUpdatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useStreamerUpdatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStreamerUpdatedSubscription({
+ *   variables: {
+ *      streamId: // value for 'streamId'
+ *   },
+ * });
+ */
+export function useStreamerUpdatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<StreamerUpdatedSubscription, StreamerUpdatedSubscriptionVariables> & ({ variables: StreamerUpdatedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<StreamerUpdatedSubscription, StreamerUpdatedSubscriptionVariables>(StreamerUpdatedDocument, options);
+      }
+export type StreamerUpdatedSubscriptionHookResult = ReturnType<typeof useStreamerUpdatedSubscription>;
+export type StreamerUpdatedSubscriptionResult = Apollo.SubscriptionResult<StreamerUpdatedSubscription>;
