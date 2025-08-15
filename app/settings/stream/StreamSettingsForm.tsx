@@ -50,14 +50,8 @@ export function StreamSettingsForm() {
 
   const onSubmit = async (values: StreamSettingsFormValues) => {
     try {
-      await updateStreamSettings({
-        variables: {
-          input: {
-            streamUrl: values.streamUrl,
-            streamKey: values.streamKey,
-          },
-        },
-      });
+      // Вызов мутации без переменных, так как она не принимает параметров
+      await updateStreamSettings();
       refetch(); // Refetch to get the latest data
       // Optionally show a toast notification for success
     } catch (err) {
