@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff } from "lucide-react"
-import { useGetStreamSettingsQuery, useUpdateStreamSettingsMutation, useResetStreamKeyMutation } from "@/graphql/__generated__/graphql"
+import { useGetStreamSettingsQuery, useResetStreamKeyMutation } from "@/graphql/__generated__/graphql"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -24,14 +24,12 @@ export function StreamSettingsForm() {
   const [showStreamKey, setShowStreamKey] = useState(false)
 
   const { data, loading, error, refetch } = useGetStreamSettingsQuery();
-  const [updateStreamSettings, { loading: updateLoading }] = useUpdateStreamSettingsMutation();
   const [resetStreamKey, { loading: resetLoading }] = useResetStreamKeyMutation();
 
   const {
     register,
-    handleSubmit,
     reset,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<StreamSettingsFormValues>({
     resolver: zodResolver(streamSettingsSchema),
     defaultValues: {
@@ -48,18 +46,6 @@ export function StreamSettingsForm() {
       });
     }
   }, [data, reset]);
-
-  const onSubmit = async () => {
-    try {
-      // Вызов мутации без переменных, так как она не принимает параметров
-      await updateStreamSettings();
-      refetch(); // Refetch to get the latest data
-      // Optionally show a toast notification for success
-    } catch (err) {
-      console.error("Failed to update stream settings:", err);
-      // Optionally show a toast notification for error
-    }
-  };
 
   const handleResetStreamKey = async () => {
     try {
@@ -85,7 +71,7 @@ export function StreamSettingsForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <div className="space-y-8">
       <h2 className="text-2xl font-semibold mb-6">Stream URL and Key</h2>
 
       <Card className="bg-gray-800 border-gray-700">
@@ -154,26 +140,6 @@ export function StreamSettingsForm() {
           )}
         </CardContent>
       </Card>
-
-      <div className="flex justify-end space-x-2">
-        {/* "Cancel" and "Save changes" buttons are kept, but "Save changes" will only trigger the parameter-less updateStreamSettings mutation */}
-        <Button
-          type="button"
-          onClick={() => reset()}
-          variant="outline"
-          className="border-gray-600 text-gray-300 hover:bg-gray-700"
-          disabled={!isDirty || updateLoading}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={!isDirty || updateLoading}
-          className="bg-green-600 hover:bg-green-700 text-white"
-        >
-          {updateLoading ? "Saving..." : "Save changes"}
-        </Button>
-      </div>
-    </form>
+    </div>
   )
 }
