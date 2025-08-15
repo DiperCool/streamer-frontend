@@ -6,12 +6,12 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff } from "lucide-react"
-import { useGetStreamSettingsQuery, useUpdateStreamSettingsMutation } from "@/graphql/__generated__/graphql"
+import { useGetStreamSettingsQuery, useUpdateStreamSettingsMutation, useResetStreamKeyMutation } from "@/graphql/__generated__/graphql"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
-// Define schema for stream settings form
+// Define schema for stream settings form (still needed for type inference and potential future use)
 const streamSettingsSchema = z.object({
   streamUrl: z.string().url("Invalid URL format").optional().or(z.literal("")),
   streamKey: z.string().min(1, "Stream key cannot be empty"),
@@ -25,6 +25,7 @@ export function StreamSettingsForm() {
 
   const { data, loading, error, refetch } = useGetStreamSettingsQuery();
   const [updateStreamSettings, { loading: updateLoading }] = useUpdateStreamSettingsMutation();
+  const [resetStreamKey, { loading: resetLoading }] = useResetStreamKeyMutation();
 
   const {
     register,
@@ -48,13 +49,25 @@ export function StreamSettingsForm() {
     }
   }, [data, reset]);
 
-  const onSubmit = async (values: StreamSettingsFormValues) => {
+  const onSubmit = async () => {
     try {
+      // Вызов мутации без переменных, так как она не принимает параметров
       await updateStreamSettings();
       refetch(); // Refetch to get the latest data
       // Optionally show a toast notification for success
     } catch (err) {
       console.error("Failed to update stream settings:", err);
+      // Optionally show a toast notification for error
+    }
+  };
+
+  const handleResetStreamKey = async () => {
+    try {
+      await resetStreamKey();
+      refetch(); // Refetch to get the newly generated key
+      // Optionally show a toast notification for success
+    } catch (err) {
+      console.error("Failed to reset stream key:", err);
       // Optionally show a toast notification for error
     }
   };
@@ -85,6 +98,7 @@ export function StreamSettingsForm() {
               id="stream-url"
               type={showStreamUrl ? "text" : "password"}
               {...register("streamUrl")}
+              readOnly // Make input read-only
               className="bg-gray-700 border-gray-600 text-white focus:border-green-500 pr-10"
             />
             <Button
@@ -113,18 +127,27 @@ export function StreamSettingsForm() {
               id="stream-key"
               type={showStreamKey ? "text" : "password"}
               {...register("streamKey")}
+              readOnly // Make input read-only
               className="bg-gray-700 border-gray-600 text-white focus:border-green-500 pr-10 flex-grow"
             />
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:bg-transparent hover:text-white"
+              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:bg-transparent hover:text-white"
               onClick={() => setShowStreamKey(!showStreamKey)}
               type="button"
             >
               {showStreamKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
-            {/* Removed the "Reset" button */}
+            <Button
+              variant="outline"
+              className="ml-2 border-gray-600 text-gray-300 hover:bg-green-600 hover:text-white"
+              onClick={handleResetStreamKey}
+              disabled={resetLoading}
+              type="button"
+            >
+              {resetLoading ? "Resetting..." : "Reset"}
+            </Button>
           </div>
           {errors.streamKey && (
             <p className="text-red-500 text-sm mt-1">{errors.streamKey.message}</p>
@@ -133,6 +156,7 @@ export function StreamSettingsForm() {
       </Card>
 
       <div className="flex justify-end space-x-2">
+        {/* "Cancel" and "Save changes" buttons are kept, but "Save changes" will only trigger the parameter-less updateStreamSettings mutation */}
         <Button
           type="button"
           onClick={() => reset()}
