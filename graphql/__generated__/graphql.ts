@@ -30,6 +30,11 @@ export enum ApplyPolicy {
   Validation = 'VALIDATION'
 }
 
+export type GetEmailResponse = {
+  __typename?: 'GetEmailResponse';
+  email: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   updateAvatar: UpdateAvatarResponse;
@@ -37,6 +42,7 @@ export type Mutation = {
   updateChannelBanner: UpdateChannelBannerResponse;
   updateOfflineBanner: UpdateOfflineBannerResponse;
   updateProfile: UpdateProfileResponse;
+  updateStreamSettings: UpdateStreamSettingsResponse;
   upload: UploadFileResponse;
 };
 
@@ -84,9 +90,17 @@ export type ProfileDto = {
 
 export type Query = {
   __typename?: 'Query';
+  currentStream: StreamDto;
   me: StreamerDto;
+  myEmail: GetEmailResponse;
   profile: ProfileDto;
+  streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
+};
+
+
+export type QueryCurrentStreamArgs = {
+  streamerId: Scalars['String']['input'];
 };
 
 
@@ -99,13 +113,39 @@ export type QueryStreamerArgs = {
   userName: Scalars['String']['input'];
 };
 
+export type StreamDto = {
+  __typename?: 'StreamDto';
+  active: Scalars['Boolean']['output'];
+  currentViewers: Scalars['Long']['output'];
+  id: Scalars['UUID']['output'];
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type StreamSettingsDto = {
+  __typename?: 'StreamSettingsDto';
+  id: Scalars['UUID']['output'];
+  streamKey: Scalars['String']['output'];
+  streamUrl: Scalars['String']['output'];
+};
+
 export type StreamerDto = {
   __typename?: 'StreamerDto';
   avatar?: Maybe<Scalars['String']['output']>;
-  email: Scalars['String']['output'];
   followers: Scalars['Long']['output'];
   id: Scalars['String']['output'];
   userName: Scalars['String']['output'];
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  streamerUpdated: StreamDto;
+};
+
+
+export type SubscriptionStreamerUpdatedArgs = {
+  streamId: Scalars['UUID']['input'];
 };
 
 export type UpdateAvatarInput = {
@@ -152,6 +192,11 @@ export type UpdateProfileInput = {
 
 export type UpdateProfileResponse = {
   __typename?: 'UpdateProfileResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type UpdateStreamSettingsResponse = {
+  __typename?: 'UpdateStreamSettingsResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -204,7 +249,7 @@ export type GetProfileQueryVariables = Exact<{
 }>;
 
 
-export type GetProfileQuery = { __typename?: 'Query', profile: { __typename?: 'ProfileDto', bio?: string | null, channelBanner?: string | null, discord?: string | null, instagram?: string | null, offlineStreamBanner?: string | null, youtube?: string | null, streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, email: string, userName: string, followers: any } } };
+export type GetProfileQuery = { __typename?: 'Query', profile: { __typename?: 'ProfileDto', bio?: string | null, channelBanner?: string | null, discord?: string | null, instagram?: string | null, offlineStreamBanner?: string | null, youtube?: string | null, streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any } } };
 
 export type UpdateAvatarMutationVariables = Exact<{
   input: UpdateAvatarInput;
@@ -218,12 +263,17 @@ export type GetStreamerQueryVariables = Exact<{
 }>;
 
 
-export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, email: string, userName: string, followers: any } };
+export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any } };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerDto', id: string, avatar?: string | null, email: string, userName: string, followers: any } };
+export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any } };
+
+export type GetMyEmailQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMyEmailQuery = { __typename?: 'Query', myEmail: { __typename?: 'GetEmailResponse', email: string } };
 
 
 export const UploadFileDocument = gql`
@@ -403,7 +453,6 @@ export const GetProfileDocument = gql`
     streamer {
       id
       avatar
-      email
       userName
       followers
     }
@@ -481,7 +530,6 @@ export const GetStreamerDocument = gql`
   streamer(userName: $userName) {
     id
     avatar
-    email
     userName
     followers
   }
@@ -525,7 +573,6 @@ export const GetMeDocument = gql`
   me {
     id
     avatar
-    email
     userName
     followers
   }
@@ -563,3 +610,42 @@ export type GetMeQueryHookResult = ReturnType<typeof useGetMeQuery>;
 export type GetMeLazyQueryHookResult = ReturnType<typeof useGetMeLazyQuery>;
 export type GetMeSuspenseQueryHookResult = ReturnType<typeof useGetMeSuspenseQuery>;
 export type GetMeQueryResult = Apollo.QueryResult<GetMeQuery, GetMeQueryVariables>;
+export const GetMyEmailDocument = gql`
+    query GetMyEmail {
+  myEmail {
+    email
+  }
+}
+    `;
+
+/**
+ * __useGetMyEmailQuery__
+ *
+ * To run a query within a React component, call `useGetMyEmailQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyEmailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyEmailQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetMyEmailQuery(baseOptions?: Apollo.QueryHookOptions<GetMyEmailQuery, GetMyEmailQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMyEmailQuery, GetMyEmailQueryVariables>(GetMyEmailDocument, options);
+      }
+export function useGetMyEmailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyEmailQuery, GetMyEmailQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMyEmailQuery, GetMyEmailQueryVariables>(GetMyEmailDocument, options);
+        }
+export function useGetMyEmailSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMyEmailQuery, GetMyEmailQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetMyEmailQuery, GetMyEmailQueryVariables>(GetMyEmailDocument, options);
+        }
+export type GetMyEmailQueryHookResult = ReturnType<typeof useGetMyEmailQuery>;
+export type GetMyEmailLazyQueryHookResult = ReturnType<typeof useGetMyEmailLazyQuery>;
+export type GetMyEmailSuspenseQueryHookResult = ReturnType<typeof useGetMyEmailSuspenseQuery>;
+export type GetMyEmailQueryResult = Apollo.QueryResult<GetMyEmailQuery, GetMyEmailQueryVariables>;

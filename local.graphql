@@ -3,6 +3,7 @@
 schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
 }
 
 "The purpose of the `cost` directive is to define a `weight` for GraphQL types, fields, and arguments. Static analysis can use these weights when calculating the overall cost of a query or response."
@@ -11,12 +12,17 @@ directive @cost(
     weight: String!
 ) on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | ENUM | INPUT_FIELD_DEFINITION
 
+type GetEmailResponse {
+    email: String!
+}
+
 type Mutation {
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
     updateBio(input: UpdateBioInput!): UpdateBioResponse!
     updateChannelBanner(input: UpdateChannelBannerInput!): UpdateChannelBannerResponse!
     updateOfflineBanner(input: UpdateOfflineBannerInput!): UpdateOfflineBannerResponse!
     updateProfile(input: UpdateProfileInput!): UpdateProfileResponse!
+    updateStreamSettings: UpdateStreamSettingsResponse!
     upload(input: UploadFileInput!): UploadFileResponse!
 }
 
@@ -32,17 +38,38 @@ type ProfileDto {
 }
 
 type Query {
+    currentStream(streamerId: String!): StreamDto!
     me: StreamerDto!
+    myEmail: GetEmailResponse!
     profile(streamerId: String!): ProfileDto!
+    streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
+}
+
+type StreamDto {
+    active: Boolean!
+    currentViewers: Long!
+    id: UUID!
+    streamer: StreamerDto
+    streamerId: String!
+    title: String!
+}
+
+type StreamSettingsDto {
+    id: UUID!
+    streamKey: String!
+    streamUrl: String!
 }
 
 type StreamerDto {
     avatar: String
-    email: String!
     followers: Long!
     id: String!
     userName: String!
+}
+
+type Subscription {
+    streamerUpdated(streamId: UUID!): StreamDto!
 }
 
 type UpdateAvatarResponse {
@@ -62,6 +89,10 @@ type UpdateOfflineBannerResponse {
 }
 
 type UpdateProfileResponse {
+    id: UUID!
+}
+
+type UpdateStreamSettingsResponse {
     id: UUID!
 }
 

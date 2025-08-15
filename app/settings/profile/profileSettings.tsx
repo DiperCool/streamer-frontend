@@ -24,6 +24,7 @@ import {UpdateChannelBanner} from "@/app/settings/profile/updateChannelBanner";
 import {UpdateOfflineBanner} from "@/app/settings/profile/updateOfflineBanner";
 import { UpdateBio } from "./updateBio";
 import { SocialMediaLink } from "@/components/ui/social-media-link";
+import {EmailSettings} from "@/app/settings/profile/emailSettings";
 
 export const ProfileSettings = () => {
     const { data: streamer, loading: streamerLoadig  } = useGetMeQuery();
@@ -124,16 +125,7 @@ export const ProfileSettings = () => {
                         </p>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="email" className="text-white">Email</Label>
-                        <Input
-                            value={streamer?.me.email}
-                            id="email"
-                            readOnly={true}
-                            type="email"
-                            className="bg-gray-700 border-gray-600 text-white focus:border-green-500"
-                        />
-                    </div>
+                    <EmailSettings/>
 
                    <UpdateBio refetch={refetch} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
                 </CardContent>

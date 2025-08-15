@@ -4,7 +4,6 @@ export const GET_STREAMER = gql`
         streamer(userName: $userName) {
             id
             avatar
-            email
             userName
             followers
         }
@@ -15,9 +14,15 @@ export const GET_ME = gql`
         me{
             id
             avatar
-            email
             userName
             followers
+        }
+    }
+`
+export const GET_EMAIL = gql`
+    query GetMyEmail {
+        myEmail{
+            email
         }
     }
 `

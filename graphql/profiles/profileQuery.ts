@@ -12,7 +12,6 @@ export const GET_PROFILE = gql`
             streamer {
                 id
                 avatar
-                email
                 userName
                 followers
             }
