@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
-import { Home, Heart, User, Settings, Play } from "lucide-react" // Import Play icon
+import { Home, Heart, User, Settings } from "lucide-react" // Removed Play icon
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -47,11 +47,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   Settings
                 </SidebarNavItem>
               </Link>
-              <Link href="/settings/stream" passHref>
-                <SidebarNavItem icon={<Play />} active={pathname === "/settings/stream"}>
-                  Stream Settings
-                </SidebarNavItem>
-              </Link>
+              {/* Removed Stream Settings link */}
             </SidebarNav>
           </SidebarContent>
         </Sidebar>
