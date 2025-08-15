@@ -3,7 +3,9 @@ import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
-import { Home, Heart, User, Settings } from "lucide-react"
+import { Home, Heart, User, Settings, Play } from "lucide-react" // Import Play icon
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -11,6 +13,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
@@ -28,18 +31,27 @@ export function MainLayout({ children }: MainLayoutProps) {
           </SidebarHeader>
           <SidebarContent>
             <SidebarNav>
-              <SidebarNavItem icon={<Home />}>
-                Home
-              </SidebarNavItem>
+              <Link href="/" passHref>
+                <SidebarNavItem icon={<Home />} active={pathname === "/"}>
+                  Home
+                </SidebarNavItem>
+              </Link>
               <SidebarNavItem icon={<Heart />}>
                 Following
               </SidebarNavItem>
               <SidebarNavItem icon={<User />}>
                 Profile
               </SidebarNavItem>
-              <SidebarNavItem icon={<Settings />}>
-                Settings
-              </SidebarNavItem>
+              <Link href="/settings/profile" passHref>
+                <SidebarNavItem icon={<Settings />} active={pathname.startsWith("/settings")}>
+                  Settings
+                </SidebarNavItem>
+              </Link>
+              <Link href="/settings/stream" passHref>
+                <SidebarNavItem icon={<Play />} active={pathname === "/settings/stream"}>
+                  Stream Settings
+                </SidebarNavItem>
+              </Link>
             </SidebarNav>
           </SidebarContent>
         </Sidebar>
