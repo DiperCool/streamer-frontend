@@ -3,7 +3,7 @@
 import React from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProfileSettings } from "@/app/settings/profile/profileSettings"
-import StreamSettingsPage from "@/app/settings/stream/page" // Import the new StreamSettingsPage
+import { StreamSettingsForm } from "@/app/settings/stream/StreamSettingsForm" // Import StreamSettingsForm directly
 import { usePathname, useRouter } from "next/navigation"
 
 export default function SettingsPage() {
@@ -50,7 +50,7 @@ export default function SettingsPage() {
             <ProfileSettings />
           </TabsContent>
           <TabsContent value="stream" className="space-y-8">
-            <StreamSettingsPage />
+            <StreamSettingsForm /> {/* Render StreamSettingsForm directly */}
           </TabsContent>
         </Tabs>
       </div>
