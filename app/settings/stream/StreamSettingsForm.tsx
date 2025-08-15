@@ -50,7 +50,6 @@ export function StreamSettingsForm() {
 
   const onSubmit = async (values: StreamSettingsFormValues) => {
     try {
-      // Вызов мутации без переменных, так как она не принимает параметров
       await updateStreamSettings();
       refetch(); // Refetch to get the latest data
       // Optionally show a toast notification for success
@@ -58,14 +57,6 @@ export function StreamSettingsForm() {
       console.error("Failed to update stream settings:", err);
       // Optionally show a toast notification for error
     }
-  };
-
-  const handleResetStreamKey = async () => {
-    // This would typically be a separate mutation to generate a new key on the backend
-    // For now, we'll just generate a new placeholder key and let the user save to get a new one (if backend supports it)
-    const newKey = "sk_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    reset((prev) => ({ ...prev, streamKey: newKey }), { keepDirty: true });
-    alert("Stream Key has been reset (placeholder action). Please save changes.");
   };
 
   if (loading) {
@@ -127,20 +118,13 @@ export function StreamSettingsForm() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:bg-transparent hover:text-white"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:bg-transparent hover:text-white"
               onClick={() => setShowStreamKey(!showStreamKey)}
               type="button"
             >
               {showStreamKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
-            <Button
-              variant="outline"
-              className="ml-2 border-gray-600 text-gray-300 hover:bg-green-600 hover:text-white"
-              onClick={handleResetStreamKey}
-              type="button"
-            >
-              Reset
-            </Button>
+            {/* Removed the "Reset" button */}
           </div>
           {errors.streamKey && (
             <p className="text-red-500 text-sm mt-1">{errors.streamKey.message}</p>
