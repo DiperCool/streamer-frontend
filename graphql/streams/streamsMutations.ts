@@ -7,11 +7,3 @@ export const UPDATE_STREAM_SETTINGS = gql`
         }
     }
 `
-
-export const RESET_STREAM_KEY = gql`
-    mutation ResetStreamKey {
-        resetStreamKey {
-            id
-        }
-    }
-`

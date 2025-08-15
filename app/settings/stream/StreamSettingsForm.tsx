@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff } from "lucide-react"
-import { useGetStreamSettingsQuery, useResetStreamKeyMutation } from "@/graphql/__generated__/graphql"
+import { useGetStreamSettingsQuery, useUpdateStreamSettingsMutation } from "@/graphql/__generated__/graphql"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -24,7 +24,7 @@ export function StreamSettingsForm() {
   const [showStreamKey, setShowStreamKey] = useState(false)
 
   const { data, loading, error, refetch } = useGetStreamSettingsQuery();
-  const [resetStreamKey, { loading: resetLoading }] = useResetStreamKeyMutation();
+  const [updateStreamSettings, { loading: updateLoading }] = useUpdateStreamSettingsMutation();
 
   const {
     register,
@@ -49,7 +49,7 @@ export function StreamSettingsForm() {
 
   const handleResetStreamKey = async () => {
     try {
-      await resetStreamKey();
+      await updateStreamSettings(); // Call updateStreamSettingsMutation without variables
       refetch(); // Refetch to get the newly generated key
       // Optionally show a toast notification for success
     } catch (err) {
@@ -129,10 +129,10 @@ export function StreamSettingsForm() {
               variant="outline"
               className="ml-2 border-gray-600 text-gray-300 hover:bg-green-600 hover:text-white"
               onClick={handleResetStreamKey}
-              disabled={resetLoading}
+              disabled={updateLoading} // Use updateLoading for the button's disabled state
               type="button"
             >
-              {resetLoading ? "Resetting..." : "Reset"}
+              {updateLoading ? "Resetting..." : "Reset"}
             </Button>
           </div>
           {errors.streamKey && (
