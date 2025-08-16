@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client"
+
 export const GET_STREAMER = gql`
     query GetStreamer($userName: String!) {
         streamer(userName: $userName) {
@@ -6,6 +7,7 @@ export const GET_STREAMER = gql`
             avatar
             userName
             followers
+            isLive
         }
     }
 `
@@ -16,6 +18,7 @@ export const GET_ME = gql`
             avatar
             userName
             followers
+            isLive
         }
     }
 `

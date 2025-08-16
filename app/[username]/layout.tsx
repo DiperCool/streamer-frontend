@@ -3,13 +3,18 @@
 import React from "react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useGetProfileQuery, useGetStreamerQuery, useGetCurrentStreamQuery } from "@/graphql/__generated__/graphql"
+import {
+  useGetProfileQuery,
+  useGetStreamerQuery,
+  useGetCurrentStreamQuery,
+  useStreamerUpdatedSubscription // Импортируем подписку
+} from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
-import { ChatSection } from "@/src/components/chat-section" // Импортируем новый компонент
+import { ChatSection } from "@/src/components/chat-section"
 
 export default function StreamerProfileLayout({
   children,
@@ -21,7 +26,7 @@ export default function StreamerProfileLayout({
   const { username } = params
   const pathname = usePathname()
 
-  const { data: streamerData, loading: streamerLoading } = useGetStreamerQuery({
+  const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
     variables: {
       userName: username,
     },
@@ -40,6 +45,19 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   });
 
+  // Подписываемся на обновления стримера
+  useStreamerUpdatedSubscription({
+    variables: {
+      streamerId: streamerData?.streamer.id ?? "",
+    },
+    skip: !streamerData?.streamer.id,
+    onData: ({ data }) => {
+      if (data.data?.streamerUpdated) {
+        refetchStreamer(); // Перезапрашиваем данные стримера при получении обновления
+      }
+    },
+  });
+
   if (streamerLoading || profileLoading || currentStreamLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -51,7 +69,7 @@ export default function StreamerProfileLayout({
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
   const currentStream = currentStreamData?.currentStream;
-  const isLive = currentStream?.active;
+  const isLive = currentStream?.active; // Используем isLive из currentStream для отображения статуса трансляции
 
   const isCurrentUserProfile = false; // Это значение должно быть определено на основе текущего пользователя
 
