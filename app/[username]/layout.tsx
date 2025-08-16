@@ -40,7 +40,7 @@ export default function StreamerProfileLayout({
       streamerId: streamerData?.streamer.id ?? "",
     },
     skip: !streamerData?.streamer.id,
-    pollInterval: 5000, // Poll every 5 seconds to check stream status
+    // Removed pollInterval to stop periodic API calls
   });
 
   if (streamerLoading || profileLoading || currentStreamLoading) {
