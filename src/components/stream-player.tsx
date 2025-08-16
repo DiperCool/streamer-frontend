@@ -11,7 +11,6 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  // Find the HLS source
   const hlsSource = sources.find(s => s.sourceType === "HLS")
 
   let urlToPlay = ""
@@ -31,10 +30,10 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     <ReactPlayer
       src={urlToPlay}
       playing
-      controls
+      controls={false} {/* Изменено на false для удаления элементов управления */}
       width="100%"
       height="100%"
-      className="absolute top-0 left-0 z-[15]" // Добавлен z-index для интерактивности
+      className="absolute top-0 left-0 z-[15]"
     />
   )
 }

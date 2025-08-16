@@ -4,6 +4,7 @@ export const GET_CURRENT_STREAM = gql`
     query GetCurrentStream($streamerId: String!) {
         currentStream(streamerId: $streamerId) {
             id
+            streamerId
             active
             title
             currentViewers
@@ -14,6 +15,7 @@ export const GET_CURRENT_STREAM = gql`
                 followers
             }
             sources {
+                streamId
                 url
                 sourceType
             }

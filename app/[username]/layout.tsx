@@ -112,7 +112,6 @@ export default function StreamerProfileLayout({
         isCurrentUserProfile={isCurrentUserProfile}
       />
 
-      {/* Navigation Tabs */}
       <div className="container mx-auto px-4 border-b border-gray-800">
         <Tabs value={activeTab} className="w-full">
           <TabsList className="bg-gray-900" currentValue={activeTab}>
