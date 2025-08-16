@@ -13,7 +13,8 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  const playerRef = useRef<React.ElementRef<typeof ReactPlayer>>(null)
+  // Исправлено: используем InstanceType<typeof ReactPlayer> для правильной типизации ref
+  const playerRef = useRef<InstanceType<typeof ReactPlayer>>(null)
   const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
 
   const hlsSource = sources.find(s => s.sourceType === "HLS")
@@ -31,8 +32,8 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     )
   }
 
-  const handleReady = () => { // Изменено: теперь без аргументов
-    if (playerRef.current) { // Доступ к экземпляру через ref
+  const handleReady = () => {
+    if (playerRef.current) {
       const internalPlayer = playerRef.current.getInternalPlayer();
       if (internalPlayer instanceof HTMLVideoElement) {
         setInternalVideoElement(internalPlayer);
