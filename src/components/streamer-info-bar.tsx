@@ -61,8 +61,8 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
         </div>
       </div>
 
-      {/* Stream Title, Live Status, Viewers, Chat Button, and Tags */}
-      <div className="flex items-center justify-between mt-2"> {/* Added justify-between for spacing */}
+      {/* Stream Title, Live Status, Tags (left) and Viewers, Share, Settings (right) */}
+      <div className="flex items-center justify-between mt-2">
         <div className="flex items-center space-x-3">
           {isLive ? (
             <>
@@ -72,9 +72,6 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
               {currentStream?.title && (
                 <p className="text-white text-lg font-semibold">{currentStream.title}</p>
               )}
-              <span className="text-white text-sm flex items-center">
-                <Users className="w-4 h-4 mr-1" /> {currentStream?.currentViewers} Viewers
-              </span>
             </>
           ) : (
             <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
@@ -92,7 +89,12 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
             Music
           </Badge>
         </div>
-        <div className="flex items-center space-x-2"> {/* Moved Share and Settings here */}
+        <div className="flex items-center space-x-2"> {/* Group for Viewers, Share, Settings */}
+          {isLive && currentStream?.currentViewers !== undefined && (
+            <span className="text-white text-sm flex items-center">
+              <Users className="w-4 h-4 mr-1" /> {currentStream.currentViewers} Viewers
+            </span>
+          )}
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Share2 className="w-5 h-5" />
           </Button>
