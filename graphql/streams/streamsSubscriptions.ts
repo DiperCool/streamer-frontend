@@ -1,3 +1,18 @@
 import { gql } from "@apollo/client"
 
-// Подписка StreamerUpdated была перемещена в graphql/streamers/streamerSubscriptions.ts
+export const STREAMER_UPDATED_SUBSCRIPTION = gql`
+    subscription StreamerUpdated($streamId: UUID!) {
+        streamerUpdated(streamId: $streamId) {
+            id
+            active
+            title
+            currentViewers
+            streamer {
+                id
+                userName
+                avatar
+                followers
+            }
+        }
+    }
+`
