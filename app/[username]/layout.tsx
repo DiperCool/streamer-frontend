@@ -48,7 +48,7 @@ export default function StreamerProfileLayout({
   // Подписываемся на обновления стримера
   useStreamerUpdatedSubscription({
     variables: {
-      streamerId: streamerData?.streamer.id ?? "",
+      streamerId: streamerData?.streamer.id ?? "", // Здесь используется streamerId, как и должно быть
     },
     skip: !streamerData?.streamer.id,
     onData: ({ data }) => {
