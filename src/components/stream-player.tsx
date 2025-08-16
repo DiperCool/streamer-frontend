@@ -25,7 +25,7 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
   return (
     <div className="absolute inset-0">
       <ReactPlayer
-        url={urlToPlay}
+        src={urlToPlay}
         playing // Воспроизведение по умолчанию
         controls={true} // Включаем стандартные элементы управления браузера
         width="100%"

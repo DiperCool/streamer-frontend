@@ -87,7 +87,7 @@ export default function StreamerProfileLayout({
       {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
         <div className="relative w-full pt-[56.25%] bg-black"> {/* 16:9 aspect ratio container */}
           <StreamPlayer sources={currentStream.sources} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
+          {/* <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div> */}
         </div>
       ) : (
         <div className="relative w-full pt-[56.25%] bg-gray-800 overflow-hidden"> {/* 16:9 aspect ratio container */}
@@ -100,7 +100,7 @@ export default function StreamerProfileLayout({
             priority
             className="absolute top-0 left-0 w-full h-full"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
+          {/* <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div> */}
         </div>
       )}
 
