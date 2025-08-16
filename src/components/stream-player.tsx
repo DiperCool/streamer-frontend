@@ -26,15 +26,27 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
 
   // Обработчик готовности плеера
   const handleReady = useCallback(() => {
-    console.log("ReactPlayer is ready!"); // Лог, когда onReady срабатывает
+    console.log("ReactPlayer is ready!");
     if (playerRef.current) {
       const internalPlayer = playerRef.current.getInternalPlayer();
-      console.log("Internal player from getInternalPlayer():", internalPlayer); // Лог, что возвращает getInternalPlayer
+      console.log("Internal player from getInternalPlayer():", internalPlayer);
+
+      let videoElement: HTMLVideoElement | null = null;
+
+      // Проверяем, является ли это напрямую видеоэлементом
       if (internalPlayer instanceof HTMLVideoElement) {
-        setInternalVideoElement(internalPlayer);
-        console.log("internalVideoElement set to:", internalPlayer);
+        videoElement = internalPlayer;
+      }
+      // Проверяем, является ли это экземпляром hls.js (распространено для HLS-потоков)
+      else if (internalPlayer && typeof internalPlayer === 'object' && 'media' in internalPlayer && (internalPlayer as any).media instanceof HTMLVideoElement) {
+        videoElement = (internalPlayer as any).media;
+      }
+
+      if (videoElement) {
+        setInternalVideoElement(videoElement);
+        console.log("internalVideoElement set to:", videoElement);
       } else {
-        console.log("Internal player is NOT an HTMLVideoElement.");
+        console.log("Could not find HTMLVideoElement from internal player.");
       }
     }
   }, []);
@@ -83,7 +95,7 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
         size="icon"
         className="absolute bottom-4 right-4 z-20 text-white hover:bg-gray-700/50"
         onClick={handleFullscreen}
-        // disabled={!internalVideoElement} // Временно закомментировано для отладки
+        disabled={!internalVideoElement} // Снова включаем disabled
       >
         <Maximize className="h-5 w-5" />
       </Button>
