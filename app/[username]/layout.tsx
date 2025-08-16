@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageSquare, Share2, Settings, ExternalLink, Users } from "lucide-react"
 import Link from "next/link"
-import { StreamPlayer } from "@/src/components/stream-player" // Import the new StreamPlayer component
+import { StreamPlayer } from "@/src/components/stream-player"
 
 export default function StreamerProfileLayout({
   children,
@@ -40,7 +40,6 @@ export default function StreamerProfileLayout({
       streamerId: streamerData?.streamer.id ?? "",
     },
     skip: !streamerData?.streamer.id,
-    // Removed pollInterval to stop periodic API calls
   });
 
   if (streamerLoading || profileLoading || currentStreamLoading) {
@@ -56,8 +55,6 @@ export default function StreamerProfileLayout({
   const currentStream = currentStreamData?.currentStream;
   const isLive = currentStream?.active;
 
-  // This logic might need adjustment if 'me' query is available
-  // For now, assuming isCurrentUserProfile is false for public profiles
   const isCurrentUserProfile = false; 
 
   if (!streamer || !streamerProfile) {
@@ -71,16 +68,15 @@ export default function StreamerProfileLayout({
   const bannerImage = streamerProfile.offlineStreamBanner || streamerProfile.channelBanner || "/placeholder.jpg"
   const avatarImage = streamer.avatar || "/placeholder-user.jpg"
 
-  // Determine the active tab based on the current pathname
   const getActiveTab = () => {
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
 
-    if (lastSegment === username) return 'home'; // If URL is just /username, it's home
+    if (lastSegment === username) return 'home';
     if (lastSegment === 'about') return 'about';
     if (lastSegment === 'videos') return 'videos';
     if (lastSegment === 'clips') return 'clips';
-    return 'home'; // Default to home if no specific tab is found
+    return 'home';
   };
 
   const activeTab = getActiveTab();
@@ -89,10 +85,12 @@ export default function StreamerProfileLayout({
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Banner/Stream Section */}
       {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
-        <div className="relative w-full h-24 md:h-32 lg:h-40 bg-black flex items-center justify-center">
-          <StreamPlayer sources={currentStream.sources} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-          <div className="absolute bottom-4 left-4 flex items-center space-x-3">
+        <div className="relative w-full pt-[56.25%] bg-black"> {/* 16:9 aspect ratio container */}
+          <div className="absolute top-0 left-0 w-full h-full"> {/* Inner div to contain the player */}
+            <StreamPlayer sources={currentStream.sources} />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
+          <div className="absolute bottom-4 left-4 flex items-center space-x-3 z-20"> {/* Increased z-index for overlays */}
             <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
               LIVE
             </Badge>
@@ -103,7 +101,7 @@ export default function StreamerProfileLayout({
               <Users className="w-4 h-4 mr-1" /> {currentStream.currentViewers} Viewers
             </span>
           </div>
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-20"> {/* Increased z-index for overlays */}
             <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
               <MessageSquare className="w-4 h-4 mr-2" />
               Chat
@@ -111,7 +109,7 @@ export default function StreamerProfileLayout({
           </div>
         </div>
       ) : (
-        <div className="relative w-full h-24 md:h-32 lg:h-40 bg-gray-800 overflow-hidden">
+        <div className="relative w-full pt-[56.25%] bg-gray-800 overflow-hidden"> {/* 16:9 aspect ratio container */}
           <Image
             src={getMinioUrl(bannerImage)}
             alt="Channel Banner"
@@ -119,9 +117,10 @@ export default function StreamerProfileLayout({
             style={{ objectFit: "cover" }}
             sizes="100vw"
             priority
+            className="absolute top-0 left-0 w-full h-full" // Image fills the aspect ratio container
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-          <div className="absolute bottom-4 left-4 flex items-center space-x-3">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
+          <div className="absolute bottom-4 left-4 flex items-center space-x-3 z-20">
             <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
               OFFLINE
             </Badge>
@@ -129,7 +128,7 @@ export default function StreamerProfileLayout({
               {streamer.userName} is offline
             </span>
           </div>
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-20">
             <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
               <MessageSquare className="w-4 h-4 mr-2" />
               Chat
@@ -199,7 +198,7 @@ export default function StreamerProfileLayout({
           </TabsList>
         </Tabs>
       </div>
-      {children} {/* This is where the nested page content will be rendered */}
+      {children}
     </div>
   )
 }

@@ -28,15 +28,17 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
   }
 
   return (
-    <div className="relative pt-[56.25%] w-full h-full"> {/* 16:9 Aspect Ratio */}
-      <ReactPlayer
-        src={urlToPlay}
-        playing
-        controls
-        width="100%"
-        height="100%"
-        className="absolute top-0 left-0"
-      />
-    </div>
+    <ReactPlayer
+      url={urlToPlay}
+      playing
+      controls
+      width="100%"
+      height="100%"
+      config={{
+        file: {
+          forceHLS: true, // Always force HLS if an HLS source is found
+        },
+      }}
+    />
   )
 }
