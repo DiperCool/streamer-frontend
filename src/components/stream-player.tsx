@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import ReactPlayer from "react-player" // Changed from "react-player/lazy"
+import ReactPlayer from "react-player"
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -11,21 +11,18 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  // Find the HLS or WebRTC source
+  // Find the HLS source
   const hlsSource = sources.find(s => s.sourceType === "HLS")
-  const webRTCSrc = sources.find(s => s.sourceType === "WebRTC")
 
   let urlToPlay = ""
   if (hlsSource) {
     urlToPlay = hlsSource.url
-  } else if (webRTCSrc) {
-    urlToPlay = webRTCSrc.url
   }
 
   if (!urlToPlay) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-black text-white">
-        No stream source available.
+        No HLS stream source available.
       </div>
     )
   }
@@ -41,11 +38,7 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
         className="absolute top-0 left-0"
         config={{
           file: {
-            hlsOptions: {
-              // HLS.js options if needed
-            },
-            forceHLS: hlsSource ? true : false,
-            forceRTC: webRTCSrc ? true : false,
+            forceHLS: true, // Always force HLS if an HLS source is found
           },
         }}
       />
