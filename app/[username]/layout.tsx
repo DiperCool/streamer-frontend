@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
+import { ChatSection } from "@/src/components/chat-section" // Импортируем новый компонент
 
 export default function StreamerProfileLayout({
   children,
@@ -80,9 +81,10 @@ export default function StreamerProfileLayout({
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8"> {/* Основной контейнер контента */}
-        <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6"> {/* Контейнер для видео и правой части */}
+        {/* Секция видео и чата */}
+        <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6 lg:h-[600px]"> {/* Фиксированная высота для десктопа */}
           {/* Секция видеоплеера / баннера */}
-          <div className="relative w-full lg:w-2/3 pt-[56.25%] bg-black rounded-lg overflow-hidden"> {/* Контейнер с соотношением сторон 16:9, занимает 2/3 ширины на больших экранах */}
+          <div className="relative w-full lg:w-2/3 pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full"> {/* lg:pt-0 и lg:h-full */}
             {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
               <StreamPlayer sources={currentStream.sources} />
             ) : (
@@ -98,10 +100,9 @@ export default function StreamerProfileLayout({
             )}
           </div>
 
-          {/* Правая секция (например, чат, пустое пространство) */}
-          <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 p-4 flex items-center justify-center text-gray-400">
-            {/* Заполнитель для чата или другого контента */}
-            <p>Чат будет здесь</p>
+          {/* Правая секция (чат) */}
+          <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full"> {/* h-full для заполнения высоты родителя */}
+            <ChatSection />
           </div>
         </div>
 
