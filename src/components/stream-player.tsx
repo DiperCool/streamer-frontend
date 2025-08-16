@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useState } from "react"
-import ReactPlayer from "react-player" // Это импортирует компонент класса
+import ReactPlayer from "react-player"
 import { Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -12,9 +12,18 @@ interface StreamPlayerProps {
   }>
 }
 
+// Определяем интерфейс для экземпляра ReactPlayer, чтобы TypeScript знал о методе getInternalPlayer
+interface IReactPlayerInstance {
+  getInternalPlayer: (key?: string) => HTMLVideoElement | undefined;
+  // Если вам нужны другие методы ReactPlayer, добавьте их сюда, например:
+  // seekTo: (amount: number, type?: 'seconds' | 'fraction') => void;
+  // play: () => void;
+  // pause: () => void;
+}
+
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  // Используем React.Component как тип для ref, а затем приводим к ReactPlayer при доступе к методам
-  const playerRef = useRef<React.Component | null>(null)
+  // Используем наш новый интерфейс для типизации useRef
+  const playerRef = useRef<IReactPlayerInstance | null>(null)
   const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
 
   const hlsSource = sources.find(s => s.sourceType === "HLS")
@@ -34,9 +43,8 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
 
   const handleReady = () => {
     if (playerRef.current) {
-      // Приводим playerRef.current к типу ReactPlayer для доступа к его специфическим методам
-      const playerInstance = playerRef.current as ReactPlayer;
-      const internalPlayer = playerInstance.getInternalPlayer();
+      // Теперь TypeScript знает, что playerRef.current имеет метод getInternalPlayer
+      const internalPlayer = playerRef.current.getInternalPlayer();
       if (internalPlayer instanceof HTMLVideoElement) {
         setInternalVideoElement(internalPlayer);
       }
