@@ -89,7 +89,7 @@ export default function StreamerProfileLayout({
           {/* StreamPlayer теперь сам абсолютно позиционируется внутри этого контейнера */}
           <StreamPlayer sources={currentStream.sources} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-          <div className="absolute bottom-4 left-4 flex items-center space-x-3 z-20">
+          <div className="absolute bottom-8 left-4 flex items-center space-x-3 z-20"> {/* Изменено bottom-4 на bottom-8 */}
             <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
               LIVE
             </Badge>
@@ -119,7 +119,7 @@ export default function StreamerProfileLayout({
             className="absolute top-0 left-0 w-full h-full" // Image fills the aspect ratio container
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-          <div className="absolute bottom-4 left-4 flex items-center space-x-3 z-20">
+          <div className="absolute bottom-8 left-4 flex items-center space-x-3 z-20"> {/* Изменено bottom-4 на bottom-8 */}
             <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
               OFFLINE
             </Badge>

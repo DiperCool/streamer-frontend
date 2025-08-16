@@ -29,17 +29,12 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
 
   return (
     <ReactPlayer
-      url={urlToPlay}
+      src={urlToPlay}
       playing
       controls
       width="100%"
       height="100%"
       className="absolute top-0 left-0 z-[15]" // Добавлен z-index для интерактивности
-      config={{
-        file: {
-          forceHLS: true, // Always force HLS if an HLS source is found
-        },
-      }}
     />
   )
 }
