@@ -30,7 +30,7 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     <ReactPlayer
       src={urlToPlay}
       playing
-      controls={false} {/* Изменено на false для удаления элементов управления */}
+      controls={false}
       width="100%"
       height="100%"
       className="absolute top-0 left-0 z-[15]"
