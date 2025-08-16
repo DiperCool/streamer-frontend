@@ -22,7 +22,7 @@ interface IReactPlayerInstance {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  // Используем наш новый интерфейс для типизации useRef
+  // Используем useRef для хранения экземпляра ReactPlayer, но типизируем его нашим интерфейсом
   const playerRef = useRef<IReactPlayerInstance | null>(null)
   const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
 
@@ -66,7 +66,15 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
   return (
     <div className="absolute inset-0">
       <ReactPlayer
-        ref={playerRef}
+        // Используем callback ref для правильной типизации экземпляра плеера
+        ref={(player) => {
+          if (player) {
+            // Приводим тип player к нашему интерфейсу и сохраняем его
+            playerRef.current = player as IReactPlayerInstance;
+          } else {
+            playerRef.current = null;
+          }
+        }}
         url={urlToPlay}
         playing
         controls={false}
