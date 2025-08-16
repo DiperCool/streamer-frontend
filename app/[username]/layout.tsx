@@ -3,14 +3,15 @@
 import React from "react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useGetProfileQuery, useGetStreamerQuery } from "@/graphql/__generated__/graphql"
+import { useGetProfileQuery, useGetStreamerQuery, useGetCurrentStreamQuery } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, Share2, Settings, ExternalLink } from "lucide-react"
+import { MessageSquare, Share2, Settings, ExternalLink, Users } from "lucide-react"
 import Link from "next/link"
+import { StreamPlayer } from "@/src/components/stream-player" // Import the new StreamPlayer component
 
 export default function StreamerProfileLayout({
   children,
@@ -34,7 +35,15 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   })
 
-  if (streamerLoading || profileLoading) {
+  const { data: currentStreamData, loading: currentStreamLoading } = useGetCurrentStreamQuery({
+    variables: {
+      streamerId: streamerData?.streamer.id ?? "",
+    },
+    skip: !streamerData?.streamer.id,
+    pollInterval: 5000, // Poll every 5 seconds to check stream status
+  });
+
+  if (streamerLoading || profileLoading || currentStreamLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
@@ -44,7 +53,12 @@ export default function StreamerProfileLayout({
 
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
-  const isCurrentUserProfile = streamerData?.streamer.id === streamer?.id // This logic might need adjustment if 'me' query is available
+  const currentStream = currentStreamData?.currentStream;
+  const isLive = currentStream?.active;
+
+  // This logic might need adjustment if 'me' query is available
+  // For now, assuming isCurrentUserProfile is false for public profiles
+  const isCurrentUserProfile = false; 
 
   if (!streamer || !streamerProfile) {
     return (
@@ -73,32 +87,56 @@ export default function StreamerProfileLayout({
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Banner Section */}
-      <div className="relative w-full h-24 md:h-32 lg:h-40 bg-gray-800 overflow-hidden">
-        <Image
-          src={getMinioUrl(bannerImage)}
-          alt="Channel Banner"
-          fill
-          style={{ objectFit: "cover" }}
-          sizes="100vw"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-        <div className="absolute bottom-4 left-4 flex items-center space-x-3">
-          <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-            OFFLINE
-          </Badge>
-          <span className="text-white text-lg font-semibold">
-            {streamer.userName} is offline
-          </span>
+      {/* Banner/Stream Section */}
+      {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
+        <div className="relative w-full h-24 md:h-32 lg:h-40 bg-black flex items-center justify-center">
+          <StreamPlayer sources={currentStream.sources} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+          <div className="absolute bottom-4 left-4 flex items-center space-x-3">
+            <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              LIVE
+            </Badge>
+            <span className="text-white text-lg font-semibold">
+              {currentStream.title}
+            </span>
+            <span className="text-white text-sm flex items-center">
+              <Users className="w-4 h-4 mr-1" /> {currentStream.currentViewers} Viewers
+            </span>
+          </div>
+          <div className="absolute top-4 right-4">
+            <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Chat
+            </Button>
+          </div>
         </div>
-        <div className="absolute top-4 right-4">
-          <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Chat
-          </Button>
+      ) : (
+        <div className="relative w-full h-24 md:h-32 lg:h-40 bg-gray-800 overflow-hidden">
+          <Image
+            src={getMinioUrl(bannerImage)}
+            alt="Channel Banner"
+            fill
+            style={{ objectFit: "cover" }}
+            sizes="100vw"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+          <div className="absolute bottom-4 left-4 flex items-center space-x-3">
+            <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              OFFLINE
+            </Badge>
+            <span className="text-white text-lg font-semibold">
+              {streamer.userName} is offline
+            </span>
+          </div>
+          <div className="absolute top-4 right-4">
+            <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Chat
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Profile Header Section */}
       <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-start md:items-center justify-between">

@@ -13,6 +13,10 @@ export const GET_CURRENT_STREAM = gql`
                 avatar
                 followers
             }
+            sources {
+                url
+                sourceType
+            }
         }
     }
 `

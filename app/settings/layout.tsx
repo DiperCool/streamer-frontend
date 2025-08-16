@@ -12,7 +12,6 @@ export default function SettingsLayout({
 }) {
   const pathname = usePathname()
 
-  // Determine the active tab based on the current URL path
   const getActiveTab = () => {
     if (pathname.includes("/settings/stream")) {
       return "stream";
