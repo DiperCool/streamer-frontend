@@ -66,9 +66,6 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
         <div className="flex items-center space-x-3">
           {isLive ? (
             <>
-              <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                LIVE
-              </Badge>
               {currentStream?.title && (
                 <p className="text-white text-lg font-semibold">{currentStream.title}</p>
               )}
