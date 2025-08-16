@@ -8,7 +8,7 @@ import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } => "@/components/ui/tabs"
 import { MessageSquare, Share2, Settings, ExternalLink, Users } from "lucide-react"
 import Link from "next/link"
 import { StreamPlayer } from "@/src/components/stream-player"
@@ -89,7 +89,7 @@ export default function StreamerProfileLayout({
           {/* StreamPlayer теперь сам абсолютно позиционируется внутри этого контейнера */}
           <StreamPlayer sources={currentStream.sources} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-          <div className="absolute bottom-8 left-4 flex items-center space-x-3 z-20"> {/* Изменено bottom-4 на bottom-8 */}
+          <div className="absolute bottom-12 left-4 flex items-center space-x-3 z-20"> {/* Изменено bottom-8 на bottom-12 */}
             <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
               LIVE
             </Badge>
@@ -119,7 +119,7 @@ export default function StreamerProfileLayout({
             className="absolute top-0 left-0 w-full h-full" // Image fills the aspect ratio container
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-          <div className="absolute bottom-8 left-4 flex items-center space-x-3 z-20"> {/* Изменено bottom-4 на bottom-8 */}
+          <div className="absolute bottom-12 left-4 flex items-center space-x-3 z-20"> {/* Изменено bottom-8 на bottom-12 */}
             <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
               OFFLINE
             </Badge>
