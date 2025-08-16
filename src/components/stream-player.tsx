@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useCallback } from "react"
 import ReactPlayer from "react-player"
-import { Maximize } => from "lucide-react"
+import { Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface StreamPlayerProps {
