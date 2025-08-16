@@ -26,10 +26,15 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
 
   // Обработчик готовности плеера
   const handleReady = useCallback(() => {
+    console.log("ReactPlayer is ready!"); // Лог, когда onReady срабатывает
     if (playerRef.current) {
       const internalPlayer = playerRef.current.getInternalPlayer();
+      console.log("Internal player from getInternalPlayer():", internalPlayer); // Лог, что возвращает getInternalPlayer
       if (internalPlayer instanceof HTMLVideoElement) {
         setInternalVideoElement(internalPlayer);
+        console.log("internalVideoElement set to:", internalPlayer);
+      } else {
+        console.log("Internal player is NOT an HTMLVideoElement.");
       }
     }
   }, []);
@@ -78,7 +83,7 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
         size="icon"
         className="absolute bottom-4 right-4 z-20 text-white hover:bg-gray-700/50"
         onClick={handleFullscreen}
-        disabled={!internalVideoElement}
+        // disabled={!internalVideoElement} // Временно закомментировано для отладки
       >
         <Maximize className="h-5 w-5" />
       </Button>
