@@ -23,6 +23,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+        {/* Left Section: Avatar, Name, Followers, Title */}
         <div className="flex items-center space-x-4 mb-4 md:mb-0">
           <Avatar className="w-20 h-20 border-2 border-green-500">
             <AvatarImage src={getMinioUrl(avatarImage)} alt="Streamer Avatar" />
@@ -33,7 +34,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl font-bold text-white">{streamer.userName}</h1>
-              <CheckCircle className="w-5 h-5 text-green-500" /> {/* Placeholder for verified badge */}
+              <CheckCircle className="w-5 h-5 text-green-500" /> {/* Verified badge */}
             </div>
             <p className="text-gray-400">{streamer.followers} followers</p>
             {isLive && currentStream?.title && (
@@ -41,7 +42,9 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
             )}
           </div>
         </div>
-        <div className="flex flex-col items-end space-y-2 md:flex-row md:space-y-0 md:space-x-4">
+
+        {/* Right Section: Action Buttons and Icons */}
+        <div className="flex items-center space-x-2"> {/* Changed to space-x-2 for tighter grouping */}
           <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white">
             Follow
           </Button>
@@ -51,14 +54,6 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
           <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
             Subscribe
           </Button>
-          {isCurrentUserProfile && (
-            <Link href="/settings/profile" passHref>
-              <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
-                Customize channel
-                <ExternalLink className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          )}
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Share2 className="w-5 h-5" />
           </Button>
@@ -68,6 +63,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
         </div>
       </div>
 
+      {/* Live Status, Viewers, Chat Button, and Tags */}
       <div className="flex items-center space-x-3 mt-4">
         {isLive ? (
           <>
