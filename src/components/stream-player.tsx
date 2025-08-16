@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useCallback } from "react"
 import ReactPlayer from "react-player"
-import { Maximize } from "lucide-react"
+import { Maximize } => from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface StreamPlayerProps {
@@ -26,28 +26,34 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
 
   // Обработчик готовности плеера
   const handleReady = useCallback(() => {
-    console.log("ReactPlayer is ready!");
+    console.log("Dyad Debug: handleReady called. ReactPlayer is ready!");
     if (playerRef.current) {
       const internalPlayer = playerRef.current.getInternalPlayer();
-      console.log("Internal player from getInternalPlayer():", internalPlayer);
+      console.log("Dyad Debug: getInternalPlayer() returned:", internalPlayer);
 
       let videoElement: HTMLVideoElement | null = null;
 
       // Проверяем, является ли это напрямую видеоэлементом
       if (internalPlayer instanceof HTMLVideoElement) {
         videoElement = internalPlayer;
+        console.log("Dyad Debug: internalPlayer is direct HTMLVideoElement.");
       }
       // Проверяем, является ли это экземпляром hls.js (распространено для HLS-потоков)
       else if (internalPlayer && typeof internalPlayer === 'object' && 'media' in internalPlayer && (internalPlayer as any).media instanceof HTMLVideoElement) {
         videoElement = (internalPlayer as any).media;
+        console.log("Dyad Debug: internalPlayer is HLS.js instance, found video in .media.");
+      } else {
+        console.log("Dyad Debug: internalPlayer is neither direct HTMLVideoElement nor HLS.js instance with .media.");
       }
 
       if (videoElement) {
         setInternalVideoElement(videoElement);
-        console.log("internalVideoElement set to:", videoElement);
+        console.log("Dyad Debug: internalVideoElement successfully set to:", videoElement);
       } else {
-        console.log("Could not find HTMLVideoElement from internal player.");
+        console.log("Dyad Debug: Could not find HTMLVideoElement from internal player. internalVideoElement remains null.");
       }
+    } else {
+      console.log("Dyad Debug: playerRef.current is null when handleReady was called.");
     }
   }, []);
 
