@@ -86,11 +86,10 @@ export default function StreamerProfileLayout({
       {/* Banner/Stream Section */}
       {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
         <div className="relative w-full pt-[56.25%] bg-black"> {/* 16:9 aspect ratio container */}
-          <div className="absolute top-0 left-0 w-full h-full"> {/* Inner div to contain the player */}
-            <StreamPlayer sources={currentStream.sources} />
-          </div>
+          {/* StreamPlayer теперь сам абсолютно позиционируется внутри этого контейнера */}
+          <StreamPlayer sources={currentStream.sources} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div>
-          <div className="absolute bottom-4 left-4 flex items-center space-x-3 z-20"> {/* Increased z-index for overlays */}
+          <div className="absolute bottom-4 left-4 flex items-center space-x-3 z-20">
             <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
               LIVE
             </Badge>
@@ -101,7 +100,7 @@ export default function StreamerProfileLayout({
               <Users className="w-4 h-4 mr-1" /> {currentStream.currentViewers} Viewers
             </span>
           </div>
-          <div className="absolute top-4 right-4 z-20"> {/* Increased z-index for overlays */}
+          <div className="absolute top-4 right-4 z-20">
             <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
               <MessageSquare className="w-4 h-4 mr-2" />
               Chat

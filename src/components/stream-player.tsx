@@ -34,6 +34,7 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
       controls
       width="100%"
       height="100%"
+      className="absolute top-0 left-0" // Добавлены классы для абсолютного позиционирования
       config={{
         file: {
           forceHLS: true, // Always force HLS if an HLS source is found
