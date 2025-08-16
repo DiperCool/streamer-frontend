@@ -42,8 +42,8 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     if (internalVideoElement) {
       if (internalVideoElement.requestFullscreen) {
         internalVideoElement.requestFullscreen();
-      } else if (internalVideoElement.webkitEnterFullscreen) {
-        internalVideoElement.webkitEnterFullscreen();
+      } else if ((internalVideoElement as any).webkitEnterFullscreen) { // Исправлено здесь
+        (internalVideoElement as any).webkitEnterFullscreen(); // Исправлено здесь
       }
     } else {
       console.warn("Internal video element not ready for fullscreen.");
