@@ -13,7 +13,6 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  // Исправлено: используем React.ElementRef<typeof ReactPlayer> для правильной типизации ref
   const playerRef = useRef<React.ElementRef<typeof ReactPlayer>>(null)
   const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
 
@@ -32,10 +31,12 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     )
   }
 
-  const handleReady = (player: ReactPlayer) => {
-    const internalPlayer = player.getInternalPlayer();
-    if (internalPlayer instanceof HTMLVideoElement) {
-      setInternalVideoElement(internalPlayer);
+  const handleReady = () => { // Изменено: теперь без аргументов
+    if (playerRef.current) { // Доступ к экземпляру через ref
+      const internalPlayer = playerRef.current.getInternalPlayer();
+      if (internalPlayer instanceof HTMLVideoElement) {
+        setInternalVideoElement(internalPlayer);
+      }
     }
   };
 
