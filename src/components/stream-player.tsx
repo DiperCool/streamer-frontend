@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useRef } from "react" // Добавлен useRef
+import React, { useRef, useState } from "react"
 import ReactPlayer from "react-player"
-import { Maximize } from "lucide-react" // Импортирована иконка Maximize
-import { Button } from "@/components/ui/button" // Импортирован компонент Button
+import { Maximize } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -13,7 +13,9 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  const playerRef = useRef<ReactPlayer>(null) // Создан ref для ReactPlayer
+  const playerRef = useRef<ReactPlayer>(null)
+  const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
+
   const hlsSource = sources.find(s => s.sourceType === "HLS")
 
   let urlToPlay = ""
@@ -29,37 +31,43 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     )
   }
 
+  const handleReady = (player: ReactPlayer) => {
+    const internalPlayer = player.getInternalPlayer();
+    if (internalPlayer instanceof HTMLVideoElement) {
+      setInternalVideoElement(internalPlayer);
+    }
+  };
+
   const handleFullscreen = () => {
-    if (playerRef.current) {
-      const internalPlayer = playerRef.current.getInternalPlayer()
-      // Проверяем, является ли внутренний плеер видеоэлементом и поддерживает ли он полноэкранный режим
-      if (internalPlayer instanceof HTMLVideoElement) {
-        if (internalPlayer.requestFullscreen) {
-          internalPlayer.requestFullscreen();
-        } else if (internalPlayer.webkitEnterFullscreen) { // Для Safari
-          internalPlayer.webkitEnterFullscreen();
-        }
-        // Можно добавить другие префиксы для кроссбраузерности, если необходимо
+    if (internalVideoElement) {
+      if (internalVideoElement.requestFullscreen) {
+        internalVideoElement.requestFullscreen();
+      } else if (internalVideoElement.webkitEnterFullscreen) {
+        internalVideoElement.webkitEnterFullscreen();
       }
+    } else {
+      console.warn("Internal video element not ready for fullscreen.");
     }
   }
 
   return (
-    <div className="absolute inset-0"> {/* Этот div заставляет StreamPlayer заполнять родительский контейнер */}
+    <div className="absolute inset-0">
       <ReactPlayer
-        ref={playerRef} // Присваиваем ref
-        src={urlToPlay}
+        ref={playerRef}
+        url={urlToPlay}
         playing
-        controls={false} // Отключаем стандартные элементы управления
+        controls={false}
         width="100%"
         height="100%"
-        className="z-[15]" // Убедимся, что плеер находится поверх других элементов
+        className="z-[15]"
+        onReady={handleReady}
       />
       <Button
         variant="ghost"
         size="icon"
         className="absolute bottom-4 right-4 z-20 text-white hover:bg-gray-700/50"
         onClick={handleFullscreen}
+        disabled={!internalVideoElement}
       >
         <Maximize className="h-5 w-5" />
       </Button>
