@@ -5,14 +5,10 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useGetProfileQuery, useGetStreamerQuery, useGetCurrentStreamQuery } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, Share2, Settings, ExternalLink, Users } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { StreamPlayer } from "@/src/components/stream-player"
-import { StreamerInfoBar } from "@/src/components/streamer-info-bar" // Import the new component
+import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
 
 export default function StreamerProfileLayout({
   children,
@@ -56,7 +52,7 @@ export default function StreamerProfileLayout({
   const currentStream = currentStreamData?.currentStream;
   const isLive = currentStream?.active;
 
-  const isCurrentUserProfile = false; 
+  const isCurrentUserProfile = false; // Это значение должно быть определено на основе текущего пользователя
 
   if (!streamer || !streamerProfile) {
     return (
@@ -83,62 +79,69 @@ export default function StreamerProfileLayout({
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Banner/Stream Section */}
-      {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
-        <div className="relative w-full pt-[56.25%] bg-black"> {/* 16:9 aspect ratio container */}
-          <StreamPlayer sources={currentStream.sources} />
-          {/* <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div> */}
-        </div>
-      ) : (
-        <div className="relative w-full pt-[56.25%] bg-gray-800 overflow-hidden"> {/* 16:9 aspect ratio container */}
-          <Image
-            src={getMinioUrl(bannerImage)}
-            alt="Channel Banner"
-            fill
-            style={{ objectFit: "cover" }}
-            sizes="100vw"
-            priority
-            className="absolute top-0 left-0 w-full h-full"
-          />
-          {/* <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"></div> */}
-        </div>
-      )}
+      <div className="container mx-auto px-4 py-8"> {/* Основной контейнер контента */}
+        <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6"> {/* Контейнер для видео и правой части */}
+          {/* Секция видеоплеера / баннера */}
+          <div className="relative w-full lg:w-2/3 pt-[56.25%] bg-black rounded-lg overflow-hidden"> {/* Контейнер с соотношением сторон 16:9, занимает 2/3 ширины на больших экранах */}
+            {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
+              <StreamPlayer sources={currentStream.sources} />
+            ) : (
+              <Image
+                src={getMinioUrl(bannerImage)}
+                alt="Channel Banner"
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 1024px) 100vw, 66vw"
+                priority
+                className="absolute top-0 left-0 w-full h-full"
+              />
+            )}
+          </div>
 
-      {/* Streamer Info Bar */}
-      <StreamerInfoBar
-        streamer={streamer}
-        profile={streamerProfile}
-        currentStream={currentStream}
-        isCurrentUserProfile={isCurrentUserProfile}
-      />
+          {/* Правая секция (например, чат, пустое пространство) */}
+          <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 p-4 flex items-center justify-center text-gray-400">
+            {/* Заполнитель для чата или другого контента */}
+            <p>Чат будет здесь</p>
+          </div>
+        </div>
 
-      <div className="container mx-auto px-4 border-b border-gray-800">
-        <Tabs value={activeTab} className="w-full">
-          <TabsList className="bg-gray-900" currentValue={activeTab}>
-            <Link href={`/${username}`} passHref>
-              <TabsTrigger value="home">
-                Home
-              </TabsTrigger>
-            </Link>
-            <Link href={`/${username}/about`} passHref>
-              <TabsTrigger value="about">
-                About
-              </TabsTrigger>
-            </Link>
-            <Link href={`/${username}/videos`} passHref>
-              <TabsTrigger value="videos">
-                Videos
-              </TabsTrigger>
-            </Link>
-            <Link href={`/${username}/clips`} passHref>
-              <TabsTrigger value="clips">
-                Clips
-              </TabsTrigger>
-            </Link>
-          </TabsList>
-        </Tabs>
+        {/* Информационная панель стримера */}
+        <StreamerInfoBar
+          streamer={streamer}
+          profile={streamerProfile}
+          currentStream={currentStream}
+          isCurrentUserProfile={isCurrentUserProfile}
+        />
+
+        {/* Вкладки */}
+        <div className="border-b border-gray-800 mt-8">
+          <Tabs value={activeTab} className="w-full">
+            <TabsList className="bg-gray-900" currentValue={activeTab}>
+              <Link href={`/${username}`} passHref>
+                <TabsTrigger value="home">
+                  Home
+                </TabsTrigger>
+              </Link>
+              <Link href={`/${username}/about`} passHref>
+                <TabsTrigger value="about">
+                  About
+                </TabsTrigger>
+              </Link>
+              <Link href={`/${username}/videos`} passHref>
+                <TabsTrigger value="videos">
+                  Videos
+                </TabsTrigger>
+              </Link>
+              <Link href={`/${username}/clips`} passHref>
+                <TabsTrigger value="clips">
+                  Clips
+                </TabsTrigger>
+              </Link>
+            </TabsList>
+          </Tabs>
+        </div>
+        {children}
       </div>
-      {children}
     </div>
   )
 }
