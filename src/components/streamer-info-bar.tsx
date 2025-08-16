@@ -1,0 +1,103 @@
+"use client"
+
+import React from "react"
+import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { MessageSquare, Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react"
+import { ProfileDto, StreamerDto, StreamDto } from "@/graphql/__generated__/graphql"
+import { getMinioUrl } from "@/utils/utils"
+
+interface StreamerInfoBarProps {
+  streamer: StreamerDto
+  profile: ProfileDto
+  currentStream?: StreamDto | null
+  isCurrentUserProfile: boolean
+}
+
+export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile }: StreamerInfoBarProps) {
+  const isLive = currentStream?.active;
+  const avatarImage = streamer.avatar || "/placeholder-user.jpg";
+
+  return (
+    <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+        <div className="flex items-center space-x-4 mb-4 md:mb-0">
+          <Avatar className="w-20 h-20 border-2 border-green-500">
+            <AvatarImage src={getMinioUrl(avatarImage)} alt="Streamer Avatar" />
+            <AvatarFallback className="bg-blue-600 text-white text-xl">
+              {streamer.userName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-3xl font-bold text-white">{streamer.userName}</h1>
+              <CheckCircle className="w-5 h-5 text-green-500" /> {/* Placeholder for verified badge */}
+            </div>
+            <p className="text-gray-400">{streamer.followers} followers</p>
+            {isLive && currentStream?.title && (
+              <p className="text-white text-lg font-semibold mt-1">{currentStream.title}</p>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col items-end space-y-2 md:flex-row md:space-y-0 md:space-x-4">
+          <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white">
+            Follow
+          </Button>
+          <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
+            Gift Subs
+          </Button>
+          <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
+            Subscribe
+          </Button>
+          {isCurrentUserProfile && (
+            <Link href="/settings/profile" passHref>
+              <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
+                Customize channel
+                <ExternalLink className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          )}
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Share2 className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Settings className="w-5 h-5" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-3 mt-4">
+        {isLive ? (
+          <>
+            <Badge className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              LIVE
+            </Badge>
+            <span className="text-white text-sm flex items-center">
+              <Users className="w-4 h-4 mr-1" /> {currentStream?.currentViewers} Viewers
+            </span>
+            <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Chat
+            </Button>
+          </>
+        ) : (
+          <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
+            OFFLINE
+          </Badge>
+        )}
+        {/* Placeholder for tags - these would typically come from the stream or profile data */}
+        <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+          Live DJ
+        </Badge>
+        <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+          English
+        </Badge>
+        <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+          Music
+        </Badge>
+      </div>
+    </div>
+  )
+}
