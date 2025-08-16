@@ -13,7 +13,8 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  const playerRef = useRef<typeof ReactPlayer>(null)
+  // Исправлено: используем React.ElementRef<typeof ReactPlayer> для правильной типизации ref
+  const playerRef = useRef<React.ElementRef<typeof ReactPlayer>>(null)
   const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
 
   const hlsSource = sources.find(s => s.sourceType === "HLS")
