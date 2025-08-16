@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import ReactPlayer from "react-player/lazy"
+import ReactPlayer from "react-player" // Changed from "react-player/lazy"
 
 interface StreamPlayerProps {
   sources: Array<{

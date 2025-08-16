@@ -118,6 +118,7 @@ export type StreamDto = {
   active: Scalars['Boolean']['output'];
   currentViewers: Scalars['Long']['output'];
   id: Scalars['UUID']['output'];
+  sources: Array<StreamSourceDto>;
   streamer?: Maybe<StreamerDto>;
   streamerId: Scalars['String']['output'];
   title: Scalars['String']['output'];
@@ -129,6 +130,18 @@ export type StreamSettingsDto = {
   streamKey: Scalars['String']['output'];
   streamUrl: Scalars['String']['output'];
 };
+
+export type StreamSourceDto = {
+  __typename?: 'StreamSourceDto';
+  sourceType: StreamSourceType;
+  streamId: Scalars['UUID']['output'];
+  url: Scalars['String']['output'];
+};
+
+export enum StreamSourceType {
+  Hls = 'HLS',
+  WebRtc = 'WEB_RTC'
+}
 
 export type StreamerDto = {
   __typename?: 'StreamerDto';
@@ -285,7 +298,7 @@ export type GetCurrentStreamQueryVariables = Exact<{
 }>;
 
 
-export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: any, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: any } | null } };
+export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: any, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: any } | null, sources: Array<{ __typename?: 'StreamSourceDto', url: string, sourceType: StreamSourceType }> } };
 
 export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -717,6 +730,10 @@ export const GetCurrentStreamDocument = gql`
       userName
       avatar
       followers
+    }
+    sources {
+      url
+      sourceType
     }
   }
 }
