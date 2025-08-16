@@ -13,7 +13,7 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  const playerRef = useRef<ReactPlayer>(null)
+  const playerRef = useRef<typeof ReactPlayer>(null)
   const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
 
   const hlsSource = sources.find(s => s.sourceType === "HLS")
@@ -42,8 +42,8 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     if (internalVideoElement) {
       if (internalVideoElement.requestFullscreen) {
         internalVideoElement.requestFullscreen();
-      } else if ((internalVideoElement as any).webkitEnterFullscreen) { // Исправлено здесь
-        (internalVideoElement as any).webkitEnterFullscreen(); // Исправлено здесь
+      } else if ((internalVideoElement as any).webkitEnterFullscreen) {
+        (internalVideoElement as any).webkitEnterFullscreen();
       }
     } else {
       console.warn("Internal video element not ready for fullscreen.");
