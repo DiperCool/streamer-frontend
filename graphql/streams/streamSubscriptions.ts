@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client"
 
-export const STREAMER_UPDATED_SUBSCRIPTION = gql`
-    subscription StreamerUpdated($streamId: UUID!) {
-        streamerUpdated(streamId: $streamId) {
+export const STREAM_UPDATED_SUBSCRIPTION = gql`
+    subscription StreamUpdated($streamId: UUID!) {
+        streamUpdated(streamId: $streamId) {
             id
             active
             title

@@ -72,11 +72,13 @@ type StreamerDto {
     avatar: String
     followers: Long!
     id: String!
+    isLive: Boolean!
     userName: String!
 }
 
 type Subscription {
-    streamerUpdated(streamId: UUID!): StreamDto!
+    streamUpdated(streamId: UUID!): StreamDto!
+    streamerUpdated(streamerId: String!): StreamerDto!
 }
 
 type UpdateAvatarResponse {
