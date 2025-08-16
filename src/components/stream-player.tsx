@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useState } from "react"
-import ReactPlayer from "react-player"
+import ReactPlayer from "react-player" // Это импортирует компонент класса
 import { Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -13,8 +13,8 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources }: StreamPlayerProps) {
-  // Исправлено: используем InstanceType<typeof ReactPlayer> для правильной типизации ref
-  const playerRef = useRef<InstanceType<typeof ReactPlayer>>(null)
+  // Корректно типизируем ref для компонента класса
+  const playerRef = useRef<ReactPlayer | null>(null)
   const [internalVideoElement, setInternalVideoElement] = useState<HTMLVideoElement | null>(null);
 
   const hlsSource = sources.find(s => s.sourceType === "HLS")
@@ -34,6 +34,7 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
 
   const handleReady = () => {
     if (playerRef.current) {
+      // playerRef.current теперь типизирован как ReactPlayer, который имеет getInternalPlayer
       const internalPlayer = playerRef.current.getInternalPlayer();
       if (internalPlayer instanceof HTMLVideoElement) {
         setInternalVideoElement(internalPlayer);
