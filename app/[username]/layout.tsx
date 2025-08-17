@@ -7,7 +7,8 @@ import {
   useGetProfileQuery,
   useGetStreamerQuery,
   useGetCurrentStreamQuery,
-  useStreamerUpdatedSubscription // Импортируем подписку
+  useStreamerUpdatedSubscription, // Импортируем подписку
+  GetStreamerDocument // Импортируем документ запроса для обновления кэша
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -15,6 +16,7 @@ import Link from "next/link"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
 import { ChatSection } from "@/src/components/chat-section"
+import { useApolloClient } from "@apollo/client" // Импортируем useApolloClient
 
 export default function StreamerProfileLayout({
   children,
@@ -25,8 +27,9 @@ export default function StreamerProfileLayout({
 }) {
   const { username } = params
   const pathname = usePathname()
+  const client = useApolloClient(); // Получаем экземпляр Apollo Client
 
-  const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
+  const { data: streamerData, loading: streamerLoading } = useGetStreamerQuery({
     variables: {
       userName: username,
     },
@@ -48,12 +51,20 @@ export default function StreamerProfileLayout({
   // Подписываемся на обновления стримера
   useStreamerUpdatedSubscription({
     variables: {
-      streamerId: streamerData?.streamer.id ?? "", // Здесь используется streamerId, как и должно быть
+      streamerId: streamerData?.streamer.id ?? "", // Используем streamerId, как и должно быть
     },
     skip: !streamerData?.streamer.id,
     onData: ({ data }) => {
       if (data.data?.streamerUpdated) {
-        refetchStreamer(); // Перезапрашиваем данные стримера при получении обновления
+        const updatedStreamer = data.data.streamerUpdated;
+        // Обновляем кэш для запроса GetStreamer
+        client.writeQuery({
+          query: GetStreamerDocument, // Документ запроса, который мы хотим обновить
+          variables: { userName: username }, // Переменные, используемые для исходного запроса GetStreamer
+          data: {
+            streamer: updatedStreamer, // Новые данные для стримера
+          },
+        });
       }
     },
   });

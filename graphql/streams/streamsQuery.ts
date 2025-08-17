@@ -10,6 +10,7 @@ export const GET_CURRENT_STREAM = gql`
             currentViewers
             streamer {
                 id
+                isLive
                 userName
                 avatar
                 followers

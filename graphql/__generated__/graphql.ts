@@ -148,17 +148,24 @@ export type StreamerDto = {
   avatar?: Maybe<Scalars['String']['output']>;
   followers: Scalars['Long']['output'];
   id: Scalars['String']['output'];
+  isLive: Scalars['Boolean']['output'];
   userName: Scalars['String']['output'];
 };
 
 export type Subscription = {
   __typename?: 'Subscription';
-  streamerUpdated: StreamDto;
+  streamUpdated: StreamDto;
+  streamerUpdated: StreamerDto;
+};
+
+
+export type SubscriptionStreamUpdatedArgs = {
+  streamId: Scalars['UUID']['input'];
 };
 
 
 export type SubscriptionStreamerUpdatedArgs = {
-  streamId: Scalars['UUID']['input'];
+  streamerId: Scalars['String']['input'];
 };
 
 export type UpdateAvatarInput = {
@@ -276,17 +283,24 @@ export type GetStreamerQueryVariables = Exact<{
 }>;
 
 
-export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any } };
+export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any, isLive: boolean } };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any } };
+export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any, isLive: boolean } };
 
 export type GetMyEmailQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetMyEmailQuery = { __typename?: 'Query', myEmail: { __typename?: 'GetEmailResponse', email: string } };
+
+export type StreamerUpdatedSubscriptionVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type StreamerUpdatedSubscription = { __typename?: 'Subscription', streamerUpdated: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any, isLive: boolean } };
 
 export type UpdateStreamSettingsMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -304,13 +318,6 @@ export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetStreamSettingsQuery = { __typename?: 'Query', streamSettings: { __typename?: 'StreamSettingsDto', id: any, streamKey: string, streamUrl: string } };
-
-export type StreamerUpdatedSubscriptionVariables = Exact<{
-  streamId: Scalars['UUID']['input'];
-}>;
-
-
-export type StreamerUpdatedSubscription = { __typename?: 'Subscription', streamerUpdated: { __typename?: 'StreamDto', id: any, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: any } | null } };
 
 
 export const UploadFileDocument = gql`
@@ -570,6 +577,7 @@ export const GetStreamerDocument = gql`
     avatar
     userName
     followers
+    isLive
   }
 }
     `;
@@ -613,6 +621,7 @@ export const GetMeDocument = gql`
     avatar
     userName
     followers
+    isLive
   }
 }
     `;
@@ -687,6 +696,40 @@ export type GetMyEmailQueryHookResult = ReturnType<typeof useGetMyEmailQuery>;
 export type GetMyEmailLazyQueryHookResult = ReturnType<typeof useGetMyEmailLazyQuery>;
 export type GetMyEmailSuspenseQueryHookResult = ReturnType<typeof useGetMyEmailSuspenseQuery>;
 export type GetMyEmailQueryResult = Apollo.QueryResult<GetMyEmailQuery, GetMyEmailQueryVariables>;
+export const StreamerUpdatedDocument = gql`
+    subscription StreamerUpdated($streamerId: String!) {
+  streamerUpdated(streamerId: $streamerId) {
+    id
+    avatar
+    userName
+    followers
+    isLive
+  }
+}
+    `;
+
+/**
+ * __useStreamerUpdatedSubscription__
+ *
+ * To run a query within a React component, call `useStreamerUpdatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useStreamerUpdatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStreamerUpdatedSubscription({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useStreamerUpdatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<StreamerUpdatedSubscription, StreamerUpdatedSubscriptionVariables> & ({ variables: StreamerUpdatedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<StreamerUpdatedSubscription, StreamerUpdatedSubscriptionVariables>(StreamerUpdatedDocument, options);
+      }
+export type StreamerUpdatedSubscriptionHookResult = ReturnType<typeof useStreamerUpdatedSubscription>;
+export type StreamerUpdatedSubscriptionResult = Apollo.SubscriptionResult<StreamerUpdatedSubscription>;
 export const UpdateStreamSettingsDocument = gql`
     mutation UpdateStreamSettings {
   updateStreamSettings {
@@ -815,42 +858,3 @@ export type GetStreamSettingsQueryHookResult = ReturnType<typeof useGetStreamSet
 export type GetStreamSettingsLazyQueryHookResult = ReturnType<typeof useGetStreamSettingsLazyQuery>;
 export type GetStreamSettingsSuspenseQueryHookResult = ReturnType<typeof useGetStreamSettingsSuspenseQuery>;
 export type GetStreamSettingsQueryResult = Apollo.QueryResult<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>;
-export const StreamerUpdatedDocument = gql`
-    subscription StreamerUpdated($streamId: UUID!) {
-  streamerUpdated(streamId: $streamId) {
-    id
-    active
-    title
-    currentViewers
-    streamer {
-      id
-      userName
-      avatar
-      followers
-    }
-  }
-}
-    `;
-
-/**
- * __useStreamerUpdatedSubscription__
- *
- * To run a query within a React component, call `useStreamerUpdatedSubscription` and pass it any options that fit your needs.
- * When your component renders, `useStreamerUpdatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useStreamerUpdatedSubscription({
- *   variables: {
- *      streamId: // value for 'streamId'
- *   },
- * });
- */
-export function useStreamerUpdatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<StreamerUpdatedSubscription, StreamerUpdatedSubscriptionVariables> & ({ variables: StreamerUpdatedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<StreamerUpdatedSubscription, StreamerUpdatedSubscriptionVariables>(StreamerUpdatedDocument, options);
-      }
-export type StreamerUpdatedSubscriptionHookResult = ReturnType<typeof useStreamerUpdatedSubscription>;
-export type StreamerUpdatedSubscriptionResult = Apollo.SubscriptionResult<StreamerUpdatedSubscription>;
