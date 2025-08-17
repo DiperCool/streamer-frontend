@@ -269,7 +269,7 @@ export type GetProfileQueryVariables = Exact<{
 }>;
 
 
-export type GetProfileQuery = { __typename?: 'Query', profile: { __typename?: 'ProfileDto', streamerId: string, bio?: string | null, channelBanner?: string | null, discord?: string | null, instagram?: string | null, offlineStreamBanner?: string | null, youtube?: string | null, streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any } } };
+export type GetProfileQuery = { __typename?: 'Query', profile: { __typename?: 'ProfileDto', streamerId: string, bio?: string | null, channelBanner?: string | null, discord?: string | null, instagram?: string | null, offlineStreamBanner?: string | null, youtube?: string | null, streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any, isLive: boolean } } };
 
 export type UpdateAvatarMutationVariables = Exact<{
   input: UpdateAvatarInput;
@@ -312,7 +312,7 @@ export type GetCurrentStreamQueryVariables = Exact<{
 }>;
 
 
-export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: any, streamerId: string, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: any } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: any, url: string, sourceType: StreamSourceType }> } };
+export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: any, streamerId: string, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName: string, avatar?: string | null, followers: any } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: any, url: string, sourceType: StreamSourceType }> } };
 
 export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -500,6 +500,7 @@ export const GetProfileDocument = gql`
       avatar
       userName
       followers
+      isLive
     }
   }
 }
@@ -772,6 +773,7 @@ export const GetCurrentStreamDocument = gql`
     currentViewers
     streamer {
       id
+      isLive
       userName
       avatar
       followers

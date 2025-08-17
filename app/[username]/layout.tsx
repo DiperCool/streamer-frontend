@@ -29,7 +29,7 @@ export default function StreamerProfileLayout({
   const pathname = usePathname()
   const client = useApolloClient(); // Получаем экземпляр Apollo Client
 
-  const { data: streamerData, loading: streamerLoading } = useGetStreamerQuery({
+  const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
     variables: {
       userName: username,
     },
@@ -41,7 +41,7 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   })
 
-  const { data: currentStreamData, loading: currentStreamLoading } = useGetCurrentStreamQuery({
+  const { data: currentStreamData, loading: currentStreamLoading, refetch: refetchStream } = useGetCurrentStreamQuery({
     variables: {
       streamerId: streamerData?.streamer.id ?? "",
     },
@@ -56,15 +56,8 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
     onData: ({ data }) => {
       if (data.data?.streamerUpdated) {
-        const updatedStreamer = data.data.streamerUpdated;
-        // Обновляем кэш для запроса GetStreamer
-        client.writeQuery({
-          query: GetStreamerDocument, // Документ запроса, который мы хотим обновить
-          variables: { userName: username }, // Переменные, используемые для исходного запроса GetStreamer
-          data: {
-            streamer: updatedStreamer, // Новые данные для стримера
-          },
-        });
+          refetchStreamer()
+          refetchStream()
       }
     },
   });
@@ -141,7 +134,7 @@ export default function StreamerProfileLayout({
           profile={streamerProfile}
           currentStream={currentStream}
           isCurrentUserProfile={isCurrentUserProfile}
-          isLive={isLive} // Передаем isLive напрямую
+          isLive={isLive ?? false} // Передаем isLive напрямую
         />
 
         {/* Вкладки */}
