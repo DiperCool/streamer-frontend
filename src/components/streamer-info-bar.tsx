@@ -14,10 +14,10 @@ interface StreamerInfoBarProps {
   profile: ProfileDto
   currentStream?: StreamDto | null
   isCurrentUserProfile: boolean
+  isLive: boolean; // Добавляем пропс isLive
 }
 
-export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile }: StreamerInfoBarProps) {
-  const isLive = currentStream?.active;
+export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
 
   return (

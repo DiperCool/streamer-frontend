@@ -80,7 +80,7 @@ export default function StreamerProfileLayout({
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
   const currentStream = currentStreamData?.currentStream;
-  const isLive = currentStream?.active; // Используем isLive из currentStream для отображения статуса трансляции
+  const isLive = streamer?.isLive; // Используем streamer.isLive для отображения статуса трансляции
 
   const isCurrentUserProfile = false; // Это значение должно быть определено на основе текущего пользователя
 
@@ -141,6 +141,7 @@ export default function StreamerProfileLayout({
           profile={streamerProfile}
           currentStream={currentStream}
           isCurrentUserProfile={isCurrentUserProfile}
+          isLive={isLive} // Передаем isLive напрямую
         />
 
         {/* Вкладки */}
