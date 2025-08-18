@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react" // Импортируем useState
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
@@ -9,9 +9,9 @@ import {
   useGetCurrentStreamQuery,
   useStreamerUpdatedSubscription,
   useWatchStreamSubscription,
-  useStreamUpdatedSubscription, // Импортируем новую подписку
+  useStreamUpdatedSubscription,
   GetStreamerDocument,
-  GetCurrentStreamDocument // Импортируем документ запроса для обновления кэша
+  GetCurrentStreamDocument
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,6 +20,7 @@ import { StreamPlayer } from "@/src/components/stream-player"
 import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
 import { ChatSection } from "@/src/components/chat-section"
 import { useApolloClient } from "@apollo/client"
+import { cn } from "@/lib/utils" // Импортируем cn для условных классов
 
 export default function StreamerProfileLayout({
   children,
@@ -31,6 +32,7 @@ export default function StreamerProfileLayout({
   const { username } = params
   const pathname = usePathname()
   const client = useApolloClient();
+  const [showChat, setShowChat] = useState(true); // Состояние для видимости чата
 
   const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
     variables: {
@@ -51,7 +53,6 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   });
 
-  // Подписка на обновления стримера (оставляем без изменений, как запрошено)
   useStreamerUpdatedSubscription({
     variables: {
       streamerId: streamerData?.streamer.id ?? "",
@@ -65,7 +66,6 @@ export default function StreamerProfileLayout({
     },
   });
 
-  // Подписка на просмотр потока (оставляем без изменений, как запрошено)
   useWatchStreamSubscription({
     variables: {
       streamId: currentStreamData?.currentStream?.id ?? "",
@@ -76,36 +76,31 @@ export default function StreamerProfileLayout({
     },
   });
 
-  // Новая подписка для обновления информации о текущем потоке
   useStreamUpdatedSubscription({
     variables: {
       streamId: currentStreamData?.currentStream?.id ?? "",
     },
-    skip: !currentStreamData?.currentStream?.id, // Подписываемся только если есть ID текущего потока
+    skip: !currentStreamData?.currentStream?.id,
     onData: ({ client, data }) => {
       const updatedStream = data.data?.streamUpdated;
       if (updatedStream) {
-        // Читаем текущие данные потока из кэша
         const existingStreamData = client.readQuery({
           query: GetCurrentStreamDocument,
           variables: { streamerId: streamerData?.streamer.id ?? "" },
         });
 
         if (existingStreamData && existingStreamData.currentStream) {
-          // Объединяем обновленные поля с существующими данными потока
           const newCurrentStream = {
             ...existingStreamData.currentStream,
             ...updatedStream,
-            // Убеждаемся, что вложенные объекты, такие как 'streamer', также объединены
             streamer: {
               ...existingStreamData.currentStream.streamer,
               ...updatedStream.streamer,
-              __typename: 'StreamerDto', // Сохраняем typename
+              __typename: 'StreamerDto',
             },
-            __typename: 'StreamDto', // Сохраняем typename
+            __typename: 'StreamDto',
           };
 
-          // Записываем обновленные данные обратно в кэш
           client.writeQuery({
             query: GetCurrentStreamDocument,
             variables: { streamerId: streamerData?.streamer.id ?? "" },
@@ -160,7 +155,10 @@ export default function StreamerProfileLayout({
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6 lg:h-[600px]">
-          <div className="relative w-full lg:w-2/3 pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full">
+          <div className={cn(
+            "relative w-full pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full",
+            showChat ? "lg:w-2/3" : "lg:w-full" // Изменяем ширину в зависимости от showChat
+          )}>
             {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
               <StreamPlayer sources={currentStream.sources} />
             ) : (
@@ -176,9 +174,11 @@ export default function StreamerProfileLayout({
             )}
           </div>
 
-          <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full">
-            <ChatSection />
-          </div>
+          {showChat && ( // Условное отображение чата
+            <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full">
+              <ChatSection />
+            </div>
+          )}
         </div>
 
         <StreamerInfoBar
@@ -187,6 +187,8 @@ export default function StreamerProfileLayout({
           currentStream={currentStream}
           isCurrentUserProfile={isCurrentUserProfile}
           isLive={isLive ?? false}
+          onToggleChat={() => setShowChat(!showChat)} // Передаем функцию переключения
+          isChatVisible={showChat} // Передаем текущее состояние чата
         />
 
         <div className="border-b border-gray-800 mt-8">

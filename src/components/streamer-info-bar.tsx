@@ -14,10 +14,12 @@ interface StreamerInfoBarProps {
   profile: ProfileDto
   currentStream?: StreamDto | null
   isCurrentUserProfile: boolean
-  isLive: boolean; // Добавляем пропс isLive
+  isLive: boolean;
+  onToggleChat: () => void; // Новое свойство для переключения чата
+  isChatVisible: boolean; // Новое свойство для отображения состояния чата
 }
 
-export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive }: StreamerInfoBarProps) {
+export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive, onToggleChat, isChatVisible }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
 
   return (
@@ -94,6 +96,9 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
           )}
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Share2 className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onToggleChat}>
+            <MessageSquare className="w-5 h-5" />
           </Button>
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Settings className="w-5 h-5" />
