@@ -4,13 +4,20 @@ import React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, Settings } from "lucide-react"
+import { Send, Smile, Gift, X } from "lucide-react" // Импортируем иконку X
 
-export function ChatSection() {
+interface ChatSectionProps {
+  onCloseChat: () => void; // Новое свойство для закрытия чата
+}
+
+export function ChatSection({ onCloseChat }: ChatSectionProps) {
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between"> {/* Изменяем flex-direction */}
         <CardTitle className="text-white text-lg">Chat</CardTitle>
+        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
+          <X className="h-5 w-5" />
+        </Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto p-4 space-y-2">
         {/* Placeholder for chat messages */}

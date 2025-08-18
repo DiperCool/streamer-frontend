@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react" // Импортируем useState
+import React, { useState } from "react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
@@ -20,7 +20,7 @@ import { StreamPlayer } from "@/src/components/stream-player"
 import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
 import { ChatSection } from "@/src/components/chat-section"
 import { useApolloClient } from "@apollo/client"
-import { cn } from "@/lib/utils" // Импортируем cn для условных классов
+import { cn } from "@/lib/utils"
 
 export default function StreamerProfileLayout({
   children,
@@ -160,7 +160,11 @@ export default function StreamerProfileLayout({
             showChat ? "lg:w-2/3" : "lg:w-full" // Изменяем ширину в зависимости от showChat
           )}>
             {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
-              <StreamPlayer sources={currentStream.sources} />
+              <StreamPlayer
+                sources={currentStream.sources}
+                isChatVisible={showChat} // Передаем состояние видимости чата
+                onOpenChat={() => setShowChat(true)} // Передаем функцию для открытия чата
+              />
             ) : (
               <Image
                 src={getMinioUrl(bannerImage)}
@@ -176,7 +180,7 @@ export default function StreamerProfileLayout({
 
           {showChat && ( // Условное отображение чата
             <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full">
-              <ChatSection />
+              <ChatSection onCloseChat={() => setShowChat(false)} /> {/* Передаем функцию для закрытия чата */}
             </div>
           )}
         </div>
@@ -187,8 +191,7 @@ export default function StreamerProfileLayout({
           currentStream={currentStream}
           isCurrentUserProfile={isCurrentUserProfile}
           isLive={isLive ?? false}
-          onToggleChat={() => setShowChat(!showChat)} // Передаем функцию переключения
-          isChatVisible={showChat} // Передаем текущее состояние чата
+          // Удаляем onToggleChat и isChatVisible
         />
 
         <div className="border-b border-gray-800 mt-8">

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react"
+import { Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react" // Удаляем MessageSquare
 import { ProfileDto, StreamerDto, StreamDto } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 
@@ -15,11 +15,10 @@ interface StreamerInfoBarProps {
   currentStream?: StreamDto | null
   isCurrentUserProfile: boolean
   isLive: boolean;
-  onToggleChat: () => void; // Новое свойство для переключения чата
-  isChatVisible: boolean; // Новое свойство для отображения состояния чата
+  // Удаляем onToggleChat и isChatVisible
 }
 
-export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive, onToggleChat, isChatVisible }: StreamerInfoBarProps) {
+export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
 
   return (
@@ -97,9 +96,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Share2 className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onToggleChat}>
-            <MessageSquare className="w-5 h-5" />
-          </Button>
+          {/* Удалена кнопка чата */}
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Settings className="w-5 h-5" />
           </Button>
