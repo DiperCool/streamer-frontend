@@ -57,3 +57,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .h-screen-minus-navbar {
+    height: calc(100vh - 4rem); /* Assuming navbar height is h-16 (4rem) */
+  }
+}
