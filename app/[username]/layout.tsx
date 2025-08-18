@@ -9,7 +9,9 @@ import {
   useGetCurrentStreamQuery,
   useStreamerUpdatedSubscription,
   useWatchStreamSubscription,
-  GetStreamerDocument
+  useStreamUpdatedSubscription, // Импортируем новую подписку
+  GetStreamerDocument,
+  GetCurrentStreamDocument // Импортируем документ запроса для обновления кэша
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -49,6 +51,7 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   });
 
+  // Подписка на обновления стримера (оставляем без изменений, как запрошено)
   useStreamerUpdatedSubscription({
     variables: {
       streamerId: streamerData?.streamer.id ?? "",
@@ -62,6 +65,7 @@ export default function StreamerProfileLayout({
     },
   });
 
+  // Подписка на просмотр потока (оставляем без изменений, как запрошено)
   useWatchStreamSubscription({
     variables: {
       streamId: currentStreamData?.currentStream?.id ?? "",
@@ -69,6 +73,48 @@ export default function StreamerProfileLayout({
     skip: !currentStreamData?.currentStream?.id,
     onData: ({ data }) => {
       // Ничего не делаем, как запрошено
+    },
+  });
+
+  // Новая подписка для обновления информации о текущем потоке
+  useStreamUpdatedSubscription({
+    variables: {
+      streamId: currentStreamData?.currentStream?.id ?? "",
+    },
+    skip: !currentStreamData?.currentStream?.id, // Подписываемся только если есть ID текущего потока
+    onData: ({ client, data }) => {
+      const updatedStream = data.data?.streamUpdated;
+      if (updatedStream) {
+        // Читаем текущие данные потока из кэша
+        const existingStreamData = client.readQuery({
+          query: GetCurrentStreamDocument,
+          variables: { streamerId: streamerData?.streamer.id ?? "" },
+        });
+
+        if (existingStreamData && existingStreamData.currentStream) {
+          // Объединяем обновленные поля с существующими данными потока
+          const newCurrentStream = {
+            ...existingStreamData.currentStream,
+            ...updatedStream,
+            // Убеждаемся, что вложенные объекты, такие как 'streamer', также объединены
+            streamer: {
+              ...existingStreamData.currentStream.streamer,
+              ...updatedStream.streamer,
+              __typename: 'StreamerDto', // Сохраняем typename
+            },
+            __typename: 'StreamDto', // Сохраняем typename
+          };
+
+          // Записываем обновленные данные обратно в кэш
+          client.writeQuery({
+            query: GetCurrentStreamDocument,
+            variables: { streamerId: streamerData?.streamer.id ?? "" },
+            data: {
+              currentStream: newCurrentStream,
+            },
+          });
+        }
+      }
     },
   });
 
