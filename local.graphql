@@ -68,6 +68,10 @@ type StreamSourceDto {
     url: String!
 }
 
+type StreamWatcher {
+    streamId: UUID!
+}
+
 type StreamerDto {
     avatar: String
     followers: Long!
@@ -79,6 +83,8 @@ type StreamerDto {
 type Subscription {
     streamUpdated(streamId: UUID!): StreamDto!
     streamerUpdated(streamerId: String!): StreamerDto!
+    subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
+    watchStream(streamId: UUID!): StreamWatcher!
 }
 
 type UpdateAvatarResponse {

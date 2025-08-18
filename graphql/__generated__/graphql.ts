@@ -143,6 +143,11 @@ export enum StreamSourceType {
   WebRtc = 'WEB_RTC'
 }
 
+export type StreamWatcher = {
+  __typename?: 'StreamWatcher';
+  streamId: Scalars['UUID']['output'];
+};
+
 export type StreamerDto = {
   __typename?: 'StreamerDto';
   avatar?: Maybe<Scalars['String']['output']>;
@@ -156,6 +161,8 @@ export type Subscription = {
   __typename?: 'Subscription';
   streamUpdated: StreamDto;
   streamerUpdated: StreamerDto;
+  subscribeWatchStream: Array<StreamWatcher>;
+  watchStream: StreamWatcher;
 };
 
 
@@ -166,6 +173,16 @@ export type SubscriptionStreamUpdatedArgs = {
 
 export type SubscriptionStreamerUpdatedArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type SubscriptionSubscribeWatchStreamArgs = {
+  streamId: Scalars['UUID']['input'];
+};
+
+
+export type SubscriptionWatchStreamArgs = {
+  streamId: Scalars['UUID']['input'];
 };
 
 export type UpdateAvatarInput = {
@@ -301,6 +318,20 @@ export type StreamerUpdatedSubscriptionVariables = Exact<{
 
 
 export type StreamerUpdatedSubscription = { __typename?: 'Subscription', streamerUpdated: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: any, isLive: boolean } };
+
+export type StreamUpdatedSubscriptionVariables = Exact<{
+  streamId: Scalars['UUID']['input'];
+}>;
+
+
+export type StreamUpdatedSubscription = { __typename?: 'Subscription', streamUpdated: { __typename?: 'StreamDto', id: any, active: boolean, title: string, currentViewers: any, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: any } | null } };
+
+export type WatchStreamSubscriptionVariables = Exact<{
+  streamId: Scalars['UUID']['input'];
+}>;
+
+
+export type WatchStreamSubscription = { __typename?: 'Subscription', watchStream: { __typename?: 'StreamWatcher', streamId: any } };
 
 export type UpdateStreamSettingsMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -731,6 +762,75 @@ export function useStreamerUpdatedSubscription(baseOptions: Apollo.SubscriptionH
       }
 export type StreamerUpdatedSubscriptionHookResult = ReturnType<typeof useStreamerUpdatedSubscription>;
 export type StreamerUpdatedSubscriptionResult = Apollo.SubscriptionResult<StreamerUpdatedSubscription>;
+export const StreamUpdatedDocument = gql`
+    subscription StreamUpdated($streamId: UUID!) {
+  streamUpdated(streamId: $streamId) {
+    id
+    active
+    title
+    currentViewers
+    streamer {
+      id
+      userName
+      avatar
+      followers
+    }
+  }
+}
+    `;
+
+/**
+ * __useStreamUpdatedSubscription__
+ *
+ * To run a query within a React component, call `useStreamUpdatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useStreamUpdatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStreamUpdatedSubscription({
+ *   variables: {
+ *      streamId: // value for 'streamId'
+ *   },
+ * });
+ */
+export function useStreamUpdatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<StreamUpdatedSubscription, StreamUpdatedSubscriptionVariables> & ({ variables: StreamUpdatedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<StreamUpdatedSubscription, StreamUpdatedSubscriptionVariables>(StreamUpdatedDocument, options);
+      }
+export type StreamUpdatedSubscriptionHookResult = ReturnType<typeof useStreamUpdatedSubscription>;
+export type StreamUpdatedSubscriptionResult = Apollo.SubscriptionResult<StreamUpdatedSubscription>;
+export const WatchStreamDocument = gql`
+    subscription WatchStream($streamId: UUID!) {
+  watchStream(streamId: $streamId) {
+    streamId
+  }
+}
+    `;
+
+/**
+ * __useWatchStreamSubscription__
+ *
+ * To run a query within a React component, call `useWatchStreamSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWatchStreamSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWatchStreamSubscription({
+ *   variables: {
+ *      streamId: // value for 'streamId'
+ *   },
+ * });
+ */
+export function useWatchStreamSubscription(baseOptions: Apollo.SubscriptionHookOptions<WatchStreamSubscription, WatchStreamSubscriptionVariables> & ({ variables: WatchStreamSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WatchStreamSubscription, WatchStreamSubscriptionVariables>(WatchStreamDocument, options);
+      }
+export type WatchStreamSubscriptionHookResult = ReturnType<typeof useWatchStreamSubscription>;
+export type WatchStreamSubscriptionResult = Apollo.SubscriptionResult<WatchStreamSubscription>;
 export const UpdateStreamSettingsDocument = gql`
     mutation UpdateStreamSettings {
   updateStreamSettings {

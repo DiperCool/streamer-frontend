@@ -1,12 +1,16 @@
 "use client"
 
 import React from "react"
-import ReactPlayer from "react-player"
+import dynamic from "next/dynamic" // Импортируем dynamic из next/dynamic
+import {StreamSourceType} from "@/graphql/__generated__/graphql";
+
+// Динамически импортируем ReactPlayer, чтобы он загружался только на клиенте
+const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 interface StreamPlayerProps {
   sources: Array<{
     url: string
-    sourceType: string
+    sourceType: StreamSourceType
   }>
 }
 
@@ -22,10 +26,19 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
     )
   }
 
+  // ReactPlayer будет null до тех пор, пока не будет загружен на клиенте
+  if (!ReactPlayer) {
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-black text-white">
+        Loading player...
+      </div>
+    );
+  }
+
   return (
     <div className="absolute inset-0">
       <ReactPlayer
-        src={urlToPlay}
+        url={urlToPlay}
         playing // Воспроизведение по умолчанию
         controls={true} // Включаем стандартные элементы управления браузера
         width="100%"
