@@ -156,14 +156,14 @@ export default function StreamerProfileLayout({
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6 lg:h-[600px]">
           <div className={cn(
-            "relative w-full pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full",
-            showChat ? "lg:w-2/3" : "lg:w-full" // Изменяем ширину в зависимости от showChat
+            "relative w-full pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full transition-all duration-300 ease-in-out",
+            showChat ? "lg:w-2/3" : "lg:w-full"
           )}>
             {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
               <StreamPlayer
                 sources={currentStream.sources}
-                isChatVisible={showChat} // Передаем состояние видимости чата
-                onOpenChat={() => setShowChat(true)} // Передаем функцию для открытия чата
+                isChatVisible={showChat}
+                onOpenChat={() => setShowChat(true)}
               />
             ) : (
               <Image
@@ -178,11 +178,14 @@ export default function StreamerProfileLayout({
             )}
           </div>
 
-          {showChat && ( // Условное отображение чата
-            <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full">
-              <ChatSection onCloseChat={() => setShowChat(false)} /> {/* Передаем функцию для закрытия чата */}
-            </div>
-          )}
+          {/* Чат теперь всегда рендерится, но его ширина анимируется */}
+          <div className={cn(
+            "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
+            showChat ? "lg:w-1/3" : "lg:w-0 overflow-hidden"
+          )}>
+            {/* Содержимое ChatSection рендерится только если чат виден, чтобы предотвратить взаимодействие */}
+            {showChat && <ChatSection onCloseChat={() => setShowChat(false)} />}
+          </div>
         </div>
 
         <StreamerInfoBar
@@ -191,7 +194,6 @@ export default function StreamerProfileLayout({
           currentStream={currentStream}
           isCurrentUserProfile={isCurrentUserProfile}
           isLive={isLive ?? false}
-          // Удаляем onToggleChat и isChatVisible
         />
 
         <div className="border-b border-gray-800 mt-8">
