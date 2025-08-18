@@ -142,7 +142,7 @@ export default function StreamerProfileLayout({
         {/* Player */}
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "lg:w-full h-full" : "lg:w-2/3 h-full" // Изменено: lg:w-full при максимизации
+          isPlayerMaximized ? "lg:w-full h-full" : "lg:w-2/3 h-full"
         )}>
           {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
             <StreamPlayer
@@ -156,7 +156,7 @@ export default function StreamerProfileLayout({
               alt="Channel Banner"
               fill
               style={{ objectFit: "cover" }}
-              sizes={isPlayerMaximized ? "100vw" : "(max-width: 1024px) 100vw, 66vw"} // Изменено: 100vw при максимизации
+              sizes={isPlayerMaximized ? "100vw" : "(max-width: 1024px) 100vw, 66vw"}
               priority
               className="absolute top-0 left-0 w-full h-full"
             />
@@ -166,7 +166,7 @@ export default function StreamerProfileLayout({
         {/* Chat Section - Скрывается при максимизации плеера */}
         <div className={cn(
           "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "lg:hidden" : "lg:w-1/3" // Изменено: lg:hidden при максимизации
+          isPlayerMaximized ? "lg:hidden" : "lg:w-1/3"
         )}>
           <ChatSection onCloseChat={() => {}} />
         </div>
@@ -195,9 +195,6 @@ export default function StreamerProfileLayout({
         <div className="border-b border-gray-800 mb-8">
           <Tabs value={activeTab} className="w-full">
             <TabsList className="bg-gray-900" currentValue={activeTab}>
-              <Link href={`/${username}/stream`} passHref>
-                <TabsTrigger value="stream">Stream</TabsTrigger>
-              </Link>
               <Link href={`/${username}`} passHref>
                 <TabsTrigger value="home">Home</TabsTrigger>
               </Link>
