@@ -4,20 +4,18 @@ import React from "react"
 import ReactPlayer from "react-player"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Maximize, Minimize } from "lucide-react";
+import { Maximize, Minimize } from "lucide-react"; // Убрал MessageSquare
 
 interface StreamPlayerProps {
   sources: Array<{
     url: string
     sourceType: StreamSourceType
   }>
-  showChatToggleButton: boolean; // Изменено название пропса
-  onToggleChat: () => void; // Изменено название пропса
   isPlayerMaximized: boolean;
   onTogglePlayerMaximize: () => void;
 }
 
-export function StreamPlayer({ sources, showChatToggleButton, onToggleChat, isPlayerMaximized, onTogglePlayerMaximize }: StreamPlayerProps) {
+export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize }: StreamPlayerProps) {
   const hlsSource = sources.find(s => s.sourceType === "HLS")
   const urlToPlay = hlsSource ? hlsSource.url : "";
 
@@ -39,25 +37,15 @@ export function StreamPlayer({ sources, showChatToggleButton, onToggleChat, isPl
         height="100%"
         className="z-[15]"
       />
-      {showChatToggleButton && ( // Используем новый пропс
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 right-4 z-20 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
-          onClick={onToggleChat} // Используем новый пропс
-        >
-          <MessageSquare className="w-6 h-6" />
-        </Button>
-      )}
-      {/* Кнопка максимизации/минимизации плеера */}
-      <Button
+      {/* Кнопка максимизации/минимизации плеера - теперь управляется извне */}
+      {/* <Button
         variant="ghost"
         size="icon"
-        className="absolute top-4 right-16 z-20 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
+        className="absolute top-4 right-4 z-20 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
         onClick={onTogglePlayerMaximize}
       >
         {isPlayerMaximized ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
-      </Button>
+      </Button> */}
     </div>
   )
 }

@@ -24,7 +24,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
-        {/* Left Section: Avatar, Name, Followers - Делаем кликабельным */}
+        {/* Left Section: Avatar, Name, Followers - Делаем кликабельным для переключения режима плеера */}
         <div className="flex items-center space-x-4 mb-4 md:mb-0 cursor-pointer" onClick={onTogglePlayerMaximize}>
           <div className="relative">
             <Avatar className="w-20 h-20 border-2 border-green-500">
