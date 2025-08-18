@@ -82,7 +82,7 @@ export default function StreamerProfileLayout({
               ...updatedStream.streamer,
               __typename: 'StreamerDto',
             },
-            __typename: 'StreamDto',
+            __typename: 'StreamerDto',
           };
           client.writeQuery({
             query: GetCurrentStreamDocument,
@@ -139,15 +139,15 @@ export default function StreamerProfileLayout({
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный (обратный порядок) на больших */}
 
-      {/* Чат (закреплен справа на больших экранах, скрыт на маленьких) */}
+      {/* Чат (закреплен справа на больших экранах) */}
       {isChatVisible && (
-        <div className="hidden lg:flex w-80 bg-gray-800 border-l border-gray-700 flex-col"> {/* Изменено border-r на border-l */}
+        <div className="hidden lg:flex fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40">
           <ChatSection onCloseChat={() => setIsChatVisible(false)} />
         </div>
       )}
 
       {/* Основная область контента (плеер, инфо-панель, вкладки) */}
-      <div className="flex-1 flex flex-col"> {/* Занимает оставшуюся ширину на больших экранах, полную ширину на маленьких */}
+      <div className="flex-1 flex flex-col lg:mr-80"> {/* Занимает оставшуюся ширину на больших экранах, полную ширину на маленьких */}
         {/* Секция плеера */}
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
@@ -175,7 +175,7 @@ export default function StreamerProfileLayout({
           {!isChatVisible && (
             <Button
               variant="outline"
-              className="absolute top-4 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700" // Удален lg:hidden
+              className="absolute top-4 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700"
               onClick={() => setIsChatVisible(true)}
             >
               <MessageSquare className="h-5 w-5 mr-2" /> Show Chat
