@@ -82,7 +82,7 @@ export default function StreamerProfileLayout({
               ...updatedStream.streamer,
               __typename: 'StreamerDto',
             },
-            __typename: 'StreamDto',
+            __typename: 'StreamerDto',
           };
           client.writeQuery({
             query: GetCurrentStreamDocument,
@@ -175,7 +175,7 @@ export default function StreamerProfileLayout({
           {!isChatVisible && (
             <Button
               variant="outline"
-              className="absolute top-4 right-4 z-20 border-gray-600 text-gray-300 hover:bg-gray-700 lg:hidden"
+              className="absolute top-4 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700 lg:hidden" // Увеличил z-index и добавил фон для лучшей видимости
               onClick={() => setIsChatVisible(true)}
             >
               <MessageSquare className="h-5 w-5 mr-2" /> Show Chat
