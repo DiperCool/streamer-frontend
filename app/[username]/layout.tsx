@@ -7,8 +7,9 @@ import {
   useGetProfileQuery,
   useGetStreamerQuery,
   useGetCurrentStreamQuery,
-  useStreamerUpdatedSubscription, // Импортируем подписку
-  GetStreamerDocument // Импортируем документ запроса для обновления кэша
+  useStreamerUpdatedSubscription,
+  useWatchStreamSubscription,
+  GetStreamerDocument
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,7 +17,7 @@ import Link from "next/link"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
 import { ChatSection } from "@/src/components/chat-section"
-import { useApolloClient } from "@apollo/client" // Импортируем useApolloClient
+import { useApolloClient } from "@apollo/client"
 
 export default function StreamerProfileLayout({
   children,
@@ -27,7 +28,7 @@ export default function StreamerProfileLayout({
 }) {
   const { username } = params
   const pathname = usePathname()
-  const client = useApolloClient(); // Получаем экземпляр Apollo Client
+  const client = useApolloClient();
 
   const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
     variables: {
@@ -48,10 +49,9 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   });
 
-  // Подписываемся на обновления стримера
   useStreamerUpdatedSubscription({
     variables: {
-      streamerId: streamerData?.streamer.id ?? "", // Используем streamerId, как и должно быть
+      streamerId: streamerData?.streamer.id ?? "",
     },
     skip: !streamerData?.streamer.id,
     onData: ({ data }) => {
@@ -59,6 +59,16 @@ export default function StreamerProfileLayout({
           refetchStreamer()
           refetchStream()
       }
+    },
+  });
+
+  useWatchStreamSubscription({
+    variables: {
+      streamId: currentStreamData?.currentStream?.id ?? "",
+    },
+    skip: !currentStreamData?.currentStream?.id,
+    onData: ({ data }) => {
+      // Ничего не делаем, как запрошено
     },
   });
 
@@ -73,9 +83,9 @@ export default function StreamerProfileLayout({
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
   const currentStream = currentStreamData?.currentStream;
-  const isLive = streamer?.isLive; // Используем streamer.isLive для отображения статуса трансляции
+  const isLive = streamer?.isLive;
 
-  const isCurrentUserProfile = false; // Это значение должно быть определено на основе текущего пользователя
+  const isCurrentUserProfile = false;
 
   if (!streamer || !streamerProfile) {
     return (
@@ -102,11 +112,9 @@ export default function StreamerProfileLayout({
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8"> {/* Основной контейнер контента */}
-        {/* Секция видео и чата */}
-        <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6 lg:h-[600px]"> {/* Фиксированная высота для десктопа */}
-          {/* Секция видеоплеера / баннера */}
-          <div className="relative w-full lg:w-2/3 pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full"> {/* lg:pt-0 и lg:h-full */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6 lg:h-[600px]">
+          <div className="relative w-full lg:w-2/3 pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full">
             {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
               <StreamPlayer sources={currentStream.sources} />
             ) : (
@@ -122,22 +130,19 @@ export default function StreamerProfileLayout({
             )}
           </div>
 
-          {/* Правая секция (чат) */}
-          <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full"> {/* h-full для заполнения высоты родителя */}
+          <div className="w-full lg:w-1/3 bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full">
             <ChatSection />
           </div>
         </div>
 
-        {/* Информационная панель стримера */}
         <StreamerInfoBar
           streamer={streamer}
           profile={streamerProfile}
           currentStream={currentStream}
           isCurrentUserProfile={isCurrentUserProfile}
-          isLive={isLive ?? false} // Передаем isLive напрямую
+          isLive={isLive ?? false}
         />
 
-        {/* Вкладки */}
         <div className="border-b border-gray-800 mt-8">
           <Tabs value={activeTab} className="w-full">
             <TabsList className="bg-gray-900" currentValue={activeTab}>
