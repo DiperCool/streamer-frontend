@@ -2,7 +2,7 @@
 
 import React from "react"
 import Image from "next/image"
-import { usePathname, useRouter } from "next/navigation" // Импортируем useRouter
+import { usePathname, useRouter } from "next/navigation"
 import {
   useGetProfileQuery,
   useGetStreamerQuery,
@@ -31,10 +31,9 @@ export default function StreamerProfileLayout({
 }) {
   const { username } = params
   const pathname = usePathname()
-  const router = useRouter(); // Инициализируем useRouter
+  const router = useRouter();
   const client = useApolloClient();
 
-  // Определяем, находится ли плеер в максимизированном режиме
   const isPlayerMaximized = pathname === `/${username}/stream`;
 
   const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
@@ -115,9 +114,9 @@ export default function StreamerProfileLayout({
 
   const handleTogglePlayerMaximize = () => {
     if (isPlayerMaximized) {
-      router.push(`/${username}`); // Переходим на главную страницу профиля (минимизированный режим)
+      router.push(`/${username}`);
     } else {
-      router.push(`/${username}/stream`); // Переходим на страницу стрима (максимизированный режим)
+      router.push(`/${username}/stream`);
     }
   };
 
@@ -138,18 +137,18 @@ export default function StreamerProfileLayout({
       {/* Player and Chat Section - Всегда сверху */}
       <div className={cn(
         "relative w-full flex flex-col lg:flex-row transition-all duration-300 ease-in-out",
-        isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]" // Занимает оставшуюся высоту при максимизации, фиксированная высота при минимизации
+        isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
       )}>
         {/* Player */}
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "lg:w-2/3 h-full" : "lg:w-2/3 h-full" // Всегда 2/3 ширины, но высота меняется
+          isPlayerMaximized ? "lg:w-full h-full" : "lg:w-2/3 h-full" // Изменено: lg:w-full при максимизации
         )}>
           {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
             <StreamPlayer
               sources={currentStream.sources}
               isPlayerMaximized={isPlayerMaximized}
-              onTogglePlayerMaximize={handleTogglePlayerMaximize} // Передаем обработчик
+              onTogglePlayerMaximize={handleTogglePlayerMaximize}
             />
           ) : (
             <Image
@@ -157,26 +156,26 @@ export default function StreamerProfileLayout({
               alt="Channel Banner"
               fill
               style={{ objectFit: "cover" }}
-              sizes={isPlayerMaximized ? "66vw" : "(max-width: 1024px) 100vw, 66vw"}
+              sizes={isPlayerMaximized ? "100vw" : "(max-width: 1024px) 100vw, 66vw"} // Изменено: 100vw при максимизации
               priority
               className="absolute top-0 left-0 w-full h-full"
             />
           )}
         </div>
 
-        {/* Chat Section - Всегда видим, занимает 1/3 ширины */}
+        {/* Chat Section - Скрывается при максимизации плеера */}
         <div className={cn(
           "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
-          "lg:w-1/3" // Чат всегда занимает 1/3 ширины, полную высоту своего контейнера
+          isPlayerMaximized ? "lg:hidden" : "lg:w-1/3" // Изменено: lg:hidden при максимизации
         )}>
-          <ChatSection onCloseChat={() => {}} /> {/* Кнопка закрытия чата пока не влияет на его видимость */}
+          <ChatSection onCloseChat={() => {}} />
         </div>
       </div>
 
       {/* Streamer Info Bar - Всегда видим, отступы меняются в зависимости от состояния плеера */}
       <div className={cn(
         "transition-all duration-300 ease-in-out relative z-30",
-        isPlayerMaximized ? "px-4 py-4" : "container mx-auto px-4 py-8" // Компактные отступы при максимизации
+        isPlayerMaximized ? "px-4 py-4" : "container mx-auto px-4 py-8"
       )}>
         <StreamerInfoBar
           streamer={streamer}
@@ -184,21 +183,21 @@ export default function StreamerProfileLayout({
           currentStream={currentStream}
           isCurrentUserProfile={false}
           isLive={isLive ?? false}
-          onTogglePlayerMaximize={handleTogglePlayerMaximize} // Передаем обработчик
+          onTogglePlayerMaximize={handleTogglePlayerMaximize}
         />
       </div>
 
       {/* Tabs and Children container - Скрывается, когда плеер максимизирован */}
       <div className={cn(
         "flex-grow transition-all duration-300 ease-in-out",
-        isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-8" // Скрыт, когда максимизирован
+        isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-8"
       )}>
         <div className="border-b border-gray-800 mb-8">
           <Tabs value={activeTab} className="w-full">
             <TabsList className="bg-gray-900" currentValue={activeTab}>
-              {/* <Link href={`/${username}/stream`} passHref>
+              <Link href={`/${username}/stream`} passHref>
                 <TabsTrigger value="stream">Stream</TabsTrigger>
-              </Link> */}
+              </Link>
               <Link href={`/${username}`} passHref>
                 <TabsTrigger value="home">Home</TabsTrigger>
               </Link>
