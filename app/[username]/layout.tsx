@@ -178,7 +178,7 @@ export default function StreamerProfileLayout({
           {!isChatVisible && (
             <Button
               variant="outline"
-              className="absolute top-4 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700"
+              className="absolute top-16 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700"
               onClick={() => setIsChatVisible(true)}
             >
               <MessageSquare className="h-5 w-5 mr-2" /> Show Chat
@@ -189,7 +189,7 @@ export default function StreamerProfileLayout({
         {/* Инфо-панель стримера */}
         <div className={cn(
           "transition-all duration-300 ease-in-out relative z-30",
-          isPlayerMaximized ? "px-4 py-2" : "container mx-auto px-4 py-2" // Уменьшил py-4 до py-2
+          isPlayerMaximized ? "px-4 py-2" : "container mx-auto px-4 py-2"
         )}>
           <StreamerInfoBar
             streamer={streamer}
@@ -204,9 +204,9 @@ export default function StreamerProfileLayout({
         {/* Контейнер вкладок и дочернего контента (скрывается, когда плеер максимизирован) */}
         <div className={cn(
           "flex-grow transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-2" // Уменьшил py-4 до py-2
+          isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-2"
         )}>
-          <div className="border-b border-gray-800 mb-2"> {/* Уменьшил mb-4 до mb-2 */}
+          <div className="border-b border-gray-800 mb-2">
             <Tabs value={activeTab} className="w-full">
               <TabsList className="bg-gray-900" currentValue={activeTab}>
                 <Link href={`/${username}`} passHref>
