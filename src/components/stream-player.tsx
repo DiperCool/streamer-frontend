@@ -4,20 +4,20 @@ import React from "react"
 import ReactPlayer from "react-player"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Maximize, Minimize } from "lucide-react"; // Импортируем Maximize и Minimize
+import { MessageSquare, Maximize, Minimize } from "lucide-react";
 
 interface StreamPlayerProps {
   sources: Array<{
     url: string
     sourceType: StreamSourceType
   }>
-  isChatVisible: boolean;
-  onOpenChat: () => void;
-  isPlayerMaximized: boolean; // Добавляем проп для состояния максимизации
-  onTogglePlayerMaximize: () => void; // Добавляем проп для переключения режима плеера
+  showChatToggleButton: boolean; // Изменено название пропса
+  onToggleChat: () => void; // Изменено название пропса
+  isPlayerMaximized: boolean;
+  onTogglePlayerMaximize: () => void;
 }
 
-export function StreamPlayer({ sources, isChatVisible, onOpenChat, isPlayerMaximized, onTogglePlayerMaximize }: StreamPlayerProps) {
+export function StreamPlayer({ sources, showChatToggleButton, onToggleChat, isPlayerMaximized, onTogglePlayerMaximize }: StreamPlayerProps) {
   const hlsSource = sources.find(s => s.sourceType === "HLS")
   const urlToPlay = hlsSource ? hlsSource.url : "";
 
@@ -39,12 +39,12 @@ export function StreamPlayer({ sources, isChatVisible, onOpenChat, isPlayerMaxim
         height="100%"
         className="z-[15]"
       />
-      {!isChatVisible && ( // Показываем кнопку чата только если чат скрыт
+      {showChatToggleButton && ( // Используем новый пропс
         <Button
           variant="ghost"
           size="icon"
           className="absolute top-4 right-4 z-20 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
-          onClick={onOpenChat}
+          onClick={onToggleChat} // Используем новый пропс
         >
           <MessageSquare className="w-6 h-6" />
         </Button>
