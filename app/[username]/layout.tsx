@@ -196,9 +196,9 @@ export default function StreamerProfileLayout({
         <div className="border-b border-gray-800 mb-8">
           <Tabs value={activeTab} className="w-full">
             <TabsList className="bg-gray-900" currentValue={activeTab}>
-              <Link href={`/${username}/stream`} passHref>
+              {/* <Link href={`/${username}/stream`} passHref>
                 <TabsTrigger value="stream">Stream</TabsTrigger>
-              </Link>
+              </Link> */}
               <Link href={`/${username}`} passHref>
                 <TabsTrigger value="home">Home</TabsTrigger>
               </Link>
