@@ -147,7 +147,10 @@ export default function StreamerProfileLayout({
       )}
 
       {/* Основная область контента (плеер, инфо-панель, вкладки) */}
-      <div className="flex-1 flex flex-col lg:mr-80"> {/* Занимает оставшуюся ширину на больших экранах, полную ширину на маленьких */}
+      <div className={cn(
+          "flex-1 flex flex-col transition-all duration-300 ease-in-out",
+          isChatVisible ? "lg:mr-80" : "", // Применяем lg:mr-80 только если чат виден
+      )}>
         {/* Секция плеера */}
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
