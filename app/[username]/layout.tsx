@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react" // Импортируем useEffect
+import React, { useState } from "react" // Удаляем useEffect, оставляем useState
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
@@ -36,14 +36,11 @@ export default function StreamerProfileLayout({
   const router = useRouter();
   const client = useApolloClient();
 
-  const isPlayerMaximized = pathname === `/${username}/stream`;
-  // Инициализируем isChatVisible: false для страницы /stream, true для остальных
-  const [isChatVisible, setIsChatVisible] = useState(!isPlayerMaximized);
+  // Инициализируем isChatVisible как true по умолчанию.
+  // Его состояние будет сохраняться при навигации внутри layout.
+  const [isChatVisible, setIsChatVisible] = useState(true); 
 
-  // Обновляем isChatVisible при изменении маршрута
-  useEffect(() => {
-    setIsChatVisible(!isPlayerMaximized);
-  }, [isPlayerMaximized]);
+  const isPlayerMaximized = pathname === `/${username}/stream`;
 
   const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
     variables: { userName: username },
