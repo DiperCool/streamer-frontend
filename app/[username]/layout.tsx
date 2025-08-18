@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react" // Удаляем useEffect, оставляем useState
+import React, { useState } from "react"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
@@ -36,8 +36,7 @@ export default function StreamerProfileLayout({
   const router = useRouter();
   const client = useApolloClient();
 
-  // Инициализируем isChatVisible как true по умолчанию.
-  // Его состояние будет сохраняться при навигации внутри layout.
+  // Состояние видимости чата, сохраняется при навигации
   const [isChatVisible, setIsChatVisible] = useState(true); 
 
   const isPlayerMaximized = pathname === `/${username}/stream`;
@@ -83,7 +82,7 @@ export default function StreamerProfileLayout({
               ...updatedStream.streamer,
               __typename: 'StreamerDto',
             },
-            __typename: 'StreamDto',
+            __typename: 'StreamerDto',
           };
           client.writeQuery({
             query: GetCurrentStreamDocument,
@@ -138,16 +137,21 @@ export default function StreamerProfileLayout({
   const activeTab = getActiveTab();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
-      {/* Player and Chat Section - Всегда сверху */}
-      <div className={cn(
-        "relative w-full flex flex-col lg:flex-row transition-all duration-300 ease-in-out",
-        isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
-      )}>
-        {/* Player */}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный на больших */}
+
+      {/* Чат (закреплен слева на больших экранах, скрыт на маленьких) */}
+      {isChatVisible && (
+        <div className="hidden lg:flex w-80 bg-gray-800 border-r border-gray-700 flex-col">
+          <ChatSection onCloseChat={() => setIsChatVisible(false)} />
+        </div>
+      )}
+
+      {/* Основная область контента (плеер, инфо-панель, вкладки) */}
+      <div className="flex-1 flex flex-col"> {/* Занимает оставшуюся ширину на больших экранах, полную ширину на маленьких */}
+        {/* Секция плеера */}
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
-          isChatVisible ? "lg:w-2/3 h-full" : "lg:w-full h-full" // Ширина плеера зависит от видимости чата
+          isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
         )}>
           {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
             <StreamPlayer
@@ -161,17 +165,17 @@ export default function StreamerProfileLayout({
               alt="Channel Banner"
               fill
               style={{ objectFit: "cover" }}
-              sizes={isChatVisible ? "(max-width: 1024px) 100vw, 66vw" : "100vw"} // Ширина баннера зависит от видимости чата
+              sizes="100vw"
               priority
               className="absolute top-0 left-0 w-full h-full"
             />
           )}
 
-          {/* Show Chat Button inside player, only when chat is not visible */}
+          {/* Кнопка "Показать чат" (только если чат скрыт И на маленьких экранах) */}
           {!isChatVisible && (
             <Button
               variant="outline"
-              className="absolute top-4 right-4 z-20 border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="absolute top-4 right-4 z-20 border-gray-600 text-gray-300 hover:bg-gray-700 lg:hidden"
               onClick={() => setIsChatVisible(true)}
             >
               <MessageSquare className="h-5 w-5 mr-2" /> Show Chat
@@ -179,56 +183,53 @@ export default function StreamerProfileLayout({
           )}
         </div>
 
-        {/* Chat Section (only when chat is visible) */}
+        {/* Инфо-панель стримера */}
+        <div className={cn(
+          "transition-all duration-300 ease-in-out relative z-30",
+          isPlayerMaximized ? "px-4 py-4" : "container mx-auto px-4 py-8"
+        )}>
+          <StreamerInfoBar
+            streamer={streamer}
+            profile={streamerProfile}
+            currentStream={currentStream}
+            isCurrentUserProfile={false}
+            isLive={isLive ?? false}
+            onTogglePlayerMaximize={handleTogglePlayerMaximize}
+          />
+        </div>
+
+        {/* Контейнер вкладок и дочернего контента (скрывается, когда плеер максимизирован) */}
+        <div className={cn(
+          "flex-grow transition-all duration-300 ease-in-out",
+          isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-8"
+        )}>
+          <div className="border-b border-gray-800 mb-8">
+            <Tabs value={activeTab} className="w-full">
+              <TabsList className="bg-gray-900" currentValue={activeTab}>
+                <Link href={`/${username}`} passHref>
+                  <TabsTrigger value="home">Home</TabsTrigger>
+                </Link>
+                <Link href={`/${username}/about`} passHref>
+                  <TabsTrigger value="about">About</TabsTrigger>
+                </Link>
+                <Link href={`/${username}/videos`} passHref>
+                  <TabsTrigger value="videos">Videos</TabsTrigger>
+                </Link>
+                <Link href={`/${username}/clips`} passHref>
+                  <TabsTrigger value="clips">Clips</TabsTrigger>
+                </Link>
+              </TabsList>
+            </Tabs>
+          </div>
+          {children}
+        </div>
+
+        {/* Чат (отображается на маленьких экранах, если чат виден) */}
         {isChatVisible && (
-          <div className={cn(
-            "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
-            "lg:w-1/3" // Чат всегда занимает 1/3, если виден
-          )}>
+          <div className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh]">
             <ChatSection onCloseChat={() => setIsChatVisible(false)} />
           </div>
         )}
-      </div>
-
-      {/* Streamer Info Bar - Всегда видим, отступы меняются в зависимости от состояния плеера */}
-      <div className={cn(
-        "transition-all duration-300 ease-in-out relative z-30",
-        isPlayerMaximized ? "px-4 py-4" : "container mx-auto px-4 py-8"
-      )}>
-        <StreamerInfoBar
-          streamer={streamer}
-          profile={streamerProfile}
-          currentStream={currentStream}
-          isCurrentUserProfile={false}
-          isLive={isLive ?? false}
-          onTogglePlayerMaximize={handleTogglePlayerMaximize}
-        />
-      </div>
-
-      {/* Tabs and Children container - Скрывается, когда плеер максимизирован */}
-      <div className={cn(
-        "flex-grow transition-all duration-300 ease-in-out",
-        isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-8"
-      )}>
-        <div className="border-b border-gray-800 mb-8">
-          <Tabs value={activeTab} className="w-full">
-            <TabsList className="bg-gray-900" currentValue={activeTab}>
-              <Link href={`/${username}`} passHref>
-                <TabsTrigger value="home">Home</TabsTrigger>
-              </Link>
-              <Link href={`/${username}/about`} passHref>
-                <TabsTrigger value="about">About</TabsTrigger>
-              </Link>
-              <Link href={`/${username}/videos`} passHref>
-                <TabsTrigger value="videos">Videos</TabsTrigger>
-              </Link>
-              <Link href={`/${username}/clips`} passHref>
-                <TabsTrigger value="clips">Clips</TabsTrigger>
-              </Link>
-            </TabsList>
-          </Tabs>
-        </div>
-        {children}
       </div>
     </div>
   )
