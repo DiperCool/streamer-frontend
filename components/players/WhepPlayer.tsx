@@ -14,20 +14,22 @@ export interface WhepPlayerProps {
     height?: string | number;
 }
 
-// Регистрируем кастомный плеер здесь, как только ReactPlayer доступен
-if (ReactPlayer.addCustomPlayer) {
-    ReactPlayer.addCustomPlayer({
-        key: "whep",
-        name: "WHEP WebRTC",
-        player: WhepPlayer as any,
-        canPlay: (url: string) => typeof url === "string" && url.includes("/whep"),
-    });
-}
-
 export const WhepPlayer = forwardRef<HTMLVideoElement, WhepPlayerProps>(
     ({ src, playing = true, muted, controls, loop, width = "100%", height = "100%" }, ref) => {
         const videoRef = useRef<HTMLVideoElement>(null);
         const [scriptLoaded, setScriptLoaded] = useState(false);
+
+        // Регистрируем кастомный плеер здесь, как только ReactPlayer доступен и компонент смонтирован
+        useEffect(() => {
+            if (ReactPlayer.addCustomPlayer) {
+                ReactPlayer.addCustomPlayer({
+                    key: "whep",
+                    name: "WHEP WebRTC",
+                    player: WhepPlayer as any,
+                    canPlay: (url: string) => typeof url === "string" && url.includes("/whep"),
+                });
+            }
+        }, []); // Пустой массив зависимостей гарантирует, что это выполнится один раз при монтировании
 
         useEffect(() => {
             if (!src || !scriptLoaded) return;

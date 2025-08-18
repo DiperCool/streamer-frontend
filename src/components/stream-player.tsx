@@ -1,11 +1,8 @@
 "use client"
 
 import React from "react"
-import dynamic from "next/dynamic" // Импортируем dynamic из next/dynamic
+import ReactPlayer from "react-player" // Прямой импорт ReactPlayer
 import {StreamSourceType} from "@/graphql/__generated__/graphql";
-
-// Динамически импортируем ReactPlayer, чтобы он загружался только на клиенте
-const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -24,15 +21,6 @@ export function StreamPlayer({ sources }: StreamPlayerProps) {
         No HLS stream source available.
       </div>
     )
-  }
-
-  // ReactPlayer будет null до тех пор, пока не будет загружен на клиенте
-  if (!ReactPlayer) {
-    return (
-      <div className="flex items-center justify-center w-full h-full bg-black text-white">
-        Loading player...
-      </div>
-    );
   }
 
   return (
