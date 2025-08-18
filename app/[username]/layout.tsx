@@ -82,7 +82,7 @@ export default function StreamerProfileLayout({
               ...updatedStream.streamer,
               __typename: 'StreamerDto',
             },
-            __typename: 'StreamerDto',
+            __typename: 'StreamDto',
           };
           client.writeQuery({
             query: GetCurrentStreamDocument,
@@ -137,11 +137,11 @@ export default function StreamerProfileLayout({
   const activeTab = getActiveTab();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный на больших */}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный (обратный порядок) на больших */}
 
-      {/* Чат (закреплен слева на больших экранах, скрыт на маленьких) */}
+      {/* Чат (закреплен справа на больших экранах, скрыт на маленьких) */}
       {isChatVisible && (
-        <div className="hidden lg:flex w-80 bg-gray-800 border-r border-gray-700 flex-col">
+        <div className="hidden lg:flex w-80 bg-gray-800 border-l border-gray-700 flex-col"> {/* Изменено border-r на border-l */}
           <ChatSection onCloseChat={() => setIsChatVisible(false)} />
         </div>
       )}
