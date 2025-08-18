@@ -189,7 +189,7 @@ export default function StreamerProfileLayout({
         {/* Инфо-панель стримера */}
         <div className={cn(
           "transition-all duration-300 ease-in-out relative z-30",
-          isPlayerMaximized ? "px-4 py-4" : "container mx-auto px-4 py-4" // Уменьшил py-8 до py-4
+          isPlayerMaximized ? "px-4 py-2" : "container mx-auto px-4 py-2" // Уменьшил py-4 до py-2
         )}>
           <StreamerInfoBar
             streamer={streamer}
@@ -204,9 +204,9 @@ export default function StreamerProfileLayout({
         {/* Контейнер вкладок и дочернего контента (скрывается, когда плеер максимизирован) */}
         <div className={cn(
           "flex-grow transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-4" // Уменьшил py-8 до py-4
+          isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-2" // Уменьшил py-4 до py-2
         )}>
-          <div className="border-b border-gray-800 mb-4"> {/* Уменьшил mb-8 до mb-4 */}
+          <div className="border-b border-gray-800 mb-2"> {/* Уменьшил mb-4 до mb-2 */}
             <Tabs value={activeTab} className="w-full">
               <TabsList className="bg-gray-900" currentValue={activeTab}>
                 <Link href={`/${username}`} passHref>
