@@ -82,7 +82,7 @@ export default function StreamerProfileLayout({
               ...updatedStream.streamer,
               __typename: 'StreamerDto',
             },
-            __typename: 'StreamerDto',
+            __typename: 'StreamDto',
           };
           client.writeQuery({
             query: GetCurrentStreamDocument,
@@ -171,11 +171,11 @@ export default function StreamerProfileLayout({
             />
           )}
 
-          {/* Кнопка "Показать чат" (только если чат скрыт И на маленьких экранах) */}
+          {/* Кнопка "Показать чат" (только если чат скрыт) */}
           {!isChatVisible && (
             <Button
               variant="outline"
-              className="absolute top-4 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700 lg:hidden" // Увеличил z-index и добавил фон для лучшей видимости
+              className="absolute top-4 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700" // Удален lg:hidden
               onClick={() => setIsChatVisible(true)}
             >
               <MessageSquare className="h-5 w-5 mr-2" /> Show Chat
