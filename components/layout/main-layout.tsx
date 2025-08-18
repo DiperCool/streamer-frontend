@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
-import { Home, Heart, User, Settings } from "lucide-react" // Removed Play icon
+import { Home, Heart, User, Settings } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -19,8 +19,9 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="min-h-screen bg-gray-900 text-white flex">
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out", // Removed lg:static lg:inset-0
+        sidebarOpen ? "translate-x-0" : "-translate-x-full",
+        "lg:translate-x-0" // Ensure it's always visible on large screens
       )}>
         <Sidebar>
           <SidebarHeader>
@@ -47,7 +48,6 @@ export function MainLayout({ children }: MainLayoutProps) {
                   Settings
                 </SidebarNavItem>
               </Link>
-              {/* Removed Stream Settings link */}
             </SidebarNav>
           </SidebarContent>
         </Sidebar>
@@ -62,7 +62,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pt-16"> {/* Added lg:ml-64 and pt-16 */}
         {/* Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
