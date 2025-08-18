@@ -29,7 +29,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                   variant="ghost"
                   size="icon"
                   onClick={onMenuClick}
-                  className="text-gray-300 hover:text-white lg:hidden"
+                  className="text-gray-300 hover:text-white" // Удален lg:hidden
               >
                 <Menu className="h-5 w-5" />
               </Button>

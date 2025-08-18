@@ -19,9 +19,9 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="min-h-screen bg-gray-900 text-white flex">
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out", // Removed lg:static lg:inset-0
-        sidebarOpen ? "translate-x-0" : "-translate-x-full",
-        "lg:translate-x-0" // Ensure it's always visible on large screens
+        "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out",
+        "top-16 h-[calc(100vh-4rem)]", // Добавлено для позиционирования под Navbar
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar>
           <SidebarHeader>
@@ -62,7 +62,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pt-16"> {/* Added lg:ml-64 and pt-16 */}
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pt-16">
         {/* Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
