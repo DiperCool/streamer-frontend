@@ -128,54 +128,18 @@ export default function StreamerProfileLayout({
     console.log("Toggling player maximize state!");
     setIsPlayerMaximized(prev => !prev);
     if (!isPlayerMaximized) {
-      setIsChatOpen(false);
+      setIsChatOpen(true); // Открываем чат, если переходим в минимизированный режим
+    } else {
+      setIsChatOpen(true); // Чат остается открытым в максимизированном режиме
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
-      {/* Player and Chat Section - This should be at the top */}
-      <div className={cn(
-        "relative w-full flex flex-col lg:flex-row transition-all duration-300 ease-in-out",
-        isPlayerMaximized ? "h-screen-minus-navbar" : "h-[35vh]"
-      )}>
-        <div className={cn(
-          "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
-          isChatOpen && !isPlayerMaximized ? "lg:w-2/3 h-full" : "lg:w-full h-full"
-        )}>
-          {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
-            <StreamPlayer
-              sources={currentStream.sources}
-              isChatVisible={isChatOpen && !isPlayerMaximized}
-              onOpenChat={() => setIsChatOpen(true)}
-              isPlayerMaximized={isPlayerMaximized}
-              onTogglePlayerMaximize={handleTogglePlayerMaximize}
-            />
-          ) : (
-            <Image
-              src={getMinioUrl(bannerImage)}
-              alt="Channel Banner"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes={isPlayerMaximized ? "100vw" : "(max-width: 1024px) 100vw, 66vw"}
-              priority
-              className="absolute top-0 left-0 w-full h-full"
-            />
-          )}
-        </div>
-
-        <div className={cn(
-          "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
-          isChatOpen && !isPlayerMaximized ? "lg:w-1/3" : "lg:w-0 overflow-hidden"
-        )}>
-          {isChatOpen && !isPlayerMaximized && <ChatSection onCloseChat={() => setIsChatOpen(false)} />}
-        </div>
-      </div>
-
-      {/* Streamer Info Bar - visible only when player is not maximized */}
+      {/* Streamer Info Bar - всегда видимый */}
       <div className={cn(
         "transition-all duration-300 ease-in-out relative z-30",
-        isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-8"
+        isPlayerMaximized ? "px-4 py-4" : "container mx-auto px-4 py-8"
       )}>
         <StreamerInfoBar
           streamer={streamer}
@@ -187,7 +151,45 @@ export default function StreamerProfileLayout({
         />
       </div>
 
-      {/* Tabs and Children container - visible only when player is not maximized */}
+      {/* Player and Chat Section */}
+      <div className={cn(
+        "relative w-full flex flex-col lg:flex-row transition-all duration-300 ease-in-out",
+        isPlayerMaximized ? "flex-grow" : "h-[35vh]" // flex-grow для заполнения оставшегося пространства в максимизированном режиме
+      )}>
+        <div className={cn(
+          "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
+          isPlayerMaximized ? "lg:w-2/3 h-full" : (isChatOpen ? "lg:w-2/3 h-full" : "lg:w-full h-full")
+        )}>
+          {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
+            <StreamPlayer
+              sources={currentStream.sources}
+              isChatVisible={isChatOpen && !isPlayerMaximized} // Кнопка чата видна, если чат закрыт и плеер не максимизирован
+              onOpenChat={() => setIsChatOpen(true)}
+              isPlayerMaximized={isPlayerMaximized}
+              onTogglePlayerMaximize={handleTogglePlayerMaximize}
+            />
+          ) : (
+            <Image
+              src={getMinioUrl(bannerImage)}
+              alt="Channel Banner"
+              fill
+              style={{ objectFit: "cover" }}
+              sizes={isPlayerMaximized ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 1024px) 100vw, 66vw"}
+              priority
+              className="absolute top-0 left-0 w-full h-full"
+            />
+          )}
+        </div>
+
+        <div className={cn(
+          "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
+          isChatOpen ? "lg:w-1/3" : "lg:w-0 overflow-hidden"
+        )}>
+          {isChatOpen && <ChatSection onCloseChat={() => setIsChatOpen(false)} />}
+        </div>
+      </div>
+
+      {/* Tabs and Children container - скрывается, когда плеер максимизирован */}
       <div className={cn(
         "flex-grow transition-all duration-300 ease-in-out",
         isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-8"
