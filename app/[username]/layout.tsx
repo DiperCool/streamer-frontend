@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react" // Импортируем useState
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
@@ -21,6 +21,8 @@ import { StreamerInfoBar } from "@/src/components/streamer-info-bar"
 import { ChatSection } from "@/src/components/chat-section"
 import { useApolloClient } from "@apollo/client"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button" // Импортируем Button
+import { MessageSquare } from "lucide-react" // Импортируем MessageSquare
 
 export default function StreamerProfileLayout({
   children,
@@ -33,6 +35,8 @@ export default function StreamerProfileLayout({
   const pathname = usePathname()
   const router = useRouter();
   const client = useApolloClient();
+
+  const [isChatVisible, setIsChatVisible] = useState(true); // Новое состояние для видимости чата
 
   const isPlayerMaximized = pathname === `/${username}/stream`;
 
@@ -127,7 +131,7 @@ export default function StreamerProfileLayout({
     if (lastSegment === 'about') return 'about';
     if (lastSegment === 'videos') return 'videos';
     if (lastSegment === 'clips') return 'clips';
-    if (lastSegment === 'stream') return 'stream';
+    // Removed 'stream' tab logic here
     return 'home';
   };
   const activeTab = getActiveTab();
@@ -142,7 +146,7 @@ export default function StreamerProfileLayout({
         {/* Player */}
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "lg:w-full h-full" : "lg:w-2/3 h-full"
+          isPlayerMaximized || !isChatVisible ? "lg:w-full h-full" : "lg:w-2/3 h-full" // Плеер занимает всю ширину, если чат скрыт или плеер максимизирован
         )}>
           {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
             <StreamPlayer
@@ -156,20 +160,31 @@ export default function StreamerProfileLayout({
               alt="Channel Banner"
               fill
               style={{ objectFit: "cover" }}
-              sizes={isPlayerMaximized ? "100vw" : "(max-width: 1024px) 100vw, 66vw"}
+              sizes={isPlayerMaximized || !isChatVisible ? "100vw" : "(max-width: 1024px) 100vw, 66vw"} // Баннер тоже на всю ширину
               priority
               className="absolute top-0 left-0 w-full h-full"
             />
           )}
         </div>
 
-        {/* Chat Section - Скрывается при максимизации плеера */}
-        <div className={cn(
-          "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "lg:hidden" : "lg:w-1/3"
-        )}>
-          <ChatSection onCloseChat={() => {}} />
-        </div>
+        {/* Chat Section or Show Chat Button */}
+        {!isPlayerMaximized && (
+          isChatVisible ? (
+            <div className="w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out lg:w-1/3">
+              <ChatSection onCloseChat={() => setIsChatVisible(false)} />
+            </div>
+          ) : (
+            <div className="w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out lg:w-1/3 flex items-center justify-center">
+              <Button
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                onClick={() => setIsChatVisible(true)}
+              >
+                <MessageSquare className="h-5 w-5 mr-2" /> Show Chat
+              </Button>
+            </div>
+          )
+        )}
       </div>
 
       {/* Streamer Info Bar - Всегда видим, отступы меняются в зависимости от состояния плеера */}
