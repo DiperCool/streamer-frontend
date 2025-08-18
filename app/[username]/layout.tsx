@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import Image from "next/image"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation" // useRouter больше не нужен
 import {
   useGetProfileQuery,
   useGetStreamerQuery,
@@ -33,13 +33,12 @@ export default function StreamerProfileLayout({
 }) {
   const { username } = params
   const pathname = usePathname()
-  const router = useRouter();
   const client = useApolloClient();
 
-  // Состояние видимости чата, сохраняется при навигации
+  // Состояние видимости чата
   const [isChatVisible, setIsChatVisible] = useState(true); 
-
-  const isPlayerMaximized = pathname === `/${username}/stream`;
+  // Состояние максимизации плеера, теперь управляется локально
+  const [isPlayerMaximized, setIsPlayerMaximized] = useState(false);
 
   const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
     variables: { userName: username },
@@ -117,17 +116,16 @@ export default function StreamerProfileLayout({
 
   const bannerImage = streamerProfile.offlineStreamBanner || streamerProfile.channelBanner || "/placeholder.jpg"
 
+  // Локальное переключение состояния максимизации плеера
   const handleTogglePlayerMaximize = () => {
-    if (isPlayerMaximized) {
-      router.push(`/${username}`);
-    } else {
-      router.push(`/${username}/stream`);
-    }
+    setIsPlayerMaximized(prev => !prev);
   };
 
   const getActiveTab = () => {
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
+    // Если плеер максимизирован, вкладки скрыты, поэтому активная вкладка не имеет значения для UI
+    // Но для логики можно оставить 'home' или текущую вкладку, если это важно для других частей
     if (lastSegment === username) return 'home';
     if (lastSegment === 'about') return 'about';
     if (lastSegment === 'videos') return 'videos';
@@ -159,6 +157,8 @@ export default function StreamerProfileLayout({
           {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
             <StreamPlayer
               sources={currentStream.sources}
+              playing={true} // Убедимся, что плеер всегда играет, когда он активен
+              controls={true}
               isPlayerMaximized={isPlayerMaximized}
               onTogglePlayerMaximize={handleTogglePlayerMaximize}
             />
