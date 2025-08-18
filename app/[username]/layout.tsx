@@ -32,7 +32,8 @@ export default function StreamerProfileLayout({
   const { username } = params
   const pathname = usePathname()
   const client = useApolloClient();
-  const [showChat, setShowChat] = useState(true); // Состояние для видимости чата
+  const [isChatOpen, setIsChatOpen] = useState(true); // Состояние для видимости чата
+  const [isPlayerMaximized, setIsPlayerMaximized] = useState(false); // Новое состояние для максимизации плеера
 
   const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
     variables: {
@@ -151,19 +152,42 @@ export default function StreamerProfileLayout({
 
   const activeTab = getActiveTab();
 
+  const handleTogglePlayerMaximize = () => {
+    console.log("Toggling player maximize state!"); // Отладочное сообщение
+    setIsPlayerMaximized(prev => !prev);
+    if (!isPlayerMaximized) { // Если переходим в максимизированный режим, скрываем чат
+      setIsChatOpen(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row lg:space-x-6 mb-6 lg:h-[600px]">
-          <div className={cn(
-            "relative w-full pt-[56.25%] lg:pt-0 bg-black rounded-lg overflow-hidden lg:h-full transition-all duration-300 ease-in-out",
-            showChat ? "lg:w-2/3" : "lg:w-full"
-          )}>
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+      {/* Streamer Info Bar - always visible */}
+      <div className={cn(
+        "transition-all duration-300 ease-in-out relative z-30", // Добавлен relative z-30
+        isPlayerMaximized ? "px-4 py-4" : "container mx-auto px-4 py-8"
+      )}>
+        <StreamerInfoBar
+          streamer={streamer}
+          profile={streamerProfile}
+          currentStream={currentStream}
+          isCurrentUserProfile={isCurrentUserProfile}
+          isLive={isLive ?? false}
+          onTogglePlayerMaximize={handleTogglePlayerMaximize}
+        />
+      </div>
+
+      {isPlayerMaximized ? (
+        // Maximized view: Player takes full width, chat hidden, tabs/children hidden
+        <div className="flex-grow flex flex-col lg:flex-row lg:space-x-6 transition-all duration-300 ease-in-out">
+          <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
             {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
               <StreamPlayer
                 sources={currentStream.sources}
-                isChatVisible={showChat}
-                onOpenChat={() => setShowChat(true)}
+                isChatVisible={false} // Chat always hidden when maximized
+                onOpenChat={() => setIsChatOpen(true)} // This won't be called
+                isPlayerMaximized={isPlayerMaximized}
+                onTogglePlayerMaximize={handleTogglePlayerMaximize}
               />
             ) : (
               <Image
@@ -171,59 +195,92 @@ export default function StreamerProfileLayout({
                 alt="Channel Banner"
                 fill
                 style={{ objectFit: "cover" }}
-                sizes="(max-width: 1024px) 100vw, 66vw"
+                sizes="100vw"
                 priority
                 className="absolute top-0 left-0 w-full h-full"
               />
             )}
           </div>
-
-          {/* Чат теперь всегда рендерится, но его ширина анимируется */}
+          {/* Chat div is present but hidden by lg:w-0 and overflow-hidden */}
           <div className={cn(
             "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
-            showChat ? "lg:w-1/3" : "lg:w-0 overflow-hidden"
+            "lg:w-0 overflow-hidden" // Always hidden when maximized
           )}>
-            {/* Содержимое ChatSection рендерится только если чат виден, чтобы предотвратить взаимодействие */}
-            {showChat && <ChatSection onCloseChat={() => setShowChat(false)} />}
+            {/* No chat content when maximized */}
           </div>
         </div>
+      ) : (
+        // Minimized view: Player is 35vh, content overlaps, chat visible
+        <>
+          <div className="relative w-full flex flex-col lg:flex-row lg:space-x-6 h-[35vh] transition-all duration-300 ease-in-out">
+            <div className={cn(
+              "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
+              isChatOpen ? "lg:w-2/3 h-full" : "lg:w-full h-full"
+            )}>
+              {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
+                <StreamPlayer
+                  sources={currentStream.sources}
+                  isChatVisible={isChatOpen}
+                  onOpenChat={() => setIsChatOpen(true)}
+                  isPlayerMaximized={isPlayerMaximized}
+                  onTogglePlayerMaximize={handleTogglePlayerMaximize}
+                />
+              ) : (
+                <Image
+                  src={getMinioUrl(bannerImage)}
+                  alt="Channel Banner"
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 1024px) 100vw, 66vw"
+                  priority
+                  className="absolute top-0 left-0 w-full h-full"
+                />
+              )}
+            </div>
 
-        <StreamerInfoBar
-          streamer={streamer}
-          profile={streamerProfile}
-          currentStream={currentStream}
-          isCurrentUserProfile={isCurrentUserProfile}
-          isLive={isLive ?? false}
-        />
+            <div className={cn(
+              "w-full bg-gray-800 rounded-lg mt-6 lg:mt-0 flex flex-col h-full transition-all duration-300 ease-in-out",
+              isChatOpen ? "lg:w-1/3" : "lg:w-0 overflow-hidden"
+            )}>
+              {isChatOpen && <ChatSection onCloseChat={() => setIsChatOpen(false)} />}
+            </div>
+          </div>
 
-        <div className="border-b border-gray-800 mt-8">
-          <Tabs value={activeTab} className="w-full">
-            <TabsList className="bg-gray-900" currentValue={activeTab}>
-              <Link href={`/${username}`} passHref>
-                <TabsTrigger value="home">
-                  Home
-                </TabsTrigger>
-              </Link>
-              <Link href={`/${username}/about`} passHref>
-                <TabsTrigger value="about">
-                  About
-                </TabsTrigger>
-              </Link>
-              <Link href={`/${username}/videos`} passHref>
-                <TabsTrigger value="videos">
-                  Videos
-                </TabsTrigger>
-              </Link>
-              <Link href={`/${username}/clips`} passHref>
-                <TabsTrigger value="clips">
-                  Clips
-                </TabsTrigger>
-              </Link>
-            </TabsList>
-          </Tabs>
-        </div>
-        {children}
-      </div>
+          {/* Tabs and Children container - this is what overlaps */}
+          <div className={cn(
+            "flex-grow transition-all duration-300 ease-in-out",
+            isPlayerMaximized ? "hidden" : "mt-[-24.5vh] container mx-auto px-4 py-8" // This creates the overlap
+          )}>
+            <div className="border-b border-gray-800 mb-8">
+              <Tabs value={activeTab} className="w-full">
+                <TabsList className="bg-gray-900" currentValue={activeTab}>
+                  <Link href={`/${username}`} passHref>
+                    <TabsTrigger value="home">
+                      Home
+                    </TabsTrigger>
+                  </Link>
+                  <Link href={`/${username}/about`} passHref>
+                    <TabsTrigger value="about">
+                      About
+                    </TabsTrigger>
+                  </Link>
+                  <Link href={`/${username}/videos`} passHref>
+                    <TabsTrigger value="videos">
+                      Videos
+                    </TabsTrigger>
+                  </Link>
+                  <Link href={`/${username}/clips`} passHref>
+                    <TabsTrigger value="clips">
+                      Clips
+                    </TabsTrigger>
+                  </Link>
+                </TabsList>
+              </Tabs>
+            </div>
+            {children}
+          </div>
+        </>
+      )}
     </div>
   )
 }
