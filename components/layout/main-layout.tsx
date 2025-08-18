@@ -20,7 +20,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Sidebar */}
       <div className={cn(
         "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out",
-        "top-16 h-[calc(100vh-4rem)]", // Добавлено для позиционирования под Navbar
+        "top-16 h-[calc(100vh-4rem)]",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar>
@@ -62,7 +62,10 @@ export function MainLayout({ children }: MainLayoutProps) {
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pt-16">
+      <div className={cn(
+        "flex-1 flex flex-col min-h-screen pt-16",
+        sidebarOpen && "lg:ml-64" // Применяем ml-64 только если sidebarOpen и на больших экранах
+      )}>
         {/* Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
