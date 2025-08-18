@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react" // Удаляем MessageSquare
+import { Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react"
 import { ProfileDto, StreamerDto, StreamDto } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 
@@ -15,17 +15,17 @@ interface StreamerInfoBarProps {
   currentStream?: StreamDto | null
   isCurrentUserProfile: boolean
   isLive: boolean;
-  // Удаляем onToggleChat и isChatVisible
+  onTogglePlayerMaximize: () => void; // Добавляем проп для переключения режима плеера
 }
 
-export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive }: StreamerInfoBarProps) {
+export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive, onTogglePlayerMaximize }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
-        {/* Left Section: Avatar, Name, Followers */}
-        <div className="flex items-center space-x-4 mb-4 md:mb-0">
+        {/* Left Section: Avatar, Name, Followers - Делаем кликабельным */}
+        <div className="flex items-center space-x-4 mb-4 md:mb-0 cursor-pointer" onClick={onTogglePlayerMaximize}>
           <div className="relative">
             <Avatar className="w-20 h-20 border-2 border-green-500">
               <AvatarImage src={getMinioUrl(avatarImage)} alt="Streamer Avatar" />
@@ -96,7 +96,6 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Share2 className="w-5 h-5" />
           </Button>
-          {/* Удалена кнопка чата */}
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Settings className="w-5 h-5" />
           </Button>
