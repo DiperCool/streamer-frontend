@@ -6,13 +6,16 @@ import { Navbar } from "@/components/ui/navbar"
 import { Home, Heart, User, Settings } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useIsMobile } from "@/hooks/use-mobile"; // Импортируем хук
 
 interface MainLayoutProps {
   children: React.ReactNode
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const isMobile = useIsMobile(); // Определяем, является ли устройство мобильным
+  // Инициализируем sidebarOpen: если это мобильное устройство, то false (закрыт), иначе true (открыт)
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile); 
   const pathname = usePathname()
 
   return (
@@ -21,7 +24,10 @@ export function MainLayout({ children }: MainLayoutProps) {
       <div className={cn(
         "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out",
         "top-16 h-[calc(100vh-4rem)]",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        // На больших экранах (lg) сайдбар всегда открыт (translate-x-0).
+        // На маленьких экранах, если sidebarOpen true, то translate-x-0, иначе -translate-x-full.
+        "lg:translate-x-0",
+        !sidebarOpen && "-translate-x-full" // Применяется, если sidebarOpen false (для мобильных)
       )}>
         <Sidebar>
           <SidebarHeader>
@@ -53,23 +59,25 @@ export function MainLayout({ children }: MainLayoutProps) {
         </Sidebar>
       </div>
 
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
+      {/* Overlay для мобильных устройств */}
+      {sidebarOpen && isMobile && ( // Показываем оверлей только на мобильных, когда сайдбар открыт
         <div
           className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Main content */}
+      {/* Основной контент */}
       <div className={cn(
         "flex-1 flex flex-col min-h-screen pt-16",
-        sidebarOpen && "lg:ml-64" // Применяем ml-64 только если sidebarOpen и на больших экранах
+        // На больших экранах (lg), если сайдбар открыт, добавляем ml-64.
+        // На маленьких экранах ml-0.
+        sidebarOpen ? "lg:ml-64" : "lg:ml-0" 
       )}>
         {/* Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
-        {/* Page content */}
+        {/* Содержимое страницы */}
         <div className="flex-1">
           {children}
         </div>
