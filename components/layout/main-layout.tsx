@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState } => "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
@@ -69,8 +69,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       <div className={cn(
         "flex-1 flex flex-col min-h-screen pt-16",
         "transition-all duration-200 ease-in-out", // Добавляем классы перехода сюда
-        // Отступ для основного контента теперь также зависит от sidebarOpen на всех экранах
-        sidebarOpen ? "ml-64" : "ml-0" 
+        // Отступ для основного контента: на мобильных всегда 0, на больших экранах зависит от sidebarOpen
+        "ml-0", // По умолчанию отступ 0 для всех экранов
+        sidebarOpen ? "lg:ml-64" : "lg:ml-0" // На больших экранах (lg) отступ 64px, если сайдбар открыт, иначе 0
       )}>
         {/* Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
