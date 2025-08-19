@@ -68,6 +68,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Основной контент */}
       <div className={cn(
         "flex-1 flex flex-col min-h-screen pt-16",
+        "transition-all duration-200 ease-in-out", // Добавляем классы перехода сюда
         // Отступ для основного контента теперь также зависит от sidebarOpen на всех экранах
         sidebarOpen ? "ml-64" : "ml-0" 
       )}>
