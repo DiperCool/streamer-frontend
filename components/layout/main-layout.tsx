@@ -24,10 +24,8 @@ export function MainLayout({ children }: MainLayoutProps) {
       <div className={cn(
         "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out",
         "top-16 h-[calc(100vh-4rem)]",
-        // На больших экранах (lg) сайдбар всегда открыт (translate-x-0).
-        // На маленьких экранах, если sidebarOpen true, то translate-x-0, иначе -translate-x-full.
-        "lg:translate-x-0",
-        !sidebarOpen && "-translate-x-full" // Применяется, если sidebarOpen false (для мобильных)
+        // Теперь translate-x-0 (открыт) или -translate-x-full (закрыт) применяется на всех экранах
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar>
           <SidebarHeader>
@@ -70,9 +68,8 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Основной контент */}
       <div className={cn(
         "flex-1 flex flex-col min-h-screen pt-16",
-        // На больших экранах (lg), если сайдбар открыт, добавляем ml-64.
-        // На маленьких экранах ml-0.
-        sidebarOpen ? "lg:ml-64" : "lg:ml-0" 
+        // Отступ для основного контента теперь также зависит от sidebarOpen на всех экранах
+        sidebarOpen ? "ml-64" : "ml-0" 
       )}>
         {/* Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
