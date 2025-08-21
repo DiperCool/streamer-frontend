@@ -14,10 +14,11 @@ import {
   useCreateMessageMutation,
   SortEnumType,
   ChatMessageDto,
+  useChatMessageCreatedSubscription, // Импортируем хук подписки
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { format, isToday } from "date-fns" // Импортируем format и isToday
+import { format, isToday } from "date-fns"
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -36,7 +37,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   const [messages, setMessages] = useState<ChatMessageDto[]>([])
   const [hasMoreMessages, setHasMoreMessages] = useState(true)
-  const initialLoadScrollDone = useRef(false) // Чтобы прокрутка к низу происходила только при первой загрузке
+  const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false) // Новый стейт для отслеживания первой загрузки
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
     variables: { streamerId },
@@ -50,12 +51,11 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     loading: messagesLoading,
     fetchMore,
     networkStatus, // Используем networkStatus для отслеживания состояния загрузки fetchMore
-    refetch: refetchMessages, // Оставляем refetch для отправки новых сообщений
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
       last: 50, // Загружаем последние 50 сообщений
-      order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху, но мы их переворачиваем для отображения снизу
+      order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху
     },
     skip: !chatId,
     notifyOnNetworkStatusChange: true, // Важно для обновления networkStatus во время fetchMore
@@ -75,9 +75,9 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   })
 
-  // Эффект для обработки начальной загрузки сообщений и последующих перезагрузок (например, после отправки сообщения)
+  // Эффект для обработки начальной загрузки сообщений
   useEffect(() => {
-    if (messagesData?.chatMessages?.nodes) {
+    if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
       // Сервер возвращает сообщения от новых к старым.
       // Для отображения в хронологическом порядке (старые сверху, новые снизу), мы переворачиваем массив.
       const newNodes = [...messagesData.chatMessages.nodes].reverse()
@@ -85,23 +85,41 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
       setHasMoreMessages(messagesData.chatMessages.pageInfo.hasPreviousPage)
 
       // Прокрутка к низу только при самой первой загрузке
-      if (!initialLoadScrollDone.current) {
-        // Добавляем setTimeout для обеспечения, что DOM обновлен перед прокруткой
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-          initialLoadScrollDone.current = true
-        }, 0); // Небольшая задержка
-      }
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+        setInitialMessagesLoaded(true) // Отмечаем, что начальная загрузка завершена
+      }, 0);
     }
-  }, [messagesData]) // Запускать только при изменении messagesData
+  }, [messagesData, initialMessagesLoaded]) // Запускать только при изменении messagesData или initialMessagesLoaded
 
-  // Эффект для прокрутки к низу при добавлении новых сообщений (например, после отправки)
-  // Это отдельный эффект от начальной загрузки для обеспечения плавной прокрутки для новых сообщений.
-  useEffect(() => {
-    if (initialLoadScrollDone.current && networkStatus === 7) { // networkStatus 7 означает "готово", указывая на успешную загрузку/перезагрузку
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
-  }, [messages.length, networkStatus]) // Запускать при изменении количества сообщений и готовности сети
+  // Подписка на новые сообщения
+  useChatMessageCreatedSubscription({
+    variables: { chatId: chatId! },
+    skip: !chatId,
+    onData: ({ data }) => {
+      const newMessage = data.data?.chatMessageCreated;
+      if (newMessage) {
+        setMessages(prevMessages => {
+          // Проверяем, чтобы избежать дубликатов, если сообщение уже было добавлено
+          if (prevMessages.some(msg => msg.id === newMessage.id)) {
+            return prevMessages;
+          }
+          return [...prevMessages, newMessage]; // Добавляем новое сообщение в конец
+        });
+
+        // Прокрутка к низу, если пользователь уже был внизу или отправил сообщение
+        const container = chatContainerRef.current;
+        // Проверяем, находится ли пользователь в пределах 50px от нижней границы
+        const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50);
+
+        if (isAtBottom) {
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          }, 0);
+        }
+      }
+    },
+  });
 
   const onSubmit = async (values: MessageForm) => {
     if (!chatId) return
@@ -115,9 +133,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         },
       })
       reset({ message: "" })
-      // После отправки, перезагружаем, чтобы получить последние сообщения, включая новое.
-      // Это вызовет useEffect выше для прокрутки к низу.
-      refetchMessages()
+      // Новое сообщение будет добавлено через подписку, нет необходимости перезагружать здесь.
     } catch (error) {
       console.error("Error sending message:", error)
       // Здесь можно добавить уведомление для пользователя об ошибке
@@ -135,7 +151,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         variables: {
           before: messagesData?.chatMessages?.pageInfo.startCursor, // Используем startCursor для получения более старых сообщений
           last: 50,
-          order: [{ createdAt: SortEnumType.Desc }], // Запрашиваем старые сообщения, но сервер все равно вернет их от новых к старым в рамках этой порции
+          order: [{ createdAt: SortEnumType.Desc }],
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult || !fetchMoreResult.chatMessages) return prev
