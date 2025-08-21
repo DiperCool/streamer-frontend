@@ -86,9 +86,14 @@ type GetEmailResponse {
 }
 
 type Mutation {
+    createMessage(request: CreateMessageInput!): CreateMessageResponse!
+    deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
+    pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
+    unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
     updateBio(input: UpdateBioInput!): UpdateBioResponse!
     updateChannelBanner(input: UpdateChannelBannerInput!): UpdateChannelBannerResponse!
+    updateChatSettings(request: UpdateChatSettingsInput!): UpdateChatSettingsResponse!
     updateOfflineBanner(input: UpdateOfflineBannerInput!): UpdateOfflineBannerResponse!
     updateProfile(input: UpdateProfileInput!): UpdateProfileResponse!
     updateStreamSettings: UpdateStreamSettingsResponse!
@@ -147,17 +152,12 @@ type Query {
         where: ChatMessageDtoFilterInput
     ): ChatMessagesConnection
     chatSettings: ChatSettingsDto!
-    createMessage(request: CreateMessageInput!): CreateMessageResponse!
     currentStream(streamerId: String!): StreamDto!
-    deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
     me: StreamerDto!
     myEmail: GetEmailResponse!
-    pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
     profile(streamerId: String!): ProfileDto!
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
-    unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
-    updateChatSettings(request: UpdateChatSettingsInput!): UpdateChatSettingsResponse!
 }
 
 type StreamDto {

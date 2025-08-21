@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import Image from "next/image"
-import { usePathname } from "next/navigation" // useRouter больше не нужен
+import { usePathname } from "next/navigation"
 import {
   useGetProfileQuery,
   useGetStreamerQuery,
@@ -140,7 +140,7 @@ export default function StreamerProfileLayout({
       {/* Чат (закреплен справа на больших экранах) */}
       {isChatVisible && (
         <div className="hidden lg:flex fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40">
-          <ChatSection onCloseChat={() => setIsChatVisible(false)} />
+          <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
         </div>
       )}
 
@@ -230,7 +230,7 @@ export default function StreamerProfileLayout({
         {/* Чат (отображается на маленьких экранах, если чат виден) */}
         {isChatVisible && (
           <div className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh]">
-            <ChatSection onCloseChat={() => setIsChatVisible(false)} />
+            <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
           </div>
         )}
       </div>
