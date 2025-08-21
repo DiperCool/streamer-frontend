@@ -54,7 +54,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     variables: {
       chatId: chatId!,
       last: 50, // Загружаем последние 50 сообщений
-      order: [{ createdAt: SortEnumType.Desc }], // Сортируем по убыванию даты создания (новые сверху)
+      order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху, но мы их переворачиваем для отображения снизу
     },
     skip: !chatId,
     notifyOnNetworkStatusChange: true, // Важно для обновления networkStatus во время fetchMore
@@ -77,7 +77,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   // Эффект для обработки начальной загрузки сообщений и последующих перезагрузок (например, после отправки сообщения)
   useEffect(() => {
     if (messagesData?.chatMessages?.nodes) {
-      // Apollo с `last` и `Desc` порядком означает, что nodes[0] — самое новое, nodes[N-1] — самое старое.
+      // Сервер возвращает сообщения от новых к старым.
       // Для отображения в хронологическом порядке (старые сверху, новые снизу), мы переворачиваем массив.
       const newNodes = [...messagesData.chatMessages.nodes].reverse()
       setMessages(newNodes)
@@ -134,13 +134,15 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         variables: {
           before: messagesData?.chatMessages?.pageInfo.startCursor, // Используем startCursor для получения более старых сообщений
           last: 50,
-          order: [{ createdAt: SortEnumType.Desc }],
+          order: [{ createdAt: SortEnumType.Desc }], // Запрашиваем старые сообщения, но сервер все равно вернет их от новых к старым в рамках этой порции
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult || !fetchMoreResult.chatMessages) return prev
 
-          const newNodes = [...fetchMoreResult.chatMessages.nodes].reverse() // Переворачиваем новую порцию для сохранения хронологического порядка
-          const updatedNodes = [...newNodes, ...prev.chatMessages.nodes!] // Добавляем новые сообщения в начало
+          // Переворачиваем новую порцию сообщений, чтобы они были от старых к новым
+          const newNodes = [...fetchMoreResult.chatMessages.nodes].reverse()
+          // Добавляем новые (более старые) сообщения в начало существующего списка
+          const updatedNodes = [...newNodes, ...prev.chatMessages.nodes!]
 
           // Вычисляем корректировку прокрутки
           // Используем setTimeout, чтобы дать браузеру время отрисовать новые элементы перед корректировкой прокрутки
