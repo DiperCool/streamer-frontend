@@ -54,7 +54,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
-      last: 50, // Загружаем последние 50 сообщений
+      first: 50, // Изменено на 'first: 50' как запрошено
       order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху
     },
     skip: !chatId,
@@ -150,8 +150,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
       fetchMore({
         variables: {
           before: messagesData?.chatMessages?.pageInfo.startCursor, // Используем startCursor для получения более старых сообщений
-          last: 50,
-          order: [{ createdAt: SortEnumType.Desc }],
+          last: 50, // Используем 'last' с 'before' для получения предыдущих 50 сообщений
+          order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult || !fetchMoreResult.chatMessages) return prev
