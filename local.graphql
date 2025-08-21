@@ -27,6 +27,7 @@ directive @listSize(
 ) on FIELD_DEFINITION
 
 type ChatDto {
+    id: UUID!
     pinnedMessage: PinnedChatMessageDto
     pinnedMessageId: UUID
     settings: ChatSettingsDto

@@ -15,6 +15,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  DateTime: { input: any; output: any; }
   Long: { input: any; output: any; }
   UUID: { input: any; output: any; }
   Upload: { input: any; output: any; }
@@ -30,6 +31,134 @@ export enum ApplyPolicy {
   Validation = 'VALIDATION'
 }
 
+export type BooleanOperationFilterInput = {
+  eq?: InputMaybe<Scalars['Boolean']['input']>;
+  neq?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type ChatDto = {
+  __typename?: 'ChatDto';
+  id: Scalars['UUID']['output'];
+  pinnedMessage?: Maybe<PinnedChatMessageDto>;
+  pinnedMessageId?: Maybe<Scalars['UUID']['output']>;
+  settings?: Maybe<ChatSettingsDto>;
+  settingsId: Scalars['UUID']['output'];
+  streamerId: Scalars['String']['output'];
+};
+
+export type ChatMessageDto = {
+  __typename?: 'ChatMessageDto';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  isDeleted: Scalars['Boolean']['output'];
+  message: Scalars['String']['output'];
+  reply?: Maybe<ChatMessageDto>;
+  replyId?: Maybe<Scalars['UUID']['output']>;
+  sender?: Maybe<StreamerDto>;
+  senderId: Scalars['String']['output'];
+  type: ChatMessageType;
+};
+
+export type ChatMessageDtoFilterInput = {
+  and?: InputMaybe<Array<ChatMessageDtoFilterInput>>;
+  createdAt?: InputMaybe<DateTimeOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  isActive?: InputMaybe<BooleanOperationFilterInput>;
+  isDeleted?: InputMaybe<BooleanOperationFilterInput>;
+  message?: InputMaybe<StringOperationFilterInput>;
+  or?: InputMaybe<Array<ChatMessageDtoFilterInput>>;
+  replyId?: InputMaybe<UuidOperationFilterInput>;
+  senderId?: InputMaybe<StringOperationFilterInput>;
+  type?: InputMaybe<ChatMessageTypeOperationFilterInput>;
+};
+
+export type ChatMessageDtoSortInput = {
+  createdAt?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  isActive?: InputMaybe<SortEnumType>;
+  isDeleted?: InputMaybe<SortEnumType>;
+  message?: InputMaybe<SortEnumType>;
+  replyId?: InputMaybe<SortEnumType>;
+  senderId?: InputMaybe<SortEnumType>;
+  type?: InputMaybe<SortEnumType>;
+};
+
+export enum ChatMessageType {
+  UserMessage = 'USER_MESSAGE'
+}
+
+export type ChatMessageTypeOperationFilterInput = {
+  eq?: InputMaybe<ChatMessageType>;
+  in?: InputMaybe<Array<ChatMessageType>>;
+  neq?: InputMaybe<ChatMessageType>;
+  nin?: InputMaybe<Array<ChatMessageType>>;
+};
+
+/** A connection to a list of items. */
+export type ChatMessagesConnection = {
+  __typename?: 'ChatMessagesConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<ChatMessagesEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<ChatMessageDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type ChatMessagesEdge = {
+  __typename?: 'ChatMessagesEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: ChatMessageDto;
+};
+
+export type ChatSettingsDto = {
+  __typename?: 'ChatSettingsDto';
+  bannedWords: Array<Scalars['String']['output']>;
+  followersOnly: Scalars['Boolean']['output'];
+  id: Scalars['UUID']['output'];
+  slowMode?: Maybe<Scalars['Int']['output']>;
+  subscribersOnly: Scalars['Boolean']['output'];
+};
+
+export type CreateMessageInput = {
+  chatId: Scalars['UUID']['input'];
+  message: Scalars['String']['input'];
+  replyMessageId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+export type CreateMessageResponse = {
+  __typename?: 'CreateMessageResponse';
+  messageId: Scalars['UUID']['output'];
+};
+
+export type DateTimeOperationFilterInput = {
+  eq?: InputMaybe<Scalars['DateTime']['input']>;
+  gt?: InputMaybe<Scalars['DateTime']['input']>;
+  gte?: InputMaybe<Scalars['DateTime']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['DateTime']['input']>>>;
+  lt?: InputMaybe<Scalars['DateTime']['input']>;
+  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  neq?: InputMaybe<Scalars['DateTime']['input']>;
+  ngt?: InputMaybe<Scalars['DateTime']['input']>;
+  ngte?: InputMaybe<Scalars['DateTime']['input']>;
+  nin?: InputMaybe<Array<InputMaybe<Scalars['DateTime']['input']>>>;
+  nlt?: InputMaybe<Scalars['DateTime']['input']>;
+  nlte?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type DeleteMessageInput = {
+  messageId: Scalars['UUID']['input'];
+};
+
+export type DeleteMessageResponse = {
+  __typename?: 'DeleteMessageResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type GetEmailResponse = {
   __typename?: 'GetEmailResponse';
   email: Scalars['String']['output'];
@@ -37,13 +166,38 @@ export type GetEmailResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createMessage: CreateMessageResponse;
+  deleteMessage: DeleteMessageResponse;
+  pinMessage: PinMessageResponse;
+  unpinMessage: UnpinMessageResponse;
   updateAvatar: UpdateAvatarResponse;
   updateBio: UpdateBioResponse;
   updateChannelBanner: UpdateChannelBannerResponse;
+  updateChatSettings: UpdateChatSettingsResponse;
   updateOfflineBanner: UpdateOfflineBannerResponse;
   updateProfile: UpdateProfileResponse;
   updateStreamSettings: UpdateStreamSettingsResponse;
   upload: UploadFileResponse;
+};
+
+
+export type MutationCreateMessageArgs = {
+  request: CreateMessageInput;
+};
+
+
+export type MutationDeleteMessageArgs = {
+  request: DeleteMessageInput;
+};
+
+
+export type MutationPinMessageArgs = {
+  pinMessage: PinMessageInput;
+};
+
+
+export type MutationUnpinMessageArgs = {
+  request: UnpinMessageInput;
 };
 
 
@@ -62,6 +216,11 @@ export type MutationUpdateChannelBannerArgs = {
 };
 
 
+export type MutationUpdateChatSettingsArgs = {
+  request: UpdateChatSettingsInput;
+};
+
+
 export type MutationUpdateOfflineBannerArgs = {
   input: UpdateOfflineBannerInput;
 };
@@ -74,6 +233,38 @@ export type MutationUpdateProfileArgs = {
 
 export type MutationUploadArgs = {
   input: UploadFileInput;
+};
+
+/** Information about pagination in a connection. */
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  /** When paginating forwards, the cursor to continue. */
+  endCursor?: Maybe<Scalars['String']['output']>;
+  /** Indicates whether more edges exist following the set defined by the clients arguments. */
+  hasNextPage: Scalars['Boolean']['output'];
+  /** Indicates whether more edges exist prior the set defined by the clients arguments. */
+  hasPreviousPage: Scalars['Boolean']['output'];
+  /** When paginating backwards, the cursor to continue. */
+  startCursor?: Maybe<Scalars['String']['output']>;
+};
+
+export type PinMessageInput = {
+  messageId: Scalars['UUID']['input'];
+};
+
+export type PinMessageResponse = {
+  __typename?: 'PinMessageResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type PinnedChatMessageDto = {
+  __typename?: 'PinnedChatMessageDto';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  message?: Maybe<ChatMessageDto>;
+  messageId: Scalars['UUID']['output'];
+  pinnedBy?: Maybe<StreamerDto>;
+  pinnedById: Scalars['String']['output'];
 };
 
 export type ProfileDto = {
@@ -90,12 +281,31 @@ export type ProfileDto = {
 
 export type Query = {
   __typename?: 'Query';
+  chat: ChatDto;
+  chatMessages?: Maybe<ChatMessagesConnection>;
+  chatSettings: ChatSettingsDto;
   currentStream: StreamDto;
   me: StreamerDto;
   myEmail: GetEmailResponse;
   profile: ProfileDto;
   streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
+};
+
+
+export type QueryChatArgs = {
+  streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryChatMessagesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  chatId: Scalars['UUID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<ChatMessageDtoSortInput>>;
+  where?: InputMaybe<ChatMessageDtoFilterInput>;
 };
 
 
@@ -112,6 +322,11 @@ export type QueryProfileArgs = {
 export type QueryStreamerArgs = {
   userName: Scalars['String']['input'];
 };
+
+export enum SortEnumType {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
 
 export type StreamDto = {
   __typename?: 'StreamDto';
@@ -157,12 +372,45 @@ export type StreamerDto = {
   userName: Scalars['String']['output'];
 };
 
+export type StringOperationFilterInput = {
+  and?: InputMaybe<Array<StringOperationFilterInput>>;
+  contains?: InputMaybe<Scalars['String']['input']>;
+  endsWith?: InputMaybe<Scalars['String']['input']>;
+  eq?: InputMaybe<Scalars['String']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  ncontains?: InputMaybe<Scalars['String']['input']>;
+  nendsWith?: InputMaybe<Scalars['String']['input']>;
+  neq?: InputMaybe<Scalars['String']['input']>;
+  nin?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  nstartsWith?: InputMaybe<Scalars['String']['input']>;
+  or?: InputMaybe<Array<StringOperationFilterInput>>;
+  startsWith?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
+  chatMessageCreated: ChatMessageDto;
+  chatMessageDeleted: ChatMessageDto;
+  chatUpdated: ChatDto;
   streamUpdated: StreamDto;
   streamerUpdated: StreamerDto;
   subscribeWatchStream: Array<StreamWatcher>;
   watchStream: StreamWatcher;
+};
+
+
+export type SubscriptionChatMessageCreatedArgs = {
+  chatId: Scalars['UUID']['input'];
+};
+
+
+export type SubscriptionChatMessageDeletedArgs = {
+  chatId: Scalars['UUID']['input'];
+};
+
+
+export type SubscriptionChatUpdatedArgs = {
+  chatId: Scalars['UUID']['input'];
 };
 
 
@@ -183,6 +431,15 @@ export type SubscriptionSubscribeWatchStreamArgs = {
 
 export type SubscriptionWatchStreamArgs = {
   streamId: Scalars['UUID']['input'];
+};
+
+export type UnpinMessageInput = {
+  chatId: Scalars['UUID']['input'];
+};
+
+export type UnpinMessageResponse = {
+  __typename?: 'UnpinMessageResponse';
+  messageId: Scalars['UUID']['output'];
 };
 
 export type UpdateAvatarInput = {
@@ -209,6 +466,19 @@ export type UpdateChannelBannerInput = {
 
 export type UpdateChannelBannerResponse = {
   __typename?: 'UpdateChannelBannerResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type UpdateChatSettingsInput = {
+  bannedWords: Array<Scalars['String']['input']>;
+  followersOnly: Scalars['Boolean']['input'];
+  id: Scalars['UUID']['input'];
+  slowMode?: InputMaybe<Scalars['Int']['input']>;
+  subscribersOnly: Scalars['Boolean']['input'];
+};
+
+export type UpdateChatSettingsResponse = {
+  __typename?: 'UpdateChatSettingsResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -245,6 +515,102 @@ export type UploadFileResponse = {
   __typename?: 'UploadFileResponse';
   fileName: Scalars['String']['output'];
 };
+
+export type UuidOperationFilterInput = {
+  eq?: InputMaybe<Scalars['UUID']['input']>;
+  gt?: InputMaybe<Scalars['UUID']['input']>;
+  gte?: InputMaybe<Scalars['UUID']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['UUID']['input']>>>;
+  lt?: InputMaybe<Scalars['UUID']['input']>;
+  lte?: InputMaybe<Scalars['UUID']['input']>;
+  neq?: InputMaybe<Scalars['UUID']['input']>;
+  ngt?: InputMaybe<Scalars['UUID']['input']>;
+  ngte?: InputMaybe<Scalars['UUID']['input']>;
+  nin?: InputMaybe<Array<InputMaybe<Scalars['UUID']['input']>>>;
+  nlt?: InputMaybe<Scalars['UUID']['input']>;
+  nlte?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+export type CreateMessageMutationVariables = Exact<{
+  request: CreateMessageInput;
+}>;
+
+
+export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { __typename?: 'CreateMessageResponse', messageId: any } };
+
+export type DeleteMessageMutationVariables = Exact<{
+  request: DeleteMessageInput;
+}>;
+
+
+export type DeleteMessageMutation = { __typename?: 'Mutation', deleteMessage: { __typename?: 'DeleteMessageResponse', id: any } };
+
+export type PinMessageMutationVariables = Exact<{
+  pinMessage: PinMessageInput;
+}>;
+
+
+export type PinMessageMutation = { __typename?: 'Mutation', pinMessage: { __typename?: 'PinMessageResponse', id: any } };
+
+export type UnpinMessageMutationVariables = Exact<{
+  request: UnpinMessageInput;
+}>;
+
+
+export type UnpinMessageMutation = { __typename?: 'Mutation', unpinMessage: { __typename?: 'UnpinMessageResponse', messageId: any } };
+
+export type UpdateChatSettingsMutationVariables = Exact<{
+  request: UpdateChatSettingsInput;
+}>;
+
+
+export type UpdateChatSettingsMutation = { __typename?: 'Mutation', updateChatSettings: { __typename?: 'UpdateChatSettingsResponse', id: any } };
+
+export type GetChatQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type GetChatQuery = { __typename?: 'Query', chat: { __typename?: 'ChatDto', id: any, pinnedMessageId?: any | null, settingsId: any, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: any, createdAt: any, messageId: any, pinnedById: string } | null, settings?: { __typename?: 'ChatSettingsDto', id: any, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
+
+export type GetChatMessagesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  chatId: Scalars['UUID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<ChatMessageDtoSortInput> | ChatMessageDtoSortInput>;
+  where?: InputMaybe<ChatMessageDtoFilterInput>;
+}>;
+
+
+export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', edges?: Array<{ __typename?: 'ChatMessagesEdge', cursor: string, node: { __typename?: 'ChatMessageDto', id: any, createdAt: any, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } }> | null, nodes?: Array<{ __typename?: 'ChatMessageDto', id: any, createdAt: any, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetChatSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetChatSettingsQuery = { __typename?: 'Query', chatSettings: { __typename?: 'ChatSettingsDto', id: any, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } };
+
+export type ChatMessageCreatedSubscriptionVariables = Exact<{
+  chatId: Scalars['UUID']['input'];
+}>;
+
+
+export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: any, id: any, isActive: boolean, isDeleted: boolean, message: string, replyId?: any | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } };
+
+export type ChatMessageDeletedSubscriptionVariables = Exact<{
+  chatId: Scalars['UUID']['input'];
+}>;
+
+
+export type ChatMessageDeletedSubscription = { __typename?: 'Subscription', chatMessageDeleted: { __typename?: 'ChatMessageDto', createdAt: any, id: any, isActive: boolean, isDeleted: boolean, message: string, replyId?: any | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } };
+
+export type ChatUpdatedSubscriptionVariables = Exact<{
+  chatId: Scalars['UUID']['input'];
+}>;
+
+
+export type ChatUpdatedSubscription = { __typename?: 'Subscription', chatUpdated: { __typename?: 'ChatDto', pinnedMessageId?: any | null, settingsId: any, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: any, createdAt: any, messageId: any, pinnedById: string } | null, settings?: { __typename?: 'ChatSettingsDto', id: any, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
 
 export type UploadFileMutationVariables = Exact<{
   input: UploadFileInput;
@@ -333,6 +699,13 @@ export type WatchStreamSubscriptionVariables = Exact<{
 
 export type WatchStreamSubscription = { __typename?: 'Subscription', watchStream: { __typename?: 'StreamWatcher', streamId: any } };
 
+export type SubscribeWatchStreamSubscriptionVariables = Exact<{
+  streamId: Scalars['UUID']['input'];
+}>;
+
+
+export type SubscribeWatchStreamSubscription = { __typename?: 'Subscription', subscribeWatchStream: Array<{ __typename?: 'StreamWatcher', streamId: any }> };
+
 export type UpdateStreamSettingsMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -351,6 +724,515 @@ export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetStreamSettingsQuery = { __typename?: 'Query', streamSettings: { __typename?: 'StreamSettingsDto', id: any, streamKey: string, streamUrl: string } };
 
 
+export const CreateMessageDocument = gql`
+    mutation CreateMessage($request: CreateMessageInput!) {
+  createMessage(request: $request) {
+    messageId
+  }
+}
+    `;
+export type CreateMessageMutationFn = Apollo.MutationFunction<CreateMessageMutation, CreateMessageMutationVariables>;
+
+/**
+ * __useCreateMessageMutation__
+ *
+ * To run a mutation, you first call `useCreateMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createMessageMutation, { data, loading, error }] = useCreateMessageMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useCreateMessageMutation(baseOptions?: Apollo.MutationHookOptions<CreateMessageMutation, CreateMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateMessageMutation, CreateMessageMutationVariables>(CreateMessageDocument, options);
+      }
+export type CreateMessageMutationHookResult = ReturnType<typeof useCreateMessageMutation>;
+export type CreateMessageMutationResult = Apollo.MutationResult<CreateMessageMutation>;
+export type CreateMessageMutationOptions = Apollo.BaseMutationOptions<CreateMessageMutation, CreateMessageMutationVariables>;
+export const DeleteMessageDocument = gql`
+    mutation DeleteMessage($request: DeleteMessageInput!) {
+  deleteMessage(request: $request) {
+    id
+  }
+}
+    `;
+export type DeleteMessageMutationFn = Apollo.MutationFunction<DeleteMessageMutation, DeleteMessageMutationVariables>;
+
+/**
+ * __useDeleteMessageMutation__
+ *
+ * To run a mutation, you first call `useDeleteMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMessageMutation, { data, loading, error }] = useDeleteMessageMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useDeleteMessageMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMessageMutation, DeleteMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteMessageMutation, DeleteMessageMutationVariables>(DeleteMessageDocument, options);
+      }
+export type DeleteMessageMutationHookResult = ReturnType<typeof useDeleteMessageMutation>;
+export type DeleteMessageMutationResult = Apollo.MutationResult<DeleteMessageMutation>;
+export type DeleteMessageMutationOptions = Apollo.BaseMutationOptions<DeleteMessageMutation, DeleteMessageMutationVariables>;
+export const PinMessageDocument = gql`
+    mutation PinMessage($pinMessage: PinMessageInput!) {
+  pinMessage(pinMessage: $pinMessage) {
+    id
+  }
+}
+    `;
+export type PinMessageMutationFn = Apollo.MutationFunction<PinMessageMutation, PinMessageMutationVariables>;
+
+/**
+ * __usePinMessageMutation__
+ *
+ * To run a mutation, you first call `usePinMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePinMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [pinMessageMutation, { data, loading, error }] = usePinMessageMutation({
+ *   variables: {
+ *      pinMessage: // value for 'pinMessage'
+ *   },
+ * });
+ */
+export function usePinMessageMutation(baseOptions?: Apollo.MutationHookOptions<PinMessageMutation, PinMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PinMessageMutation, PinMessageMutationVariables>(PinMessageDocument, options);
+      }
+export type PinMessageMutationHookResult = ReturnType<typeof usePinMessageMutation>;
+export type PinMessageMutationResult = Apollo.MutationResult<PinMessageMutation>;
+export type PinMessageMutationOptions = Apollo.BaseMutationOptions<PinMessageMutation, PinMessageMutationVariables>;
+export const UnpinMessageDocument = gql`
+    mutation UnpinMessage($request: UnpinMessageInput!) {
+  unpinMessage(request: $request) {
+    messageId
+  }
+}
+    `;
+export type UnpinMessageMutationFn = Apollo.MutationFunction<UnpinMessageMutation, UnpinMessageMutationVariables>;
+
+/**
+ * __useUnpinMessageMutation__
+ *
+ * To run a mutation, you first call `useUnpinMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnpinMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unpinMessageMutation, { data, loading, error }] = useUnpinMessageMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useUnpinMessageMutation(baseOptions?: Apollo.MutationHookOptions<UnpinMessageMutation, UnpinMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UnpinMessageMutation, UnpinMessageMutationVariables>(UnpinMessageDocument, options);
+      }
+export type UnpinMessageMutationHookResult = ReturnType<typeof useUnpinMessageMutation>;
+export type UnpinMessageMutationResult = Apollo.MutationResult<UnpinMessageMutation>;
+export type UnpinMessageMutationOptions = Apollo.BaseMutationOptions<UnpinMessageMutation, UnpinMessageMutationVariables>;
+export const UpdateChatSettingsDocument = gql`
+    mutation UpdateChatSettings($request: UpdateChatSettingsInput!) {
+  updateChatSettings(request: $request) {
+    id
+  }
+}
+    `;
+export type UpdateChatSettingsMutationFn = Apollo.MutationFunction<UpdateChatSettingsMutation, UpdateChatSettingsMutationVariables>;
+
+/**
+ * __useUpdateChatSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateChatSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateChatSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateChatSettingsMutation, { data, loading, error }] = useUpdateChatSettingsMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useUpdateChatSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateChatSettingsMutation, UpdateChatSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateChatSettingsMutation, UpdateChatSettingsMutationVariables>(UpdateChatSettingsDocument, options);
+      }
+export type UpdateChatSettingsMutationHookResult = ReturnType<typeof useUpdateChatSettingsMutation>;
+export type UpdateChatSettingsMutationResult = Apollo.MutationResult<UpdateChatSettingsMutation>;
+export type UpdateChatSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateChatSettingsMutation, UpdateChatSettingsMutationVariables>;
+export const GetChatDocument = gql`
+    query GetChat($streamerId: String!) {
+  chat(streamerId: $streamerId) {
+    id
+    pinnedMessageId
+    settingsId
+    streamerId
+    pinnedMessage {
+      id
+      createdAt
+      messageId
+      pinnedById
+    }
+    settings {
+      id
+      bannedWords
+      followersOnly
+      slowMode
+      subscribersOnly
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetChatQuery__
+ *
+ * To run a query within a React component, call `useGetChatQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChatQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useGetChatQuery(baseOptions: Apollo.QueryHookOptions<GetChatQuery, GetChatQueryVariables> & ({ variables: GetChatQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetChatQuery, GetChatQueryVariables>(GetChatDocument, options);
+      }
+export function useGetChatLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatQuery, GetChatQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetChatQuery, GetChatQueryVariables>(GetChatDocument, options);
+        }
+export function useGetChatSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetChatQuery, GetChatQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetChatQuery, GetChatQueryVariables>(GetChatDocument, options);
+        }
+export type GetChatQueryHookResult = ReturnType<typeof useGetChatQuery>;
+export type GetChatLazyQueryHookResult = ReturnType<typeof useGetChatLazyQuery>;
+export type GetChatSuspenseQueryHookResult = ReturnType<typeof useGetChatSuspenseQuery>;
+export type GetChatQueryResult = Apollo.QueryResult<GetChatQuery, GetChatQueryVariables>;
+export const GetChatMessagesDocument = gql`
+    query GetChatMessages($after: String, $before: String, $chatId: UUID!, $first: Int, $last: Int, $order: [ChatMessageDtoSortInput!], $where: ChatMessageDtoFilterInput) {
+  chatMessages(
+    after: $after
+    before: $before
+    chatId: $chatId
+    first: $first
+    last: $last
+    order: $order
+    where: $where
+  ) {
+    edges {
+      cursor
+      node {
+        id
+        createdAt
+        isActive
+        isDeleted
+        message
+        type
+        sender {
+          id
+          userName
+          avatar
+        }
+        reply {
+          id
+          message
+          sender {
+            userName
+          }
+        }
+      }
+    }
+    nodes {
+      id
+      createdAt
+      isActive
+      isDeleted
+      message
+      type
+      sender {
+        id
+        userName
+        avatar
+      }
+      reply {
+        id
+        message
+        sender {
+          userName
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetChatMessagesQuery__
+ *
+ * To run a query within a React component, call `useGetChatMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChatMessagesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      chatId: // value for 'chatId'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetChatMessagesQuery(baseOptions: Apollo.QueryHookOptions<GetChatMessagesQuery, GetChatMessagesQueryVariables> & ({ variables: GetChatMessagesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetChatMessagesQuery, GetChatMessagesQueryVariables>(GetChatMessagesDocument, options);
+      }
+export function useGetChatMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatMessagesQuery, GetChatMessagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetChatMessagesQuery, GetChatMessagesQueryVariables>(GetChatMessagesDocument, options);
+        }
+export function useGetChatMessagesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetChatMessagesQuery, GetChatMessagesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetChatMessagesQuery, GetChatMessagesQueryVariables>(GetChatMessagesDocument, options);
+        }
+export type GetChatMessagesQueryHookResult = ReturnType<typeof useGetChatMessagesQuery>;
+export type GetChatMessagesLazyQueryHookResult = ReturnType<typeof useGetChatMessagesLazyQuery>;
+export type GetChatMessagesSuspenseQueryHookResult = ReturnType<typeof useGetChatMessagesSuspenseQuery>;
+export type GetChatMessagesQueryResult = Apollo.QueryResult<GetChatMessagesQuery, GetChatMessagesQueryVariables>;
+export const GetChatSettingsDocument = gql`
+    query GetChatSettings {
+  chatSettings {
+    id
+    bannedWords
+    followersOnly
+    slowMode
+    subscribersOnly
+  }
+}
+    `;
+
+/**
+ * __useGetChatSettingsQuery__
+ *
+ * To run a query within a React component, call `useGetChatSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChatSettingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetChatSettingsQuery(baseOptions?: Apollo.QueryHookOptions<GetChatSettingsQuery, GetChatSettingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetChatSettingsQuery, GetChatSettingsQueryVariables>(GetChatSettingsDocument, options);
+      }
+export function useGetChatSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatSettingsQuery, GetChatSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetChatSettingsQuery, GetChatSettingsQueryVariables>(GetChatSettingsDocument, options);
+        }
+export function useGetChatSettingsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetChatSettingsQuery, GetChatSettingsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetChatSettingsQuery, GetChatSettingsQueryVariables>(GetChatSettingsDocument, options);
+        }
+export type GetChatSettingsQueryHookResult = ReturnType<typeof useGetChatSettingsQuery>;
+export type GetChatSettingsLazyQueryHookResult = ReturnType<typeof useGetChatSettingsLazyQuery>;
+export type GetChatSettingsSuspenseQueryHookResult = ReturnType<typeof useGetChatSettingsSuspenseQuery>;
+export type GetChatSettingsQueryResult = Apollo.QueryResult<GetChatSettingsQuery, GetChatSettingsQueryVariables>;
+export const ChatMessageCreatedDocument = gql`
+    subscription ChatMessageCreated($chatId: UUID!) {
+  chatMessageCreated(chatId: $chatId) {
+    createdAt
+    id
+    isActive
+    isDeleted
+    message
+    replyId
+    senderId
+    type
+    sender {
+      id
+      userName
+      avatar
+    }
+    reply {
+      id
+      message
+      sender {
+        userName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useChatMessageCreatedSubscription__
+ *
+ * To run a query within a React component, call `useChatMessageCreatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useChatMessageCreatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatMessageCreatedSubscription({
+ *   variables: {
+ *      chatId: // value for 'chatId'
+ *   },
+ * });
+ */
+export function useChatMessageCreatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<ChatMessageCreatedSubscription, ChatMessageCreatedSubscriptionVariables> & ({ variables: ChatMessageCreatedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ChatMessageCreatedSubscription, ChatMessageCreatedSubscriptionVariables>(ChatMessageCreatedDocument, options);
+      }
+export type ChatMessageCreatedSubscriptionHookResult = ReturnType<typeof useChatMessageCreatedSubscription>;
+export type ChatMessageCreatedSubscriptionResult = Apollo.SubscriptionResult<ChatMessageCreatedSubscription>;
+export const ChatMessageDeletedDocument = gql`
+    subscription ChatMessageDeleted($chatId: UUID!) {
+  chatMessageDeleted(chatId: $chatId) {
+    createdAt
+    id
+    isActive
+    isDeleted
+    message
+    replyId
+    senderId
+    type
+    sender {
+      id
+      userName
+      avatar
+    }
+    reply {
+      id
+      message
+      sender {
+        userName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useChatMessageDeletedSubscription__
+ *
+ * To run a query within a React component, call `useChatMessageDeletedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useChatMessageDeletedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatMessageDeletedSubscription({
+ *   variables: {
+ *      chatId: // value for 'chatId'
+ *   },
+ * });
+ */
+export function useChatMessageDeletedSubscription(baseOptions: Apollo.SubscriptionHookOptions<ChatMessageDeletedSubscription, ChatMessageDeletedSubscriptionVariables> & ({ variables: ChatMessageDeletedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ChatMessageDeletedSubscription, ChatMessageDeletedSubscriptionVariables>(ChatMessageDeletedDocument, options);
+      }
+export type ChatMessageDeletedSubscriptionHookResult = ReturnType<typeof useChatMessageDeletedSubscription>;
+export type ChatMessageDeletedSubscriptionResult = Apollo.SubscriptionResult<ChatMessageDeletedSubscription>;
+export const ChatUpdatedDocument = gql`
+    subscription ChatUpdated($chatId: UUID!) {
+  chatUpdated(chatId: $chatId) {
+    pinnedMessageId
+    settingsId
+    streamerId
+    pinnedMessage {
+      id
+      createdAt
+      messageId
+      pinnedById
+    }
+    settings {
+      id
+      bannedWords
+      followersOnly
+      slowMode
+      subscribersOnly
+    }
+  }
+}
+    `;
+
+/**
+ * __useChatUpdatedSubscription__
+ *
+ * To run a query within a React component, call `useChatUpdatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useChatUpdatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatUpdatedSubscription({
+ *   variables: {
+ *      chatId: // value for 'chatId'
+ *   },
+ * });
+ */
+export function useChatUpdatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<ChatUpdatedSubscription, ChatUpdatedSubscriptionVariables> & ({ variables: ChatUpdatedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ChatUpdatedSubscription, ChatUpdatedSubscriptionVariables>(ChatUpdatedDocument, options);
+      }
+export type ChatUpdatedSubscriptionHookResult = ReturnType<typeof useChatUpdatedSubscription>;
+export type ChatUpdatedSubscriptionResult = Apollo.SubscriptionResult<ChatUpdatedSubscription>;
 export const UploadFileDocument = gql`
     mutation UploadFile($input: UploadFileInput!) {
   upload(input: $input) {
@@ -831,6 +1713,36 @@ export function useWatchStreamSubscription(baseOptions: Apollo.SubscriptionHookO
       }
 export type WatchStreamSubscriptionHookResult = ReturnType<typeof useWatchStreamSubscription>;
 export type WatchStreamSubscriptionResult = Apollo.SubscriptionResult<WatchStreamSubscription>;
+export const SubscribeWatchStreamDocument = gql`
+    subscription SubscribeWatchStream($streamId: UUID!) {
+  subscribeWatchStream(streamId: $streamId) {
+    streamId
+  }
+}
+    `;
+
+/**
+ * __useSubscribeWatchStreamSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeWatchStreamSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeWatchStreamSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeWatchStreamSubscription({
+ *   variables: {
+ *      streamId: // value for 'streamId'
+ *   },
+ * });
+ */
+export function useSubscribeWatchStreamSubscription(baseOptions: Apollo.SubscriptionHookOptions<SubscribeWatchStreamSubscription, SubscribeWatchStreamSubscriptionVariables> & ({ variables: SubscribeWatchStreamSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeWatchStreamSubscription, SubscribeWatchStreamSubscriptionVariables>(SubscribeWatchStreamDocument, options);
+      }
+export type SubscribeWatchStreamSubscriptionHookResult = ReturnType<typeof useSubscribeWatchStreamSubscription>;
+export type SubscribeWatchStreamSubscriptionResult = Apollo.SubscriptionResult<SubscribeWatchStreamSubscription>;
 export const UpdateStreamSettingsDocument = gql`
     mutation UpdateStreamSettings {
   updateStreamSettings {
