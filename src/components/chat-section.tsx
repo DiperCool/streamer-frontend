@@ -85,8 +85,11 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
       // Прокрутка к низу только при самой первой загрузке
       if (!initialLoadScrollDone.current) {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-        initialLoadScrollDone.current = true
+        // Добавляем setTimeout для обеспечения, что DOM обновлен перед прокруткой
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+          initialLoadScrollDone.current = true
+        }, 0); // Небольшая задержка
       }
     }
   }, [messagesData]) // Запускать только при изменении messagesData
