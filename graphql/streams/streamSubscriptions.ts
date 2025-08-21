@@ -23,3 +23,11 @@ export const WATCH_STREAM = gql`
         }
     }
 `
+
+export const SUBSCRIBE_WATCH_STREAM = gql`
+    subscription SubscribeWatchStream($streamId: UUID!) {
+        subscribeWatchStream(streamId: $streamId) {
+            streamId
+        }
+    }
+`
