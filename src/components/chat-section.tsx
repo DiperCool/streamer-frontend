@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2 } from "lucide-react"
+import { Send, Smile, Gift, X, Loader2, ChevronUp } from "lucide-react" // Добавил ChevronUp для кнопки
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -14,7 +14,7 @@ import {
   useCreateMessageMutation,
   SortEnumType,
   ChatMessageDto,
-  useChatMessageCreatedSubscription, // Импортируем хук подписки
+  useChatMessageCreatedSubscription,
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -33,11 +33,11 @@ type MessageForm = z.infer<typeof messageSchema>
 
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null) // Для прокрутки к новым сообщениям (вниз)
-  const chatContainerRef = useRef<HTMLDivElement>(null) // Для обнаружения прокрутки вверх (пагинация)
+  const chatContainerRef = useRef<HTMLDivElement>(null) // Для сохранения позиции прокрутки
 
   const [messages, setMessages] = useState<ChatMessageDto[]>([])
   const [hasMoreMessages, setHasMoreMessages] = useState(true)
-  const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false) // Новый стейт для отслеживания первой загрузки
+  const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
     variables: { streamerId },
@@ -50,15 +50,15 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     data: messagesData,
     loading: messagesLoading,
     fetchMore,
-    networkStatus, // Используем networkStatus для отслеживания состояния загрузки fetchMore
+    networkStatus,
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
-      first: 50, // Изменено на 'first: 50' как запрошено
+      first: 50, // Загружаем последние 50 сообщений
       order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху
     },
     skip: !chatId,
-    notifyOnNetworkStatusChange: true, // Важно для обновления networkStatus во время fetchMore
+    notifyOnNetworkStatusChange: true,
   })
 
   const [createMessage, { loading: sendingMessage }] = useCreateMessageMutation()
@@ -78,19 +78,16 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   // Эффект для обработки начальной загрузки сообщений
   useEffect(() => {
     if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
-      // Сервер возвращает сообщения от новых к старым.
-      // Для отображения в хронологическом порядке (старые сверху, новые снизу), мы переворачиваем массив.
       const newNodes = [...messagesData.chatMessages.nodes].reverse()
       setMessages(newNodes)
       setHasMoreMessages(messagesData.chatMessages.pageInfo.hasPreviousPage)
 
-      // Прокрутка к низу только при самой первой загрузке
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-        setInitialMessagesLoaded(true) // Отмечаем, что начальная загрузка завершена
+        setInitialMessagesLoaded(true)
       }, 0);
     }
-  }, [messagesData, initialMessagesLoaded]) // Запускать только при изменении messagesData или initialMessagesLoaded
+  }, [messagesData, initialMessagesLoaded])
 
   // Подписка на новые сообщения
   useChatMessageCreatedSubscription({
@@ -100,16 +97,13 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
       const newMessage = data.data?.chatMessageCreated;
       if (newMessage) {
         setMessages(prevMessages => {
-          // Проверяем, чтобы избежать дубликатов, если сообщение уже было добавлено
           if (prevMessages.some(msg => msg.id === newMessage.id)) {
             return prevMessages;
           }
-          return [...prevMessages, newMessage]; // Добавляем новое сообщение в конец
+          return [...prevMessages, newMessage];
         });
 
-        // Прокрутка к низу, если пользователь уже был внизу или отправил сообщение
         const container = chatContainerRef.current;
-        // Проверяем, находится ли пользователь в пределах 50px от нижней границы
         const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50);
 
         if (isAtBottom) {
@@ -133,76 +127,57 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         },
       })
       reset({ message: "" })
-      // Новое сообщение будет добавлено через подписку, нет необходимости перезагружать здесь.
     } catch (error) {
       console.error("Error sending message:", error)
-      // Здесь можно добавить уведомление для пользователя об ошибке
     }
   }
 
-  const handleScroll = useCallback(() => {
-    const container = chatContainerRef.current
-    // Проверяем, что прокрутка находится в самом верху, есть еще сообщения для загрузки,
-    // и fetchMore не находится в процессе (networkStatus 3)
-    if (container && container.scrollTop === 0 && hasMoreMessages && networkStatus !== 3) {
-      const currentScrollHeight = container.scrollHeight
+  const handleLoadMore = async () => {
+    if (!chatId || !hasMoreMessages || networkStatus === 3) return;
 
-      fetchMore({
+    const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+
+    try {
+      const result = await fetchMore({
         variables: {
-          before: messagesData?.chatMessages?.pageInfo.startCursor, // Используем startCursor для получения более старых сообщений
-          last: 50, // Используем 'last' с 'before' для получения предыдущих 50 сообщений
-          order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху
+          before: messagesData?.chatMessages?.pageInfo.startCursor,
+          last: 50,
+          order: [{ createdAt: SortEnumType.Desc }],
         },
         updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult || !fetchMoreResult.chatMessages) return prev
+          if (!fetchMoreResult || !fetchMoreResult.chatMessages) return prev;
 
-          // Переворачиваем новую порцию сообщений, чтобы они были от старых к новым
-          const newNodes = [...fetchMoreResult.chatMessages.nodes].reverse()
-          // Добавляем новые (более старые) сообщения в начало существующего списка
-          const updatedNodes = [...newNodes, ...prev.chatMessages.nodes!]
+          const newNodes = [...fetchMoreResult.chatMessages.nodes].reverse();
+          const updatedNodes = [...newNodes, ...prev.chatMessages.nodes!];
 
-          // Вычисляем корректировку прокрутки
-          // Используем setTimeout, чтобы дать браузеру время отрисовать новые элементы перед корректировкой прокрутки
           setTimeout(() => {
             if (chatContainerRef.current) {
-              const newScrollHeight = chatContainerRef.current.scrollHeight
-              const scrollDifference = newScrollHeight - currentScrollHeight
-              chatContainerRef.current.scrollTop += scrollDifference
+              const newScrollHeight = chatContainerRef.current.scrollHeight;
+              const scrollDifference = newScrollHeight - currentScrollHeight;
+              chatContainerRef.current.scrollTop += scrollDifference;
             }
-          }, 0)
+          }, 0);
 
           return {
             chatMessages: {
-              ...fetchMoreResult.chatMessages, // Берем новую pageInfo (startCursor, hasPreviousPage) из fetchMoreResult
+              ...fetchMoreResult.chatMessages,
               nodes: updatedNodes,
               pageInfo: {
                 ...fetchMoreResult.chatMessages.pageInfo,
-                // Сохраняем оригинальный endCursor и hasNextPage из предыдущего состояния,
-                // так как мы только загружаем более старые сообщения.
                 endCursor: prev.chatMessages.pageInfo.endCursor,
                 hasNextPage: prev.chatMessages.pageInfo.hasNextPage,
               },
             },
-          }
+          };
         },
-      }).then(result => {
-        setHasMoreMessages(result.data.chatMessages.pageInfo.hasPreviousPage)
-      }).catch(error => {
-        console.error("Error fetching more messages:", error)
-      })
+      });
+      setHasMoreMessages(result.data.chatMessages?.pageInfo.hasPreviousPage ?? false);
+    } catch (error) {
+      console.error("Error fetching more messages:", error);
     }
-  }, [chatId, hasMoreMessages, messagesData, fetchMore, networkStatus]) // Зависимости для useCallback
+  };
 
-  // Прикрепляем слушатель события прокрутки
-  useEffect(() => {
-    const container = chatContainerRef.current
-    if (container) {
-      container.addEventListener('scroll', handleScroll)
-      return () => container.removeEventListener('scroll', handleScroll)
-    }
-  }, [handleScroll]) // Переприкрепляем, если handleScroll изменится
-
-  const isLoadingMore = networkStatus === 3 // networkStatus 3 указывает, что fetchMore находится в процессе
+  const isLoadingMore = networkStatus === 3;
 
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col">
@@ -219,16 +194,28 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           </div>
         ) : (
           <>
-            {isLoadingMore && (
+            {hasMoreMessages && (
               <div className="flex justify-center py-2">
-                <Loader2 className="h-6 w-6 animate-spin text-green-500" />
+                <Button
+                  variant="outline"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                >
+                  {isLoadingMore ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4 mr-2" />
+                  )}
+                  {isLoadingMore ? "Loading..." : "Load More"}
+                </Button>
               </div>
             )}
             {messages.map((msg) => {
               const messageDate = new Date(msg.createdAt);
               const formattedTime = isToday(messageDate)
-                ? format(messageDate, "HH:mm") // Только часы и минуты, если сегодня
-                : format(messageDate, "MMM dd, yyyy"); // Месяц, день, год, если не сегодня
+                ? format(messageDate, "HH:mm")
+                : format(messageDate, "MMM dd, yyyy");
 
               return (
                 <div key={msg.id} className="text-gray-300 text-sm flex items-start space-x-2">
@@ -241,12 +228,12 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                   <div>
                     <span className="font-semibold text-green-400">{msg.sender?.userName}:</span>{" "}
                     <span>{msg.message}</span>
-                    <span className="text-gray-500 text-xs ml-2">{formattedTime}</span> {/* Отображение времени/даты */}
+                    <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
                   </div>
                 </div>
               );
             })}
-            <div ref={messagesEndRef} /> {/* Элемент для прокрутки */}
+            <div ref={messagesEndRef} />
           </>
         )}
       </CardContent>
