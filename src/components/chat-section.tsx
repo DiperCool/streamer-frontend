@@ -17,6 +17,7 @@ import {
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { format, isToday } from "date-fns" // Импортируем format и isToday
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -207,20 +208,28 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 <Loader2 className="h-6 w-6 animate-spin text-green-500" />
               </div>
             )}
-            {messages.map((msg) => (
-              <div key={msg.id} className="text-gray-300 text-sm flex items-start space-x-2">
-                <Avatar className="w-6 h-6">
-                  <AvatarImage src={getMinioUrl(msg.sender?.avatar!)} alt={msg.sender?.userName || "User"} />
-                  <AvatarFallback className="bg-gray-600 text-white text-xs">
-                    {msg.sender?.userName?.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <span className="font-semibold text-green-400">{msg.sender?.userName}:</span>{" "}
-                  <span>{msg.message}</span>
+            {messages.map((msg) => {
+              const messageDate = new Date(msg.createdAt);
+              const formattedTime = isToday(messageDate)
+                ? format(messageDate, "HH:mm") // Только часы и минуты, если сегодня
+                : format(messageDate, "MMM dd, yyyy"); // Месяц, день, год, если не сегодня
+
+              return (
+                <div key={msg.id} className="text-gray-300 text-sm flex items-start space-x-2">
+                  <Avatar className="w-6 h-6">
+                    <AvatarImage src={getMinioUrl(msg.sender?.avatar!)} alt={msg.sender?.userName || "User"} />
+                    <AvatarFallback className="bg-gray-600 text-white text-xs">
+                      {msg.sender?.userName?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <span className="font-semibold text-green-400">{msg.sender?.userName}:</span>{" "}
+                    <span>{msg.message}</span>
+                    <span className="text-gray-500 text-xs ml-2">{formattedTime}</span> {/* Отображение времени/даты */}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} /> {/* Элемент для прокрутки */}
           </>
         )}
