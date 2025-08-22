@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2, ChevronUp } from "lucide-react" // Добавил ChevronUp для кнопки
+import { Send, Smile, Gift, X, Loader2, ChevronUp } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -14,11 +14,14 @@ import {
     useCreateMessageMutation,
     SortEnumType,
     ChatMessageDto,
-    useChatMessageCreatedSubscription, GetChatMessagesQuery,
+    useChatMessageCreatedSubscription,
+    GetChatMessagesQuery,
+    GetChatMessagesDocument, // Импортируем GetChatMessagesDocument
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format, isToday } from "date-fns"
+import { useApolloClient } from "@apollo/client" // Импортируем useApolloClient
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -32,9 +35,9 @@ const messageSchema = z.object({
 type MessageForm = z.infer<typeof messageSchema>
 
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null) // Для прокрутки к новым сообщениям (вниз)
-  const chatContainerRef = useRef<HTMLDivElement>(null) // Для сохранения позиции прокрутки
-
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const client = useApolloClient(); // Инициализируем Apollo Client
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
 
@@ -53,8 +56,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
-      first: 1, // Загружаем последние 50 сообщений
-      order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху
+      first: 1, // ОСТАВЛЕНО КАК ЕСТЬ: Загружаем последнее сообщение
+      order: [{ createdAt: SortEnumType.Desc }],
     },
     skip: !chatId,
     notifyOnNetworkStatusChange: true,
@@ -76,11 +79,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   // Эффект для обработки начальной загрузки сообщений
   useEffect(() => {
-    if (messagesData?.chatMessages?.nodes) {
-      const newNodes = [...messagesData.chatMessages.nodes]
-         console.log(newNodes)
-
-
+    if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
         setInitialMessagesLoaded(true)
@@ -92,11 +91,73 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   useChatMessageCreatedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
-    onData: ({ data }) => {
+    onData: ({ client, data }) => {
       const newMessage = data.data?.chatMessageCreated;
       if (newMessage) {
+        // Обновляем кеш Apollo
+        client.cache.updateQuery(
+          {
+            query: GetChatMessagesDocument,
+            variables: {
+              chatId: chatId!,
+              first: 1, // ДОЛЖНО СООТВЕТСТВОВАТЬ запросу в useGetChatMessagesQuery
+              order: [{ createdAt: SortEnumType.Desc }],
+            },
+          },
+          (prev) => {
+            if (!prev || !prev.chatMessages) {
+              return prev;
+            }
 
+            // Создаем новый узел сообщения с необходимыми __typename
+            const newNode: ChatMessageDto = {
+              __typename: 'ChatMessageDto',
+              ...newMessage,
+              sender: {
+                __typename: 'StreamerDto',
+                id: newMessage.sender?.id || '',
+                userName: newMessage.sender?.userName || '',
+                avatar: newMessage.sender?.avatar,
+              },
+              reply: newMessage.reply ? {
+                __typename: 'ChatMessageDto',
+                id: newMessage.reply.id,
+                message: newMessage.reply.message,
+                sender: newMessage.reply.sender ? {
+                  __typename: 'StreamerDto',
+                  userName: newMessage.reply.sender.userName,
+                } : null,
+              } : null,
+            };
 
+            // Для запроса с first: 1, мы просто заменяем текущее сообщение новым
+            const updatedNodes = [newNode];
+            const newEdge = {
+              __typename: 'ChatMessagesEdge',
+              cursor: btoa(newNode.createdAt.toString()),
+              node: newNode,
+            };
+            const updatedEdges = [newEdge];
+
+            return {
+              ...prev,
+              chatMessages: {
+                ...prev.chatMessages,
+                nodes: updatedNodes,
+                edges: updatedEdges,
+                pageInfo: {
+                  ...prev.chatMessages.pageInfo,
+                  startCursor: newEdge.cursor,
+                  endCursor: newEdge.cursor,
+                  hasNextPage: true, // Предполагаем, что могут быть более старые сообщения для загрузки
+                  hasPreviousPage: false, // Это самое новое, поэтому нет предыдущих в этом 'first:1' представлении
+                },
+              },
+            };
+          }
+        );
+
+        // Прокручиваем вниз, если пользователь находится внизу чата
         const container = chatContainerRef.current;
         const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50);
 
@@ -135,7 +196,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             const result = await fetchMore({
                 variables: {
                     after: messagesData?.chatMessages?.pageInfo.endCursor,
-                    first: 1,
+                    first: 1, // ОСТАВЛЕНО КАК ЕСТЬ: Загружаем следующее сообщение
                     order: [{ createdAt: SortEnumType.Desc }],
                 },
                 updateQuery: (prev, { fetchMoreResult }): GetChatMessagesQuery => {
