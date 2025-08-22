@@ -16,12 +16,12 @@ import {
     ChatMessageDto,
     useChatMessageCreatedSubscription,
     GetChatMessagesQuery,
-    GetChatMessagesDocument, // Импортируем GetChatMessagesDocument
+    GetChatMessagesDocument,
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format, isToday } from "date-fns"
-import { useApolloClient } from "@apollo/client" // Импортируем useApolloClient
+import { useApolloClient } from "@apollo/client"
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -33,11 +33,11 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-
+const messagesCount = 50;
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-  const client = useApolloClient(); // Инициализируем Apollo Client
+  const client = useApolloClient();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
 
@@ -56,7 +56,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
-      first: 1, // ОСТАВЛЕНО КАК ЕСТЬ: Загружаем последнее сообщение
+      first: messagesCount,
       order: [{ createdAt: SortEnumType.Desc }],
     },
     skip: !chatId,
@@ -100,7 +100,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             query: GetChatMessagesDocument,
             variables: {
               chatId: chatId!,
-              first: 1, // ДОЛЖНО СООТВЕТСТВОВАТЬ запросу в useGetChatMessagesQuery
+              first: messagesCount, // ИСПРАВЛЕНО: Теперь соответствует основному запросу
               order: [{ createdAt: SortEnumType.Desc }],
             },
           },
@@ -139,14 +139,15 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               } : null,
             };
 
-            // Добавляем новое сообщение в конец списка существующих сообщений
-            const updatedNodes = [...(prev.chatMessages.nodes || []), newNode];
+            // Добавляем новое сообщение в НАЧАЛО списка существующих сообщений в кеше.
+            // Это сохраняет порядок "новые сверху" в кеше, так как сервер отдает сообщения DESC.
+            const updatedNodes = [newNode, ...(prev.chatMessages.nodes || [])];
             const newEdge = {
               __typename: 'ChatMessagesEdge',
               cursor: btoa(newNode.createdAt.toString()),
               node: newNode,
             };
-            const updatedEdges = [...(prev.chatMessages.edges || []), newEdge];
+            const updatedEdges = [newEdge, ...(prev.chatMessages.edges || [])];
 
             return {
               ...prev,
@@ -156,10 +157,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 edges: updatedEdges,
                 pageInfo: {
                   ...prev.chatMessages.pageInfo,
-                  startCursor: prev.chatMessages.pageInfo.startCursor || newEdge.cursor,
-                  endCursor: newEdge.cursor,
-                  hasNextPage: prev.chatMessages.pageInfo.hasNextPage,
-                  hasPreviousPage: updatedNodes.length > 1,
+                  startCursor: newEdge.cursor, // Обновляем startCursor на курсор нового сообщения
+                  hasPreviousPage: true, // Теперь всегда есть предыдущие, если добавили
                 },
               },
             };
@@ -205,7 +204,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             const result = await fetchMore({
                 variables: {
                     after: messagesData?.chatMessages?.pageInfo.endCursor,
-                    first: 1, // ОСТАВЛЕНО КАК ЕСТЬ: Загружаем следующее сообщение
+                    first: messagesCount,
                     order: [{ createdAt: SortEnumType.Desc }],
                 },
                 updateQuery: (prev, { fetchMoreResult }): GetChatMessagesQuery => {
@@ -213,8 +212,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                         return prev;
                     }
 
-                    const newNodes = [...fetchMoreResult.chatMessages.nodes];
-                    const updatedNodes = [...newNodes, ...(prev.chatMessages?.nodes ?? [])];
+                    const newNodes = fetchMoreResult.chatMessages.nodes; // Эти сообщения старше
+                    const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes]; // Добавляем старые в конец
 
                     setTimeout(() => {
                         if (chatContainerRef.current) {
@@ -223,17 +222,18 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                             chatContainerRef.current.scrollTop += scrollDifference;
                         }
                     }, 0);
-                    console.log(prev)
+                    
                     return {
-                        ...prev, // копируем верхний уровень
+                        ...prev,
                         chatMessages: {
                             __typename: prev.chatMessages?.__typename ?? "ChatMessagesConnection",
                             ...fetchMoreResult.chatMessages,
                             nodes: updatedNodes,
-
                             pageInfo: {
                                 __typename: prev.chatMessages?.pageInfo.__typename ?? "PageInfo",
                                 ...fetchMoreResult.chatMessages.pageInfo,
+                                // endCursor должен быть курсором самого старого сообщения в updatedNodes
+                                endCursor: fetchMoreResult.chatMessages.pageInfo.endCursor,
                             },
                         },
                     };
@@ -280,7 +280,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 </Button>
               </div>
             )}
-            {messagesData?.chatMessages?.nodes?.map((msg) => {
+            {/* Отображаем сообщения в обратном порядке, чтобы новые были внизу */}
+            {messagesData?.chatMessages?.nodes?.slice().reverse().map((msg) => {
               const messageDate = new Date(msg.createdAt);
               const formattedTime = isToday(messageDate)
                 ? format(messageDate, "HH:mm")
