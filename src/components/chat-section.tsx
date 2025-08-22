@@ -35,7 +35,7 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-const messagesCount = 15;
+const messagesCount = 50; // Увеличено количество сообщений для начальной загрузки
 const MESSAGE_ITEM_HEIGHT = 50; // Approximate fixed height for a message item
 
 // Define interface for data passed to Row component
@@ -423,12 +423,12 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
       setIsScrolledToTop(scrollTop < 10); // If scrollTop is very small, consider it "at top"
       setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_HEIGHT); // Check if near bottom
 
-      // Trigger load more if scrolling up and near the top
-      if (scrollTop < MESSAGE_ITEM_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
+      // Trigger load more if initial messages are loaded AND scrolling up near the top
+      if (initialMessagesLoaded && scrollTop < MESSAGE_ITEM_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
         handleLoadMore();
       }
     }
-  }, [messagesData, isLoadingMore, handleLoadMore]);
+  }, [messagesData, isLoadingMore, handleLoadMore, initialMessagesLoaded]); // Добавлена зависимость initialMessagesLoaded
 
   // Memoize the itemData object to ensure stability for FixedSizeList
   const itemData = React.useMemo(() => ({
@@ -481,7 +481,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               width={listWidth}
               itemCount={reversedMessages.length}
               itemSize={MESSAGE_ITEM_HEIGHT}
-              itemData={itemData} {/* Используем мемоизированный itemData */}
+              itemData={itemData}
               onScroll={onListScroll}
               className="custom-scrollbar"
             >
