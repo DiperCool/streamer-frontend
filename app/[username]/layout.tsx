@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef, useCallback } from "react" // Добавлен useRef и useCallback
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
@@ -134,13 +134,26 @@ export default function StreamerProfileLayout({
   };
   const activeTab = getActiveTab();
 
+  // Ref для контейнера чата, чтобы прокручивать его
+  const chatPanelRef = useRef<HTMLDivElement>(null);
+
+  // Функция для прокрутки панели чата до конца
+  const scrollChatPanelToBottom = useCallback(() => {
+    if (chatPanelRef.current) {
+      chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный (обратный порядок) на больших */}
 
       {/* Чат (закреплен справа на больших экранах) */}
       {isChatVisible && (
-        <div className="hidden lg:flex fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40">
-          <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
+        <div
+          ref={chatPanelRef} // Добавлен ref
+          className="hidden lg:flex fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto" // Добавлен overflow-y-auto
+        >
+          <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
         </div>
       )}
 
@@ -229,8 +242,11 @@ export default function StreamerProfileLayout({
 
         {/* Чат (отображается на маленьких экранах, если чат виден) */}
         {isChatVisible && (
-          <div className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh]">
-            <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
+          <div
+            ref={chatPanelRef} // Добавлен ref
+            className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh] overflow-y-auto" // Добавлен overflow-y-auto
+          >
+            <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
           </div>
         )}
       </div>

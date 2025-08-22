@@ -8,7 +8,7 @@ import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply } from "lu
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { VariableSizeList, ListOnScrollProps } from 'react-window'; // Изменено на VariableSizeList
+import { VariableSizeList, ListOnScrollProps } from 'react-window';
 import {
     useGetChatQuery,
     useGetChatMessagesQuery,
@@ -28,6 +28,7 @@ import { MessageItem } from "@/src/components/chat/message-item"
 interface ChatSectionProps {
   onCloseChat: () => void
   streamerId: string
+  onScrollToBottom: () => void; // Новый пропс для прокрутки родителя
 }
 
 const messageSchema = z.object({
@@ -71,17 +72,17 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
   );
 });
 
-export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
+export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatSectionProps) { // Добавлен onScrollToBottom
   const chatContainerRef = useRef<HTMLDivElement>(null) // Ref for the outer div to get dimensions
-  const listRef = useRef<VariableSizeList>(null); // Изменено на VariableSizeList
-  const outerListRef = useRef<HTMLDivElement>(null); // Ref for the actual scrollable DOM element of VariableSizeList
+  const listRef = useRef<VariableSizeList>(null);
+  const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
   const [isScrolledToTop, setIsScrolledToTop] = useState(false);
-  const [isUserAtBottom, setIsUserAtBottom] = useState(true); // New state to track if user is at the bottom
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
 
@@ -185,10 +186,11 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   // Effect to scroll to bottom when reply box appears
   useEffect(() => {
-    if (replyToMessage && listRef.current && reversedMessages.length > 0) {
-      listRef.current.scrollToItem(reversedMessages.length - 1, "end");
+    if (replyToMessage) {
+      // Вместо прокрутки списка, прокручиваем родительский контейнер
+      onScrollToBottom(); 
     }
-  }, [replyToMessage, reversedMessages.length]);
+  }, [replyToMessage, onScrollToBottom]); // Добавлен onScrollToBottom в зависимости
 
   // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
@@ -511,16 +513,16 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           </div>
         ) : (
           listHeight > 0 && listWidth > 0 && (
-            <VariableSizeList // Изменено на VariableSizeList
+            <VariableSizeList
               ref={listRef}
               outerRef={outerListRef}
               height={listHeight}
               width={listWidth}
               itemCount={reversedMessages.length}
-              itemSize={getItemSize} // Используем функцию getItemSize
+              itemSize={getItemSize}
               itemData={itemData}
               onScroll={onListScroll}
-              estimatedItemSize={MESSAGE_ITEM_BASE_HEIGHT} // Добавлено для лучшей производительности
+              estimatedItemSize={MESSAGE_ITEM_BASE_HEIGHT}
               className="custom-scrollbar"
             >
               {Row}
