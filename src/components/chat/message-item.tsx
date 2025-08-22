@@ -2,7 +2,7 @@
 
 import React from "react"
 import { format, isToday } from "date-fns"
-import { MessageSquareReply, MoreHorizontal, X } from "lucide-react"
+import { MessageSquareReply, MoreHorizontal, X, Pin } from "lucide-react" // Добавлен Pin
 import { cn } from "@/lib/utils"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -12,12 +12,14 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
+  ContextMenuSeparator, // Добавлен разделитель
 } from "@/components/ui/context-menu"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator, // Добавлен разделитель
 } from "@/components/ui/dropdown-menu"
 import { ChatMessageDto } from "@/graphql/__generated__/graphql"
 
@@ -25,18 +27,26 @@ interface MessageItemProps {
   message: ChatMessageDto
   onReply: (message: ChatMessageDto) => void
   onDelete: (messageId: string) => void
+  onPin: (messageId: string) => void // Новый пропс для закрепления
+  onUnpin: (chatId: string) => void // Новый пропс для открепления
+  isPinned: boolean // Новый пропс для определения, закреплено ли сообщение
   currentHoveredMessageId: string | null
   onMouseEnter: (messageId: string) => void
   onMouseLeave: () => void
+  chatId: string // Добавлен chatId для unpin
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
   message,
   onReply,
   onDelete,
+  onPin,
+  onUnpin,
+  isPinned,
   currentHoveredMessageId,
   onMouseEnter,
   onMouseLeave,
+  chatId,
 }) => {
   const messageDate = new Date(message.createdAt)
   const formattedTime = isToday(messageDate)
@@ -77,6 +87,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             <span className="font-semibold text-green-400">{message.sender?.userName}:</span>{" "}
             <span>{isMessageDeleted ? "[deleted]" : message.message}</span>
             <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
+            {isPinned && (
+              <Pin className="h-3 w-3 ml-1 inline-block text-blue-400" title="Pinned message" />
+            )}
           </div>
 
           <DropdownMenu>
@@ -102,12 +115,30 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               >
                 Reply
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {!isPinned ? (
+                <DropdownMenuItem
+                  onClick={() => onPin(message.id)}
+                  className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
+                  disabled={isMessageDeleted}
+                >
+                  <Pin className="h-4 w-4 mr-2" /> Pin Message
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={() => onUnpin(chatId)}
+                  className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
+                >
+                  <Pin className="h-4 w-4 mr-2" /> Unpin Message
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => onDelete(message.id)}
                 className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
                 disabled={isMessageDeleted}
               >
-                Delete
+                <X className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -121,12 +152,30 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         >
           Reply
         </ContextMenuItem>
+        <ContextMenuSeparator />
+        {!isPinned ? (
+          <ContextMenuItem
+            onClick={() => onPin(message.id)}
+            className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
+            disabled={isMessageDeleted}
+          >
+            <Pin className="h-4 w-4 mr-2" /> Pin Message
+          </ContextMenuItem>
+        ) : (
+          <ContextMenuItem
+            onClick={() => onUnpin(chatId)}
+            className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
+          >
+            <Pin className="h-4 w-4 mr-2" /> Unpin Message
+          </ContextMenuItem>
+        )}
+        <ContextMenuSeparator />
         <ContextMenuItem
           onClick={() => onDelete(message.id)}
           className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
           disabled={isMessageDeleted}
         >
-          Delete
+          <X className="h-4 w-4 mr-2" /> Delete
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

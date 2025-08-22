@@ -1,10 +1,11 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
+import { format, isToday } from "date-fns" // Добавлен импорт format, isToday
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply } from "lucide-react"
+import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin } from "lucide-react" // Добавлен Pin
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -14,21 +15,24 @@ import {
     useGetChatMessagesQuery,
     useCreateMessageMutation,
     useDeleteMessageMutation,
+    usePinMessageMutation, // Импорт мутации для закрепления
+    useUnpinMessageMutation, // Импорт мутации для открепления
+    useChatUpdatedSubscription, // Импорт подписки для обновления чата
     SortEnumType,
     ChatMessageDto,
-    useChatMessageCreatedSubscription,
-    useChatMessageDeletedSubscription,
     GetChatMessagesQuery,
     GetChatMessagesDocument,
     ChatMessagesEdge,
+    GetChatDocument, // Импорт для обновления кэша чата
 } from "@/graphql/__generated__/graphql"
 import { useApolloClient } from "@apollo/client"
 import { MessageItem } from "@/src/components/chat/message-item"
+import { getMinioUrl } from "@/utils/utils" // Импорт getMinioUrl
 
 interface ChatSectionProps {
   onCloseChat: () => void
   streamerId: string
-  onScrollToBottom: () => void; // Новый пропс для прокрутки родителя
+  onScrollToBottom: () => void;
 }
 
 const messageSchema = z.object({
@@ -36,27 +40,32 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-const messagesCount = 50; // Увеличено количество сообщений для начальной загрузки
-const MESSAGE_ITEM_BASE_HEIGHT = 50; // Базовая высота для однострочного сообщения без ответа
-const REPLY_HEIGHT_ADDITION = 20; // Дополнительная высота для сообщения, которое является ответом
-const LONG_MESSAGE_TEXT_THRESHOLD = 50; // Порог символов для определения длинного сообщения
-const LONG_MESSAGE_HEIGHT_PER_LINE = 18; // Примерная высота для каждой дополнительной строки длинного сообщения
+const messagesCount = 50;
+const MESSAGE_ITEM_BASE_HEIGHT = 50;
+const REPLY_HEIGHT_ADDITION = 20;
+const LONG_MESSAGE_TEXT_THRESHOLD = 50;
+const LONG_MESSAGE_HEIGHT_PER_LINE = 18;
+const PINNED_MESSAGE_HEIGHT = 70; // Примерная высота для закрепленного сообщения
 
-// Define interface for data passed to Row component
 interface RowData {
   messages: ChatMessageDto[];
   onReply: (message: ChatMessageDto) => void;
   onDelete: (messageId: string) => void;
+  onPin: (messageId: string) => void;
+  onUnpin: (chatId: string) => void;
   currentHoveredMessageId: string | null;
   onMouseEnter: (messageId: string) => void;
   onMouseLeave: () => void;
+  chatId: string;
+  pinnedMessageId: string | null; // Передаем ID закрепленного сообщения
 }
 
-// Row component for VariableSizeList - moved outside ChatSection
 const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
-  const { messages, onReply, onDelete, currentHoveredMessageId, onMouseEnter, onMouseLeave } = data;
+  const { messages, onReply, onDelete, onPin, onUnpin, currentHoveredMessageId, onMouseEnter, onMouseLeave, chatId, pinnedMessageId } = data;
   const message = messages[index];
   if (!message) return null;
+
+  const isPinned = message.id === pinnedMessageId; // Проверяем, закреплено ли это сообщение
 
   return (
     <div style={style}>
@@ -64,16 +73,20 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
         message={message}
         onReply={onReply}
         onDelete={onDelete}
+        onPin={onPin}
+        onUnpin={onUnpin}
+        isPinned={isPinned}
         currentHoveredMessageId={currentHoveredMessageId}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
+        chatId={chatId}
       />
     </div>
   );
 });
 
-export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatSectionProps) { // Добавлен onScrollToBottom
-  const chatContainerRef = useRef<HTMLDivElement>(null) // Ref for the outer div to get dimensions
+export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatSectionProps) {
+  const chatContainerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
@@ -92,6 +105,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   })
 
   const chatId = chatData?.chat.id
+  const pinnedMessage = chatData?.chat.pinnedMessage;
+  const pinnedMessageId = chatData?.chat.pinnedMessageId;
 
   const {
     data: messagesData,
@@ -111,6 +126,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
 
   const [createMessage, { loading: sendingMessage }] = useCreateMessageMutation()
   const [deleteMessageMutation] = useDeleteMessageMutation();
+  const [pinMessageMutation] = usePinMessageMutation(); // Инициализация мутации закрепления
+  const [unpinMessageMutation] = useUnpinMessageMutation(); // Инициализация мутации открепления
 
   const {
     register,
@@ -123,6 +140,46 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
       message: "",
     },
   })
+
+  // Подписка на обновление чата (для закрепленных сообщений)
+  useChatUpdatedSubscription({
+    variables: { chatId: chatId! },
+    skip: !chatId,
+    onData: ({ client, data }) => {
+      const updatedChat = data.data?.chatUpdated;
+      if (updatedChat) {
+        // Обновляем кэш для GetChatQuery
+        client.cache.updateQuery(
+          {
+            query: GetChatDocument,
+            variables: { streamerId },
+          },
+          (prev) => {
+            if (!prev || !prev.chat) return prev;
+            return {
+              ...prev,
+              chat: {
+                ...prev.chat,
+                pinnedMessageId: updatedChat.pinnedMessageId,
+                pinnedMessage: updatedChat.pinnedMessage ? {
+                  ...updatedChat.pinnedMessage,
+                  __typename: 'PinnedChatMessageDto',
+                  message: updatedChat.pinnedMessage.message ? {
+                    ...updatedChat.pinnedMessage.message,
+                    __typename: 'ChatMessageDto',
+                    sender: updatedChat.pinnedMessage.message.sender ? {
+                      ...updatedChat.pinnedMessage.message.sender,
+                      __typename: 'StreamerDto',
+                    } : null,
+                  } : null,
+                } : null,
+              },
+            };
+          }
+        );
+      }
+    },
+  });
 
   // ResizeObserver to get dynamic height/width for VariableSizeList
   useEffect(() => {
@@ -161,9 +218,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
       height += REPLY_HEIGHT_ADDITION;
     }
 
-    // Простая оценка для длинных сообщений
     if (message.message.length > LONG_MESSAGE_TEXT_THRESHOLD) {
-      // Примерная оценка количества дополнительных строк
       const extraLines = Math.ceil((message.message.length - LONG_MESSAGE_TEXT_THRESHOLD) / 30); 
       height += extraLines * LONG_MESSAGE_HEIGHT_PER_LINE;
     }
@@ -175,22 +230,14 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   useEffect(() => {
     if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
       const timer = setTimeout(() => {
-        listRef.current?.scrollToItem(reversedMessages.length - 1, "end"); // Прокрутка в конец при начальной загрузке
-        setInitialMessagesLoaded(true);
+        listRef.current?.scrollToItem(reversedMessages.length - 1, "end");
         setIsScrolledToTop(false);
         setIsUserAtBottom(true);
-      }, 50); // Задержка в 50 мс
+        setInitialMessagesLoaded(true);
+      }, 50);
       return () => clearTimeout(timer);
     }
   }, [reversedMessages, initialMessagesLoaded]);
-
-  // Effect to scroll to bottom when reply box appears
-  useEffect(() => {
-    if (replyToMessage) {
-      // Вместо прокрутки списка, прокручиваем родительский контейнер
-      onScrollToBottom(); 
-    }
-  }, [replyToMessage, onScrollToBottom]); // Добавлен onScrollToBottom в зависимости
 
   // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
@@ -274,7 +321,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
           }
         );
 
-        // Scroll to bottom if user was already at bottom
         if (isUserAtBottom && listRef.current) {
           listRef.current.scrollToItem(reversedMessages.length, "end"); 
         }
@@ -304,11 +350,9 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
             }
             const updatedNodes = prev.chatMessages.nodes.map(
               (node: ChatMessageDto) => {
-                // Case 1: The message itself is being deleted
                 if (node.id === deletedMessage.id) {
                   return { ...node, isDeleted: true, message: "[deleted]" };
                 }
-                // Case 2: The message replies to the deleted message
                 if (node.replyId === deletedMessage.id) {
                   return {
                     ...node,
@@ -358,7 +402,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
           }
         );
 
-        // Clear replyToMessage if the deleted message was being replied to
         if (replyToMessage?.id === deletedMessage.id) {
           setReplyToMessage(null);
         }
@@ -394,17 +437,45 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
           },
         },
       });
-      // UI will be updated via the useChatMessageDeletedSubscription, which directly modifies the Apollo cache
     } catch (error) {
       console.error("Error deleting message:", error);
-      // Optionally show a toast notification for error
+    }
+  };
+
+  const handlePinMessage = async (messageId: string) => {
+    if (!chatId) return;
+    try {
+      await pinMessageMutation({
+        variables: {
+          pinMessage: {
+            messageId: messageId,
+          },
+        },
+      });
+      // UI will be updated via the useChatUpdatedSubscription
+    } catch (error) {
+      console.error("Error pinning message:", error);
+    }
+  };
+
+  const handleUnpinMessage = async (chatId: string) => {
+    try {
+      await unpinMessageMutation({
+        variables: {
+          request: {
+            chatId: chatId,
+          },
+        },
+      });
+      // UI will be updated via the useChatUpdatedSubscription
+    } catch (error) {
+      console.error("Error unpinning message:", error);
     }
   };
 
   const handleLoadMore = async () => {
     if (!chatId || !messagesData?.chatMessages?.pageInfo.hasNextPage || networkStatus === 3) return;
 
-    // Store current scroll position before fetching more
     const currentScrollOffset = outerListRef.current?.scrollTop || 0;
 
     try {
@@ -422,8 +493,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
           const newNodes = fetchMoreResult.chatMessages.nodes;
           const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
           
-          // Calculate new scroll position to maintain view
-          // Используем getItemSize для более точного расчета
           let newItemsHeight = 0;
           for (let i = 0; i < newNodes.length; i++) {
             newItemsHeight += getItemSize(prev.chatMessages?.nodes?.length ?? 0 + i);
@@ -459,25 +528,23 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   const onListScroll = useCallback(({ scrollOffset }: ListOnScrollProps) => {
     if (outerListRef.current) {
       const { scrollTop, clientHeight, scrollHeight } = outerListRef.current;
-      setIsScrolledToTop(scrollTop < 10); // If scrollTop is very small, consider it "at top"
-      setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_BASE_HEIGHT); // Check if near bottom
-
-      // Trigger load more if initial messages are loaded AND scrolling up near the top
-      if (initialMessagesLoaded && scrollTop < MESSAGE_ITEM_BASE_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
-        handleLoadMore();
-      }
+      setIsScrolledToTop(scrollTop < 10);
+      setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_BASE_HEIGHT);
     }
-  }, [messagesData, isLoadingMore, handleLoadMore, initialMessagesLoaded]);
+  }, [messagesData, isLoadingMore, initialMessagesLoaded]);
 
-  // Memoize the itemData object to ensure stability for VariableSizeList
   const itemData = React.useMemo(() => ({
     messages: reversedMessages,
     onReply: setReplyToMessage,
     onDelete: handleDeleteMessage,
+    onPin: handlePinMessage,
+    onUnpin: handleUnpinMessage,
     currentHoveredMessageId: hoveredMessageId,
     onMouseEnter: setHoveredMessageId,
     onMouseLeave: () => setHoveredMessageId(null),
-  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, hoveredMessageId, setHoveredMessageId]);
+    chatId: chatId!,
+    pinnedMessageId: pinnedMessageId,
+  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId]);
 
 
   return (
@@ -505,6 +572,30 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
           <X className="h-5 w-5" />
         </Button>
       </CardHeader>
+
+      {/* Pinned Message Display */}
+      {pinnedMessage && (
+        <div className="bg-blue-900/30 border-b border-blue-800 p-3 flex items-center justify-between text-sm text-blue-200">
+          <div className="flex items-center space-x-2">
+            <Pin className="h-4 w-4 text-blue-400 flex-shrink-0" />
+            <span className="font-semibold">{pinnedMessage.message?.sender?.userName}:</span>
+            <span className="truncate flex-1">{pinnedMessage.message?.message}</span>
+            <span className="text-blue-300 text-xs ml-2">
+              {isToday(new Date(pinnedMessage.createdAt))
+                ? format(new Date(pinnedMessage.createdAt), "HH:mm")
+                : format(new Date(pinnedMessage.createdAt), "MMM dd, yyyy")}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-blue-300 hover:text-white hover:bg-blue-800/50"
+            onClick={() => handleUnpinMessage(chatId!)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       <CardContent className="flex-1 p-0" ref={chatContainerRef}>
         {chatLoading || messagesLoading ? (
