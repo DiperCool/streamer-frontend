@@ -12,6 +12,27 @@ export const GET_CHAT = gql`
                 createdAt
                 messageId
                 pinnedById
+                message {
+                    id
+                    createdAt
+                    isActive
+                    isDeleted
+                    message
+                    type
+                    sender {
+                        id
+                        userName
+                        avatar
+                    }
+                    reply {
+                        id
+                        isDeleted
+                        message
+                        sender {
+                            userName
+                        }
+                    }
+                }
             }
             settings {
                 id

@@ -1,11 +1,11 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
-import { format, isToday } from "date-fns" // Добавлен импорт format, isToday
+import { format, isToday } from "date-fns"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin } from "lucide-react" // Добавлен Pin
+import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -15,19 +15,19 @@ import {
     useGetChatMessagesQuery,
     useCreateMessageMutation,
     useDeleteMessageMutation,
-    usePinMessageMutation, // Импорт мутации для закрепления
-    useUnpinMessageMutation, // Импорт мутации для открепления
-    useChatUpdatedSubscription, // Импорт подписки для обновления чата
+    usePinMessageMutation,
+    useUnpinMessageMutation,
+    useChatUpdatedSubscription,
     SortEnumType,
     ChatMessageDto,
     GetChatMessagesQuery,
     GetChatMessagesDocument,
     ChatMessagesEdge,
-    GetChatDocument, // Импорт для обновления кэша чата
+    GetChatDocument,
 } from "@/graphql/__generated__/graphql"
 import { useApolloClient } from "@apollo/client"
 import { MessageItem } from "@/src/components/chat/message-item"
-import { getMinioUrl } from "@/utils/utils" // Импорт getMinioUrl
+import { getMinioUrl } from "@/utils/utils"
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -45,7 +45,7 @@ const MESSAGE_ITEM_BASE_HEIGHT = 50;
 const REPLY_HEIGHT_ADDITION = 20;
 const LONG_MESSAGE_TEXT_THRESHOLD = 50;
 const LONG_MESSAGE_HEIGHT_PER_LINE = 18;
-const PINNED_MESSAGE_HEIGHT = 70; // Примерная высота для закрепленного сообщения
+const PINNED_MESSAGE_HEIGHT = 70;
 
 interface RowData {
   messages: ChatMessageDto[];
@@ -57,7 +57,7 @@ interface RowData {
   onMouseEnter: (messageId: string) => void;
   onMouseLeave: () => void;
   chatId: string;
-  pinnedMessageId: string | null; // Передаем ID закрепленного сообщения
+  pinnedMessageId: string | null;
 }
 
 const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
@@ -65,7 +65,7 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
   const message = messages[index];
   if (!message) return null;
 
-  const isPinned = message.id === pinnedMessageId; // Проверяем, закреплено ли это сообщение
+  const isPinned = message.id === pinnedMessageId;
 
   return (
     <div style={style}>
@@ -99,7 +99,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
 
-  const { data: chatData, loading: chatLoading } = useGetChatQuery({
+  const { data: chatData, loading: chatLoading, refetch: refetchChat } = useGetChatQuery({ // Добавлен refetchChat
     variables: { streamerId },
     skip: !streamerId,
   })
@@ -126,8 +126,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
 
   const [createMessage, { loading: sendingMessage }] = useCreateMessageMutation()
   const [deleteMessageMutation] = useDeleteMessageMutation();
-  const [pinMessageMutation] = usePinMessageMutation(); // Инициализация мутации закрепления
-  const [unpinMessageMutation] = useUnpinMessageMutation(); // Инициализация мутации открепления
+  const [pinMessageMutation] = usePinMessageMutation();
+  const [unpinMessageMutation] = useUnpinMessageMutation();
 
   const {
     register,
@@ -145,39 +145,9 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   useChatUpdatedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
-    onData: ({ client, data }) => {
-      const updatedChat = data.data?.chatUpdated;
-      if (updatedChat) {
-        // Обновляем кэш для GetChatQuery
-        client.cache.updateQuery(
-          {
-            query: GetChatDocument,
-            variables: { streamerId },
-          },
-          (prev) => {
-            if (!prev || !prev.chat) return prev;
-            return {
-              ...prev,
-              chat: {
-                ...prev.chat,
-                pinnedMessageId: updatedChat.pinnedMessageId,
-                pinnedMessage: updatedChat.pinnedMessage ? {
-                  ...updatedChat.pinnedMessage,
-                  __typename: 'PinnedChatMessageDto',
-                  message: updatedChat.pinnedMessage.message ? {
-                    ...updatedChat.pinnedMessage.message,
-                    __typename: 'ChatMessageDto',
-                    sender: updatedChat.pinnedMessage.message.sender ? {
-                      ...updatedChat.pinnedMessage.message.sender,
-                      __typename: 'StreamerDto',
-                    } : null,
-                  } : null,
-                } : null,
-              },
-            };
-          }
-        );
-      }
+    onData: () => {
+      // Просто перезапрашиваем данные чата, чтобы получить обновленное закрепленное сообщение
+      refetchChat();
     },
   });
 
@@ -452,7 +422,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
           },
         },
       });
-      // UI will be updated via the useChatUpdatedSubscription
+      // UI will be updated via the useChatUpdatedSubscription, which now calls refetchChat
     } catch (error) {
       console.error("Error pinning message:", error);
     }
@@ -467,7 +437,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
           },
         },
       });
-      // UI will be updated via the useChatUpdatedSubscription
+      // UI will be updated via the useChatUpdatedSubscription, which now calls refetchChat
     } catch (error) {
       console.error("Error unpinning message:", error);
     }
