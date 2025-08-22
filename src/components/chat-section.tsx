@@ -240,7 +240,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
         // Scroll to bottom if user was already at bottom
         if (isUserAtBottom && listRef.current) {
-          listRef.current.scrollToItem(reversedMessages.length, "end"); // Use "end" for new messages
+          // Scroll to the newly added message (which is now the last item)
+          listRef.current.scrollToItem(reversedMessages.length, "end"); 
         }
       }
     },
@@ -386,8 +387,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           const newNodes = fetchMoreResult.chatMessages.nodes;
           const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
           
-          // No automatic scroll adjustment here. User will need to scroll up to see older messages.
-          // This simplifies the logic and avoids complex react-window prepend scroll management.
+          // Calculate new scroll position to maintain view
+          const newItemsCount = newNodes.length;
+          const newScrollOffset = currentScrollOffset + (newItemsCount * MESSAGE_ITEM_HEIGHT);
+          
+          // This will be called after the state update, so it will scroll to the correct position
+          setTimeout(() => {
+            outerListRef.current?.scrollTo(0, newScrollOffset); // Corrected: use outerListRef and (x, y)
+          }, 0);
 
           return {
             ...prev,
