@@ -227,13 +227,13 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                   return { ...node, isDeleted: true, message: "[deleted]" };
                 }
                 // Case 2: The message replies to the deleted message
-                if (node.reply?.id === deletedMessage.id) {
+                if (node.replyId === deletedMessage.id) {
                   return {
                     ...node,
-                    reply: {
+                    reply: node.reply ? {
                       ...node.reply,
                       message: "[deleted]",
-                    },
+                    } : node.reply,
                   };
                 }
                 return node;
@@ -241,18 +241,17 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             );
             const updatedEdges = prev.chatMessages.edges?.map(
               (edge) => {
-                // Apply the same logic to the node within the edge
                 const updatedNode = (() => {
                   if (edge.node.id === deletedMessage.id) {
                     return { ...edge.node, isDeleted: true, message: "[deleted]" };
                   }
-                  if (edge.node.reply?.id === deletedMessage.id) {
+                  if (edge.node.replyId === deletedMessage.id) {
                     return {
                       ...edge.node,
-                      reply: {
+                      reply: edge.node.reply ? {
                         ...edge.node.reply,
                         message: "[deleted]",
-                      },
+                      } : edge.node.reply,
                     };
                   }
                   return edge.node;
@@ -274,6 +273,11 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             };
           }
         );
+
+        // Clear replyToMessage if the deleted message was being replied to
+        if (replyToMessage?.id === deletedMessage.id) {
+          setReplyToMessage(null);
+        }
       }
     },
   });
