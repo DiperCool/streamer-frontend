@@ -33,7 +33,7 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-const messagesCount = 15;
+const messagesCount = 50;
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -53,6 +53,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     loading: messagesLoading,
     fetchMore,
     networkStatus,
+    refetch, // Получаем функцию refetch
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
@@ -77,7 +78,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   })
 
-  // Эффект для обработки начальной загрузки сообщений
+  // Эффект для обработки начальной загрузки сообщений и прокрутки
   useEffect(() => {
     if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
       setTimeout(() => {
@@ -86,6 +87,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
       }, 0);
     }
   }, [messagesData, initialMessagesLoaded])
+
+  // Новый эффект для вызова refetch при открытии чата
+  useEffect(() => {
+    if (chatId) {
+      refetch(); // Вызываем refetch, чтобы получить свежие данные
+      setInitialMessagesLoaded(false); // Сбрасываем, чтобы прокрутка сработала после refetch
+    }
+  }, [chatId, refetch]); // Зависим от chatId и refetch
 
   // Подписка на новые сообщения
   useChatMessageCreatedSubscription({
@@ -100,7 +109,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             query: GetChatMessagesDocument,
             variables: {
               chatId: chatId!,
-              first: messagesCount, // ИСПРАВЛЕНО: Теперь соответствует основному запросу
+              first: messagesCount, // Соответствует основному запросу
               order: [{ createdAt: SortEnumType.Desc }],
             },
           },
