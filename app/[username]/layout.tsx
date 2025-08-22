@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback } from "react" // Добавлен useRef и useCallback
+import React, { useState, useRef, useCallback } from "react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
@@ -93,6 +93,16 @@ export default function StreamerProfileLayout({
     },
   });
 
+  // Ref для контейнера чата, чтобы прокручивать его
+  const chatPanelRef = useRef<HTMLDivElement>(null);
+
+  // Функция для прокрутки панели чата до конца
+  const scrollChatPanelToBottom = useCallback(() => {
+    if (chatPanelRef.current) {
+      chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
+    }
+  }, []);
+
   if (streamerLoading || profileLoading || currentStreamLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -133,16 +143,6 @@ export default function StreamerProfileLayout({
     return 'home';
   };
   const activeTab = getActiveTab();
-
-  // Ref для контейнера чата, чтобы прокручивать его
-  const chatPanelRef = useRef<HTMLDivElement>(null);
-
-  // Функция для прокрутки панели чата до конца
-  const scrollChatPanelToBottom = useCallback(() => {
-    if (chatPanelRef.current) {
-      chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный (обратный порядок) на больших */}
