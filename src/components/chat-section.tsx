@@ -137,7 +137,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             }
 
             const existingMessage = prev.chatMessages.nodes?.find(
-              (node: ChatMessageDto) => node.id === newMessage.id // <--- Исправлено здесь
+              (node: ChatMessageDto) => node.id === newMessage.id
             );
 
             if (existingMessage) {
@@ -222,7 +222,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               return prev;
             }
             const updatedNodes = prev.chatMessages.nodes.map(
-              (node) => {
+              (node: ChatMessageDto) => { // <--- Исправлено здесь
                 // Case 1: The message itself is being deleted
                 if (node.id === deletedMessage.id) {
                   return { ...node, isDeleted: true, message: "[deleted]" };
