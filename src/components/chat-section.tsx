@@ -137,7 +137,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             }
 
             const existingMessage = prev.chatMessages.nodes?.find(
-              (node) => node.id === newMessage.id
+              (node: ChatMessageDto) => node.id === newMessage.id // <--- Исправлено здесь
             );
 
             if (existingMessage) {
@@ -151,7 +151,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 __typename: 'StreamerDto',
                 id: newMessage.sender?.id || '',
                 userName: newMessage.sender?.userName || '',
-                avatar: newMessage.sender?.avatar
+                avatar: newMessage.sender?.avatar,
               },
               reply: newMessage.reply ? {
                 __typename: 'ChatMessageDto',
