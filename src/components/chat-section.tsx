@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2, ChevronUp } from "lucide-react"
+import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -22,6 +22,12 @@ import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { format, isToday } from "date-fns"
 import { useApolloClient } from "@apollo/client"
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -40,6 +46,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const client = useApolloClient();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
+  const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
     variables: { streamerId },
@@ -189,10 +197,12 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           request: {
             chatId,
             message: values.message,
+            replyMessageId: replyToMessage?.id, // Передаем ID сообщения для ответа
           },
         },
       })
       reset({ message: "" })
+      setReplyToMessage(null) // Очищаем состояние ответа после отправки
     } catch (error) {
       console.error("Error sending message:", error)
     }
@@ -269,7 +279,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               <div className="flex justify-center py-2">
                 <Button
                   variant="default"
-                  size="sm" // Используем 'sm' для компактности
+                  size="sm"
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
                 >
@@ -281,7 +291,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 </Button>
               </div>
             )}
-            {/* Отображаем сообщения в обратном порядке, чтобы новые были внизу */}
             {messagesData?.chatMessages?.nodes?.slice().reverse().map((msg) => {
               const messageDate = new Date(msg.createdAt);
               const formattedTime = isToday(messageDate)
@@ -289,51 +298,96 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 : format(messageDate, "MMM dd, yyyy");
 
               return (
-                <div key={msg.id} className="text-gray-300 text-sm flex items-start space-x-2">
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage src={getMinioUrl(msg.sender?.avatar!)} alt={msg.sender?.userName || "User"} />
-                    <AvatarFallback className="bg-gray-600 text-white text-xs">
-                      {msg.sender?.userName?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <span className="font-semibold text-green-400">{msg.sender?.userName}:</span>{" "}
-                    <span>{msg.message}</span>
-                    <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
-                  </div>
-                </div>
+                <ContextMenu key={msg.id}>
+                  <ContextMenuTrigger asChild>
+                    <div
+                      className={cn(
+                        "text-gray-300 text-sm flex items-start space-x-2 p-1 rounded-md transition-colors duration-150",
+                        hoveredMessageId === msg.id && "bg-gray-700"
+                      )}
+                      onMouseEnter={() => setHoveredMessageId(msg.id)}
+                      onMouseLeave={() => setHoveredMessageId(null)}
+                    >
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={getMinioUrl(msg.sender?.avatar!)} alt={msg.sender?.userName || "User"} />
+                        <AvatarFallback className="bg-gray-600 text-white text-xs">
+                          {msg.sender?.userName?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        {msg.reply && (
+                          <div className="flex items-center text-xs text-gray-400 mb-1">
+                            <MessageSquareReply className="h-3 w-3 mr-1" />
+                            Replying to <span className="font-semibold ml-1">{msg.reply.sender?.userName}:</span>
+                            <span className="ml-1 truncate max-w-[150px]">{msg.reply.message}</span>
+                          </div>
+                        )}
+                        <span className="font-semibold text-green-400">{msg.sender?.userName}:</span>{" "}
+                        <span>{msg.message}</span>
+                        <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
+                      </div>
+                    </div>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent className="w-48 bg-gray-700 border-gray-600 text-white">
+                    <ContextMenuItem
+                      onClick={() => setReplyToMessage(msg)}
+                      className="hover:bg-green-600 hover:text-white cursor-pointer"
+                    >
+                      Reply
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
               );
             })}
             <div ref={messagesEndRef} />
           </>
         )}
       </CardContent>
-      <div className="p-4 border-t border-gray-700 flex items-center space-x-2">
-        <Input
-          {...register("message")}
-          placeholder="Send a message"
-          className="flex-1 bg-gray-700 border-gray-600 text-white focus:border-green-500"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit(onSubmit)()
-            }
-          }}
-        />
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-          <Smile className="h-5 w-5" />
-        </Button>
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-          <Gift className="h-5 w-5" />
-        </Button>
-        <Button
-          variant="default"
-          size="icon"
-          className="bg-green-600 hover:bg-green-700 text-white"
-          onClick={handleSubmit(onSubmit)}
-          disabled={sendingMessage}
-        >
-          <Send className="h-5 w-5" />
-        </Button>
+      <div className="p-4 border-t border-gray-700 flex flex-col space-y-2">
+        {replyToMessage && (
+          <div className="flex items-center justify-between bg-gray-700 p-2 rounded-md text-sm text-gray-300">
+            <div className="flex items-center">
+              <MessageSquareReply className="h-4 w-4 mr-2" />
+              Replying to <span className="font-semibold ml-1">{replyToMessage.sender?.userName}:</span>
+              <span className="ml-1 truncate max-w-[150px]">{replyToMessage.message}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-gray-400 hover:text-white"
+              onClick={() => setReplyToMessage(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        <div className="flex items-center space-x-2">
+          <Input
+            {...register("message")}
+            placeholder="Send a message"
+            className="flex-1 bg-gray-700 border-gray-600 text-white focus:border-green-500"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit(onSubmit)()
+              }
+            }}
+          />
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Smile className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Gift className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="default"
+            size="icon"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={handleSubmit(onSubmit)}
+            disabled={sendingMessage}
+          >
+            <Send className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
       {errors.message && (
         <p className="text-red-500 text-sm px-4 pb-2">{errors.message.message}</p>
