@@ -19,7 +19,7 @@ import {
     useChatMessageDeletedSubscription,
     GetChatMessagesQuery,
     GetChatMessagesDocument,
-    ChatMessagesEdge, // Импортируем ChatMessagesEdge
+    ChatMessagesEdge,
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -59,6 +59,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
+  const [isScrolledToTop, setIsScrolledToTop] = useState(false); // State to track if scrolled to top
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
     variables: { streamerId },
@@ -98,7 +99,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   })
 
-  // Эффект для обработки начальной загрузки сообщений и прокрутки
+  // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
     if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
       setTimeout(() => {
@@ -108,7 +109,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     }
   }, [messagesData, initialMessagesLoaded])
 
-  // Эффект для вызова refetch при открытии чата
+  // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
     if (chatId) {
       refetch();
@@ -116,7 +117,30 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     }
   }, [chatId, refetch]);
 
-  // Подписка на новые сообщения
+  // Effect to handle scroll detection for "Load More" button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      if (chatContainerRef.current) {
+        // Consider "top" if scrollTop is very close to 0 (e.g., within 10 pixels)
+        setIsScrolledToTop(chatContainerRef.current.scrollTop < 10);
+      }
+    };
+
+    const currentRef = chatContainerRef.current;
+    if (currentRef) {
+      currentRef.addEventListener("scroll", handleScroll);
+      // Initial check after component mounts and ref is available
+      handleScroll();
+    }
+
+    return () => {
+      if (currentRef) {
+        currentRef.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [chatContainerRef]);
+
+  // Subscription for new messages
   useChatMessageCreatedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
@@ -202,7 +226,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   });
 
-  // Подписка на удаленные сообщения
+  // Subscription for deleted messages
   useChatMessageDeletedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
@@ -234,7 +258,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                     ...node,
                     reply: node.reply ? {
                       ...node.reply,
-                      isDeleted: true, // <-- Добавлено: помечаем ответ как удаленный
+                      isDeleted: true,
                       message: "[deleted]",
                     } : node.reply,
                   };
@@ -243,7 +267,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               }
             );
             const updatedEdges = prev.chatMessages.edges?.map(
-              (edge: ChatMessagesEdge) => { // <--- Исправлено здесь
+              (edge: ChatMessagesEdge) => {
                 const updatedNode = (() => {
                   if (edge.node.id === deletedMessage.id) {
                     return { ...edge.node, isDeleted: true, message: "[deleted]" };
@@ -253,7 +277,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                       ...edge.node,
                       reply: edge.node.reply ? {
                         ...edge.node.reply,
-                        isDeleted: true, // <-- Добавлено: помечаем ответ как удаленный
+                        isDeleted: true,
                         message: "[deleted]",
                       } : edge.node.reply,
                     };
@@ -314,10 +338,10 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           },
         },
       });
-      // UI будет обновлен через подписку useChatMessageDeletedSubscription, которая напрямую изменяет кэш Apollo
+      // UI will be updated via the useChatMessageDeletedSubscription, which directly modifies the Apollo cache
     } catch (error) {
       console.error("Error deleting message:", error);
-      // Здесь можно добавить уведомление для пользователя об ошибке
+      // Optionally show a toast notification for error
     }
   };
 
@@ -374,13 +398,33 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const isLoadingMore = networkStatus === 3;
 
   return (
-    <Card className="bg-gray-800 border-gray-700 h-full flex flex-col">
+    <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative"> {/* Added relative for absolute positioning */}
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
         <CardTitle className="text-white text-lg">Chat</CardTitle>
         <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
           <X className="h-5 w-5" />
         </Button>
       </CardHeader>
+
+      {/* Moved "Load More" button */}
+      {messagesData?.chatMessages?.pageInfo.hasNextPage && isScrolledToTop && (
+        <div className="absolute top-4 right-4 z-10"> {/* Positioned at top-right */}
+          <Button
+            variant="default"
+            size="icon" // Make it a small, round button
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            className="bg-green-600 hover:bg-green-700 text-white rounded-full p-2 h-8 w-8 flex items-center justify-center"
+          >
+            {isLoadingMore ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ChevronUp className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      )}
+
       <CardContent className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar" ref={chatContainerRef}>
         {chatLoading || messagesLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -388,22 +432,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           </div>
         ) : (
           <>
-            {messagesData?.chatMessages?.pageInfo.hasNextPage && (
-              <div className="flex justify-center py-2">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleLoadMore}
-                  disabled={isLoadingMore}
-                >
-                  {isLoadingMore ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ChevronUp className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            )}
+            {/* Removed the old "Load More" button div from here */}
             {messagesData?.chatMessages?.nodes?.slice().reverse().map((msg) => {
               const messageDate = new Date(msg.createdAt);
               const formattedTime = isToday(messageDate)
@@ -455,7 +484,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                                 hoveredMessageId === msg.id ? "opacity-100 visible" : "opacity-0 invisible"
                               )}
                               onClick={(e) => e.stopPropagation()}
-                              disabled={isMessageDeleted} // Отключаем кнопку для удаленных сообщений
+                              disabled={isMessageDeleted}
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -464,14 +493,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                             <DropdownMenuItem
                               onClick={() => setReplyToMessage(msg)}
                               className="hover:bg-green-600 hover:text-white cursor-pointer"
-                              disabled={isMessageDeleted} // Отключаем для удаленных сообщений
+                              disabled={isMessageDeleted}
                             >
                               Reply
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDeleteMessage(msg.id)}
                               className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                              disabled={isMessageDeleted} // Отключаем для удаленных сообщений
+                              disabled={isMessageDeleted}
                             >
                               Delete
                             </DropdownMenuItem>
@@ -483,14 +512,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                     <ContextMenuItem
                       onClick={() => setReplyToMessage(msg)}
                       className="hover:bg-green-600 hover:text-white cursor-pointer"
-                      disabled={isMessageDeleted} // Отключаем для удаленных сообщений
+                      disabled={isMessageDeleted}
                     >
                       Reply
                     </ContextMenuItem>
                     <ContextMenuItem
                       onClick={() => handleDeleteMessage(msg.id)}
                       className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                      disabled={isMessageDeleted} // Отключаем для удаленных сообщений
+                      disabled={isMessageDeleted}
                     >
                       Delete
                     </ContextMenuItem>
