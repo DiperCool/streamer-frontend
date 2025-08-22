@@ -33,7 +33,7 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-const messagesCount = 15;
+const messagesCount = 15; // Установлено на 15
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -269,7 +269,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               <div className="flex justify-center py-2">
                 <Button
                   variant="default"
-                  size="sm"
+                  size="sm" // Используем 'sm' для компактности
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
                 >
