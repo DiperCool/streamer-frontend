@@ -9,12 +9,12 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import {
-  useGetChatQuery,
-  useGetChatMessagesQuery,
-  useCreateMessageMutation,
-  SortEnumType,
-  ChatMessageDto,
-  useChatMessageCreatedSubscription,
+    useGetChatQuery,
+    useGetChatMessagesQuery,
+    useCreateMessageMutation,
+    SortEnumType,
+    ChatMessageDto,
+    useChatMessageCreatedSubscription, GetChatMessagesQuery,
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -54,7 +54,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
-      first: 50, // Загружаем последние 50 сообщений
+      first: 1, // Загружаем последние 50 сообщений
       order: [{ createdAt: SortEnumType.Desc }], // Сервер возвращает новые сообщения сверху
     },
     skip: !chatId,
@@ -77,10 +77,11 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   // Эффект для обработки начальной загрузки сообщений
   useEffect(() => {
-    if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
-      const newNodes = [...messagesData.chatMessages.nodes].reverse()
+    if (messagesData?.chatMessages?.nodes) {
+      const newNodes = [...messagesData.chatMessages.nodes]
+         console.log(newNodes)
       setMessages(newNodes)
-      setHasMoreMessages(messagesData.chatMessages.pageInfo.hasPreviousPage)
+      setHasMoreMessages(messagesData.chatMessages.pageInfo.hasNextPage)
 
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -132,52 +133,58 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     }
   }
 
-  const handleLoadMore = async () => {
-    if (!chatId || !hasMoreMessages || networkStatus === 3) return;
+    const handleLoadMore = async () => {
+        if (!chatId || !hasMoreMessages || networkStatus === 3) return;
 
-    const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+        const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
-    try {
-      const result = await fetchMore({
-        variables: {
-          before: messagesData?.chatMessages?.pageInfo.startCursor,
-          last: 50,
-          order: [{ createdAt: SortEnumType.Desc }],
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult || !fetchMoreResult.chatMessages) return prev;
+        try {
+            const result = await fetchMore({
+                variables: {
+                    after: messagesData?.chatMessages?.pageInfo.endCursor,
+                    first: 1,
+                    order: [{ createdAt: SortEnumType.Desc }],
+                },
+                updateQuery: (prev, { fetchMoreResult }): GetChatMessagesQuery => {
+                    if (!fetchMoreResult || !fetchMoreResult.chatMessages?.nodes) {
+                        return prev;
+                    }
 
-          const newNodes = [...fetchMoreResult.chatMessages.nodes].reverse();
-          const updatedNodes = [...newNodes, ...prev.chatMessages.nodes!];
+                    const newNodes = [...fetchMoreResult.chatMessages.nodes];
+                    const updatedNodes = [...newNodes, ...(prev.chatMessages?.nodes ?? [])];
 
-          setTimeout(() => {
-            if (chatContainerRef.current) {
-              const newScrollHeight = chatContainerRef.current.scrollHeight;
-              const scrollDifference = newScrollHeight - currentScrollHeight;
-              chatContainerRef.current.scrollTop += scrollDifference;
-            }
-          }, 0);
+                    setTimeout(() => {
+                        if (chatContainerRef.current) {
+                            const newScrollHeight = chatContainerRef.current.scrollHeight;
+                            const scrollDifference = newScrollHeight - currentScrollHeight;
+                            chatContainerRef.current.scrollTop += scrollDifference;
+                        }
+                    }, 0);
+                    console.log(prev)
+                    return {
+                        ...prev, // копируем верхний уровень
+                        chatMessages: {
+                            __typename: prev.chatMessages?.__typename ?? "ChatMessagesConnection",
+                            ...fetchMoreResult.chatMessages,
+                            nodes: updatedNodes,
 
-          return {
-            chatMessages: {
-              ...fetchMoreResult.chatMessages,
-              nodes: updatedNodes,
-              pageInfo: {
-                ...fetchMoreResult.chatMessages.pageInfo,
-                endCursor: prev.chatMessages.pageInfo.endCursor,
-                hasNextPage: prev.chatMessages.pageInfo.hasNextPage,
-              },
-            },
-          };
-        },
-      });
-      setHasMoreMessages(result.data.chatMessages?.pageInfo.hasPreviousPage ?? false);
-    } catch (error) {
-      console.error("Error fetching more messages:", error);
-    }
-  };
+                            pageInfo: {
+                                __typename: prev.chatMessages?.pageInfo.__typename ?? "PageInfo",
+                                ...fetchMoreResult.chatMessages.pageInfo,
+                            },
+                        },
+                    };
 
-  const isLoadingMore = networkStatus === 3;
+                },
+            });
+
+            setHasMoreMessages(result.data.chatMessages?.pageInfo.hasNextPage ?? false);
+        } catch (error) {
+            console.error("Error fetching more messages:", error);
+        }
+    };
+
+    const isLoadingMore = networkStatus === 3;
 
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col">
