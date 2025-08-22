@@ -240,7 +240,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
         // Scroll to bottom if user was already at bottom
         if (isUserAtBottom && listRef.current) {
-          // Scroll to the newly added message (which is now the last item)
           listRef.current.scrollToItem(reversedMessages.length, "end"); 
         }
       }
@@ -431,6 +430,17 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     }
   }, [messagesData, isLoadingMore, handleLoadMore]);
 
+  // Memoize the itemData object to ensure stability for FixedSizeList
+  const itemData = React.useMemo(() => ({
+    messages: reversedMessages,
+    onReply: setReplyToMessage,
+    onDelete: handleDeleteMessage,
+    currentHoveredMessageId: hoveredMessageId,
+    onMouseEnter: setHoveredMessageId,
+    onMouseLeave: () => setHoveredMessageId(null),
+  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, hoveredMessageId, setHoveredMessageId]);
+
+
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
@@ -457,7 +467,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         </Button>
       </CardHeader>
 
-      <CardContent className="flex-1 p-0" ref={chatContainerRef}> {/* p-0 to let FixedSizeList manage padding */}
+      <CardContent className="flex-1 p-0" ref={chatContainerRef}>
         {chatLoading || messagesLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
@@ -466,21 +476,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           listHeight > 0 && listWidth > 0 && (
             <FixedSizeList
               ref={listRef}
-              outerRef={outerListRef} {/* Pass outerRef here */}
+              outerRef={outerListRef}
               height={listHeight}
               width={listWidth}
               itemCount={reversedMessages.length}
               itemSize={MESSAGE_ITEM_HEIGHT}
-              itemData={{
-                messages: reversedMessages,
-                onReply: setReplyToMessage,
-                onDelete: handleDeleteMessage,
-                currentHoveredMessageId: hoveredMessageId,
-                onMouseEnter: setHoveredMessageId,
-                onMouseLeave: () => setHoveredMessageId(null),
-              }}
+              itemData={itemData} {/* Используем мемоизированный itemData */}
               onScroll={onListScroll}
-              className="custom-scrollbar" // Apply custom scrollbar if needed
+              className="custom-scrollbar"
             >
               {Row}
             </FixedSizeList>
