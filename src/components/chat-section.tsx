@@ -12,11 +12,11 @@ import {
     useGetChatQuery,
     useGetChatMessagesQuery,
     useCreateMessageMutation,
-    useDeleteMessageMutation, // Импортируем мутацию удаления
+    useDeleteMessageMutation,
     SortEnumType,
     ChatMessageDto,
     useChatMessageCreatedSubscription,
-    useChatMessageDeletedSubscription, // Импортируем подписку на удаление
+    useChatMessageDeletedSubscription,
     GetChatMessagesQuery,
     GetChatMessagesDocument,
 } from "@/graphql/__generated__/graphql"
@@ -83,7 +83,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   })
 
   const [createMessage, { loading: sendingMessage }] = useCreateMessageMutation()
-  const [deleteMessageMutation] = useDeleteMessageMutation(); // Инициализируем мутацию удаления
+  const [deleteMessageMutation] = useDeleteMessageMutation();
 
   const {
     register,
@@ -220,11 +220,17 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             if (!prev || !prev.chatMessages?.nodes) {
               return prev;
             }
-            const updatedNodes = prev.chatMessages.nodes.filter(
-              (node) => node.id !== deletedMessage.id
+            const updatedNodes = prev.chatMessages.nodes.map(
+              (node) =>
+                node.id === deletedMessage.id
+                  ? { ...node, isDeleted: true, message: "[deleted]" } // Обновляем сообщение
+                  : node
             );
-            const updatedEdges = prev.chatMessages.edges?.filter(
-              (edge) => edge.node.id !== deletedMessage.id
+            const updatedEdges = prev.chatMessages.edges?.map(
+              (edge) =>
+                edge.node.id === deletedMessage.id
+                  ? { ...edge, node: { ...edge.node, isDeleted: true, message: "[deleted]" } } // Обновляем сообщение в edge
+                  : edge
             );
 
             return {
@@ -235,7 +241,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 edges: updatedEdges,
                 pageInfo: {
                   ...prev.chatMessages.pageInfo,
-                  // Adjust cursors if necessary, or refetch for simplicity if pagination is complex
                 },
               },
             };
@@ -369,12 +374,15 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 ? format(messageDate, "HH:mm")
                 : format(messageDate, "MMM dd, yyyy");
 
+              const isMessageDeleted = msg.isDeleted;
+
               return (
                 <ContextMenu key={msg.id}>
                   <ContextMenuTrigger asChild>
                     <div
                       className={cn(
-                        "text-gray-300 text-sm flex items-start space-x-2 p-1 rounded-md transition-colors duration-150 group relative",
+                        "text-sm flex items-start space-x-2 p-1 rounded-md transition-colors duration-150 group relative",
+                        isMessageDeleted ? "text-gray-500 italic" : "text-gray-300",
                         hoveredMessageId === msg.id && "bg-gray-700"
                       )}
                       onMouseEnter={() => setHoveredMessageId(msg.id)}
@@ -387,7 +395,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        {msg.reply && (
+                        {msg.reply && !isMessageDeleted && ( // Не показываем ответ, если сообщение удалено
                           <div className="flex items-center text-xs text-gray-400 mb-1">
                             <MessageSquareReply className="h-3 w-3 mr-1" />
                             Replying to <span className="font-semibold ml-1">{msg.reply.sender?.userName}:</span>
@@ -395,7 +403,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                           </div>
                         )}
                         <span className="font-semibold text-green-400">{msg.sender?.userName}:</span>{" "}
-                        <span>{msg.message}</span>
+                        <span>{isMessageDeleted ? "[deleted]" : msg.message}</span>
                         <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
                       </div>
 
@@ -409,6 +417,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                                 hoveredMessageId === msg.id ? "opacity-100 visible" : "opacity-0 invisible"
                               )}
                               onClick={(e) => e.stopPropagation()}
+                              disabled={isMessageDeleted} // Отключаем кнопку для удаленных сообщений
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -417,12 +426,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                             <DropdownMenuItem
                               onClick={() => setReplyToMessage(msg)}
                               className="hover:bg-green-600 hover:text-white cursor-pointer"
+                              disabled={isMessageDeleted} // Отключаем для удаленных сообщений
                             >
                               Reply
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDeleteMessage(msg.id)}
                               className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
+                              disabled={isMessageDeleted} // Отключаем для удаленных сообщений
                             >
                               Delete
                             </DropdownMenuItem>
@@ -434,12 +445,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                     <ContextMenuItem
                       onClick={() => setReplyToMessage(msg)}
                       className="hover:bg-green-600 hover:text-white cursor-pointer"
+                      disabled={isMessageDeleted} // Отключаем для удаленных сообщений
                     >
                       Reply
                     </ContextMenuItem>
                     <ContextMenuItem
                       onClick={() => handleDeleteMessage(msg.id)}
                       className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
+                      disabled={isMessageDeleted} // Отключаем для удаленных сообщений
                     >
                       Delete
                     </ContextMenuItem>
