@@ -596,7 +596,7 @@ export type ChatMessageCreatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: any, id: any, isActive: boolean, isDeleted: boolean, message: string, replyId?: any | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } };
+export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: any, id: any, isActive: boolean, isDeleted: boolean, message: string, replyId?: any | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } };
 
 export type ChatMessageDeletedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
@@ -1086,6 +1086,7 @@ export const ChatMessageCreatedDocument = gql`
     }
     reply {
       id
+      isDeleted
       message
       sender {
         userName

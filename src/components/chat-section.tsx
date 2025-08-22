@@ -151,12 +151,12 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 __typename: 'StreamerDto',
                 id: newMessage.sender?.id || '',
                 userName: newMessage.sender?.userName || '',
-                avatar: newMessage.sender?.avatar,
+                avatar: newMessage.sender?.avatar
               },
               reply: newMessage.reply ? {
                 __typename: 'ChatMessageDto',
                 id: newMessage.reply.id,
-                isDeleted: newMessage.reply.isDeleted, // <--- Добавлено это поле
+                isDeleted: newMessage.reply.isDeleted,
                 message: newMessage.reply.message,
                 sender: newMessage.reply.sender ? {
                   __typename: 'StreamerDto',
