@@ -335,13 +335,15 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                       </div>
 
                       {/* Кнопка "три точки" */}
-                      {hoveredMessageId === msg.id && (
-                        <DropdownMenu>
+                      <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="absolute top-1 right-1 h-6 w-6 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-1"
+                              className={cn(
+                                "absolute top-1 right-1 h-6 w-6 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-1",
+                                hoveredMessageId === msg.id ? "opacity-100 visible" : "opacity-0 invisible"
+                              )}
                               onClick={(e) => e.stopPropagation()} // Предотвращаем всплытие события, чтобы не закрывать меню сразу
                             >
                               <MoreHorizontal className="h-4 w-4" />
@@ -356,7 +358,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      )}
                     </div>
                   </ContextMenuTrigger>
                   <ContextMenuContent className="w-48 bg-gray-700 border-gray-600 text-white">
