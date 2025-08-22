@@ -12,9 +12,11 @@ import {
     useGetChatQuery,
     useGetChatMessagesQuery,
     useCreateMessageMutation,
+    useDeleteMessageMutation, // Импортируем мутацию удаления
     SortEnumType,
     ChatMessageDto,
     useChatMessageCreatedSubscription,
+    useChatMessageDeletedSubscription, // Импортируем подписку на удаление
     GetChatMessagesQuery,
     GetChatMessagesDocument,
 } from "@/graphql/__generated__/graphql"
@@ -47,6 +49,7 @@ const messageSchema = z.object({
 
 type MessageForm = z.infer<typeof messageSchema>
 const messagesCount = 15;
+
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -80,6 +83,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   })
 
   const [createMessage, { loading: sendingMessage }] = useCreateMessageMutation()
+  const [deleteMessageMutation] = useDeleteMessageMutation(); // Инициализируем мутацию удаления
 
   const {
     register,
@@ -196,6 +200,51 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   });
 
+  // Подписка на удаленные сообщения
+  useChatMessageDeletedSubscription({
+    variables: { chatId: chatId! },
+    skip: !chatId,
+    onData: ({ client, data }) => {
+      const deletedMessage = data.data?.chatMessageDeleted;
+      if (deletedMessage) {
+        client.cache.updateQuery(
+          {
+            query: GetChatMessagesDocument,
+            variables: {
+              chatId: chatId!,
+              first: messagesCount,
+              order: [{ createdAt: SortEnumType.Desc }],
+            },
+          },
+          (prev) => {
+            if (!prev || !prev.chatMessages?.nodes) {
+              return prev;
+            }
+            const updatedNodes = prev.chatMessages.nodes.filter(
+              (node) => node.id !== deletedMessage.id
+            );
+            const updatedEdges = prev.chatMessages.edges?.filter(
+              (edge) => edge.node.id !== deletedMessage.id
+            );
+
+            return {
+              ...prev,
+              chatMessages: {
+                ...prev.chatMessages,
+                nodes: updatedNodes,
+                edges: updatedEdges,
+                pageInfo: {
+                  ...prev.chatMessages.pageInfo,
+                  // Adjust cursors if necessary, or refetch for simplicity if pagination is complex
+                },
+              },
+            };
+          }
+        );
+      }
+    },
+  });
+
   const onSubmit = async (values: MessageForm) => {
     if (!chatId) return
     try {
@@ -204,68 +253,84 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           request: {
             chatId,
             message: values.message,
-            replyMessageId: replyToMessage?.id, // Передаем ID сообщения для ответа
+            replyMessageId: replyToMessage?.id,
           },
         },
       })
       reset({ message: "" })
-      setReplyToMessage(null) // Очищаем состояние ответа после отправки
+      setReplyToMessage(null)
     } catch (error) {
       console.error("Error sending message:", error)
     }
   }
 
-    const handleLoadMore = async () => {
-        if (!chatId || !messagesData?.chatMessages?.pageInfo.hasNextPage || networkStatus === 3) return;
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      await deleteMessageMutation({
+        variables: {
+          request: {
+            messageId: messageId,
+          },
+        },
+      });
+      // UI будет обновлен через подписку useChatMessageDeletedSubscription, которая напрямую изменяет кэш Apollo
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      // Здесь можно добавить уведомление для пользователя об ошибке
+    }
+  };
 
-        const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+  const handleLoadMore = async () => {
+    if (!chatId || !messagesData?.chatMessages?.pageInfo.hasNextPage || networkStatus === 3) return;
 
-        try {
-            const result = await fetchMore({
-                variables: {
-                    after: messagesData?.chatMessages?.pageInfo.endCursor,
-                    first: messagesCount,
-                    order: [{ createdAt: SortEnumType.Desc }],
-                },
-                updateQuery: (prev, { fetchMoreResult }): GetChatMessagesQuery => {
-                    if (!fetchMoreResult || !fetchMoreResult.chatMessages?.nodes) {
-                        return prev;
-                    }
+    const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
-                    const newNodes = fetchMoreResult.chatMessages.nodes;
-                    const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
+    try {
+      const result = await fetchMore({
+        variables: {
+          after: messagesData?.chatMessages?.pageInfo.endCursor,
+          first: messagesCount,
+          order: [{ createdAt: SortEnumType.Desc }],
+        },
+        updateQuery: (prev, { fetchMoreResult }): GetChatMessagesQuery => {
+          if (!fetchMoreResult || !fetchMoreResult.chatMessages?.nodes) {
+            return prev;
+          }
 
-                    setTimeout(() => {
-                        if (chatContainerRef.current) {
-                            const newScrollHeight = chatContainerRef.current.scrollHeight;
-                            const scrollDifference = newScrollHeight - currentScrollHeight;
-                            chatContainerRef.current.scrollTop += scrollDifference;
-                        }
-                    }, 0);
-                    
-                    return {
-                        ...prev,
-                        chatMessages: {
-                            __typename: prev.chatMessages?.__typename ?? "ChatMessagesConnection",
-                            ...fetchMoreResult.chatMessages,
-                            nodes: updatedNodes,
-                            pageInfo: {
-                                __typename: prev.chatMessages?.pageInfo.__typename ?? "PageInfo",
-                                ...fetchMoreResult.chatMessages.pageInfo,
-                                endCursor: fetchMoreResult.chatMessages.pageInfo.endCursor,
-                            },
-                        },
-                    };
+          const newNodes = fetchMoreResult.chatMessages.nodes;
+          const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
 
-                },
-            });
+          setTimeout(() => {
+            if (chatContainerRef.current) {
+              const newScrollHeight = chatContainerRef.current.scrollHeight;
+              const scrollDifference = newScrollHeight - currentScrollHeight;
+              chatContainerRef.current.scrollTop += scrollDifference;
+            }
+          }, 0);
+          
+          return {
+            ...prev,
+            chatMessages: {
+              __typename: prev.chatMessages?.__typename ?? "ChatMessagesConnection",
+              ...fetchMoreResult.chatMessages,
+              nodes: updatedNodes,
+              pageInfo: {
+                __typename: prev.chatMessages?.pageInfo.__typename ?? "PageInfo",
+                ...fetchMoreResult.chatMessages.pageInfo,
+                endCursor: fetchMoreResult.chatMessages.pageInfo.endCursor,
+              },
+            },
+          };
 
-        } catch (error) {
-            console.error("Error fetching more messages:", error);
-        }
-    };
+        },
+      });
 
-    const isLoadingMore = networkStatus === 3;
+    } catch (error) {
+      console.error("Error fetching more messages:", error);
+    }
+  };
+
+  const isLoadingMore = networkStatus === 3;
 
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col">
@@ -282,7 +347,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           </div>
         ) : (
           <>
-            {messagesData.chatMessages.pageInfo.hasNextPage && (
+            {messagesData?.chatMessages?.pageInfo.hasNextPage && (
               <div className="flex justify-center py-2">
                 <Button
                   variant="default"
@@ -309,7 +374,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                   <ContextMenuTrigger asChild>
                     <div
                       className={cn(
-                        "text-gray-300 text-sm flex items-start space-x-2 p-1 rounded-md transition-colors duration-150 group relative", // Добавлен 'group relative'
+                        "text-gray-300 text-sm flex items-start space-x-2 p-1 rounded-md transition-colors duration-150 group relative",
                         hoveredMessageId === msg.id && "bg-gray-700"
                       )}
                       onMouseEnter={() => setHoveredMessageId(msg.id)}
@@ -321,7 +386,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                           {msg.sender?.userName?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1"> {/* Добавлен flex-1 для правильного распределения пространства */}
+                      <div className="flex-1">
                         {msg.reply && (
                           <div className="flex items-center text-xs text-gray-400 mb-1">
                             <MessageSquareReply className="h-3 w-3 mr-1" />
@@ -334,7 +399,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                         <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
                       </div>
 
-                      {/* Кнопка "три точки" */}
                       <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -344,7 +408,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                                 "absolute top-1 right-1 h-6 w-6 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-1",
                                 hoveredMessageId === msg.id ? "opacity-100 visible" : "opacity-0 invisible"
                               )}
-                              onClick={(e) => e.stopPropagation()} // Предотвращаем всплытие события, чтобы не закрывать меню сразу
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -356,6 +420,12 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                             >
                               Reply
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
+                            >
+                              Delete
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -366,6 +436,12 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                       className="hover:bg-green-600 hover:text-white cursor-pointer"
                     >
                       Reply
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                      onClick={() => handleDeleteMessage(msg.id)}
+                      className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
+                    >
+                      Delete
                     </ContextMenuItem>
                   </ContextMenuContent>
                 </ContextMenu>
