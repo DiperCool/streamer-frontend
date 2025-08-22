@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Send, Smile, Gift, X, Loader2, ChevronUp } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { useForm } from "react-hook-form" // Убедился, что импорт правильный
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import {
@@ -53,7 +53,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     loading: messagesLoading,
     fetchMore,
     networkStatus,
-    refetch, // Получаем функцию refetch
+    refetch,
   } = useGetChatMessagesQuery({
     variables: {
       chatId: chatId!,
@@ -82,19 +82,19 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   useEffect(() => {
     if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
         setInitialMessagesLoaded(true)
       }, 0);
     }
   }, [messagesData, initialMessagesLoaded])
 
-  // Новый эффект для вызова refetch при открытии чата
+  // Эффект для вызова refetch при открытии чата
   useEffect(() => {
     if (chatId) {
-      refetch(); // Вызываем refetch, чтобы получить свежие данные
-      setInitialMessagesLoaded(false); // Сбрасываем, чтобы прокрутка сработала после refetch
+      refetch();
+      setInitialMessagesLoaded(false);
     }
-  }, [chatId, refetch]); // Зависим от chatId и refetch
+  }, [chatId, refetch]);
 
   // Подписка на новые сообщения
   useChatMessageCreatedSubscription({
@@ -103,13 +103,12 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     onData: ({ client, data }) => {
       const newMessage = data.data?.chatMessageCreated;
       if (newMessage) {
-        // Обновляем кеш Apollo
         client.cache.updateQuery(
           {
             query: GetChatMessagesDocument,
             variables: {
               chatId: chatId!,
-              first: messagesCount, // Соответствует основному запросу
+              first: messagesCount,
               order: [{ createdAt: SortEnumType.Desc }],
             },
           },
@@ -118,16 +117,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               return prev;
             }
 
-            // Проверяем, существует ли уже это сообщение в кеше, чтобы избежать дублирования
             const existingMessage = prev.chatMessages.nodes?.find(
               (node) => node.id === newMessage.id
             );
 
             if (existingMessage) {
-              return prev; // Если сообщение уже есть, возвращаем предыдущее состояние без изменений
+              return prev;
             }
 
-            // Создаем новый узел сообщения с необходимыми __typename
             const newNode: ChatMessageDto = {
               __typename: 'ChatMessageDto',
               ...newMessage,
@@ -148,8 +145,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               } : null,
             };
 
-            // Добавляем новое сообщение в НАЧАЛО списка существующих сообщений в кеше.
-            // Это сохраняет порядок "новые сверху" в кеше, так как сервер отдает сообщения DESC.
             const updatedNodes = [newNode, ...(prev.chatMessages.nodes || [])];
             const newEdge = {
               __typename: 'ChatMessagesEdge',
@@ -166,15 +161,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 edges: updatedEdges,
                 pageInfo: {
                   ...prev.chatMessages.pageInfo,
-                  startCursor: newEdge.cursor, // Обновляем startCursor на курсор нового сообщения
-                  hasPreviousPage: true, // Теперь всегда есть предыдущие, если добавили
+                  startCursor: newEdge.cursor,
+                  hasPreviousPage: true,
                 },
               },
             };
           }
         );
 
-        // Прокручиваем вниз, если пользователь находится внизу чата
         const container = chatContainerRef.current;
         const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50);
 
@@ -221,8 +215,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                         return prev;
                     }
 
-                    const newNodes = fetchMoreResult.chatMessages.nodes; // Эти сообщения старше
-                    const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes]; // Добавляем старые в конец
+                    const newNodes = fetchMoreResult.chatMessages.nodes;
+                    const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
 
                     setTimeout(() => {
                         if (chatContainerRef.current) {
@@ -241,7 +235,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                             pageInfo: {
                                 __typename: prev.chatMessages?.pageInfo.__typename ?? "PageInfo",
                                 ...fetchMoreResult.chatMessages.pageInfo,
-                                // endCursor должен быть курсором самого старого сообщения в updatedNodes
                                 endCursor: fetchMoreResult.chatMessages.pageInfo.endCursor,
                             },
                         },
@@ -275,8 +268,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             {messagesData.chatMessages.pageInfo.hasNextPage && (
               <div className="flex justify-center py-2">
                 <Button
-                  variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  variant="default" // Изменено на default для зеленого цвета
+                  size="sm" // Изменено на sm для компактности
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
                 >
