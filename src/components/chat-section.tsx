@@ -33,7 +33,7 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-const messagesCount = 15; // Установлено на 15
+const messagesCount = 15;
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -274,9 +274,9 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                   disabled={isLoadingMore}
                 >
                   {isLoadingMore ? (
-                    <Loader2 className="h-4 w-4 animate-spin" /> {/* Убран mr-2 */}
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <ChevronUp className="h-4 w-4" /> {/* Убран mr-2 */}
+                    <ChevronUp className="h-4 w-4" />
                   )}
                 </Button>
               </div>
