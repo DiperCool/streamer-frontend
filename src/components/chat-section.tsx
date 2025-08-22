@@ -8,7 +8,7 @@ import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply } from "lu
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { FixedSizeList, ListOnScrollProps } from 'react-window';
+import { VariableSizeList, ListOnScrollProps } from 'react-window'; // Изменено на VariableSizeList
 import {
     useGetChatQuery,
     useGetChatMessagesQuery,
@@ -36,7 +36,10 @@ const messageSchema = z.object({
 
 type MessageForm = z.infer<typeof messageSchema>
 const messagesCount = 50; // Увеличено количество сообщений для начальной загрузки
-const MESSAGE_ITEM_HEIGHT = 50; // Approximate fixed height for a message item
+const MESSAGE_ITEM_BASE_HEIGHT = 50; // Базовая высота для однострочного сообщения без ответа
+const REPLY_HEIGHT_ADDITION = 20; // Дополнительная высота для сообщения, которое является ответом
+const LONG_MESSAGE_TEXT_THRESHOLD = 50; // Порог символов для определения длинного сообщения
+const LONG_MESSAGE_HEIGHT_PER_LINE = 18; // Примерная высота для каждой дополнительной строки длинного сообщения
 
 // Define interface for data passed to Row component
 interface RowData {
@@ -48,7 +51,7 @@ interface RowData {
   onMouseLeave: () => void;
 }
 
-// Row component for FixedSizeList - moved outside ChatSection
+// Row component for VariableSizeList - moved outside ChatSection
 const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
   const { messages, onReply, onDelete, currentHoveredMessageId, onMouseEnter, onMouseLeave } = data;
   const message = messages[index];
@@ -70,8 +73,8 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
 
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null) // Ref for the outer div to get dimensions
-  const listRef = useRef<FixedSizeList>(null); // Ref for FixedSizeList instance methods
-  const outerListRef = useRef<HTMLDivElement>(null); // Ref for the actual scrollable DOM element of FixedSizeList
+  const listRef = useRef<VariableSizeList>(null); // Изменено на VariableSizeList
+  const outerListRef = useRef<HTMLDivElement>(null); // Ref for the actual scrollable DOM element of VariableSizeList
   const client = useApolloClient();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
@@ -120,7 +123,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   })
 
-  // ResizeObserver to get dynamic height/width for FixedSizeList
+  // ResizeObserver to get dynamic height/width for VariableSizeList
   useEffect(() => {
     const currentRef = chatContainerRef.current;
     if (!currentRef) return;
@@ -141,22 +144,42 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     };
   }, []);
 
-  // Memoize reversed messages for FixedSizeList
+  // Memoize reversed messages for VariableSizeList
   const reversedMessages = React.useMemo(() => {
     return messagesData?.chatMessages?.nodes ? [...messagesData.chatMessages.nodes].reverse() : [];
   }, [messagesData]);
 
+  // Function to get item size for VariableSizeList
+  const getItemSize = useCallback((index: number) => {
+    const message = reversedMessages[index];
+    if (!message) return MESSAGE_ITEM_BASE_HEIGHT;
+
+    let height = MESSAGE_ITEM_BASE_HEIGHT;
+
+    if (message.reply) {
+      height += REPLY_HEIGHT_ADDITION;
+    }
+
+    // Простая оценка для длинных сообщений
+    if (message.message.length > LONG_MESSAGE_TEXT_THRESHOLD) {
+      // Примерная оценка количества дополнительных строк
+      const extraLines = Math.ceil((message.message.length - LONG_MESSAGE_TEXT_THRESHOLD) / 30); 
+      height += extraLines * LONG_MESSAGE_HEIGHT_PER_LINE;
+    }
+
+    return height;
+  }, [reversedMessages]);
+
   // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
     if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
-      // Добавляем небольшую задержку для более плавной прокрутки
       const timer = setTimeout(() => {
         listRef.current?.scrollToItem(reversedMessages.length - 1, "end"); // Прокрутка в конец при начальной загрузке
         setInitialMessagesLoaded(true);
         setIsScrolledToTop(false);
         setIsUserAtBottom(true);
       }, 50); // Задержка в 50 мс
-      return () => clearTimeout(timer); // Очистка таймера при размонтировании или изменении зависимостей
+      return () => clearTimeout(timer);
     }
   }, [reversedMessages, initialMessagesLoaded]);
 
@@ -391,12 +414,15 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
           
           // Calculate new scroll position to maintain view
-          const newItemsCount = newNodes.length;
-          const newScrollOffset = currentScrollOffset + (newItemsCount * MESSAGE_ITEM_HEIGHT);
+          // Используем getItemSize для более точного расчета
+          let newItemsHeight = 0;
+          for (let i = 0; i < newNodes.length; i++) {
+            newItemsHeight += getItemSize(prev.chatMessages?.nodes?.length ?? 0 + i);
+          }
+          const newScrollOffset = currentScrollOffset + newItemsHeight;
           
-          // This will be called after the state update, so it will scroll to the correct position
           setTimeout(() => {
-            outerListRef.current?.scrollTo(0, newScrollOffset); // Corrected: use outerListRef and (x, y)
+            outerListRef.current?.scrollTo(0, newScrollOffset);
           }, 0);
 
           return {
@@ -425,16 +451,16 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     if (outerListRef.current) {
       const { scrollTop, clientHeight, scrollHeight } = outerListRef.current;
       setIsScrolledToTop(scrollTop < 10); // If scrollTop is very small, consider it "at top"
-      setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_HEIGHT); // Check if near bottom
+      setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_BASE_HEIGHT); // Check if near bottom
 
       // Trigger load more if initial messages are loaded AND scrolling up near the top
-      if (initialMessagesLoaded && scrollTop < MESSAGE_ITEM_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
+      if (initialMessagesLoaded && scrollTop < MESSAGE_ITEM_BASE_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
         handleLoadMore();
       }
     }
   }, [messagesData, isLoadingMore, handleLoadMore, initialMessagesLoaded]);
 
-  // Memoize the itemData object to ensure stability for FixedSizeList
+  // Memoize the itemData object to ensure stability for VariableSizeList
   const itemData = React.useMemo(() => ({
     messages: reversedMessages,
     onReply: setReplyToMessage,
@@ -478,19 +504,20 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           </div>
         ) : (
           listHeight > 0 && listWidth > 0 && (
-            <FixedSizeList
+            <VariableSizeList // Изменено на VariableSizeList
               ref={listRef}
               outerRef={outerListRef}
               height={listHeight}
               width={listWidth}
               itemCount={reversedMessages.length}
-              itemSize={MESSAGE_ITEM_HEIGHT}
+              itemSize={getItemSize} // Используем функцию getItemSize
               itemData={itemData}
               onScroll={onListScroll}
+              estimatedItemSize={MESSAGE_ITEM_BASE_HEIGHT} // Добавлено для лучшей производительности
               className="custom-scrollbar"
             >
               {Row}
-            </FixedSizeList>
+            </VariableSizeList>
           )
         )}
       </CardContent>
