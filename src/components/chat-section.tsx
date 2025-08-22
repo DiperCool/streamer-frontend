@@ -109,6 +109,15 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               return prev;
             }
 
+            // Проверяем, существует ли уже это сообщение в кеше, чтобы избежать дублирования
+            const existingMessage = prev.chatMessages.nodes?.find(
+              (node) => node.id === newMessage.id
+            );
+
+            if (existingMessage) {
+              return prev; // Если сообщение уже есть, возвращаем предыдущее состояние без изменений
+            }
+
             // Создаем новый узел сообщения с необходимыми __typename
             const newNode: ChatMessageDto = {
               __typename: 'ChatMessageDto',
