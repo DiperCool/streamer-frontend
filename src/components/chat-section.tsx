@@ -183,6 +183,13 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     }
   }, [reversedMessages, initialMessagesLoaded]);
 
+  // Effect to scroll to bottom when reply box appears
+  useEffect(() => {
+    if (replyToMessage && listRef.current && reversedMessages.length > 0) {
+      listRef.current.scrollToItem(reversedMessages.length - 1, "end");
+    }
+  }, [replyToMessage, reversedMessages.length]);
+
   // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
     if (chatId) {
