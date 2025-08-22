@@ -72,8 +72,8 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
   );
 });
 
-export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatSectionProps) { // Добавлен onScrollToBottom
-  const chatContainerRef = useRef<HTMLDivElement>(null) // Ref for the outer div to get dimensions
+export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatSectionProps) {
+  const chatContainerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
@@ -176,21 +176,20 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
     if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
       const timer = setTimeout(() => {
         listRef.current?.scrollToItem(reversedMessages.length - 1, "end"); // Прокрутка в конец при начальной загрузке
-        setInitialMessagesLoaded(true);
         setIsScrolledToTop(false);
         setIsUserAtBottom(true);
+        setInitialMessagesLoaded(true);
       }, 50); // Задержка в 50 мс
       return () => clearTimeout(timer);
     }
   }, [reversedMessages, initialMessagesLoaded]);
 
-  // Effect to scroll to bottom when reply box appears
-  useEffect(() => {
-    if (replyToMessage) {
-      // Вместо прокрутки списка, прокручиваем родительский контейнер
-      onScrollToBottom(); 
-    }
-  }, [replyToMessage, onScrollToBottom]); // Добавлен onScrollToBottom в зависимости
+  // УДАЛЕН Effect to scroll to bottom when reply box appears
+  // useEffect(() => {
+  //   if (replyToMessage) {
+  //     onScrollToBottom(); 
+  //   }
+  // }, [replyToMessage, onScrollToBottom]);
 
   // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
@@ -461,13 +460,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
       const { scrollTop, clientHeight, scrollHeight } = outerListRef.current;
       setIsScrolledToTop(scrollTop < 10); // If scrollTop is very small, consider it "at top"
       setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_BASE_HEIGHT); // Check if near bottom
-
-      // Trigger load more if initial messages are loaded AND scrolling up near the top
-      if (initialMessagesLoaded && scrollTop < MESSAGE_ITEM_BASE_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
-        handleLoadMore();
-      }
     }
-  }, [messagesData, isLoadingMore, handleLoadMore, initialMessagesLoaded]);
+  }, [messagesData, isLoadingMore, initialMessagesLoaded]);
 
   // Memoize the itemData object to ensure stability for VariableSizeList
   const itemData = React.useMemo(() => ({
