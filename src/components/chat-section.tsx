@@ -19,6 +19,7 @@ import {
     useChatMessageDeletedSubscription,
     GetChatMessagesQuery,
     GetChatMessagesDocument,
+    ChatMessagesEdge, // Импортируем ChatMessagesEdge
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -222,7 +223,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               return prev;
             }
             const updatedNodes = prev.chatMessages.nodes.map(
-              (node: ChatMessageDto) => { // <--- Исправлено здесь
+              (node: ChatMessageDto) => {
                 // Case 1: The message itself is being deleted
                 if (node.id === deletedMessage.id) {
                   return { ...node, isDeleted: true, message: "[deleted]" };
@@ -242,7 +243,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               }
             );
             const updatedEdges = prev.chatMessages.edges?.map(
-              (edge) => {
+              (edge: ChatMessagesEdge) => { // <--- Исправлено здесь
                 const updatedNode = (() => {
                   if (edge.node.id === deletedMessage.id) {
                     return { ...edge.node, isDeleted: true, message: "[deleted]" };
