@@ -221,16 +221,44 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               return prev;
             }
             const updatedNodes = prev.chatMessages.nodes.map(
-              (node) =>
-                node.id === deletedMessage.id
-                  ? { ...node, isDeleted: true, message: "[deleted]" } // Обновляем сообщение
-                  : node
+              (node) => {
+                // Case 1: The message itself is being deleted
+                if (node.id === deletedMessage.id) {
+                  return { ...node, isDeleted: true, message: "[deleted]" };
+                }
+                // Case 2: The message replies to the deleted message
+                if (node.reply?.id === deletedMessage.id) {
+                  return {
+                    ...node,
+                    reply: {
+                      ...node.reply,
+                      message: "[deleted]",
+                    },
+                  };
+                }
+                return node;
+              }
             );
             const updatedEdges = prev.chatMessages.edges?.map(
-              (edge) =>
-                edge.node.id === deletedMessage.id
-                  ? { ...edge, node: { ...edge.node, isDeleted: true, message: "[deleted]" } } // Обновляем сообщение в edge
-                  : edge
+              (edge) => {
+                // Apply the same logic to the node within the edge
+                const updatedNode = (() => {
+                  if (edge.node.id === deletedMessage.id) {
+                    return { ...edge.node, isDeleted: true, message: "[deleted]" };
+                  }
+                  if (edge.node.reply?.id === deletedMessage.id) {
+                    return {
+                      ...edge.node,
+                      reply: {
+                        ...edge.node.reply,
+                        message: "[deleted]",
+                      },
+                    };
+                  }
+                  return edge.node;
+                })();
+                return { ...edge, node: updatedNode };
+              }
             );
 
             return {
@@ -395,7 +423,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        {msg.reply && !isMessageDeleted && ( // Не показываем ответ, если сообщение удалено
+                        {msg.reply && ( // Всегда показываем блок ответа, но его контент может быть [deleted]
                           <div className="flex items-center text-xs text-gray-400 mb-1">
                             <MessageSquareReply className="h-3 w-3 mr-1" />
                             Replying to <span className="font-semibold ml-1">{msg.reply.sender?.userName}:</span>
