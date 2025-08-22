@@ -35,8 +35,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null) // Для прокрутки к новым сообщениям (вниз)
   const chatContainerRef = useRef<HTMLDivElement>(null) // Для сохранения позиции прокрутки
 
-  const [messages, setMessages] = useState<ChatMessageDto[]>([])
-  const [hasMoreMessages, setHasMoreMessages] = useState(true)
+
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
@@ -80,8 +79,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     if (messagesData?.chatMessages?.nodes) {
       const newNodes = [...messagesData.chatMessages.nodes]
          console.log(newNodes)
-      setMessages(newNodes)
-      setHasMoreMessages(messagesData.chatMessages.pageInfo.hasNextPage)
+
 
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -97,12 +95,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     onData: ({ data }) => {
       const newMessage = data.data?.chatMessageCreated;
       if (newMessage) {
-        setMessages(prevMessages => {
-          if (prevMessages.some(msg => msg.id === newMessage.id)) {
-            return prevMessages;
-          }
-          return [...prevMessages, newMessage];
-        });
+
 
         const container = chatContainerRef.current;
         const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50);
@@ -134,7 +127,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   }
 
     const handleLoadMore = async () => {
-        if (!chatId || !hasMoreMessages || networkStatus === 3) return;
+        if (!chatId || !messagesData?.chatMessages?.pageInfo.hasNextPage || networkStatus === 3) return;
 
         const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
@@ -178,7 +171,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 },
             });
 
-            setHasMoreMessages(result.data.chatMessages?.pageInfo.hasNextPage ?? false);
         } catch (error) {
             console.error("Error fetching more messages:", error);
         }
@@ -201,7 +193,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           </div>
         ) : (
           <>
-            {hasMoreMessages && (
+            {messagesData.chatMessages.pageInfo.hasNextPage && (
               <div className="flex justify-center py-2">
                 <Button
                   variant="outline"
@@ -218,7 +210,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 </Button>
               </div>
             )}
-            {messages.map((msg) => {
+            {messagesData?.chatMessages?.nodes?.map((msg) => {
               const messageDate = new Date(msg.createdAt);
               const formattedTime = isToday(messageDate)
                 ? format(messageDate, "HH:mm")
