@@ -398,32 +398,30 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const isLoadingMore = networkStatus === 3;
 
   return (
-    <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative"> {/* Added relative for absolute positioning */}
+    <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-white text-lg">Chat</CardTitle>
+        <div className="flex items-center space-x-2"> {/* Group Chat title and Load More button */}
+          <CardTitle className="text-white text-lg">Chat</CardTitle>
+          {messagesData?.chatMessages?.pageInfo.hasNextPage && isScrolledToTop && (
+            <Button
+              variant="default"
+              size="icon"
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+              className="bg-green-600 hover:bg-green-700 text-white rounded-full p-2 h-8 w-8 flex items-center justify-center"
+            >
+              {isLoadingMore ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+        </div>
         <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
           <X className="h-5 w-5" />
         </Button>
       </CardHeader>
-
-      {/* Moved "Load More" button */}
-      {messagesData?.chatMessages?.pageInfo.hasNextPage && isScrolledToTop && (
-        <div className="absolute top-4 right-4 z-10"> {/* Positioned at top-right */}
-          <Button
-            variant="default"
-            size="icon" // Make it a small, round button
-            onClick={handleLoadMore}
-            disabled={isLoadingMore}
-            className="bg-green-600 hover:bg-green-700 text-white rounded-full p-2 h-8 w-8 flex items-center justify-center"
-          >
-            {isLoadingMore ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <ChevronUp className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      )}
 
       <CardContent className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar" ref={chatContainerRef}>
         {chatLoading || messagesLoading ? (
@@ -432,7 +430,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           </div>
         ) : (
           <>
-            {/* Removed the old "Load More" button div from here */}
             {messagesData?.chatMessages?.nodes?.slice().reverse().map((msg) => {
               const messageDate = new Date(msg.createdAt);
               const formattedTime = isToday(messageDate)
