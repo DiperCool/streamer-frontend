@@ -130,14 +130,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               } : null,
             };
 
-            // Для запроса с first: 1, мы просто заменяем текущее сообщение новым
-            const updatedNodes = [newNode];
+            // Добавляем новое сообщение в конец списка существующих сообщений
+            const updatedNodes = [...(prev.chatMessages.nodes || []), newNode];
             const newEdge = {
               __typename: 'ChatMessagesEdge',
               cursor: btoa(newNode.createdAt.toString()),
               node: newNode,
             };
-            const updatedEdges = [newEdge];
+            const updatedEdges = [...(prev.chatMessages.edges || []), newEdge];
 
             return {
               ...prev,
@@ -147,10 +147,10 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                 edges: updatedEdges,
                 pageInfo: {
                   ...prev.chatMessages.pageInfo,
-                  startCursor: newEdge.cursor,
+                  startCursor: prev.chatMessages.pageInfo.startCursor || newEdge.cursor,
                   endCursor: newEdge.cursor,
-                  hasNextPage: true, // Предполагаем, что могут быть более старые сообщения для загрузки
-                  hasPreviousPage: false, // Это самое новое, поэтому нет предыдущих в этом 'first:1' представлении
+                  hasNextPage: prev.chatMessages.pageInfo.hasNextPage,
+                  hasPreviousPage: updatedNodes.length > 1,
                 },
               },
             };
