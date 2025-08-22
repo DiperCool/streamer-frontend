@@ -18,12 +18,22 @@ const config: CodegenConfig = {
                 reactApolloVersion: 3,
                 dedupeFragments: true,
                 useTypeImports: true,
+                scalars: {
+                    UUID: 'string',
+                    DateTime: 'string',
+                    Long: 'number',
+                },
             },
         },
     },
     config: {
         dedupeFragments: true,
         useTypeImports: true,
+        scalars: {
+            UUID: 'string',
+            DateTime: 'string',
+            Long: 'number',
+        },
     },
 }
 
