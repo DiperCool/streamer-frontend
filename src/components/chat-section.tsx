@@ -109,14 +109,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
-    if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
+    if (messagesData?.chatMessages?.nodes && chatContainerRef.current && !initialMessagesLoaded) {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
         handleScroll(); // Call handleScroll after programmatic scroll
         setInitialMessagesLoaded(true)
       }, 0);
     }
-  }, [messagesData, initialMessagesLoaded, handleScroll])
+  }, [messagesData, initialMessagesLoaded, handleScroll, chatContainerRef])
 
   // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
@@ -131,7 +131,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     const currentRef = chatContainerRef.current;
     if (currentRef) {
       currentRef.addEventListener("scroll", handleScroll);
-      handleScroll(); // Initial check after component mounts and ref is available
+      // Removed initial handleScroll() call here, as it's handled by the initialMessagesLoaded useEffect
     }
 
     return () => {
