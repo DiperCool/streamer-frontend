@@ -99,15 +99,24 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   })
 
+  // Refactored handleScroll into a useCallback
+  const handleScroll = useCallback(() => {
+    if (chatContainerRef.current) {
+      // Consider "top" if scrollTop is very close to 0 (e.g., within 10 pixels)
+      setIsScrolledToTop(chatContainerRef.current.scrollTop < 10);
+    }
+  }, []);
+
   // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
     if (messagesData?.chatMessages?.nodes && !initialMessagesLoaded) {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
+        handleScroll(); // Call handleScroll after programmatic scroll
         setInitialMessagesLoaded(true)
       }, 0);
     }
-  }, [messagesData, initialMessagesLoaded])
+  }, [messagesData, initialMessagesLoaded, handleScroll])
 
   // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
@@ -119,18 +128,10 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   // Effect to handle scroll detection for "Load More" button visibility
   useEffect(() => {
-    const handleScroll = () => {
-      if (chatContainerRef.current) {
-        // Consider "top" if scrollTop is very close to 0 (e.g., within 10 pixels)
-        setIsScrolledToTop(chatContainerRef.current.scrollTop < 10);
-      }
-    };
-
     const currentRef = chatContainerRef.current;
     if (currentRef) {
       currentRef.addEventListener("scroll", handleScroll);
-      // Initial check after component mounts and ref is available
-      handleScroll();
+      handleScroll(); // Initial check after component mounts and ref is available
     }
 
     return () => {
@@ -138,7 +139,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         currentRef.removeEventListener("scroll", handleScroll);
       }
     };
-  }, [chatContainerRef]);
+  }, [chatContainerRef, handleScroll]); // Added handleScroll to dependencies
 
   // Subscription for new messages
   useChatMessageCreatedSubscription({
