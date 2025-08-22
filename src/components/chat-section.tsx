@@ -232,6 +232,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                     ...node,
                     reply: node.reply ? {
                       ...node.reply,
+                      isDeleted: true, // <-- Добавлено: помечаем ответ как удаленный
                       message: "[deleted]",
                     } : node.reply,
                   };
@@ -250,6 +251,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                       ...edge.node,
                       reply: edge.node.reply ? {
                         ...edge.node.reply,
+                        isDeleted: true, // <-- Добавлено: помечаем ответ как удаленный
                         message: "[deleted]",
                       } : edge.node.reply,
                     };
@@ -427,11 +429,13 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        {msg.reply && ( // Всегда показываем блок ответа, но его контент может быть [deleted]
+                        {msg.reply && (
                           <div className="flex items-center text-xs text-gray-400 mb-1">
                             <MessageSquareReply className="h-3 w-3 mr-1" />
                             Replying to <span className="font-semibold ml-1">{msg.reply.sender?.userName}:</span>
-                            <span className="ml-1 truncate max-w-[150px]">{msg.reply.message}</span>
+                            <span className={cn("ml-1 truncate max-w-[150px]", msg.reply.isDeleted && "italic text-gray-500")}>
+                              {msg.reply.isDeleted ? "[deleted]" : msg.reply.message}
+                            </span>
                           </div>
                         )}
                         <span className="font-semibold text-green-400">{msg.sender?.userName}:</span>{" "}
