@@ -39,14 +39,16 @@ const messagesCount = 15;
 const MESSAGE_ITEM_HEIGHT = 50; // Approximate fixed height for a message item
 
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-  const listRef = useRef<FixedSizeList>(null); // Ref for FixedSizeList
+  const chatContainerRef = useRef<HTMLDivElement>(null) // Ref for the outer div to get dimensions
+  const listRef = useRef<FixedSizeList>(null); // Ref for FixedSizeList instance methods
+  const outerListRef = useRef<HTMLDivElement>(null); // Ref for the actual scrollable DOM element of FixedSizeList
   const client = useApolloClient();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
   const [isScrolledToTop, setIsScrolledToTop] = useState(false);
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true); // New state to track if user is at the bottom
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
 
@@ -117,9 +119,10 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
     if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
-      listRef.current.scrollToItem(reversedMessages.length - 1, "auto");
+      listRef.current.scrollToItem(reversedMessages.length - 1, "auto"); // Scroll to end on initial load
       setInitialMessagesLoaded(true);
       setIsScrolledToTop(false); // Ensure button is hidden after initial scroll
+      setIsUserAtBottom(true); // Assume user is at bottom after initial scroll
     }
   }, [reversedMessages, initialMessagesLoaded]);
 
@@ -205,14 +208,9 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           }
         );
 
-        // Scroll to bottom if user is already near bottom
-        if (listRef.current) {
-          const { scrollOffset, clientHeight, scrollHeight } = listRef.current._instanceProps.outerRef;
-          const isAtBottom = (scrollHeight - scrollOffset - clientHeight) < MESSAGE_ITEM_HEIGHT; // Check if near bottom
-
-          if (isAtBottom) {
-            listRef.current.scrollToItem(reversedMessages.length, "smooth");
-          }
+        // Scroll to bottom if user was already at bottom
+        if (isUserAtBottom && listRef.current) {
+          listRef.current.scrollToItem(reversedMessages.length, "end"); // Use "end" for new messages
         }
       }
     },
@@ -340,7 +338,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const handleLoadMore = async () => {
     if (!chatId || !messagesData?.chatMessages?.pageInfo.hasNextPage || networkStatus === 3) return;
 
-    const currentScrollOffset = listRef.current?._instanceProps.outerRef.scrollTop || 0;
+    // Store current scroll position before fetching more
+    const currentScrollOffset = outerListRef.current?.scrollTop || 0;
 
     try {
       await fetchMore({
@@ -357,14 +356,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           const newNodes = fetchMoreResult.chatMessages.nodes;
           const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
           
-          // Calculate new scroll position to maintain view
-          const newItemsCount = newNodes.length;
-          const newScrollOffset = currentScrollOffset + (newItemsCount * MESSAGE_ITEM_HEIGHT);
-          
-          // This will be called after the state update, so it will scroll to the correct position
-          setTimeout(() => {
-            listRef.current?.scrollTo(newScrollOffset);
-          }, 0);
+          // No automatic scroll adjustment here. User will need to scroll up to see older messages.
+          // This simplifies the logic and avoids complex react-window prepend scroll management.
 
           return {
             ...prev,
@@ -388,12 +381,16 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   const isLoadingMore = networkStatus === 3;
 
-  const onListScroll = useCallback(({ scrollOffset, scrollDirection }: ListOnScrollProps) => {
-    setIsScrolledToTop(scrollOffset < 10); // If scrollOffset is very small, consider it "at top"
+  const onListScroll = useCallback(({ scrollOffset }: ListOnScrollProps) => {
+    if (outerListRef.current) {
+      const { scrollTop, clientHeight, scrollHeight } = outerListRef.current;
+      setIsScrolledToTop(scrollTop < 10); // If scrollTop is very small, consider it "at top"
+      setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_HEIGHT); // Check if near bottom
 
-    // Trigger load more if scrolling up and near the top
-    if (scrollDirection === 'backward' && scrollOffset < MESSAGE_ITEM_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
-      handleLoadMore();
+      // Trigger load more if scrolling up and near the top
+      if (scrollTop < MESSAGE_ITEM_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
+        handleLoadMore();
+      }
     }
   }, [messagesData, isLoadingMore, handleLoadMore]);
 
@@ -451,6 +448,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           listHeight > 0 && listWidth > 0 && (
             <FixedSizeList
               ref={listRef}
+              outerRef={outerListRef} {/* Pass outerRef here */}
               height={listHeight}
               width={listWidth}
               itemCount={reversedMessages.length}
