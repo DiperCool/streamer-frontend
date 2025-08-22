@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Send, Smile, Gift, X, Loader2, ChevronUp } from "lucide-react"
-import { useForm } from "react-hook-form" // Убедился, что импорт правильный
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import {
@@ -33,7 +33,7 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-const messagesCount = 50;
+const messagesCount = 15; // Изменено на 15
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -268,8 +268,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
             {messagesData.chatMessages.pageInfo.hasNextPage && (
               <div className="flex justify-center py-2">
                 <Button
-                  variant="default" // Изменено на default для зеленого цвета
-                  size="sm" // Изменено на sm для компактности
+                  variant="default" // Зеленый цвет
+                  size="sm" // Компактный размер
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
                 >
