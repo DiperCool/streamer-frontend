@@ -8,6 +8,7 @@ import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply } from "lu
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { FixedSizeList, ListOnScrollProps } from 'react-window'; // Import FixedSizeList and ListOnScrollProps
 import {
     useGetChatQuery,
     useGetChatMessagesQuery,
@@ -22,7 +23,7 @@ import {
     ChatMessagesEdge,
 } from "@/graphql/__generated__/graphql"
 import { useApolloClient } from "@apollo/client"
-import { MessageItem } from "@/src/components/chat/message-item" // Import the new component
+import { MessageItem } from "@/src/components/chat/message-item"
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -35,16 +36,19 @@ const messageSchema = z.object({
 
 type MessageForm = z.infer<typeof messageSchema>
 const messagesCount = 15;
+const MESSAGE_ITEM_HEIGHT = 50; // Approximate fixed height for a message item
 
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<FixedSizeList>(null); // Ref for FixedSizeList
   const client = useApolloClient();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
-  const [isScrolledToTop, setIsScrolledToTop] = useState(false); // State to track if scrolled to top
+  const [isScrolledToTop, setIsScrolledToTop] = useState(false);
+  const [listHeight, setListHeight] = useState(0);
+  const [listWidth, setListWidth] = useState(0);
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
     variables: { streamerId },
@@ -84,24 +88,40 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     },
   })
 
-  // Refactored handleScroll into a useCallback
-  const handleScroll = useCallback(() => {
-    if (chatContainerRef.current) {
-      // Consider "top" if scrollTop is very close to 0 (e.g., within 10 pixels)
-      setIsScrolledToTop(chatContainerRef.current.scrollTop < 10);
-    }
+  // ResizeObserver to get dynamic height/width for FixedSizeList
+  useEffect(() => {
+    const currentRef = chatContainerRef.current;
+    if (!currentRef) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        if (entry.target === currentRef) {
+          setListHeight(entry.contentRect.height);
+          setListWidth(entry.contentRect.width);
+        }
+      }
+    });
+
+    resizeObserver.observe(currentRef);
+
+    return () => {
+      resizeObserver.unobserve(currentRef);
+    };
   }, []);
+
+  // Memoize reversed messages for FixedSizeList
+  const reversedMessages = React.useMemo(() => {
+    return messagesData?.chatMessages?.nodes ? [...messagesData.chatMessages.nodes].reverse() : [];
+  }, [messagesData]);
 
   // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
-    if (messagesData?.chatMessages?.nodes && chatContainerRef.current && !initialMessagesLoaded) {
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
-        handleScroll(); // Call handleScroll after programmatic scroll
-        setInitialMessagesLoaded(true)
-      }, 0);
+    if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
+      listRef.current.scrollToItem(reversedMessages.length - 1, "auto");
+      setInitialMessagesLoaded(true);
+      setIsScrolledToTop(false); // Ensure button is hidden after initial scroll
     }
-  }, [messagesData, initialMessagesLoaded, handleScroll, chatContainerRef])
+  }, [reversedMessages, initialMessagesLoaded]);
 
   // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
@@ -110,21 +130,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
       setInitialMessagesLoaded(false);
     }
   }, [chatId, refetch]);
-
-  // Effect to handle scroll detection for "Load More" button visibility
-  useEffect(() => {
-    const currentRef = chatContainerRef.current;
-    if (currentRef) {
-      currentRef.addEventListener("scroll", handleScroll);
-      // Removed initial handleScroll() call here, as it's handled by the initialMessagesLoaded useEffect
-    }
-
-    return () => {
-      if (currentRef) {
-        currentRef.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [chatContainerRef, handleScroll]); // Added handleScroll to dependencies
 
   // Subscription for new messages
   useChatMessageCreatedSubscription({
@@ -200,13 +205,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
           }
         );
 
-        const container = chatContainerRef.current;
-        const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50);
+        // Scroll to bottom if user is already near bottom
+        if (listRef.current) {
+          const { scrollOffset, clientHeight, scrollHeight } = listRef.current._instanceProps.outerRef;
+          const isAtBottom = (scrollHeight - scrollOffset - clientHeight) < MESSAGE_ITEM_HEIGHT; // Check if near bottom
 
-        if (isAtBottom) {
-          setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-          }, 0);
+          if (isAtBottom) {
+            listRef.current.scrollToItem(reversedMessages.length, "smooth");
+          }
         }
       }
     },
@@ -334,10 +340,10 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const handleLoadMore = async () => {
     if (!chatId || !messagesData?.chatMessages?.pageInfo.hasNextPage || networkStatus === 3) return;
 
-    const currentScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+    const currentScrollOffset = listRef.current?._instanceProps.outerRef.scrollTop || 0;
 
     try {
-      const result = await fetchMore({
+      await fetchMore({
         variables: {
           after: messagesData?.chatMessages?.pageInfo.endCursor,
           first: messagesCount,
@@ -350,15 +356,16 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
           const newNodes = fetchMoreResult.chatMessages.nodes;
           const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
-
-          setTimeout(() => {
-            if (chatContainerRef.current) {
-              const newScrollHeight = chatContainerRef.current.scrollHeight;
-              const scrollDifference = newScrollHeight - currentScrollHeight;
-              chatContainerRef.current.scrollTop += scrollDifference;
-            }
-          }, 0);
           
+          // Calculate new scroll position to maintain view
+          const newItemsCount = newNodes.length;
+          const newScrollOffset = currentScrollOffset + (newItemsCount * MESSAGE_ITEM_HEIGHT);
+          
+          // This will be called after the state update, so it will scroll to the correct position
+          setTimeout(() => {
+            listRef.current?.scrollTo(newScrollOffset);
+          }, 0);
+
           return {
             ...prev,
             chatMessages: {
@@ -372,10 +379,8 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               },
             },
           };
-
         },
       });
-
     } catch (error) {
       console.error("Error fetching more messages:", error);
     }
@@ -383,10 +388,38 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
 
   const isLoadingMore = networkStatus === 3;
 
+  const onListScroll = useCallback(({ scrollOffset, scrollDirection }: ListOnScrollProps) => {
+    setIsScrolledToTop(scrollOffset < 10); // If scrollOffset is very small, consider it "at top"
+
+    // Trigger load more if scrolling up and near the top
+    if (scrollDirection === 'backward' && scrollOffset < MESSAGE_ITEM_HEIGHT * 2 && messagesData?.chatMessages?.pageInfo.hasNextPage && !isLoadingMore) {
+      handleLoadMore();
+    }
+  }, [messagesData, isLoadingMore, handleLoadMore]);
+
+  // Row component for FixedSizeList
+  const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const message = reversedMessages[index];
+    if (!message) return null;
+
+    return (
+      <div style={style}>
+        <MessageItem
+          message={message}
+          onReply={setReplyToMessage}
+          onDelete={handleDeleteMessage}
+          currentHoveredMessageId={hoveredMessageId}
+          onMouseEnter={setHoveredMessageId}
+          onMouseLeave={() => setHoveredMessageId(null)}
+        />
+      </div>
+    );
+  };
+
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
-        <div className="flex items-center space-x-2"> {/* Group Chat title and Load More button */}
+        <div className="flex items-center space-x-2">
           <CardTitle className="text-white text-lg">Chat</CardTitle>
           {messagesData?.chatMessages?.pageInfo.hasNextPage && isScrolledToTop && (
             <Button
@@ -409,26 +442,26 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         </Button>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar" ref={chatContainerRef}>
+      <CardContent className="flex-1 p-0" ref={chatContainerRef}> {/* p-0 to let FixedSizeList manage padding */}
         {chatLoading || messagesLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
           </div>
         ) : (
-          <>
-            {messagesData?.chatMessages?.nodes?.slice().reverse().map((msg) => (
-              <MessageItem
-                key={msg.id}
-                message={msg}
-                onReply={setReplyToMessage}
-                onDelete={handleDeleteMessage}
-                currentHoveredMessageId={hoveredMessageId}
-                onMouseEnter={setHoveredMessageId}
-                onMouseLeave={() => setHoveredMessageId(null)}
-              />
-            ))}
-            <div ref={messagesEndRef} />
-          </>
+          listHeight > 0 && listWidth > 0 && (
+            <FixedSizeList
+              ref={listRef}
+              height={listHeight}
+              width={listWidth}
+              itemCount={reversedMessages.length}
+              itemSize={MESSAGE_ITEM_HEIGHT}
+              itemData={reversedMessages}
+              onScroll={onListScroll}
+              className="custom-scrollbar" // Apply custom scrollbar if needed
+            >
+              {Row}
+            </FixedSizeList>
+          )
         )}
       </CardContent>
       <div className="p-4 border-t border-gray-700 flex flex-col space-y-2">
