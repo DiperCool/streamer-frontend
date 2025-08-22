@@ -149,10 +149,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
     if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
-      listRef.current.scrollToItem(reversedMessages.length - 1, "auto"); // Scroll to end on initial load
-      setInitialMessagesLoaded(true);
-      setIsScrolledToTop(false); // Ensure button is hidden after initial scroll
-      setIsUserAtBottom(true); // Assume user is at bottom after initial scroll
+      // Добавляем небольшую задержку для более плавной прокрутки
+      const timer = setTimeout(() => {
+        listRef.current?.scrollToItem(reversedMessages.length - 1, "end"); // Прокрутка в конец при начальной загрузке
+        setInitialMessagesLoaded(true);
+        setIsScrolledToTop(false);
+        setIsUserAtBottom(true);
+      }, 50); // Задержка в 50 мс
+      return () => clearTimeout(timer); // Очистка таймера при размонтировании или изменении зависимостей
     }
   }, [reversedMessages, initialMessagesLoaded]);
 
@@ -428,7 +432,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
         handleLoadMore();
       }
     }
-  }, [messagesData, isLoadingMore, handleLoadMore, initialMessagesLoaded]); // Добавлена зависимость initialMessagesLoaded
+  }, [messagesData, isLoadingMore, handleLoadMore, initialMessagesLoaded]);
 
   // Memoize the itemData object to ensure stability for FixedSizeList
   const itemData = React.useMemo(() => ({
