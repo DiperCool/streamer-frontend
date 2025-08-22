@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply } from "lucide-react"
+import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, MoreHorizontal } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -28,6 +28,13 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {cn} from "@/lib/utils";
 
 interface ChatSectionProps {
   onCloseChat: () => void
@@ -302,7 +309,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                   <ContextMenuTrigger asChild>
                     <div
                       className={cn(
-                        "text-gray-300 text-sm flex items-start space-x-2 p-1 rounded-md transition-colors duration-150",
+                        "text-gray-300 text-sm flex items-start space-x-2 p-1 rounded-md transition-colors duration-150 group relative", // Добавлен 'group relative'
                         hoveredMessageId === msg.id && "bg-gray-700"
                       )}
                       onMouseEnter={() => setHoveredMessageId(msg.id)}
@@ -314,7 +321,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                           {msg.sender?.userName?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
+                      <div className="flex-1"> {/* Добавлен flex-1 для правильного распределения пространства */}
                         {msg.reply && (
                           <div className="flex items-center text-xs text-gray-400 mb-1">
                             <MessageSquareReply className="h-3 w-3 mr-1" />
@@ -326,6 +333,30 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
                         <span>{msg.message}</span>
                         <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
                       </div>
+
+                      {/* Кнопка "три точки" */}
+                      {hoveredMessageId === msg.id && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute top-1 right-1 h-6 w-6 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-1"
+                              onClick={(e) => e.stopPropagation()} // Предотвращаем всплытие события, чтобы не закрывать меню сразу
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-48 bg-gray-700 border-gray-600 text-white">
+                            <DropdownMenuItem
+                              onClick={() => setReplyToMessage(msg)}
+                              className="hover:bg-green-600 hover:text-white cursor-pointer"
+                            >
+                              Reply
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                   </ContextMenuTrigger>
                   <ContextMenuContent className="w-48 bg-gray-700 border-gray-600 text-white">
