@@ -43,29 +43,6 @@ export const GET_CHAT_MESSAGES = gql`
             order: $order
             where: $where
         ) {
-            edges {
-                cursor
-                node {
-                    id
-                    createdAt
-                    isActive
-                    isDeleted
-                    message
-                    type
-                    sender {
-                        id
-                        userName
-                        avatar
-                    }
-                    reply {
-                        id
-                        message
-                        sender {
-                            userName
-                        }
-                    }
-                }
-            }
             nodes {
                 id
                 createdAt
@@ -80,6 +57,7 @@ export const GET_CHAT_MESSAGES = gql`
                 }
                 reply {
                     id
+                    isDeleted
                     message
                     sender {
                         userName

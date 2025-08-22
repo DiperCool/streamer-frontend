@@ -584,7 +584,7 @@ export type GetChatMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', edges?: Array<{ __typename?: 'ChatMessagesEdge', cursor: string, node: { __typename?: 'ChatMessageDto', id: any, createdAt: any, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } }> | null, nodes?: Array<{ __typename?: 'ChatMessageDto', id: any, createdAt: any, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', nodes?: Array<{ __typename?: 'ChatMessageDto', id: any, createdAt: any, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: any, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetChatSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -956,29 +956,6 @@ export const GetChatMessagesDocument = gql`
     order: $order
     where: $where
   ) {
-    edges {
-      cursor
-      node {
-        id
-        createdAt
-        isActive
-        isDeleted
-        message
-        type
-        sender {
-          id
-          userName
-          avatar
-        }
-        reply {
-          id
-          message
-          sender {
-            userName
-          }
-        }
-      }
-    }
     nodes {
       id
       createdAt
@@ -993,6 +970,7 @@ export const GetChatMessagesDocument = gql`
       }
       reply {
         id
+        isDeleted
         message
         sender {
           userName

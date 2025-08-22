@@ -156,6 +156,7 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               reply: newMessage.reply ? {
                 __typename: 'ChatMessageDto',
                 id: newMessage.reply.id,
+                isDeleted: newMessage.reply.isDeleted, // <--- Добавлено это поле
                 message: newMessage.reply.message,
                 sender: newMessage.reply.sender ? {
                   __typename: 'StreamerDto',

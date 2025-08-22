@@ -18,6 +18,7 @@ export const CHAT_MESSAGE_CREATED_SUBSCRIPTION = gql`
             }
             reply {
                 id
+                isDeleted # <--- Добавлено это поле
                 message
                 sender {
                     userName
