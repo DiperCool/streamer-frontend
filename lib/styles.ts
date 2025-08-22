@@ -1,0 +1,1 @@
+export const hoverGreenClasses = "focus:bg-green-600 focus:text-white hover:bg-green-600 hover:text-white";

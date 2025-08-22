@@ -5,6 +5,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Dot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { hoverGreenClasses } from "@/lib/styles" // Импортируем общие классы
 
 const DropdownMenu = DropdownMenuPrimitive.Root
 
@@ -83,8 +84,9 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-green-600 focus:text-white hover:bg-green-600 hover:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
+      hoverGreenClasses, // Используем общие классы
       className
     )}
     {...props}
