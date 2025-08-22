@@ -8,7 +8,7 @@ import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply } from "lu
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { FixedSizeList, ListOnScrollProps } from 'react-window'; // Import FixedSizeList and ListOnScrollProps
+import { FixedSizeList, ListOnScrollProps } from 'react-window';
 import {
     useGetChatQuery,
     useGetChatMessagesQuery,
@@ -37,6 +37,36 @@ const messageSchema = z.object({
 type MessageForm = z.infer<typeof messageSchema>
 const messagesCount = 15;
 const MESSAGE_ITEM_HEIGHT = 50; // Approximate fixed height for a message item
+
+// Define interface for data passed to Row component
+interface RowData {
+  messages: ChatMessageDto[];
+  onReply: (message: ChatMessageDto) => void;
+  onDelete: (messageId: string) => void;
+  currentHoveredMessageId: string | null;
+  onMouseEnter: (messageId: string) => void;
+  onMouseLeave: () => void;
+}
+
+// Row component for FixedSizeList - moved outside ChatSection
+const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
+  const { messages, onReply, onDelete, currentHoveredMessageId, onMouseEnter, onMouseLeave } = data;
+  const message = messages[index];
+  if (!message) return null;
+
+  return (
+    <div style={style}>
+      <MessageItem
+        message={message}
+        onReply={onReply}
+        onDelete={onDelete}
+        currentHoveredMessageId={currentHoveredMessageId}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      />
+    </div>
+  );
+});
 
 export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null) // Ref for the outer div to get dimensions
@@ -394,25 +424,6 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
     }
   }, [messagesData, isLoadingMore, handleLoadMore]);
 
-  // Row component for FixedSizeList
-  const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const message = reversedMessages[index];
-    if (!message) return null;
-
-    return (
-      <div style={style}>
-        <MessageItem
-          message={message}
-          onReply={setReplyToMessage}
-          onDelete={handleDeleteMessage}
-          currentHoveredMessageId={hoveredMessageId}
-          onMouseEnter={setHoveredMessageId}
-          onMouseLeave={() => setHoveredMessageId(null)}
-        />
-      </div>
-    );
-  };
-
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
@@ -453,7 +464,14 @@ export function ChatSection({ onCloseChat, streamerId }: ChatSectionProps) {
               width={listWidth}
               itemCount={reversedMessages.length}
               itemSize={MESSAGE_ITEM_HEIGHT}
-              itemData={reversedMessages}
+              itemData={{
+                messages: reversedMessages,
+                onReply: setReplyToMessage,
+                onDelete: handleDeleteMessage,
+                currentHoveredMessageId: hoveredMessageId,
+                onMouseEnter: setHoveredMessageId,
+                onMouseLeave: () => setHoveredMessageId(null),
+              }}
               onScroll={onListScroll}
               className="custom-scrollbar" // Apply custom scrollbar if needed
             >
