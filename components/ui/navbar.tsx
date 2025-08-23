@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Menu, Search, LayoutDashboard, Sparkles, Store, Settings, LogOut } from "lucide-react"
+import { Menu, Search, Sparkles, Store, Settings, LogOut } from "lucide-react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { useGetMeQuery } from "@/graphql/__generated__/graphql"
 import {
@@ -18,6 +18,7 @@ import {
 import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMinioUrl } from "@/utils/utils"
+import { useIsMobile } from "@/hooks/use-mobile" // Импортируем хук для определения мобильного устройства
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void
@@ -30,6 +31,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
         skip: !isAuthenticated,
       });
       const router = useRouter();
+      const isMobile = useIsMobile(); // Используем хук
 
       const userName = streamerData?.me?.userName;
       const userAvatar = streamerData?.me?.avatar;
@@ -112,7 +114,14 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                               </Avatar>
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-gray-800 border-gray-700 text-white p-1">
+                          <DropdownMenuContent
+                            className={cn(
+                              "bg-gray-800 border-gray-700 text-white p-1",
+                              isMobile
+                                ? "w-screen h-[calc(100vh-4rem)] fixed top-16 left-0 rounded-none" // Full screen on mobile
+                                : "w-56" // Default width on desktop
+                            )}
+                          >
                             {userName && (
                               <>
                                 <DropdownMenuLabel className="flex items-center space-x-2 px-2 py-1.5 text-base font-semibold text-white">
@@ -130,7 +139,6 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                             <DropdownMenuItem onClick={() => router.push(`/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Store className="h-4 w-4 mr-2" /> Channel
                             </DropdownMenuItem>
-                            {/* Удален Creator Dashboard */}
                             <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Sparkles className="h-4 w-4 mr-2" /> Subscriptions
                             </DropdownMenuItem>
