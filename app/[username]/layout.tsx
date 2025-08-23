@@ -148,14 +148,16 @@ export default function StreamerProfileLayout({
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный (обратный порядок) на больших */}
 
       {/* Чат (закреплен справа на больших экранах) */}
-      {isChatVisible && (
-        <div
-          ref={chatPanelRef} // Добавлен ref
-          className="hidden lg:flex fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto" // Добавлен overflow-y-auto
-        >
-          <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
-        </div>
-      )}
+      <div
+        ref={chatPanelRef} // Добавлен ref
+        className={cn(
+          "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
+          isChatVisible ? "translate-x-0" : "translate-x-full", // Используем translateX для плавной анимации
+          "hidden lg:flex" // Скрываем на маленьких экранах, отображаем как flex на больших
+        )}
+      >
+        <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
+      </div>
 
       {/* Основная область контента (плеер, инфо-панель, вкладки) */}
       <div className={cn(
