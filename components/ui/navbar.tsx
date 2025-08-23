@@ -103,8 +103,8 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                     ) : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full"> {/* Изменил стили для кнопки-триггера */}
-                              <Avatar className="w-8 h-8"> {/* Уменьшил размер аватара для шапки */}
+                            <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full">
+                              <Avatar className="w-8 h-8">
                                 <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
                                 <AvatarFallback className="bg-green-600 text-white text-sm">
                                   {userName?.charAt(0).toUpperCase() || "U"}
@@ -130,9 +130,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                             <DropdownMenuItem onClick={() => router.push(`/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Store className="h-4 w-4 mr-2" /> Channel
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => console.log('Creator Dashboard clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
-                              <LayoutDashboard className="h-4 w-4 mr-2" /> Creator Dashboard
-                            </DropdownMenuItem>
+                            {/* Удален Creator Dashboard */}
                             <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Sparkles className="h-4 w-4 mr-2" /> Subscriptions
                             </DropdownMenuItem>
