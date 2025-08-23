@@ -113,7 +113,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 className="hover:bg-green-600 hover:text-white cursor-pointer"
                 disabled={isMessageDeleted}
               >
-                Reply
+                <MessageSquareReply className="h-4 w-4 mr-2" /> Reply {/* Добавлена иконка */}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {!isPinned ? (
@@ -150,7 +150,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           className="hover:bg-green-600 hover:text-white cursor-pointer"
           disabled={isMessageDeleted}
         >
-          Reply
+          <MessageSquareReply className="h-4 w-4 mr-2" /> Reply {/* Добавлена иконка */}
         </ContextMenuItem>
         <ContextMenuSeparator />
         {!isPinned ? (
