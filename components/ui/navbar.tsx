@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Menu, Search, LayoutDashboard, Sparkles, Store, Settings, LogOut } from "lucide-react" // Импортируем новые иконки
+import { Menu, Search, LayoutDashboard, Sparkles, Store, Settings, LogOut } from "lucide-react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { useGetMeQuery } from "@/graphql/__generated__/graphql"
 import {
@@ -13,11 +13,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel, // Импортируем DropdownMenuLabel
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" // Импортируем Avatar компоненты
-import { getMinioUrl } from "@/utils/utils" // Импортируем getMinioUrl
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getMinioUrl } from "@/utils/utils"
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void
@@ -103,11 +103,16 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                     ) : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer">
-                              {userName || "My Account"}
+                            <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full"> {/* Изменил стили для кнопки-триггера */}
+                              <Avatar className="w-8 h-8"> {/* Уменьшил размер аватара для шапки */}
+                                <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
+                                <AvatarFallback className="bg-green-600 text-white text-sm">
+                                  {userName?.charAt(0).toUpperCase() || "U"}
+                                </AvatarFallback>
+                              </Avatar>
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-gray-800 border-gray-700 text-white p-1"> {/* Увеличил ширину и изменил фон/бордер */}
+                          <DropdownMenuContent className="w-56 bg-gray-800 border-gray-700 text-white p-1">
                             {userName && (
                               <>
                                 <DropdownMenuLabel className="flex items-center space-x-2 px-2 py-1.5 text-base font-semibold text-white">
