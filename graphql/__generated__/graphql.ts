@@ -571,7 +571,7 @@ export type GetChatQueryVariables = Exact<{
 }>;
 
 
-export type GetChatQuery = { __typename?: 'Query', chat: { __typename?: 'ChatDto', id: string, pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
+export type GetChatQuery = { __typename?: 'Query', chat: { __typename?: 'ChatDto', id: string, pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
 
 export type GetChatMessagesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -596,21 +596,21 @@ export type ChatMessageCreatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } };
+export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } };
 
 export type ChatMessageDeletedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
 }>;
 
 
-export type ChatMessageDeletedSubscription = { __typename?: 'Subscription', chatMessageDeleted: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } };
+export type ChatMessageDeletedSubscription = { __typename?: 'Subscription', chatMessageDeleted: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } };
 
 export type ChatUpdatedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
 }>;
 
 
-export type ChatUpdatedSubscription = { __typename?: 'Subscription', chatUpdated: { __typename?: 'ChatDto', pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
+export type ChatUpdatedSubscription = { __typename?: 'Subscription', chatUpdated: { __typename?: 'ChatDto', pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
 
 export type UploadFileMutationVariables = Exact<{
   input: UploadFileInput;
@@ -918,6 +918,7 @@ export const GetChatDocument = gql`
           isDeleted
           message
           sender {
+            id
             userName
           }
         }
@@ -1110,6 +1111,7 @@ export const ChatMessageCreatedDocument = gql`
       isDeleted
       message
       sender {
+        id
         userName
       }
     }
@@ -1160,6 +1162,7 @@ export const ChatMessageDeletedDocument = gql`
       isDeleted
       message
       sender {
+        id
         userName
       }
     }
@@ -1217,6 +1220,7 @@ export const ChatUpdatedDocument = gql`
           isDeleted
           message
           sender {
+            id
             userName
           }
         }

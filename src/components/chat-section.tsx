@@ -23,7 +23,7 @@ import {
     GetChatMessagesQuery,
     GetChatMessagesDocument,
     ChatMessagesEdge,
-    GetChatDocument,
+    GetChatDocument, useChatMessageCreatedSubscription, useChatMessageDeletedSubscription,
 } from "@/graphql/__generated__/graphql"
 import { useApolloClient } from "@apollo/client"
 import { MessageItem } from "@/src/components/chat/message-item"
@@ -262,6 +262,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
                 message: newMessage.reply.message,
                 sender: newMessage.reply.sender ? {
                   __typename: 'StreamerDto',
+                    id: newMessage.reply.sender.id,
                   userName: newMessage.reply.sender.userName,
                 } : null,
               } : null,

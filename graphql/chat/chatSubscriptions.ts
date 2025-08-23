@@ -21,6 +21,7 @@ export const CHAT_MESSAGE_CREATED_SUBSCRIPTION = gql`
                 isDeleted
                 message
                 sender {
+                    id
                     userName
                 }
             }
@@ -46,9 +47,10 @@ export const CHAT_MESSAGE_DELETED_SUBSCRIPTION = gql`
             }
             reply {
                 id
-                isDeleted # <--- Добавлено это поле
+                isDeleted
                 message
                 sender {
+                    id
                     userName
                 }
             }
@@ -84,6 +86,7 @@ export const CHAT_UPDATED_SUBSCRIPTION = gql`
                         isDeleted
                         message
                         sender {
+                            id
                             userName
                         }
                     }
