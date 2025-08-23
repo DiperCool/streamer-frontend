@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
 import { format, isToday } from "date-fns"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card" // Удален CardContent
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin } from "lucide-react"
@@ -99,7 +99,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
 
-  const { data: chatData, loading: chatLoading, refetch: refetchChat } = useGetChatQuery({ // Добавлен refetchChat
+  const { data: chatData, loading: chatLoading, refetch: refetchChat } = useGetChatQuery({
     variables: { streamerId },
     skip: !streamerId,
   })
@@ -568,7 +568,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
         </div>
       )}
 
-      <CardContent className="flex-1 p-0" ref={chatContainerRef}>
+      {/* Messages List Container - This is the new flex-1 div */}
+      <div className="flex-1 overflow-hidden" ref={chatContainerRef}>
         {chatLoading || messagesLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
@@ -591,7 +592,9 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
             </VariableSizeList>
           )
         )}
-      </CardContent>
+      </div>
+
+      {/* Input Area */}
       <div className="p-4 border-t border-gray-700 flex flex-col space-y-2">
         {replyToMessage && (
           <div className="flex items-center justify-between bg-gray-700 p-2 rounded-md text-sm text-gray-300">
