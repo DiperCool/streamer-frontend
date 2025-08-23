@@ -117,11 +117,8 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                           <DropdownMenuContent
                             className={cn(
                               "bg-gray-800 border-gray-700 text-white p-1",
-                              isMobile
-                                ? "w-screen h-[calc(100vh-4rem)] fixed top-16 left-0 right-0 rounded-none min-w-0" // Full screen on mobile
-                                : "w-56" // Default width on desktop
+                              "w-56" // Default width on desktop
                             )}
-                            align={isMobile ? "start" : "end"} // Explicitly set align to 'start' for mobile
                           >
                             {userName && (
                               <>
