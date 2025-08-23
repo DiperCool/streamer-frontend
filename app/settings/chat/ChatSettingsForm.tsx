@@ -37,6 +37,7 @@ export function ChatSettingsForm() {
     handleSubmit,
     reset,
     watch,
+    setValue, // Добавляем setValue
     formState: { errors, isDirty },
   } = useForm<ChatSettingsFormValues>({
     resolver: zodResolver(chatSettingsSchema),
@@ -137,7 +138,7 @@ export function ChatSettingsForm() {
             <Switch
               id="followersOnly"
               checked={watch("followersOnly")}
-              onCheckedChange={(checked) => reset({ ...watch(), followersOnly: checked }, { dirty: true })}
+              onCheckedChange={(checked) => setValue("followersOnly", checked, { shouldDirty: true })} // Используем setValue
               className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
             />
           </div>
@@ -151,7 +152,7 @@ export function ChatSettingsForm() {
             <Switch
               id="subscribersOnly"
               checked={watch("subscribersOnly")}
-              onCheckedChange={(checked) => reset({ ...watch(), subscribersOnly: checked }, { dirty: true })}
+              onCheckedChange={(checked) => setValue("subscribersOnly", checked, { shouldDirty: true })} // Используем setValue
               className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
             />
           </div>
@@ -164,7 +165,14 @@ export function ChatSettingsForm() {
             <Label htmlFor="bannedWords" className="text-white">Banned Words (comma-separated)</Label>
             <Textarea
               id="bannedWords"
-              {...register("bannedWords")}
+              {...register("bannedWords", {
+                onChange: () => {
+                  // Manually mark as dirty when textarea changes
+                  if (!isDirty) {
+                    setValue("bannedWords", watch("bannedWords"), { shouldDirty: true });
+                  }
+                }
+              })}
               placeholder="word1, word2, word3"
               className="bg-gray-700 border-gray-600 text-white focus:border-green-500 min-h-[100px]"
             />
