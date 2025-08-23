@@ -114,9 +114,9 @@ export function ChatSettingsForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Slow Mode */}
-          <div className="space-y-1"> {/* Changed to space-y-1 */}
+          <div className="space-y-1">
             <Label htmlFor="slowMode" className="text-white">Slow Mode (seconds)</Label>
-            <p className="text-sm text-gray-400 mb-2"> {/* Added mb-2 for spacing with input */}
+            <p className="text-sm text-gray-400"> {/* Убран mb-2 */}
               Limit how frequently users can send messages. Set to 0 to disable.
             </p>
             <Input
@@ -133,7 +133,7 @@ export function ChatSettingsForm() {
 
           {/* Followers Only */}
           <div className="flex items-center justify-between space-x-2">
-            <div className="flex flex-col"> {/* New wrapper for label and description */}
+            <div className="flex flex-col space-y-1"> {/* Добавлен space-y-1 */}
               <Label htmlFor="followersOnly" className="text-white">Followers Only Chat</Label>
               <p className="text-sm text-gray-400">
                 Only followers can send messages in chat.
@@ -149,7 +149,7 @@ export function ChatSettingsForm() {
 
           {/* Subscribers Only */}
           <div className="flex items-center justify-between space-x-2">
-            <div className="flex flex-col"> {/* New wrapper for label and description */}
+            <div className="flex flex-col space-y-1"> {/* Добавлен space-y-1 */}
               <Label htmlFor="subscribersOnly" className="text-white">Subscribers Only Chat</Label>
               <p className="text-sm text-gray-400">
                 Only subscribers can send messages in chat.
@@ -164,9 +164,9 @@ export function ChatSettingsForm() {
           </div>
 
           {/* Banned Words */}
-          <div className="space-y-1"> {/* Changed to space-y-1 */}
+          <div className="space-y-1">
             <Label htmlFor="bannedWords" className="text-white">Banned Words (comma-separated)</Label>
-            <p className="text-sm text-gray-400 mb-2"> {/* Added mb-2 for spacing with textarea */}
+            <p className="text-sm text-gray-400"> {/* Убран mb-2 */}
               Messages containing these words will be blocked. Separate words with commas.
             </p>
             <Textarea
