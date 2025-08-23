@@ -16,6 +16,9 @@ export default function SettingsLayout({
     if (pathname.includes("/settings/stream")) {
       return "stream";
     }
+    if (pathname.includes("/settings/chat")) { // New: Check for chat settings path
+      return "chat";
+    }
     return "profile"; // Default to profile
   };
 
@@ -39,6 +42,11 @@ export default function SettingsLayout({
             <Link href="/settings/stream" passHref>
               <TabsTrigger value="stream">
                 Stream URL and Key
+              </TabsTrigger>
+            </Link>
+            <Link href="/settings/chat" passHref> {/* New: Chat tab */}
+              <TabsTrigger value="chat">
+                Chat
               </TabsTrigger>
             </Link>
           </TabsList>
