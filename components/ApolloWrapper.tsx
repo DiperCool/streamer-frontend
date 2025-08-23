@@ -19,7 +19,7 @@ interface MyApolloProviderProps {
 }
 
 export function MyApolloProvider({ children }: MyApolloProviderProps) {
-    const { getAccessTokenSilently, isLoading: authLoading } = useAuth0();
+    const { getAccessTokenSilently, isAuthenticated, isLoading: authLoading } = useAuth0();
 
 
     const client = useMemo(() => {
@@ -28,11 +28,18 @@ export function MyApolloProvider({ children }: MyApolloProviderProps) {
         });
 
         const authLink = setContext(async (_, { headers }) => {
-            let token = await getAccessTokenSilently();
+            let token = null;
+            if (isAuthenticated) {
+                try {
+                    token = await getAccessTokenSilently();
+                } catch (e) {
+                    console.error("Error getting access token silently:", e);
+                }
+            }
             return {
                 headers: {
                     ...headers,
-                    Authorization: `Bearer ${token}`
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
             };
         });
@@ -43,10 +50,15 @@ export function MyApolloProvider({ children }: MyApolloProviderProps) {
                     createClient({
                         url: process.env.NEXT_PUBLIC_GRAPHQL_WS_URI!,
                         connectionParams: async () => {
-                            const token = await getAccessTokenSilently();
-                            if (token) {
-                                return { Authorization: `Bearer ${token}` };
+                            let token = null;
+                            if (isAuthenticated) {
+                                try {
+                                    token = await getAccessTokenSilently();
+                                } catch (e) {
+                                    console.error("Error getting access token for WS:", e);
+                                }
                             }
+                            return token ? { Authorization: `Bearer ${token}` } : {};
                         },
                     })
                 )
@@ -71,7 +83,7 @@ export function MyApolloProvider({ children }: MyApolloProviderProps) {
             link: splitLink,
             cache: new InMemoryCache(),
         });
-    }, [getAccessTokenSilently]);
+    }, [getAccessTokenSilently, isAuthenticated]);
 
     if (authLoading || !client) {
         return (
