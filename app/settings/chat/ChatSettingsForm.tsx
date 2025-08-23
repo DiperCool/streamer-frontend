@@ -37,7 +37,7 @@ export function ChatSettingsForm() {
     handleSubmit,
     reset,
     watch,
-    setValue, // Добавляем setValue
+    setValue,
     formState: { errors, isDirty },
   } = useForm<ChatSettingsFormValues>({
     resolver: zodResolver(chatSettingsSchema),
@@ -55,7 +55,7 @@ export function ChatSettingsForm() {
         slowMode: data.chatSettings.slowMode,
         followersOnly: data.chatSettings.followersOnly,
         subscribersOnly: data.chatSettings.subscribersOnly,
-        bannedWords: data.chatSettings.bannedWords.join(", "), // Convert array to comma-separated string
+        bannedWords: data.chatSettings.bannedWords.join(", "),
       });
     }
   }, [data, reset]);
@@ -75,10 +75,9 @@ export function ChatSettingsForm() {
           },
         },
       });
-      refetch(); // Refetch to get the latest settings and update the form
+      refetch();
     } catch (err) {
       console.error("Failed to update chat settings:", err);
-      // Optionally show a toast notification for error
     }
   };
 
@@ -115,8 +114,11 @@ export function ChatSettingsForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Slow Mode */}
-          <div className="space-y-2">
+          <div className="space-y-1"> {/* Changed to space-y-1 */}
             <Label htmlFor="slowMode" className="text-white">Slow Mode (seconds)</Label>
+            <p className="text-sm text-gray-400 mb-2"> {/* Added mb-2 for spacing with input */}
+              Limit how frequently users can send messages. Set to 0 to disable.
+            </p>
             <Input
               id="slowMode"
               type="number"
@@ -127,47 +129,50 @@ export function ChatSettingsForm() {
             {errors.slowMode && (
               <p className="text-red-500 text-sm mt-1">{errors.slowMode.message}</p>
             )}
-            <p className="text-sm text-gray-400">
-              Limit how frequently users can send messages. Set to 0 to disable.
-            </p>
           </div>
 
           {/* Followers Only */}
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="followersOnly" className="text-white">Followers Only Chat</Label>
+            <div className="flex flex-col"> {/* New wrapper for label and description */}
+              <Label htmlFor="followersOnly" className="text-white">Followers Only Chat</Label>
+              <p className="text-sm text-gray-400">
+                Only followers can send messages in chat.
+              </p>
+            </div>
             <Switch
               id="followersOnly"
               checked={watch("followersOnly")}
-              onCheckedChange={(checked) => setValue("followersOnly", checked, { shouldDirty: true })} // Используем setValue
+              onCheckedChange={(checked) => setValue("followersOnly", checked, { shouldDirty: true })}
               className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
             />
           </div>
-          <p className="text-sm text-gray-400 -mt-4">
-            Only followers can send messages in chat.
-          </p>
 
           {/* Subscribers Only */}
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="subscribersOnly" className="text-white">Subscribers Only Chat</Label>
+            <div className="flex flex-col"> {/* New wrapper for label and description */}
+              <Label htmlFor="subscribersOnly" className="text-white">Subscribers Only Chat</Label>
+              <p className="text-sm text-gray-400">
+                Only subscribers can send messages in chat.
+              </p>
+            </div>
             <Switch
               id="subscribersOnly"
               checked={watch("subscribersOnly")}
-              onCheckedChange={(checked) => setValue("subscribersOnly", checked, { shouldDirty: true })} // Используем setValue
+              onCheckedChange={(checked) => setValue("subscribersOnly", checked, { shouldDirty: true })}
               className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
             />
           </div>
-          <p className="text-sm text-gray-400 -mt-4">
-            Only subscribers can send messages in chat.
-          </p>
 
           {/* Banned Words */}
-          <div className="space-y-2">
+          <div className="space-y-1"> {/* Changed to space-y-1 */}
             <Label htmlFor="bannedWords" className="text-white">Banned Words (comma-separated)</Label>
+            <p className="text-sm text-gray-400 mb-2"> {/* Added mb-2 for spacing with textarea */}
+              Messages containing these words will be blocked. Separate words with commas.
+            </p>
             <Textarea
               id="bannedWords"
               {...register("bannedWords", {
                 onChange: () => {
-                  // Manually mark as dirty when textarea changes
                   if (!isDirty) {
                     setValue("bannedWords", watch("bannedWords"), { shouldDirty: true });
                   }
@@ -179,9 +184,6 @@ export function ChatSettingsForm() {
             {errors.bannedWords && (
               <p className="text-red-500 text-sm mt-1">{errors.bannedWords.message}</p>
             )}
-            <p className="text-sm text-gray-400">
-              Messages containing these words will be blocked. Separate words with commas.
-            </p>
           </div>
 
           <div className="flex justify-end space-x-2">
