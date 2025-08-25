@@ -82,6 +82,10 @@ type DeleteMessageResponse {
     id: UUID!
 }
 
+type FollowResponse {
+    id: UUID!
+}
+
 type GetEmailResponse {
     email: String!
 }
@@ -154,11 +158,14 @@ type Query {
     ): ChatMessagesConnection
     chatSettings: ChatSettingsDto!
     currentStream(streamerId: String!): StreamDto!
+    follow(follow: FollowInput!): FollowResponse!
     me: StreamerDto!
     myEmail: GetEmailResponse!
     profile(streamerId: String!): ProfileDto!
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
+    streamerInteraction(streamerId: String!): StreamerInteractionDto!
+    unfollow(follow: UnfollowInput!): UnfollowResponse!
 }
 
 type StreamDto {
@@ -195,6 +202,11 @@ type StreamerDto {
     userName: String!
 }
 
+type StreamerInteractionDto {
+    followed: Boolean!
+    followedAt: DateTime
+}
+
 type Subscription {
     chatMessageCreated(chatId: UUID!): ChatMessageDto!
     chatMessageDeleted(chatId: UUID!): ChatMessageDto!
@@ -203,6 +215,10 @@ type Subscription {
     streamerUpdated(streamerId: String!): StreamerDto!
     subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
     watchStream(streamId: UUID!): StreamWatcher!
+}
+
+type UnfollowResponse {
+    id: UUID!
 }
 
 type UnpinMessageResponse {
@@ -337,6 +353,10 @@ input DeleteMessageInput {
     messageId: UUID!
 }
 
+input FollowInput {
+    streamerId: String!
+}
+
 input PinMessageInput {
     messageId: UUID!
 }
@@ -354,6 +374,10 @@ input StringOperationFilterInput {
     nstartsWith: String
     or: [StringOperationFilterInput!]
     startsWith: String
+}
+
+input UnfollowInput {
+    streamerId: String!
 }
 
 input UnpinMessageInput {

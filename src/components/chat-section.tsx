@@ -40,7 +40,7 @@ const messageSchema = z.object({
 })
 
 type MessageForm = z.infer<typeof messageSchema>
-const messagesCount = 50;
+const messagesCount = 15;
 const MESSAGE_ITEM_BASE_HEIGHT = 50;
 const REPLY_HEIGHT_ADDITION = 20;
 const LONG_MESSAGE_TEXT_THRESHOLD = 50;
