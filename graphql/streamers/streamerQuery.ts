@@ -33,7 +33,8 @@ export const GET_EMAIL = gql`
 export const GET_STREAMER_INTERACTION = gql`
     query StreamerInteraction($streamerId: String!) {
         streamerInteraction(streamerId: $streamerId) {
-            isFollowing
+            followed
+            followedAt
         }
     }
 `
