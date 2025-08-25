@@ -93,7 +93,9 @@ type GetEmailResponse {
 type Mutation {
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
+    follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
+    unfollow(follow: UnfollowInput!): UnfollowResponse!
     unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
     updateBio(input: UpdateBioInput!): UpdateBioResponse!
@@ -158,14 +160,12 @@ type Query {
     ): ChatMessagesConnection
     chatSettings: ChatSettingsDto!
     currentStream(streamerId: String!): StreamDto!
-    follow(follow: FollowInput!): FollowResponse!
     me: StreamerDto!
     myEmail: GetEmailResponse!
     profile(streamerId: String!): ProfileDto!
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
     streamerInteraction(streamerId: String!): StreamerInteractionDto!
-    unfollow(follow: UnfollowInput!): UnfollowResponse!
 }
 
 type StreamDto {

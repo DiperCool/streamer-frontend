@@ -11,7 +11,8 @@ export const UPDATE_AVATAR = gql`
 export const FOLLOW_STREAMER = gql`
     mutation FollowStreamer($streamerId: String!) {
         followStreamer(streamerId: $streamerId) {
-            id
+            followed
+            followedAt
         }
     }
 `
@@ -19,7 +20,8 @@ export const FOLLOW_STREAMER = gql`
 export const UNFOLLOW_STREAMER = gql`
     mutation UnfollowStreamer($streamerId: String!) {
         unfollowStreamer(streamerId: $streamerId) {
-            id
+            followed
+            followedAt
         }
     }
 `
