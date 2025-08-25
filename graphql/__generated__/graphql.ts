@@ -159,6 +159,15 @@ export type DeleteMessageResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type FollowInput = {
+  streamerId: Scalars['String']['input'];
+};
+
+export type FollowResponse = {
+  __typename?: 'FollowResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type GetEmailResponse = {
   __typename?: 'GetEmailResponse';
   email: Scalars['String']['output'];
@@ -168,7 +177,9 @@ export type Mutation = {
   __typename?: 'Mutation';
   createMessage: CreateMessageResponse;
   deleteMessage: DeleteMessageResponse;
+  follow: FollowResponse;
   pinMessage: PinMessageResponse;
+  unfollow: UnfollowResponse;
   unpinMessage: UnpinMessageResponse;
   updateAvatar: UpdateAvatarResponse;
   updateBio: UpdateBioResponse;
@@ -191,8 +202,18 @@ export type MutationDeleteMessageArgs = {
 };
 
 
+export type MutationFollowArgs = {
+  follow: FollowInput;
+};
+
+
 export type MutationPinMessageArgs = {
   pinMessage: PinMessageInput;
+};
+
+
+export type MutationUnfollowArgs = {
+  unfollow: UnfollowInput;
 };
 
 
@@ -290,6 +311,7 @@ export type Query = {
   profile: ProfileDto;
   streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
+  streamerInteraction: StreamerInteractionDto;
 };
 
 
@@ -321,6 +343,11 @@ export type QueryProfileArgs = {
 
 export type QueryStreamerArgs = {
   userName: Scalars['String']['input'];
+};
+
+
+export type QueryStreamerInteractionArgs = {
+  streamerId: Scalars['String']['input'];
 };
 
 export enum SortEnumType {
@@ -370,6 +397,12 @@ export type StreamerDto = {
   id: Scalars['String']['output'];
   isLive: Scalars['Boolean']['output'];
   userName: Scalars['String']['output'];
+};
+
+export type StreamerInteractionDto = {
+  __typename?: 'StreamerInteractionDto';
+  followed: Scalars['Boolean']['output'];
+  followedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type StringOperationFilterInput = {
@@ -431,6 +464,15 @@ export type SubscriptionSubscribeWatchStreamArgs = {
 
 export type SubscriptionWatchStreamArgs = {
   streamId: Scalars['UUID']['input'];
+};
+
+export type UnfollowInput = {
+  streamerId: Scalars['String']['input'];
+};
+
+export type UnfollowResponse = {
+  __typename?: 'UnfollowResponse';
+  id: Scalars['UUID']['output'];
 };
 
 export type UnpinMessageInput = {
@@ -661,6 +703,20 @@ export type UpdateAvatarMutationVariables = Exact<{
 
 export type UpdateAvatarMutation = { __typename?: 'Mutation', updateAvatar: { __typename?: 'UpdateAvatarResponse', file: string } };
 
+export type FollowStreamerMutationVariables = Exact<{
+  input: FollowInput;
+}>;
+
+
+export type FollowStreamerMutation = { __typename?: 'Mutation', follow: { __typename?: 'FollowResponse', id: string } };
+
+export type UnfollowStreamerMutationVariables = Exact<{
+  input: UnfollowInput;
+}>;
+
+
+export type UnfollowStreamerMutation = { __typename?: 'Mutation', unfollow: { __typename?: 'UnfollowResponse', id: string } };
+
 export type GetStreamerQueryVariables = Exact<{
   userName: Scalars['String']['input'];
 }>;
@@ -677,6 +733,13 @@ export type GetMyEmailQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetMyEmailQuery = { __typename?: 'Query', myEmail: { __typename?: 'GetEmailResponse', email: string } };
+
+export type StreamerInteractionQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null } };
 
 export type StreamerUpdatedSubscriptionVariables = Exact<{
   streamerId: Scalars['String']['input'];
@@ -1510,6 +1573,72 @@ export function useUpdateAvatarMutation(baseOptions?: Apollo.MutationHookOptions
 export type UpdateAvatarMutationHookResult = ReturnType<typeof useUpdateAvatarMutation>;
 export type UpdateAvatarMutationResult = Apollo.MutationResult<UpdateAvatarMutation>;
 export type UpdateAvatarMutationOptions = Apollo.BaseMutationOptions<UpdateAvatarMutation, UpdateAvatarMutationVariables>;
+export const FollowStreamerDocument = gql`
+    mutation FollowStreamer($input: FollowInput!) {
+  follow(follow: $input) {
+    id
+  }
+}
+    `;
+export type FollowStreamerMutationFn = Apollo.MutationFunction<FollowStreamerMutation, FollowStreamerMutationVariables>;
+
+/**
+ * __useFollowStreamerMutation__
+ *
+ * To run a mutation, you first call `useFollowStreamerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFollowStreamerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [followStreamerMutation, { data, loading, error }] = useFollowStreamerMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useFollowStreamerMutation(baseOptions?: Apollo.MutationHookOptions<FollowStreamerMutation, FollowStreamerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FollowStreamerMutation, FollowStreamerMutationVariables>(FollowStreamerDocument, options);
+      }
+export type FollowStreamerMutationHookResult = ReturnType<typeof useFollowStreamerMutation>;
+export type FollowStreamerMutationResult = Apollo.MutationResult<FollowStreamerMutation>;
+export type FollowStreamerMutationOptions = Apollo.BaseMutationOptions<FollowStreamerMutation, FollowStreamerMutationVariables>;
+export const UnfollowStreamerDocument = gql`
+    mutation UnfollowStreamer($input: UnfollowInput!) {
+  unfollow(unfollow: $input) {
+    id
+  }
+}
+    `;
+export type UnfollowStreamerMutationFn = Apollo.MutationFunction<UnfollowStreamerMutation, UnfollowStreamerMutationVariables>;
+
+/**
+ * __useUnfollowStreamerMutation__
+ *
+ * To run a mutation, you first call `useUnfollowStreamerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnfollowStreamerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unfollowStreamerMutation, { data, loading, error }] = useUnfollowStreamerMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUnfollowStreamerMutation(baseOptions?: Apollo.MutationHookOptions<UnfollowStreamerMutation, UnfollowStreamerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UnfollowStreamerMutation, UnfollowStreamerMutationVariables>(UnfollowStreamerDocument, options);
+      }
+export type UnfollowStreamerMutationHookResult = ReturnType<typeof useUnfollowStreamerMutation>;
+export type UnfollowStreamerMutationResult = Apollo.MutationResult<UnfollowStreamerMutation>;
+export type UnfollowStreamerMutationOptions = Apollo.BaseMutationOptions<UnfollowStreamerMutation, UnfollowStreamerMutationVariables>;
 export const GetStreamerDocument = gql`
     query GetStreamer($userName: String!) {
   streamer(userName: $userName) {
@@ -1636,6 +1765,47 @@ export type GetMyEmailQueryHookResult = ReturnType<typeof useGetMyEmailQuery>;
 export type GetMyEmailLazyQueryHookResult = ReturnType<typeof useGetMyEmailLazyQuery>;
 export type GetMyEmailSuspenseQueryHookResult = ReturnType<typeof useGetMyEmailSuspenseQuery>;
 export type GetMyEmailQueryResult = Apollo.QueryResult<GetMyEmailQuery, GetMyEmailQueryVariables>;
+export const StreamerInteractionDocument = gql`
+    query StreamerInteraction($streamerId: String!) {
+  streamerInteraction(streamerId: $streamerId) {
+    followed
+    followedAt
+  }
+}
+    `;
+
+/**
+ * __useStreamerInteractionQuery__
+ *
+ * To run a query within a React component, call `useStreamerInteractionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStreamerInteractionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStreamerInteractionQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useStreamerInteractionQuery(baseOptions: Apollo.QueryHookOptions<StreamerInteractionQuery, StreamerInteractionQueryVariables> & ({ variables: StreamerInteractionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StreamerInteractionQuery, StreamerInteractionQueryVariables>(StreamerInteractionDocument, options);
+      }
+export function useStreamerInteractionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StreamerInteractionQuery, StreamerInteractionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StreamerInteractionQuery, StreamerInteractionQueryVariables>(StreamerInteractionDocument, options);
+        }
+export function useStreamerInteractionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<StreamerInteractionQuery, StreamerInteractionQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StreamerInteractionQuery, StreamerInteractionQueryVariables>(StreamerInteractionDocument, options);
+        }
+export type StreamerInteractionQueryHookResult = ReturnType<typeof useStreamerInteractionQuery>;
+export type StreamerInteractionLazyQueryHookResult = ReturnType<typeof useStreamerInteractionLazyQuery>;
+export type StreamerInteractionSuspenseQueryHookResult = ReturnType<typeof useStreamerInteractionSuspenseQuery>;
+export type StreamerInteractionQueryResult = Apollo.QueryResult<StreamerInteractionQuery, StreamerInteractionQueryVariables>;
 export const StreamerUpdatedDocument = gql`
     subscription StreamerUpdated($streamerId: String!) {
   streamerUpdated(streamerId: $streamerId) {

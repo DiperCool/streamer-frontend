@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,17 @@ import { Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react
 import { ProfileDto, StreamerDto, StreamDto, useFollowStreamerMutation, useStreamerInteractionQuery, useUnfollowStreamerMutation } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { useAuth0 } from "@auth0/auth0-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog" // Импортируем компоненты AlertDialog
 
 interface StreamerInfoBarProps {
   streamer: StreamerDto
@@ -22,6 +33,7 @@ interface StreamerInfoBarProps {
 export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive, onTogglePlayerMaximize }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
+  const [showUnfollowDialog, setShowUnfollowDialog] = useState(false); // Состояние для диалога
 
   const { data: streamerInteractionData, loading: interactionLoading, refetch: refetchInteraction } = useStreamerInteractionQuery({
     variables: { streamerId: streamer.id },
@@ -34,18 +46,23 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
   const isFollowing = streamerInteractionData?.streamerInteraction?.followed;
   const actionLoading = followLoading || unfollowLoading || interactionLoading;
 
-  const handleFollowToggle = async () => {
+  const handleFollow = async () => {
     if (!isAuthenticated) {
-      // Optionally prompt user to log in
-      console.log("User not authenticated. Cannot follow/unfollow.");
+      console.log("User not authenticated. Cannot follow.");
       return;
     }
-    if (isFollowing) {
-      await unfollowStreamer({ variables: { input: { streamerId: streamer.id } } });
-    } else {
-      await followStreamer({ variables: { input: { streamerId: streamer.id } } });
+    await followStreamer({ variables: { input: { streamerId: streamer.id } } });
+    refetchInteraction();
+  };
+
+  const handleUnfollow = async () => {
+    if (!isAuthenticated) {
+      console.log("User not authenticated. Cannot unfollow.");
+      return;
     }
-    refetchInteraction(); // Refetch to update the button state
+    await unfollowStreamer({ variables: { input: { streamerId: streamer.id } } });
+    refetchInteraction();
+    setShowUnfollowDialog(false); // Закрываем диалог после отписки
   };
 
   return (
@@ -78,14 +95,48 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
         {/* Right Section: Action Buttons */}
         <div className="flex items-center space-x-2 mt-4 md:mt-0">
           {!isCurrentUserProfile && isAuthenticated && (
-            <Button
-              variant={isFollowing ? "secondary" : "default"}
-              className={isFollowing ? "bg-gray-800 hover:bg-gray-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"}
-              onClick={handleFollowToggle}
-              disabled={actionLoading}
-            >
-              {actionLoading ? "Loading..." : (isFollowing ? "Following" : "Follow")}
-            </Button>
+            <>
+              {isFollowing ? (
+                <AlertDialog open={showUnfollowDialog} onOpenChange={setShowUnfollowDialog}>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="bg-gray-800 hover:bg-gray-700 text-white"
+                      disabled={actionLoading}
+                    >
+                      {actionLoading ? "Loading..." : "Following"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-gray-800 border-gray-700 text-white">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-white">Are you sure you want to unfollow?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-gray-400">
+                        This action cannot be undone. You will stop receiving updates from {streamer.userName}.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleUnfollow}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                        disabled={unfollowLoading}
+                      >
+                        {unfollowLoading ? "Unfollowing..." : "Unfollow"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              ) : (
+                <Button
+                  variant="default"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={handleFollow}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Loading..." : "Follow"}
+                </Button>
+              )}
+            </>
           )}
           <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
             Gift Subs
