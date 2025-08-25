@@ -6,8 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react"
-import { ProfileDto, StreamerDto, StreamDto } from "@/graphql/__generated__/graphql"
+import { ProfileDto, StreamerDto, StreamDto, useFollowStreamerMutation, useStreamerInteractionQuery, useUnfollowStreamerMutation } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
+import { useAuth0 } from "@auth0/auth0-react"
 
 interface StreamerInfoBarProps {
   streamer: StreamerDto
@@ -15,11 +16,37 @@ interface StreamerInfoBarProps {
   currentStream?: StreamDto | null
   isCurrentUserProfile: boolean
   isLive: boolean;
-  onTogglePlayerMaximize: () => void; // Добавляем проп для переключения режима плеера
+  onTogglePlayerMaximize: () => void;
 }
 
 export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive, onTogglePlayerMaximize }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+
+  const { data: streamerInteractionData, loading: interactionLoading, refetch: refetchInteraction } = useStreamerInteractionQuery({
+    variables: { streamerId: streamer.id },
+    skip: !isAuthenticated || authLoading || !streamer.id,
+  });
+
+  const [followStreamer, { loading: followLoading }] = useFollowStreamerMutation();
+  const [unfollowStreamer, { loading: unfollowLoading }] = useUnfollowStreamerMutation();
+
+  const isFollowing = streamerInteractionData?.streamerInteraction?.followed;
+  const actionLoading = followLoading || unfollowLoading || interactionLoading;
+
+  const handleFollowToggle = async () => {
+    if (!isAuthenticated) {
+      // Optionally prompt user to log in
+      console.log("User not authenticated. Cannot follow/unfollow.");
+      return;
+    }
+    if (isFollowing) {
+      await unfollowStreamer({ variables: { input: { streamerId: streamer.id } } });
+    } else {
+      await followStreamer({ variables: { input: { streamerId: streamer.id } } });
+    }
+    refetchInteraction(); // Refetch to update the button state
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
@@ -50,9 +77,16 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
 
         {/* Right Section: Action Buttons */}
         <div className="flex items-center space-x-2 mt-4 md:mt-0">
-          <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white">
-            Follow
-          </Button>
+          {!isCurrentUserProfile && isAuthenticated && (
+            <Button
+              variant={isFollowing ? "secondary" : "default"}
+              className={isFollowing ? "bg-gray-800 hover:bg-gray-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"}
+              onClick={handleFollowToggle}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Loading..." : (isFollowing ? "Following" : "Follow")}
+            </Button>
+          )}
           <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
             Gift Subs
           </Button>
