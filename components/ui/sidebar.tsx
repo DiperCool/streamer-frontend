@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Home, Heart, Menu, Search, User, Settings } from "lucide-react"
-import Link from "next/link" // Добавлен импорт Link
+import Link from "next/link" 
 // useIsMobile is not directly used here, but passed from MainLayout
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
