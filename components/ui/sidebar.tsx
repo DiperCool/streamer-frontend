@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, X } from "lucide-react" // Импортируем Menu и X для кнопки закрытия
+import { Home, Heart, Menu } from "lucide-react" // Импортируем Menu
 import Link from "next/link" 
 // useIsMobile is not directly used here, but passed from MainLayout
 
@@ -22,7 +22,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
       )}
       {...props}
     >
-      <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen}>
+      <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen} onCloseClick={() => { /* Handled by MainLayout */ }}>
         {/* Логотип STREAMER BETA будет здесь, условно отображаемый */}
       </SidebarHeader>
       <SidebarContent>
@@ -57,22 +57,24 @@ const SidebarHeader = React.forwardRef<
     className={cn("flex items-center px-6 py-4 lg:py-0", className)}
     {...props}
   >
-    {isMobile && sidebarOpen && ( // Логотип и кнопка закрытия видны только на мобильных, когда сайдбар открыт
-      <div className="flex items-center justify-between w-full">
+    {/* Кнопка-бургер всегда видна в SidebarHeader */}
+    <div className="flex items-center space-x-4"> {/* Группировка для единообразного отступа с Navbar */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onCloseClick} // Эта кнопка закрывает сайдбар
+        className="text-gray-300 hover:text-white"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+      {/* Логотип виден только на мобильных, когда сайдбар открыт */}
+      {isMobile && sidebarOpen && (
         <div className="flex items-center space-x-2">
           <div className="text-xl font-bold text-green-500">STREAMER</div>
           <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onCloseClick} // Эта кнопка закрывает сайдбар
-          className="text-gray-300 hover:text-white"
-        >
-          <Menu className="h-5 w-5" /> {/* Изменено на иконку Menu */}
-        </Button>
-      </div>
-    )}
+      )}
+    </div>
   </div>
 ));
 SidebarHeader.displayName = "SidebarHeader"
