@@ -49,7 +49,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
 
   return (
     <div className="group relative w-full cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
-      <Link href={`/vods/${vod.id}`} className="block">
+      <Link href={`/vod/${vod.id}`} className="block">
         <div className="relative w-full aspect-video">
           <Image
             src={thumbnailUrl}
