@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
-import { Home, Heart } from "lucide-react" // Удалены User, Settings
+import { Home, Heart } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -27,10 +27,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       )}>
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center space-x-2">
-              <div className="text-2xl font-bold text-green-500">STREAMER</div>
-              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
-            </div>
+            {/* Логотип STREAMER BETA был перемещен в Navbar */}
           </SidebarHeader>
           <SidebarContent>
             <SidebarNav>
