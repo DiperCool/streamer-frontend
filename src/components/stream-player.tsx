@@ -4,7 +4,7 @@ import React from "react"
 import ReactPlayer from "react-player"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import { Button } from "@/components/ui/button";
-import { Maximize, Minimize } from "lucide-react"; // Убрал MessageSquare
+import { Maximize, Minimize } from "lucide-react";
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -30,7 +30,7 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   return (
     <div className="absolute inset-0">
       <ReactPlayer
-        src={urlToPlay}
+        url={urlToPlay} {/* Corrected from src to url */}
         playing
         controls={true}
         width="100%"
