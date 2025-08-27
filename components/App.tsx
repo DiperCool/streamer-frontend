@@ -4,19 +4,9 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import { MyApolloProvider } from "@/components/ApolloWrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import type React from "react";
-import { useGetMeQuery } from "@/graphql/__generated__/graphql";
-import { UsernameSetupDialog } from "@/src/components/auth/UsernameSetupDialog";
+import { AuthChecker } from "@/src/components/auth/AuthChecker"; // Импортируем новый компонент
 
 export function App({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isLoading: authLoading } = useAuth0();
-
-    // Fetch 'me' data to check finishedAuth status
-    const { data: meData, loading: meLoading } = useGetMeQuery({
-        skip: !isAuthenticated, // Skip if not authenticated
-    });
-
-    const showUsernameDialog = isAuthenticated && !authLoading && !meLoading && meData?.me.finishedAuth === false;
-
     return (
         <Auth0Provider
             domain={process.env.NEXT_PUBLIC_AUTH0_DOMAIN!}
@@ -29,9 +19,9 @@ export function App({ children }: { children: React.ReactNode }) {
         >
             <MyApolloProvider>
                 <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-                    {children}
-                    {/* Render the UsernameSetupDialog conditionally */}
-                    <UsernameSetupDialog isOpen={showUsernameDialog} onClose={() => {}} />
+                    <AuthChecker> {/* Оборачиваем children в AuthChecker */}
+                        {children}
+                    </AuthChecker>
                 </ThemeProvider>
             </MyApolloProvider>
         </Auth0Provider>
