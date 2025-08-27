@@ -44,9 +44,9 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({
             }
         }));
         formData.append("map", JSON.stringify({
-            "0": ["variables.input.file"]
+            "files": ["variables.input.file"] // Changed key from "0" to "files"
         }));
-        formData.append("0", file);
+        formData.append("files", file); // Changed key from "0" to "files"
 
         const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URI!, {
             method: "POST",
