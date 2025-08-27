@@ -27,8 +27,8 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="min-h-screen bg-gray-900 text-white flex">
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out",
-        "top-0 h-full", // Изменено: top-0 и h-full для перекрытия Navbar и полной высоты
+        "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out", // z-index Sidebar теперь 50
+        "top-0 h-full",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar isMobile={isMobile} sidebarOpen={sidebarOpen}>
@@ -60,7 +60,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Основной контент */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen pt-16", // pt-16 остается, чтобы контент не перекрывался Navbar
+        "flex-1 flex flex-col min-h-screen pt-16",
         "transition-all duration-200 ease-in-out",
         sidebarOpen ? "lg:ml-64" : "lg:ml-0"
       )}>

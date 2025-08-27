@@ -49,7 +49,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
           <div
               ref={ref}
               className={cn(
-                  "fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between border-b border-gray-800 bg-gray-900 px-6",
+                  "fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-gray-800 bg-gray-900 px-6", // z-index Navbar теперь 40
                   className
               )}
               {...props}
@@ -64,8 +64,8 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              {/* Логотип виден на десктопе ИЛИ на мобильных, когда сайдбар закрыт */}
-              {(!isMobile || (isMobile && !sidebarOpen)) && (
+              {/* Логотип виден только на десктопе */}
+              {!isMobile && (
                 <div className="flex items-center space-x-2">
                   <div className="text-xl font-bold text-green-500">STREAMER</div>
                   <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
