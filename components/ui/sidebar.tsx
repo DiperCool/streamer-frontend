@@ -54,7 +54,7 @@ const SidebarHeader = React.forwardRef<
 >(({ className, isMobile, sidebarOpen, onCloseClick, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center px-6 py-4 lg:py-0", className)}
+    className={cn("flex h-16 items-center px-6", className)} {/* Изменено: добавлено h-16, удалено py-4 lg:py-0 */}
     {...props}
   >
     {/* Этот блок скопирован непосредственно из левой части Navbar */}
