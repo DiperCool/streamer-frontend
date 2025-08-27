@@ -22,8 +22,10 @@ interface VodCardProps {
   isCurrentStream?: boolean // To show "Current Stream" badge
 }
 
-// Helper to format duration (placeholder, as duration is not in VodDto yet)
+// Helper to format duration from seconds into HH:MM:SS
 const formatDuration = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) return "00:00";
+  
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
@@ -40,8 +42,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
   const thumbnailUrl = vod.preview ? getMinioUrl(vod.preview) : "/placeholder.jpg"
   const timeAgo = formatDistanceToNowStrict(new Date(vod.createdAt), { addSuffix: true });
 
-  // Placeholder for duration and category, as they are not in VodDto
-  const dummyDuration = "08:28:02"; // Example duration
+  // Placeholder for category, as it is not in VodDto
   const dummyCategory = "World"; // Example category
 
   return (
@@ -62,7 +63,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
             </Badge>
           )}
           <Badge className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
-            {dummyDuration}
+            {formatDuration(vod.duration)}
           </Badge>
           <Badge className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
             {vod.views} views

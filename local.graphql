@@ -288,6 +288,7 @@ type UploadFileResponse {
 type VodDto {
     createdAt: DateTime!
     description: String
+    duration: Long!
     id: UUID!
     preview: String
     source: String
@@ -514,6 +515,7 @@ input VodDtoFilterInput {
     and: [VodDtoFilterInput!]
     createdAt: DateTimeOperationFilterInput
     description: StringOperationFilterInput
+    duration: LongOperationFilterInput
     id: UuidOperationFilterInput
     or: [VodDtoFilterInput!]
     preview: StringOperationFilterInput
@@ -526,6 +528,7 @@ input VodDtoFilterInput {
 input VodDtoSortInput {
     createdAt: SortEnumType
     description: SortEnumType
+    duration: SortEnumType
     id: SortEnumType
     preview: SortEnumType
     source: SortEnumType

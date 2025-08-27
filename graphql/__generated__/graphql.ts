@@ -635,6 +635,7 @@ export type VodDto = {
   __typename?: 'VodDto';
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  duration: Scalars['Long']['output'];
   id: Scalars['UUID']['output'];
   preview?: Maybe<Scalars['String']['output']>;
   source?: Maybe<Scalars['String']['output']>;
@@ -648,6 +649,7 @@ export type VodDtoFilterInput = {
   and?: InputMaybe<Array<VodDtoFilterInput>>;
   createdAt?: InputMaybe<DateTimeOperationFilterInput>;
   description?: InputMaybe<StringOperationFilterInput>;
+  duration?: InputMaybe<LongOperationFilterInput>;
   id?: InputMaybe<UuidOperationFilterInput>;
   or?: InputMaybe<Array<VodDtoFilterInput>>;
   preview?: InputMaybe<StringOperationFilterInput>;
@@ -660,6 +662,7 @@ export type VodDtoFilterInput = {
 export type VodDtoSortInput = {
   createdAt?: InputMaybe<SortEnumType>;
   description?: InputMaybe<SortEnumType>;
+  duration?: InputMaybe<SortEnumType>;
   id?: InputMaybe<SortEnumType>;
   preview?: InputMaybe<SortEnumType>;
   source?: InputMaybe<SortEnumType>;
@@ -907,6 +910,26 @@ export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetStreamSettingsQuery = { __typename?: 'Query', streamSettings: { __typename?: 'StreamSettingsDto', id: string, streamKey: string, streamUrl: string } };
+
+export type GetVodsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<VodDtoSortInput> | VodDtoSortInput>;
+  streamerId: Scalars['String']['input'];
+  where?: InputMaybe<VodDtoFilterInput>;
+}>;
+
+
+export type GetVodsQuery = { __typename?: 'Query', vods?: { __typename?: 'VodsConnection', nodes?: Array<{ __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetVodQueryVariables = Exact<{
+  vodId: Scalars['UUID']['input'];
+}>;
+
+
+export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 
 export const CreateMessageDocument = gql`
@@ -2224,3 +2247,129 @@ export type GetStreamSettingsQueryHookResult = ReturnType<typeof useGetStreamSet
 export type GetStreamSettingsLazyQueryHookResult = ReturnType<typeof useGetStreamSettingsLazyQuery>;
 export type GetStreamSettingsSuspenseQueryHookResult = ReturnType<typeof useGetStreamSettingsSuspenseQuery>;
 export type GetStreamSettingsQueryResult = Apollo.QueryResult<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>;
+export const GetVodsDocument = gql`
+    query GetVods($after: String, $before: String, $first: Int, $last: Int, $order: [VodDtoSortInput!], $streamerId: String!, $where: VodDtoFilterInput) {
+  vods(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    streamerId: $streamerId
+    where: $where
+  ) {
+    nodes {
+      id
+      title
+      description
+      preview
+      source
+      views
+      createdAt
+      duration
+      streamer {
+        id
+        userName
+        avatar
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetVodsQuery__
+ *
+ * To run a query within a React component, call `useGetVodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVodsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      streamerId: // value for 'streamerId'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetVodsQuery(baseOptions: Apollo.QueryHookOptions<GetVodsQuery, GetVodsQueryVariables> & ({ variables: GetVodsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVodsQuery, GetVodsQueryVariables>(GetVodsDocument, options);
+      }
+export function useGetVodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVodsQuery, GetVodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVodsQuery, GetVodsQueryVariables>(GetVodsDocument, options);
+        }
+export function useGetVodsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVodsQuery, GetVodsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVodsQuery, GetVodsQueryVariables>(GetVodsDocument, options);
+        }
+export type GetVodsQueryHookResult = ReturnType<typeof useGetVodsQuery>;
+export type GetVodsLazyQueryHookResult = ReturnType<typeof useGetVodsLazyQuery>;
+export type GetVodsSuspenseQueryHookResult = ReturnType<typeof useGetVodsSuspenseQuery>;
+export type GetVodsQueryResult = Apollo.QueryResult<GetVodsQuery, GetVodsQueryVariables>;
+export const GetVodDocument = gql`
+    query GetVod($vodId: UUID!) {
+  vod(vodId: $vodId) {
+    id
+    title
+    description
+    preview
+    source
+    views
+    createdAt
+    duration
+    streamer {
+      id
+      userName
+      avatar
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetVodQuery__
+ *
+ * To run a query within a React component, call `useGetVodQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVodQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVodQuery({
+ *   variables: {
+ *      vodId: // value for 'vodId'
+ *   },
+ * });
+ */
+export function useGetVodQuery(baseOptions: Apollo.QueryHookOptions<GetVodQuery, GetVodQueryVariables> & ({ variables: GetVodQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVodQuery, GetVodQueryVariables>(GetVodDocument, options);
+      }
+export function useGetVodLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVodQuery, GetVodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVodQuery, GetVodQueryVariables>(GetVodDocument, options);
+        }
+export function useGetVodSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVodQuery, GetVodQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVodQuery, GetVodQueryVariables>(GetVodDocument, options);
+        }
+export type GetVodQueryHookResult = ReturnType<typeof useGetVodQuery>;
+export type GetVodLazyQueryHookResult = ReturnType<typeof useGetVodLazyQuery>;
+export type GetVodSuspenseQueryHookResult = ReturnType<typeof useGetVodSuspenseQuery>;
+export type GetVodQueryResult = Apollo.QueryResult<GetVodQuery, GetVodQueryVariables>;
