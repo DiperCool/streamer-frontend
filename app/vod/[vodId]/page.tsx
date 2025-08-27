@@ -2,17 +2,17 @@
 
 import React, { useState } from "react"
 import { useGetVodQuery, useGetStreamerQuery, useGetProfileQuery } from "@/graphql/__generated__/graphql"
-import { Loader2, MessageSquare } from "lucide-react" // Добавлен MessageSquare
+import { Loader2, MessageSquare } from "lucide-react"
 import { getMinioUrl } from "@/utils/utils"
 import { VodDetailsSection } from "@/src/components/vod-details-section"
 import ReactPlayer from "react-player";
-import { VodChatSection } from "@/src/components/vod-chat-section" // Импортируем новый компонент
-import { cn } from "@/lib/utils" // Импортируем cn для условных классов
-import { Button } from "@/components/ui/button" // Импортируем Button
+import { VodChatSection } from "@/src/components/vod-chat-section"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 export default function VodDetailPage({ params }: { params: { vodId: string } }) {
   const { vodId } = params
-  const [isChatVisible, setIsChatVisible] = useState(true); // Состояние видимости чата
+  const [isChatVisible, setIsChatVisible] = useState(true);
 
   const { data: vodData, loading: vodLoading, error: vodError } = useGetVodQuery({
     variables: { vodId },
@@ -61,10 +61,10 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
   const videoSource = vod.source ? getMinioUrl(vod.source) : null;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row"> {/* Основной контейнер */}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row pt-16"> {/* Добавлен pt-16 */}
       <div className={cn(
         "flex-1 flex flex-col transition-all duration-300 ease-in-out",
-        isChatVisible ? "lg:pr-80" : "" // Добавляем правый отступ, если чат виден
+        isChatVisible ? "lg:pr-80" : ""
       )}>
         {/* Video Player Section */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
@@ -106,7 +106,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         className={cn(
           "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
           isChatVisible ? "translate-x-0" : "translate-x-full",
-          "hidden lg:flex" // Скрываем на маленьких экранах, отображаем как flex на больших
+          "hidden lg:flex"
         )}
       >
         <VodChatSection onCloseChat={() => setIsChatVisible(false)} />
