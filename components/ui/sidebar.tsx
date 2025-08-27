@@ -3,17 +3,17 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu } from "lucide-react" // Импортируем Menu
+import { Home, Heart, Menu } from "lucide-react" 
 import Link from "next/link" 
-// useIsMobile is not directly used here, but passed from MainLayout
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
   sidebarOpen: boolean;
+  onCloseClick: () => void; // Добавлен пропс onCloseClick
 }
 
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
-  ({ className, isMobile, sidebarOpen, ...props }, ref) => (
+  ({ className, isMobile, sidebarOpen, onCloseClick, ...props }, ref) => ( // Принимаем onCloseClick
     <div
       ref={ref}
       className={cn(
@@ -22,7 +22,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
       )}
       {...props}
     >
-      <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen} onCloseClick={() => { /* Handled by MainLayout */ }}>
+      <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen} onCloseClick={onCloseClick}> {/* Передаем onCloseClick */}
         {/* Логотип STREAMER BETA будет здесь, условно отображаемый */}
       </SidebarHeader>
       <SidebarContent>
