@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react" // Импортируем useEffect
+import React, { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
@@ -28,7 +28,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Sidebar */}
       <div className={cn(
         "fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out",
-        "top-16 h-[calc(100vh-4rem)]",
+        "top-0 h-full", // Изменено: top-0 и h-full для перекрытия Navbar и полной высоты
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar isMobile={isMobile} sidebarOpen={sidebarOpen}>
@@ -60,10 +60,8 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Основной контент */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen pt-16",
+        "flex-1 flex flex-col min-h-screen pt-16", // pt-16 остается, чтобы контент не перекрывался Navbar
         "transition-all duration-200 ease-in-out",
-        // Default margin is 0. On large screens, it's 64px if sidebar is open, else 0.
-        // On mobile, it's always 0 because lg: classes don't apply.
         sidebarOpen ? "lg:ml-64" : "lg:ml-0"
       )}>
         {/* Navbar */}
