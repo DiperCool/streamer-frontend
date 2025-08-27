@@ -22,13 +22,14 @@ interface VodCardProps {
   isCurrentStream?: boolean // To show "Current Stream" badge
 }
 
-// Helper to format duration from seconds into HH:MM:SS
-const formatDuration = (seconds: number): string => {
-  if (isNaN(seconds) || seconds < 0) return "00:00";
+// Helper to format duration from milliseconds into HH:MM:SS
+const formatDuration = (milliseconds: number): string => {
+  if (isNaN(milliseconds) || milliseconds < 0) return "00:00";
   
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
 
   const parts = [];
   if (hours > 0) parts.push(String(hours).padStart(2, '0'));
