@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNowStrict } from "date-fns"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" // Import Avatar components
 
 interface VodCardProps {
   vod: VodDto
@@ -43,8 +44,8 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
   const thumbnailUrl = vod.preview ? getMinioUrl(vod.preview) : "/placeholder.jpg"
   const timeAgo = formatDistanceToNowStrict(new Date(vod.createdAt), { addSuffix: true });
 
-  // Placeholder for category, as it is not in VodDto
-  const dummyCategory = "World"; // Example category
+  const streamerName = vod.streamer?.userName || "Unknown Streamer";
+  const streamerAvatar = vod.streamer?.avatar;
 
   return (
     <div className="group relative w-full cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
@@ -76,9 +77,17 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
           <h3 className="text-base font-semibold text-white line-clamp-2 group-hover:text-green-400 transition-colors">
             {vod.title || "Untitled Video"}
           </h3>
-          <p className="text-sm text-gray-400 mt-1">
-            {dummyCategory} • {timeAgo}
-          </p>
+          <div className="flex items-center mt-1"> {/* Container for avatar and username */}
+            <Avatar className="w-6 h-6 mr-2">
+              <AvatarImage src={getMinioUrl(streamerAvatar!)} alt={streamerName} />
+              <AvatarFallback className="bg-gray-600 text-white text-xs">
+                {streamerName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <p className="text-sm text-gray-400">
+              {streamerName} • {timeAgo}
+            </p>
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
