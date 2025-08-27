@@ -54,10 +54,9 @@ const SidebarHeader = React.forwardRef<
 >(({ className, isMobile, sidebarOpen, onCloseClick, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex h-16 items-center px-6", className)} {/* Изменено: добавлено h-16, удалено py-4 lg:py-0 */}
+    className={cn("flex h-16 items-center px-6", className)} 
     {...props}
   >
-    {/* Этот блок скопирован непосредственно из левой части Navbar */}
     <div className="flex items-center space-x-4"> 
       <Button
         variant="ghost"
@@ -67,7 +66,6 @@ const SidebarHeader = React.forwardRef<
       >
         <Menu className="h-5 w-5" />
       </Button>
-      {/* Логотип виден только на десктопе, идентично Navbar */}
       {!isMobile && (
         <div className="flex items-center space-x-2">
           <div className="text-xl font-bold text-green-500">STREAMER</div>
