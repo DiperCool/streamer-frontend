@@ -61,7 +61,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
   const videoSource = vod.source ? getMinioUrl(vod.source) : null;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row pt-16"> {/* Добавлен pt-16 */}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row"> {/* Убран pt-16 */}
       <div className={cn(
         "flex-1 flex flex-col transition-all duration-300 ease-in-out",
         isChatVisible ? "lg:pr-80" : ""
