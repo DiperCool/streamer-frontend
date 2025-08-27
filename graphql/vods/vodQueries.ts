@@ -42,3 +42,22 @@ export const GET_VODS = gql`
         }
     }
 `
+
+export const GET_VOD = gql`
+    query GetVod($vodId: UUID!) {
+        vod(vodId: $vodId) {
+            id
+            title
+            description
+            preview
+            source
+            views
+            createdAt
+            streamer {
+                id
+                userName
+                avatar
+            }
+        }
+    }
+`
