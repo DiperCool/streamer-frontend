@@ -105,7 +105,7 @@ export function VodChatSection({ onCloseChat }: VodChatSectionProps) {
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-white text-lg">Chat</CardTitle>
+        <CardTitle className="text-white text-lg">Chat Replay</CardTitle> {/* Изменено на "Chat Replay" */}
         {onCloseChat && (
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
             <X className="h-5 w-5" />
