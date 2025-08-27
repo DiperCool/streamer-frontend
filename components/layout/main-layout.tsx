@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react" // Импортируем useEffect
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
@@ -17,6 +17,11 @@ export function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const pathname = usePathname()
+
+  // Эффект для обновления sidebarOpen при изменении isMobile
+  useEffect(() => {
+    setSidebarOpen(!isMobile);
+  }, [isMobile]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
@@ -57,7 +62,8 @@ export function MainLayout({ children }: MainLayoutProps) {
       <div className={cn(
         "flex-1 flex flex-col min-h-screen pt-16",
         "transition-all duration-200 ease-in-out",
-        "ml-0",
+        // Default margin is 0. On large screens, it's 64px if sidebar is open, else 0.
+        // On mobile, it's always 0 because lg: classes don't apply.
         sidebarOpen ? "lg:ml-64" : "lg:ml-0"
       )}>
         {/* Navbar */}
