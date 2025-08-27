@@ -159,6 +159,15 @@ export type DeleteMessageResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type FinishAuthInput = {
+  userName: Scalars['String']['input'];
+};
+
+export type FinishAuthResponse = {
+  __typename?: 'FinishAuthResponse';
+  id: Scalars['String']['output'];
+};
+
 export type FollowInput = {
   streamerId: Scalars['String']['input'];
 };
@@ -192,6 +201,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createMessage: CreateMessageResponse;
   deleteMessage: DeleteMessageResponse;
+  finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
   unfollow: UnfollowResponse;
@@ -214,6 +224,11 @@ export type MutationCreateMessageArgs = {
 
 export type MutationDeleteMessageArgs = {
   request: DeleteMessageInput;
+};
+
+
+export type MutationFinishAuthArgs = {
+  input: FinishAuthInput;
 };
 
 
@@ -816,6 +831,13 @@ export type UnfollowStreamerMutationVariables = Exact<{
 
 
 export type UnfollowStreamerMutation = { __typename?: 'Mutation', unfollow: { __typename?: 'UnfollowResponse', id: string } };
+
+export type FinishAuthMutationVariables = Exact<{
+  input: FinishAuthInput;
+}>;
+
+
+export type FinishAuthMutation = { __typename?: 'Mutation', finishAuth: { __typename?: 'FinishAuthResponse', id: string } };
 
 export type GetStreamerQueryVariables = Exact<{
   userName: Scalars['String']['input'];
@@ -1739,6 +1761,39 @@ export function useUnfollowStreamerMutation(baseOptions?: Apollo.MutationHookOpt
 export type UnfollowStreamerMutationHookResult = ReturnType<typeof useUnfollowStreamerMutation>;
 export type UnfollowStreamerMutationResult = Apollo.MutationResult<UnfollowStreamerMutation>;
 export type UnfollowStreamerMutationOptions = Apollo.BaseMutationOptions<UnfollowStreamerMutation, UnfollowStreamerMutationVariables>;
+export const FinishAuthDocument = gql`
+    mutation FinishAuth($input: FinishAuthInput!) {
+  finishAuth(input: $input) {
+    id
+  }
+}
+    `;
+export type FinishAuthMutationFn = Apollo.MutationFunction<FinishAuthMutation, FinishAuthMutationVariables>;
+
+/**
+ * __useFinishAuthMutation__
+ *
+ * To run a mutation, you first call `useFinishAuthMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinishAuthMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finishAuthMutation, { data, loading, error }] = useFinishAuthMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useFinishAuthMutation(baseOptions?: Apollo.MutationHookOptions<FinishAuthMutation, FinishAuthMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<FinishAuthMutation, FinishAuthMutationVariables>(FinishAuthDocument, options);
+      }
+export type FinishAuthMutationHookResult = ReturnType<typeof useFinishAuthMutation>;
+export type FinishAuthMutationResult = Apollo.MutationResult<FinishAuthMutation>;
+export type FinishAuthMutationOptions = Apollo.BaseMutationOptions<FinishAuthMutation, FinishAuthMutationVariables>;
 export const GetStreamerDocument = gql`
     query GetStreamer($userName: String!) {
   streamer(userName: $userName) {

@@ -18,7 +18,7 @@ import {
 import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMinioUrl } from "@/utils/utils"
-import { useIsMobile } from "@/hooks/use-mobile" // Импортируем хук для определения мобильного устройства
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void
@@ -31,7 +31,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
         skip: !isAuthenticated,
       });
       const router = useRouter();
-      const isMobile = useIsMobile(); // Используем хук
+      const isMobile = useIsMobile();
 
       const userName = streamerData?.me?.userName;
       const userAvatar = streamerData?.me?.avatar;
@@ -62,6 +62,11 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               >
                 <Menu className="h-5 w-5" />
               </Button>
+              {/* STREAMER BETA logo */}
+              <div className="flex items-center space-x-2">
+                <div className="text-xl font-bold text-green-500">STREAMER</div>
+                <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
+              </div>
             </div>
 
             <div className="flex-1 flex justify-center">
@@ -117,7 +122,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                           <DropdownMenuContent
                             className={cn(
                               "bg-gray-800 border-gray-700 text-white p-1",
-                              "w-56" // Default width on desktop
+                              "w-56"
                             )}
                           >
                             {userName && (
