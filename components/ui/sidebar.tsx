@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, X } from "lucide-react" // Импортируем X для кнопки закрытия
+import { Home, Heart, Menu, X } from "lucide-react" // Импортируем Menu и X для кнопки закрытия
 import Link from "next/link" 
 // useIsMobile is not directly used here, but passed from MainLayout
 
@@ -45,7 +45,7 @@ Sidebar.displayName = "Sidebar"
 interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
   sidebarOpen: boolean;
-  onCloseClick?: () => void; // Новый пропс для кнопки закрытия
+  onCloseClick?: () => void; // Пропс для кнопки закрытия
 }
 
 const SidebarHeader = React.forwardRef<
@@ -58,7 +58,7 @@ const SidebarHeader = React.forwardRef<
     {...props}
   >
     {isMobile && sidebarOpen && ( // Логотип и кнопка закрытия видны только на мобильных, когда сайдбар открыт
-      <div className="flex items-center justify-between w-full"> {/* Добавлен justify-between */}
+      <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-2">
           <div className="text-xl font-bold text-green-500">STREAMER</div>
           <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
@@ -66,10 +66,10 @@ const SidebarHeader = React.forwardRef<
         <Button
           variant="ghost"
           size="icon"
-          onClick={onCloseClick}
+          onClick={onCloseClick} // Эта кнопка закрывает сайдбар
           className="text-gray-300 hover:text-white"
         >
-          <X className="h-5 w-5" />
+          <Menu className="h-5 w-5" /> {/* Изменено на иконку Menu */}
         </Button>
       </div>
     )}
