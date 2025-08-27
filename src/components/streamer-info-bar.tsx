@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog" // Импортируем компоненты AlertDialog
+} from "@/components/ui/alert-dialog"
 
 interface StreamerInfoBarProps {
   streamer: StreamerDto

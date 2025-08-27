@@ -138,7 +138,7 @@ type ProfileDto {
     discord: String
     instagram: String
     offlineStreamBanner: String
-    streamer: StreamerDto!
+    streamer: StreamerDto
     streamerId: String!
     youtube: String
 }
@@ -160,12 +160,26 @@ type Query {
     ): ChatMessagesConnection
     chatSettings: ChatSettingsDto!
     currentStream(streamerId: String!): StreamDto!
-    me: StreamerDto!
+    me: StreamerMeDto!
     myEmail: GetEmailResponse!
     profile(streamerId: String!): ProfileDto!
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
     streamerInteraction(streamerId: String!): StreamerInteractionDto!
+    vod(vodId: UUID!): VodDto!
+    vods(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [VodDtoSortInput!],
+        streamerId: String!,
+        where: VodDtoFilterInput
+    ): VodsConnection
 }
 
 type StreamDto {
@@ -199,12 +213,21 @@ type StreamerDto {
     followers: Long!
     id: String!
     isLive: Boolean!
-    userName: String!
+    userName: String
 }
 
 type StreamerInteractionDto {
     followed: Boolean!
     followedAt: DateTime
+}
+
+type StreamerMeDto {
+    avatar: String
+    finishedAuth: Boolean!
+    followers: Long!
+    id: String!
+    isLive: Boolean!
+    userName: String
 }
 
 type Subscription {
@@ -255,6 +278,36 @@ type UpdateStreamSettingsResponse {
 
 type UploadFileResponse {
     fileName: String!
+}
+
+type VodDto {
+    createdAt: DateTime!
+    description: String
+    id: UUID!
+    preview: String
+    source: String
+    streamer: StreamerDto
+    streamerId: String!
+    title: String
+    views: Long!
+}
+
+"A connection to a list of items."
+type VodsConnection {
+    "A list of edges."
+    edges: [VodsEdge!]
+    "A flattened list of the nodes."
+    nodes: [VodDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type VodsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: VodDto!
 }
 
 "Defines when a policy shall be executed."
@@ -357,6 +410,21 @@ input FollowInput {
     streamerId: String!
 }
 
+input LongOperationFilterInput {
+    eq: Long
+    gt: Long
+    gte: Long
+    in: [Long]
+    lt: Long
+    lte: Long
+    neq: Long
+    ngt: Long
+    ngte: Long
+    nin: [Long]
+    nlt: Long
+    nlte: Long
+}
+
 input PinMessageInput {
     messageId: UUID!
 }
@@ -431,4 +499,28 @@ input UuidOperationFilterInput {
     nin: [UUID]
     nlt: UUID
     nlte: UUID
+}
+
+input VodDtoFilterInput {
+    and: [VodDtoFilterInput!]
+    createdAt: DateTimeOperationFilterInput
+    description: StringOperationFilterInput
+    id: UuidOperationFilterInput
+    or: [VodDtoFilterInput!]
+    preview: StringOperationFilterInput
+    source: StringOperationFilterInput
+    streamerId: StringOperationFilterInput
+    title: StringOperationFilterInput
+    views: LongOperationFilterInput
+}
+
+input VodDtoSortInput {
+    createdAt: SortEnumType
+    description: SortEnumType
+    id: SortEnumType
+    preview: SortEnumType
+    source: SortEnumType
+    streamerId: SortEnumType
+    title: SortEnumType
+    views: SortEnumType
 }

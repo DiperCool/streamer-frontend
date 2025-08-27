@@ -23,3 +23,13 @@ export const UNFOLLOW_STREAMER = gql`
         }
     }
 `
+
+export const UPDATE_STREAMER_AUTH_COMPLETION = gql`
+    mutation UpdateStreamerAuthCompletion($input: UpdateStreamerAuthCompletionInput!) {
+        updateStreamerAuthCompletion(input: $input) {
+            id
+            userName
+            finishedAuth
+        }
+    }
+`

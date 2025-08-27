@@ -173,6 +173,21 @@ export type GetEmailResponse = {
   email: Scalars['String']['output'];
 };
 
+export type LongOperationFilterInput = {
+  eq?: InputMaybe<Scalars['Long']['input']>;
+  gt?: InputMaybe<Scalars['Long']['input']>;
+  gte?: InputMaybe<Scalars['Long']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Long']['input']>>>;
+  lt?: InputMaybe<Scalars['Long']['input']>;
+  lte?: InputMaybe<Scalars['Long']['input']>;
+  neq?: InputMaybe<Scalars['Long']['input']>;
+  ngt?: InputMaybe<Scalars['Long']['input']>;
+  ngte?: InputMaybe<Scalars['Long']['input']>;
+  nin?: InputMaybe<Array<InputMaybe<Scalars['Long']['input']>>>;
+  nlt?: InputMaybe<Scalars['Long']['input']>;
+  nlte?: InputMaybe<Scalars['Long']['input']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createMessage: CreateMessageResponse;
@@ -295,7 +310,7 @@ export type ProfileDto = {
   discord?: Maybe<Scalars['String']['output']>;
   instagram?: Maybe<Scalars['String']['output']>;
   offlineStreamBanner?: Maybe<Scalars['String']['output']>;
-  streamer: StreamerDto;
+  streamer?: Maybe<StreamerDto>;
   streamerId: Scalars['String']['output'];
   youtube?: Maybe<Scalars['String']['output']>;
 };
@@ -306,12 +321,14 @@ export type Query = {
   chatMessages?: Maybe<ChatMessagesConnection>;
   chatSettings: ChatSettingsDto;
   currentStream: StreamDto;
-  me: StreamerDto;
+  me: StreamerMeDto;
   myEmail: GetEmailResponse;
   profile: ProfileDto;
   streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
   streamerInteraction: StreamerInteractionDto;
+  vod: VodDto;
+  vods?: Maybe<VodsConnection>;
 };
 
 
@@ -348,6 +365,22 @@ export type QueryStreamerArgs = {
 
 export type QueryStreamerInteractionArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryVodArgs = {
+  vodId: Scalars['UUID']['input'];
+};
+
+
+export type QueryVodsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<VodDtoSortInput>>;
+  streamerId: Scalars['String']['input'];
+  where?: InputMaybe<VodDtoFilterInput>;
 };
 
 export enum SortEnumType {
@@ -396,13 +429,23 @@ export type StreamerDto = {
   followers: Scalars['Long']['output'];
   id: Scalars['String']['output'];
   isLive: Scalars['Boolean']['output'];
-  userName: Scalars['String']['output'];
+  userName?: Maybe<Scalars['String']['output']>;
 };
 
 export type StreamerInteractionDto = {
   __typename?: 'StreamerInteractionDto';
   followed: Scalars['Boolean']['output'];
   followedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StreamerMeDto = {
+  __typename?: 'StreamerMeDto';
+  avatar?: Maybe<Scalars['String']['output']>;
+  finishedAuth: Scalars['Boolean']['output'];
+  followers: Scalars['Long']['output'];
+  id: Scalars['String']['output'];
+  isLive: Scalars['Boolean']['output'];
+  userName?: Maybe<Scalars['String']['output']>;
 };
 
 export type StringOperationFilterInput = {
@@ -573,6 +616,63 @@ export type UuidOperationFilterInput = {
   nlte?: InputMaybe<Scalars['UUID']['input']>;
 };
 
+export type VodDto = {
+  __typename?: 'VodDto';
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['UUID']['output'];
+  preview?: Maybe<Scalars['String']['output']>;
+  source?: Maybe<Scalars['String']['output']>;
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  views: Scalars['Long']['output'];
+};
+
+export type VodDtoFilterInput = {
+  and?: InputMaybe<Array<VodDtoFilterInput>>;
+  createdAt?: InputMaybe<DateTimeOperationFilterInput>;
+  description?: InputMaybe<StringOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<VodDtoFilterInput>>;
+  preview?: InputMaybe<StringOperationFilterInput>;
+  source?: InputMaybe<StringOperationFilterInput>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+  title?: InputMaybe<StringOperationFilterInput>;
+  views?: InputMaybe<LongOperationFilterInput>;
+};
+
+export type VodDtoSortInput = {
+  createdAt?: InputMaybe<SortEnumType>;
+  description?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  preview?: InputMaybe<SortEnumType>;
+  source?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+  title?: InputMaybe<SortEnumType>;
+  views?: InputMaybe<SortEnumType>;
+};
+
+/** A connection to a list of items. */
+export type VodsConnection = {
+  __typename?: 'VodsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<VodsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<VodDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type VodsEdge = {
+  __typename?: 'VodsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: VodDto;
+};
+
 export type CreateMessageMutationVariables = Exact<{
   request: CreateMessageInput;
 }>;
@@ -613,7 +713,7 @@ export type GetChatQueryVariables = Exact<{
 }>;
 
 
-export type GetChatQuery = { __typename?: 'Query', chat: { __typename?: 'ChatDto', id: string, pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
+export type GetChatQuery = { __typename?: 'Query', chat: { __typename?: 'ChatDto', id: string, pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
 
 export type GetChatMessagesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -626,7 +726,7 @@ export type GetChatMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', nodes?: Array<{ __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName: string } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', nodes?: Array<{ __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName?: string | null } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetChatSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -638,21 +738,21 @@ export type ChatMessageCreatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } };
+export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } };
 
 export type ChatMessageDeletedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
 }>;
 
 
-export type ChatMessageDeletedSubscription = { __typename?: 'Subscription', chatMessageDeleted: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } };
+export type ChatMessageDeletedSubscription = { __typename?: 'Subscription', chatMessageDeleted: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } };
 
 export type ChatUpdatedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
 }>;
 
 
-export type ChatUpdatedSubscription = { __typename?: 'Subscription', chatUpdated: { __typename?: 'ChatDto', pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName: string } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
+export type ChatUpdatedSubscription = { __typename?: 'Subscription', chatUpdated: { __typename?: 'ChatDto', pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
 
 export type UploadFileMutationVariables = Exact<{
   input: UploadFileInput;
@@ -694,7 +794,7 @@ export type GetProfileQueryVariables = Exact<{
 }>;
 
 
-export type GetProfileQuery = { __typename?: 'Query', profile: { __typename?: 'ProfileDto', streamerId: string, bio?: string | null, channelBanner?: string | null, discord?: string | null, instagram?: string | null, offlineStreamBanner?: string | null, youtube?: string | null, streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: number, isLive: boolean } } };
+export type GetProfileQuery = { __typename?: 'Query', profile: { __typename?: 'ProfileDto', streamerId: string, bio?: string | null, channelBanner?: string | null, discord?: string | null, instagram?: string | null, offlineStreamBanner?: string | null, youtube?: string | null, streamer?: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean } | null } };
 
 export type UpdateAvatarMutationVariables = Exact<{
   input: UpdateAvatarInput;
@@ -722,12 +822,12 @@ export type GetStreamerQueryVariables = Exact<{
 }>;
 
 
-export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: number, isLive: boolean } };
+export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean } };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: number, isLive: boolean } };
+export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerMeDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean, finishedAuth: boolean } };
 
 export type GetMyEmailQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -746,14 +846,14 @@ export type StreamerUpdatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type StreamerUpdatedSubscription = { __typename?: 'Subscription', streamerUpdated: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName: string, followers: number, isLive: boolean } };
+export type StreamerUpdatedSubscription = { __typename?: 'Subscription', streamerUpdated: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean } };
 
 export type StreamUpdatedSubscriptionVariables = Exact<{
   streamId: Scalars['UUID']['input'];
 }>;
 
 
-export type StreamUpdatedSubscription = { __typename?: 'Subscription', streamUpdated: { __typename?: 'StreamDto', id: string, active: boolean, title: string, currentViewers: number, streamer?: { __typename?: 'StreamerDto', id: string, userName: string, avatar?: string | null, followers: number } | null } };
+export type StreamUpdatedSubscription = { __typename?: 'Subscription', streamUpdated: { __typename?: 'StreamDto', id: string, active: boolean, title: string, currentViewers: number, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, followers: number } | null } };
 
 export type WatchStreamSubscriptionVariables = Exact<{
   streamId: Scalars['UUID']['input'];
@@ -779,7 +879,7 @@ export type GetCurrentStreamQueryVariables = Exact<{
 }>;
 
 
-export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: string, streamerId: string, active: boolean, title: string, currentViewers: number, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName: string, avatar?: string | null, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }> } };
+export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: string, streamerId: string, active: boolean, title: string, currentViewers: number, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }> } };
 
 export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1691,6 +1791,7 @@ export const GetMeDocument = gql`
     userName
     followers
     isLive
+    finishedAuth
   }
 }
     `;
