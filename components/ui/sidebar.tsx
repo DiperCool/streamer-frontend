@@ -4,11 +4,15 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Home, Heart, Menu, Search, User, Settings } from "lucide-react"
+// useIsMobile is not directly used here, but passed from MainLayout
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  isMobile: boolean;
+  sidebarOpen: boolean;
+}
 
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
-  ({ className, ...props }, ref) => (
+  ({ className, isMobile, sidebarOpen, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
@@ -16,21 +20,49 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         className
       )}
       {...props}
-    />
+    >
+      <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen}>
+        {/* Логотип будет здесь */}
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarNav>
+          <Link href="/" passHref>
+            <SidebarNavItem icon={<Home />} active={false}>
+              Home
+            </SidebarNavItem>
+          </Link>
+          <SidebarNavItem icon={<Heart />}>
+            Following
+          </SidebarNavItem>
+        </SidebarNav>
+      </SidebarContent>
+    </div>
   )
 )
 Sidebar.displayName = "Sidebar"
 
+interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  isMobile: boolean;
+  sidebarOpen: boolean;
+}
+
 const SidebarHeader = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  SidebarHeaderProps
+>(({ className, isMobile, sidebarOpen, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center px-6", className)}
+    className={cn("flex items-center px-6 py-4 lg:py-0", className)}
     {...props}
-  />
-))
+  >
+    {isMobile && sidebarOpen && ( // Логотип виден только на мобильных, когда сайдбар открыт
+      <div className="flex items-center space-x-2">
+        <div className="text-xl font-bold text-green-500">STREAMER</div>
+        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
+      </div>
+    )}
+  </div>
+));
 SidebarHeader.displayName = "SidebarHeader"
 
 const SidebarContent = React.forwardRef<

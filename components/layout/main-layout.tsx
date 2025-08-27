@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
@@ -25,9 +26,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         "top-16 h-[calc(100vh-4rem)]",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <Sidebar>
-          <SidebarHeader>
-            {/* Логотип STREAMER BETA был перемещен в Navbar */}
+        <Sidebar isMobile={isMobile} sidebarOpen={sidebarOpen}>
+          <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen}>
+            {/* Логотип STREAMER BETA будет здесь, условно отображаемый */}
           </SidebarHeader>
           <SidebarContent>
             <SidebarNav>
@@ -39,7 +40,6 @@ export function MainLayout({ children }: MainLayoutProps) {
               <SidebarNavItem icon={<Heart />}>
                 Following
               </SidebarNavItem>
-              {/* Удалены пункты Profile и Settings */}
             </SidebarNav>
           </SidebarContent>
         </Sidebar>
@@ -61,7 +61,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         sidebarOpen ? "lg:ml-64" : "lg:ml-0"
       )}>
         {/* Navbar */}
-        <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} sidebarOpen={sidebarOpen} />
         
         {/* Содержимое страницы */}
         <div className="flex-1">

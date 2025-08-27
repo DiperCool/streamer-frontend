@@ -21,17 +21,18 @@ import { getMinioUrl } from "@/utils/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
-  onMenuClick?: () => void
+  onMenuClick?: () => void;
+  isMobile: boolean;
+  sidebarOpen: boolean;
 }
 
 const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
-    ({ className, onMenuClick, ...props }, ref) => {
+    ({ className, onMenuClick, isMobile, sidebarOpen, ...props }, ref) => {
       const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0()
       const { data: streamerData, loading: streamerLoading } = useGetMeQuery({
         skip: !isAuthenticated,
       });
       const router = useRouter();
-      const isMobile = useIsMobile();
 
       const userName = streamerData?.me?.userName;
       const userAvatar = streamerData?.me?.avatar;
@@ -54,19 +55,22 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               {...props}
           >
             <div className="flex items-center space-x-4">
-              <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onMenuClick}
-                  className="text-gray-300 hover:text-white"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-              {/* STREAMER BETA logo */}
-              <div className="flex items-center space-x-2">
-                <div className="text-xl font-bold text-green-500">STREAMER</div>
-                <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
-              </div>
+              {isMobile && ( // Кнопка меню видна только на мобильных
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onMenuClick}
+                    className="text-gray-300 hover:text-white"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              )}
+              {(!isMobile || !sidebarOpen) && ( // Логотип виден на десктопе ИЛИ на мобильных, когда сайдбар закрыт
+                <div className="flex items-center space-x-2">
+                  <div className="text-xl font-bold text-green-500">STREAMER</div>
+                  <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
+                </div>
+              )}
             </div>
 
             <div className="flex-1 flex justify-center">
