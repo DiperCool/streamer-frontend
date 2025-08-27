@@ -61,13 +61,13 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
   const videoSource = vod.source ? getMinioUrl(vod.source) : null;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row"> {/* Убран pt-16 */}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row">
       <div className={cn(
         "flex-1 flex flex-col transition-all duration-300 ease-in-out",
         isChatVisible ? "lg:pr-80" : ""
       )}>
         {/* Video Player Section */}
-        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
+        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden"> {/* Убран mb-6 */}
           {videoSource ? (
             <ReactPlayer
               src={videoSource}
@@ -96,7 +96,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         </div>
 
         {/* VOD Details and Streamer Info */}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-4"> {/* Изменен py-8 на py-4 */}
           <VodDetailsSection vod={vod} streamer={streamer} profile={profile} />
         </div>
       </div>
