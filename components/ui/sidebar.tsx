@@ -66,12 +66,11 @@ const SidebarHeader = React.forwardRef<
       >
         <Menu className="h-5 w-5" />
       </Button>
-      {!isMobile && (
-        <div className="flex items-center space-x-2">
-          <div className="text-xl font-bold text-green-500">STREAMER</div>
-          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
-        </div>
-      )}
+      {/* Логотип теперь всегда виден в Sidebar, независимо от isMobile */}
+      <div className="flex items-center space-x-2">
+        <div className="text-xl font-bold text-green-500">STREAMER</div>
+        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
+      </div>
     </div>
   </div>
 ));
