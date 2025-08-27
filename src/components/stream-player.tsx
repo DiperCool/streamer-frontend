@@ -30,22 +30,13 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   return (
     <div className="absolute inset-0">
       <ReactPlayer
-        url={urlToPlay} {/* Corrected from src to url */}
+        url={urlToPlay}
         playing
         controls={true}
         width="100%"
         height="100%"
         className="z-[15]"
       />
-      {/* Кнопка максимизации/минимизации плеера - теперь управляется извне */}
-      {/* <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-4 right-4 z-20 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
-        onClick={onTogglePlayerMaximize}
-      >
-        {isPlayerMaximized ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
-      </Button> */}
     </div>
   )
 }
