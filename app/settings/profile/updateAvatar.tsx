@@ -5,11 +5,13 @@ import {ProfileDto, useUpdateAvatarMutation} from "@/graphql/__generated__/graph
 import {FC} from "react";
 interface UpdateBioProps {
     refetch: () => void;
+    refetchMe: () => void; // Added refetchMe prop
 }
-export const UpdateAvatar: FC<UpdateBioProps> = ({ refetch }) => {
+export const UpdateAvatar: FC<UpdateBioProps> = ({ refetch, refetchMe }) => {
 
     const [updateAvatarMutation] = useUpdateAvatarMutation();
     const updateAvatar =  (file: string) => {
+        console.log(file)
          updateAvatarMutation({
             variables: {
                 input:{
@@ -18,6 +20,7 @@ export const UpdateAvatar: FC<UpdateBioProps> = ({ refetch }) => {
             }
         }).then(()=>{
             refetch()
+            refetchMe() // Call refetchMe here
          })
     }
     return(

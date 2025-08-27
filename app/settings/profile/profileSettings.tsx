@@ -27,7 +27,7 @@ import { SocialMediaLink } from "@/components/ui/social-media-link";
 import {EmailSettings} from "@/app/settings/profile/emailSettings";
 
 export const ProfileSettings = () => {
-    const { data: streamer, loading: streamerLoadig  } = useGetMeQuery();
+    const { data: streamer, loading: streamerLoadig, refetch: refetchMe } = useGetMeQuery();
     const { data: profile, refetch } = useGetProfileQuery({
         variables:{
             streamerId: streamer?.me.id ?? ""
@@ -96,14 +96,14 @@ export const ProfileSettings = () => {
                         </div>
                     </div>
 
-                    <UpdateAvatar refetch={refetch} />
+                    <UpdateAvatar refetch={refetchProfile} refetchMe={refetchMe} />
                 </CardContent>
             </Card>
 
 
-            <UpdateChannelBanner refetch={refetch} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
+            <UpdateChannelBanner refetch={refetchProfile} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
 
-            <UpdateOfflineBanner refetch={refetch} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
+            <UpdateOfflineBanner refetch={refetchProfile} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
             <Card className="bg-gray-800 border-gray-700 mb-8">
                 <CardHeader>
                     <CardTitle className="text-white">Basic Details</CardTitle>
@@ -127,11 +127,11 @@ export const ProfileSettings = () => {
 
                     <EmailSettings/>
 
-                   <UpdateBio refetch={refetch} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
+                   <UpdateBio refetch={refetchProfile} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
                 </CardContent>
             </Card>
 
-            <UpdateSocialMedia refetch={refetch} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
+            <UpdateSocialMedia refetch={refetchProfile} profile={{...streamerProfile, streamerId: streamer.me.id}}/>
         </div>
     )
 }

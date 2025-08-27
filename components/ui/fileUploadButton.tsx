@@ -58,7 +58,7 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({
         });
 
         const result = await response.json();
-        const fileName = result?.data?.upload?.fileName;
+        const fileName = `files/${result?.data?.upload?.fileName}`;
 
         if (fileName) {
             onUpload(fileName);
