@@ -2,10 +2,10 @@
 
 import React from "react"
 import { useGetVodQuery, useGetStreamerQuery, useGetProfileQuery } from "@/graphql/__generated__/graphql"
-import ReactPlayer from "react-player"
 import { Loader2 } from "lucide-react"
 import { getMinioUrl } from "@/utils/utils"
 import { VodDetailsSection } from "@/src/components/vod-details-section"
+import WhepPlayer from "@/components/players/WhepPlayer"; // Импортируем WhepPlayer
 
 export default function VodDetailPage({ params }: { params: { vodId: string } }) {
   const { vodId } = params
@@ -62,8 +62,9 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         {/* Video Player Section */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
           {videoSource ? (
-            <ReactPlayer
-              url={videoSource}
+            // Используем WhepPlayer напрямую, передавая src
+            <WhepPlayer
+              src={videoSource}
               playing={true}
               controls={true}
               width="100%"
