@@ -23,7 +23,8 @@ import {
     GetChatMessagesQuery,
     GetChatMessagesDocument,
     ChatMessagesEdge,
-    GetChatDocument, useChatMessageCreatedSubscription, useChatMessageDeletedSubscription,
+    useChatMessageCreatedSubscription,
+    useChatMessageDeletedSubscription,
 } from "@/graphql/__generated__/graphql"
 import { useApolloClient } from "@apollo/client"
 import { MessageItem } from "@/src/components/chat/message-item"
@@ -145,7 +146,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   useChatUpdatedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
-    onData: () => {
+    onData: ({ data }) => {
       // Просто перезапрашиваем данные чата, чтобы получить обновленное закрепленное сообщение
       refetchChat();
     },
