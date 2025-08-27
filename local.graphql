@@ -82,6 +82,10 @@ type DeleteMessageResponse {
     id: UUID!
 }
 
+type FinishAuthResponse {
+    id: String!
+}
+
 type FollowResponse {
     id: UUID!
 }
@@ -93,6 +97,7 @@ type GetEmailResponse {
 type Mutation {
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
+    finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
     unfollow(unfollow: UnfollowInput!): UnfollowResponse!
@@ -404,6 +409,10 @@ input DateTimeOperationFilterInput {
 
 input DeleteMessageInput {
     messageId: UUID!
+}
+
+input FinishAuthInput {
+    userName: String!
 }
 
 input FollowInput {
