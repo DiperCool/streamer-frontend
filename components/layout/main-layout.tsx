@@ -32,7 +32,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <Sidebar isMobile={isMobile} sidebarOpen={sidebarOpen}>
-          <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen}>
+          <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen} onCloseClick={() => setSidebarOpen(false)}>
             {/* Логотип STREAMER BETA будет здесь, условно отображаемый */}
           </SidebarHeader>
           <SidebarContent>

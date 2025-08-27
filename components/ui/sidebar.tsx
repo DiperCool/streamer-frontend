@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, Search, User, Settings } from "lucide-react"
+import { Home, Heart, X } from "lucide-react" // Импортируем X для кнопки закрытия
 import Link from "next/link" 
 // useIsMobile is not directly used here, but passed from MainLayout
 
@@ -23,7 +23,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
       {...props}
     >
       <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen}>
-        {/* Логотип будет здесь */}
+        {/* Логотип STREAMER BETA будет здесь, условно отображаемый */}
       </SidebarHeader>
       <SidebarContent>
         <SidebarNav>
@@ -45,21 +45,32 @@ Sidebar.displayName = "Sidebar"
 interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
   sidebarOpen: boolean;
+  onCloseClick?: () => void; // Новый пропс для кнопки закрытия
 }
 
 const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   SidebarHeaderProps
->(({ className, isMobile, sidebarOpen, ...props }, ref) => (
+>(({ className, isMobile, sidebarOpen, onCloseClick, ...props }, ref) => (
   <div
     ref={ref}
     className={cn("flex items-center px-6 py-4 lg:py-0", className)}
     {...props}
   >
-    {isMobile && sidebarOpen && ( // Логотип виден только на мобильных, когда сайдбар открыт
-      <div className="flex items-center space-x-2">
-        <div className="text-xl font-bold text-green-500">STREAMER</div>
-        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
+    {isMobile && sidebarOpen && ( // Логотип и кнопка закрытия видны только на мобильных, когда сайдбар открыт
+      <div className="flex items-center justify-between w-full"> {/* Добавлен justify-between */}
+        <div className="flex items-center space-x-2">
+          <div className="text-xl font-bold text-green-500">STREAMER</div>
+          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onCloseClick}
+          className="text-gray-300 hover:text-white"
+        >
+          <X className="h-5 w-5" />
+        </Button>
       </div>
     )}
   </div>
