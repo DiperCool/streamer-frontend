@@ -4,7 +4,7 @@ import React from "react"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
-import ReactPlayer from "react-player"; // Re-import ReactPlayer
+import ReactPlayer from "react-player"; // Импортируем ReactPlayer
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -16,13 +16,15 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize }: StreamPlayerProps) {
-  const whepSource = sources.find(s => s.sourceType === "WEB_RTC")
-  const urlToPlay = whepSource ? whepSource.url : "";
+  // Ищем источник, который будет передан в ReactPlayer через проп src.
+  // Предполагаем, что ReactPlayer сможет обработать этот URL.
+  const streamSource = sources.find(s => s.sourceType === "WEB_RTC") // Или любой другой тип, который ReactPlayer может обработать
+  const urlToPlay = streamSource ? streamSource.url : "";
 
   if (!urlToPlay) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-black text-white">
-        No WHEP stream source available.
+        No stream source available.
       </div>
     )
   }
@@ -30,7 +32,7 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   return (
     <div className="absolute inset-0">
       <ReactPlayer
-        url={urlToPlay} // Используем проп 'url' для ReactPlayer
+        src={urlToPlay} // Используем проп 'src' для ReactPlayer, как вы просили
         playing
         controls={true}
         width="100%"

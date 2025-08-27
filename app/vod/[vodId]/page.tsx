@@ -5,7 +5,7 @@ import { useGetVodQuery, useGetStreamerQuery, useGetProfileQuery } from "@/graph
 import { Loader2 } from "lucide-react"
 import { getMinioUrl } from "@/utils/utils"
 import { VodDetailsSection } from "@/src/components/vod-details-section"
-import ReactPlayer from "react-player"; // Re-import ReactPlayer
+import ReactPlayer from "react-player"; // Импортируем ReactPlayer
 
 export default function VodDetailPage({ params }: { params: { vodId: string } }) {
   const { vodId } = params
@@ -63,7 +63,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden mb-6">
           {videoSource ? (
             <ReactPlayer
-              url={videoSource} // Используем проп 'url' для ReactPlayer
+              src={videoSource} // Используем проп 'src' для ReactPlayer, как вы просили
               playing={true}
               controls={true}
               width="100%"
