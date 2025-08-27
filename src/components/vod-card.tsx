@@ -77,7 +77,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
           <h3 className="text-base font-semibold text-white line-clamp-2 group-hover:text-green-400 transition-colors">
             {vod.title || "Untitled Video"}
           </h3>
-          <div className="flex items-center mt-1"> {/* Container for avatar and username */}
+          <div className="flex items-center mt-1"> {/* Container for avatar and time ago */}
             <Avatar className="w-6 h-6 mr-2">
               <AvatarImage src={getMinioUrl(streamerAvatar!)} alt={streamerName} />
               <AvatarFallback className="bg-gray-600 text-white text-xs">
@@ -85,7 +85,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
               </AvatarFallback>
             </Avatar>
             <p className="text-sm text-gray-400">
-              {streamerName} • {timeAgo}
+              {timeAgo}
             </p>
           </div>
         </div>
