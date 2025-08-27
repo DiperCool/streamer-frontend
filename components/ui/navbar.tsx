@@ -55,17 +55,17 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               {...props}
           >
             <div className="flex items-center space-x-4">
-              {isMobile && ( // Кнопка меню видна только на мобильных
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onMenuClick}
-                    className="text-gray-300 hover:text-white"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              )}
-              {(!isMobile || !sidebarOpen) && ( // Логотип виден на десктопе ИЛИ на мобильных, когда сайдбар закрыт
+              {/* Кнопка меню всегда видна */}
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onMenuClick}
+                  className="text-gray-300 hover:text-white"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+              {/* Логотип виден на десктопе ИЛИ на мобильных, когда сайдбар закрыт */}
+              {(!isMobile || (isMobile && !sidebarOpen)) && (
                 <div className="flex items-center space-x-2">
                   <div className="text-xl font-bold text-green-500">STREAMER</div>
                   <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
