@@ -94,6 +94,11 @@ type GetEmailResponse {
     email: String!
 }
 
+type GetMessageHistoryResponse {
+    messages: [ChatMessageDto!]!
+    nextFrom: DateTime!
+}
+
 type Mutation {
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
@@ -163,6 +168,7 @@ type Query {
         order: [ChatMessageDtoSortInput!],
         where: ChatMessageDtoFilterInput
     ): ChatMessagesConnection
+    chatMessagesHistory(chatId: UUID!, order: [GetMessageHistoryResponseSortInput!], startFrom: DateTime!, where: GetMessageHistoryResponseFilterInput): GetMessageHistoryResponse!
     chatSettings: ChatSettingsDto!
     currentStream(streamerId: String!): StreamDto!
     me: StreamerMeDto!
@@ -418,6 +424,24 @@ input FinishAuthInput {
 
 input FollowInput {
     streamerId: String!
+}
+
+input GetMessageHistoryResponseFilterInput {
+    and: [GetMessageHistoryResponseFilterInput!]
+    messages: ListFilterInputTypeOfChatMessageDtoFilterInput
+    nextFrom: DateTimeOperationFilterInput
+    or: [GetMessageHistoryResponseFilterInput!]
+}
+
+input GetMessageHistoryResponseSortInput {
+    nextFrom: SortEnumType
+}
+
+input ListFilterInputTypeOfChatMessageDtoFilterInput {
+    all: ChatMessageDtoFilterInput
+    any: Boolean
+    none: ChatMessageDtoFilterInput
+    some: ChatMessageDtoFilterInput
 }
 
 input LongOperationFilterInput {

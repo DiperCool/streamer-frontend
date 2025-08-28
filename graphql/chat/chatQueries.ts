@@ -107,3 +107,45 @@ export const GET_CHAT_SETTINGS = gql`
         }
     }
 `
+
+export const GET_CHAT_MESSAGES_HISTORY = gql`
+    query GetChatMessagesHistory(
+        $chatId: UUID!
+        $order: [GetMessageHistoryResponseSortInput!]
+        $startFrom: DateTime!
+        $where: GetMessageHistoryResponseFilterInput
+    ) {
+        chatMessagesHistory(
+            chatId: $chatId
+            order: $order
+            startFrom: $startFrom
+            where: $where
+        ) {
+            messages {
+                createdAt
+                id
+                isActive
+                isDeleted
+                message
+                replyId
+                senderId
+                type
+                sender {
+                    id
+                    userName
+                    avatar
+                }
+                reply {
+                    id
+                    isDeleted
+                    message
+                    sender {
+                        id
+                        userName
+                    }
+                }
+            }
+            nextFrom
+        }
+    }
+`
