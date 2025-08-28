@@ -4,74 +4,111 @@ import React, { useEffect, useRef, useState, useCallback } from "react"
 import { format, isToday } from "date-fns"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { X, MessageSquareReply, Pin } from "lucide-react"
+import { X, MessageSquareReply, Pin, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { VariableSizeList } from 'react-window';
+import { VariableSizeList, ListOnScrollProps } from 'react-window';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMinioUrl } from "@/utils/utils"
+import {
+  useGetChatQuery,
+  useGetChatMessagesHistoryQuery, // Используем новый хук
+  SortEnumType,
+  ChatMessageDto,
+  GetChatMessagesHistoryQuery,
+} from "@/graphql/__generated__/graphql"
+import { MessageItem } from "@/src/components/chat/message-item" // Переиспользуем MessageItem
 
 interface VodChatSectionProps {
-  onCloseChat?: () => void; // Optional close handler
+  onCloseChat?: () => void;
+  vodId: string; // Добавлен vodId
+  vodCreatedAt: string; // Добавлен vodCreatedAt
+  playerPosition: number; // Добавлена playerPosition в секундах
 }
 
-// Static message data for demonstration
-const staticMessages = [
-  { id: "1", sender: "User1", message: "Hello everyone!", time: "10:00", avatar: "/placeholder-user.jpg" },
-  { id: "2", sender: "User2", message: "Welcome to the VOD!", time: "10:01", avatar: "/placeholder-user.jpg" },
-  { id: "3", sender: "User1", message: "This is a static chat for demonstration purposes.", time: "10:02", avatar: "/placeholder-user.jpg" },
-  { id: "4", sender: "User3", message: "No live interaction here.", time: "10:03", avatar: "/placeholder-user.jpg" },
-  { id: "5", sender: "User2", message: "Just a placeholder.", time: "10:04", avatar: "/placeholder-user.jpg" },
-  { id: "6", sender: "User4", message: "Enjoy the video! This message is a bit longer to test how it wraps within the chat window. It should demonstrate multi-line handling effectively.", time: "10:05", avatar: "/placeholder-user.jpg" },
-  { id: "7", sender: "User1", message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", time: "10:06", avatar: "/placeholder-user.jpg" },
-  { id: "8", sender: "User5", message: "Very long message to test scrolling and height calculation. This message should definitely take up more than one line to ensure the VariableSizeList handles it correctly. We need enough text to wrap and show the dynamic height adjustment. This is a crucial test for the layout.", time: "10:07", avatar: "/placeholder-user.jpg" },
-  { id: "9", sender: "User6", message: "Another message.", time: "10:08", avatar: "/placeholder-user.jpg" },
-  { id: "10", sender: "User1", message: "Short one.", time: "10:09", avatar: "/placeholder-user.jpg" },
-];
+const MESSAGE_ITEM_BASE_HEIGHT = 50;
+const REPLY_HEIGHT_ADDITION = 20;
+const LONG_MESSAGE_TEXT_THRESHOLD = 50;
+const LONG_MESSAGE_HEIGHT_PER_LINE = 18;
 
-const MESSAGE_ITEM_BASE_HEIGHT = 50; // Base height for a short message
-const LONG_MESSAGE_TEXT_THRESHOLD = 50; // Characters before considering it a long message
-const LONG_MESSAGE_HEIGHT_PER_LINE = 18; // Additional height per extra line
+interface RowData {
+  messages: ChatMessageDto[];
+  currentHoveredMessageId: string | null;
+  onMouseEnter: (messageId: string) => void;
+  onMouseLeave: () => void;
+  pinnedMessageId: string | null;
+}
 
-const getItemSize = (index: number) => {
-  const message = staticMessages[index];
-  if (!message) return MESSAGE_ITEM_BASE_HEIGHT;
-
-  let height = MESSAGE_ITEM_BASE_HEIGHT;
-  if (message.message.length > LONG_MESSAGE_TEXT_THRESHOLD) {
-    const extraLines = Math.ceil((message.message.length - LONG_MESSAGE_TEXT_THRESHOLD) / 30); // Approx 30 chars per line
-    height += extraLines * LONG_MESSAGE_HEIGHT_PER_LINE;
-  }
-  return height;
-};
-
-const Row = React.memo(({ index, style }: { index: number; style: React.CSSProperties }) => {
-  const message = staticMessages[index];
+const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
+  const { messages, currentHoveredMessageId, onMouseEnter, onMouseLeave, pinnedMessageId } = data;
+  const message = messages[index];
   if (!message) return null;
 
+  const isPinned = message.id === pinnedMessageId;
+
+  // В VOD чате нет функционала ответа, удаления или закрепления, поэтому передаем пустые функции
   return (
-    <div style={style} className="flex items-start space-x-2 p-1 text-sm text-gray-300">
-      <Avatar className="w-6 h-6">
-        <AvatarImage src={getMinioUrl(message.avatar)} alt={message.sender} />
-        <AvatarFallback className="bg-gray-600 text-white text-xs">
-          {message.sender.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1">
-        <span className="font-semibold text-green-400">{message.sender}:</span>{" "}
-        <span>{message.message}</span>
-        <span className="text-gray-500 text-xs ml-2">{message.time}</span>
-      </div>
+    <div style={style}>
+      <MessageItem
+        message={message}
+        onReply={() => {}}
+        onDelete={() => {}}
+        onPin={() => {}}
+        onUnpin={() => {}}
+        isPinned={isPinned}
+        currentHoveredMessageId={currentHoveredMessageId}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        chatId={""} // Не используется в VOD чате
+      />
     </div>
   );
 });
 
-export function VodChatSection({ onCloseChat }: VodChatSectionProps) {
+export function VodChatSection({ onCloseChat, vodId, vodCreatedAt, playerPosition }: VodChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<VariableSizeList>(null);
+  const outerListRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
 
-  // ResizeObserver to get dynamic height/width for VariableSizeList
+  const [allFetchedMessages, setAllFetchedMessages] = useState<ChatMessageDto[]>([]);
+  const [nextFromCursor, setNextFromCursor] = useState<string | null>(null);
+  const [displayedMessages, setDisplayedMessages] = useState<ChatMessageDto[]>([]);
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
+
+  const { data: chatData, loading: chatLoading } = useGetChatQuery({
+    variables: { streamerId: vodId }, // Используем vodId как streamerId для получения чата
+    skip: !vodId,
+  });
+
+  const chatId = chatData?.chat.id;
+  const pinnedMessage = chatData?.chat.pinnedMessage;
+  const pinnedMessageId = chatData?.chat.pinnedMessageId;
+
+  const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useGetChatMessagesHistoryQuery({
+    variables: {
+      chatId: chatId!,
+      startFrom: nextFromCursor || vodCreatedAt, // Используем nextFromCursor для последующих запросов
+      order: [{ createdAt: SortEnumType.Asc }], // Сортируем по возрастанию для истории
+    },
+    skip: !chatId || !vodCreatedAt,
+    pollInterval: 5000, // Опрашиваем каждые 5 секунд
+    onCompleted: (data) => {
+      if (data?.chatMessagesHistory) {
+        const newMessages = data.chatMessagesHistory.messages;
+        setAllFetchedMessages(prev => {
+          const existingIds = new Set(prev.map(msg => msg.id));
+          const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
+          return [...prev, ...uniqueNewMessages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        });
+        setNextFromCursor(data.chatMessagesHistory.nextFrom);
+      }
+    },
+  });
+
+  // ResizeObserver для динамической высоты/ширины VariableSizeList
   useEffect(() => {
     const currentRef = chatContainerRef.current;
     if (!currentRef) return;
@@ -92,20 +129,79 @@ export function VodChatSection({ onCloseChat }: VodChatSectionProps) {
     };
   }, []);
 
-  // Scroll to bottom on initial load
+  // Эффект для фильтрации сообщений на основе playerPosition
   useEffect(() => {
-    if (staticMessages.length > 0 && listRef.current) {
-      const timer = setTimeout(() => {
-        listRef.current?.scrollToItem(staticMessages.length - 1, "end");
-      }, 50);
-      return () => clearTimeout(timer);
+    if (!vodCreatedAt || allFetchedMessages.length === 0) {
+      setDisplayedMessages([]);
+      return;
     }
-  }, [listHeight, listWidth]); // Re-scroll if container size changes
+
+    const vodStartTime = new Date(vodCreatedAt).getTime();
+    const currentTimeInVod = vodStartTime + playerPosition * 1000;
+
+    const newDisplayedMessages = allFetchedMessages.filter(msg =>
+      new Date(msg.createdAt).getTime() <= currentTimeInVod
+    );
+    setDisplayedMessages(newDisplayedMessages);
+
+    // Прокрутка к низу, если пользователь был внизу или это первый рендер
+    if (isUserAtBottom && listRef.current && newDisplayedMessages.length > 0) {
+      listRef.current.scrollToItem(newDisplayedMessages.length - 1, "end");
+    } else if (!initialScrollDone && newDisplayedMessages.length > 0) {
+        listRef.current?.scrollToItem(newDisplayedMessages.length - 1, "end");
+        setInitialScrollDone(true);
+    }
+  }, [playerPosition, allFetchedMessages, vodCreatedAt, isUserAtBottom, initialScrollDone]);
+
+  // Сброс сообщений при смене VOD
+  useEffect(() => {
+    setAllFetchedMessages([]);
+    setNextFromCursor(null);
+    setDisplayedMessages([]);
+    setInitialScrollDone(false);
+    setIsUserAtBottom(true);
+  }, [vodId]);
+
+  // Функция для получения размера элемента для VariableSizeList
+  const getItemSize = useCallback((index: number) => {
+    const message = displayedMessages[index];
+    if (!message) return MESSAGE_ITEM_BASE_HEIGHT;
+
+    let height = MESSAGE_ITEM_BASE_HEIGHT;
+
+    if (message.reply) {
+      height += REPLY_HEIGHT_ADDITION;
+    }
+
+    if (message.message.length > LONG_MESSAGE_TEXT_THRESHOLD) {
+      const extraLines = Math.ceil((message.message.length - LONG_MESSAGE_TEXT_THRESHOLD) / 30);
+      height += extraLines * LONG_MESSAGE_HEIGHT_PER_LINE;
+    }
+
+    return height;
+  }, [displayedMessages]);
+
+  const onListScroll = useCallback(({ scrollOffset }: ListOnScrollProps) => {
+    if (outerListRef.current) {
+      const { scrollTop, clientHeight, scrollHeight } = outerListRef.current;
+      setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_BASE_HEIGHT);
+    }
+  }, []);
+
+  const itemData = React.useMemo(() => ({
+    messages: displayedMessages,
+    currentHoveredMessageId: hoveredMessageId,
+    onMouseEnter: setHoveredMessageId,
+    onMouseLeave: () => setHoveredMessageId(null),
+    pinnedMessageId: pinnedMessageId,
+  }), [displayedMessages, hoveredMessageId, pinnedMessageId]);
+
+  const isLoading = chatLoading || historyLoading;
 
   return (
     <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-white text-lg">Chat Replay</CardTitle> {/* Изменено на "Chat Replay" */}
+        <CardTitle className="text-white text-lg">Chat Replay</CardTitle>
         {onCloseChat && (
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
             <X className="h-5 w-5" />
@@ -113,48 +209,51 @@ export function VodChatSection({ onCloseChat }: VodChatSectionProps) {
         )}
       </CardHeader>
 
-      <div className="flex-1 overflow-hidden" ref={chatContainerRef}>
-        {listHeight > 0 && listWidth > 0 && staticMessages.length > 0 ? (
-          <VariableSizeList
-            ref={listRef}
-            height={listHeight}
-            width={listWidth}
-            itemCount={staticMessages.length}
-            itemSize={getItemSize}
-            estimatedItemSize={MESSAGE_ITEM_BASE_HEIGHT}
-            className="custom-scrollbar"
-          >
-            {Row}
-          </VariableSizeList>
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            No messages available for this VOD.
+      {/* Pinned Message Display */}
+      {pinnedMessage && (
+        <div className="bg-blue-900/30 border-b border-blue-800 p-3 flex items-center justify-between text-sm text-blue-200">
+          <div className="flex items-center space-x-2">
+            <Pin className="h-4 w-4 text-blue-400 flex-shrink-0" />
+            <span className="font-semibold">{pinnedMessage.message?.sender?.userName}:</span>
+            <span className="truncate flex-1">{pinnedMessage.message?.message}</span>
+            <span className="text-blue-300 text-xs ml-2">
+              {isToday(new Date(pinnedMessage.createdAt))
+                ? format(new Date(pinnedMessage.createdAt), "HH:mm")
+                : format(new Date(pinnedMessage.createdAt), "MMM dd, yyyy")}
+            </span>
           </div>
+          {/* В VOD чате нет функционала открепления */}
+        </div>
+      )}
+
+      <div className="flex-1 overflow-hidden" ref={chatContainerRef}>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+          </div>
+        ) : (
+          listHeight > 0 && listWidth > 0 && displayedMessages.length > 0 ? (
+            <VariableSizeList
+              ref={listRef}
+              outerRef={outerListRef}
+              height={listHeight}
+              width={listWidth}
+              itemCount={displayedMessages.length}
+              itemSize={getItemSize}
+              itemData={itemData}
+              onScroll={onListScroll}
+              estimatedItemSize={MESSAGE_ITEM_BASE_HEIGHT}
+              className="custom-scrollbar"
+            >
+              {Row}
+            </VariableSizeList>
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              No messages available for this VOD.
+            </div>
+          )
         )}
       </div>
-
-      {/* Input Area - Removed for static VOD chat */}
-      {/* <div className="p-4 border-t border-gray-700 flex flex-col space-y-2">
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder="Send a message"
-            className="flex-1 bg-gray-700 border-gray-600 text-white focus:border-green-500"
-          />
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Smile className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Gift className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="default"
-            size="icon"
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
-        </div>
-      </div> */}
     </Card>
   );
 }

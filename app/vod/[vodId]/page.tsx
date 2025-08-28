@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 export default function VodDetailPage({ params }: { params: { vodId: string } }) {
   const { vodId } = params
   const [isChatVisible, setIsChatVisible] = useState(true);
+  const [playerPosition, setPlayerPosition] = useState(0); // Состояние для отслеживания позиции плеера в секундах
 
   const { data: vodData, loading: vodLoading, error: vodError } = useGetVodQuery({
     variables: { vodId },
@@ -67,15 +68,16 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         isChatVisible ? "lg:pr-80" : ""
       )}>
         {/* Video Player Section */}
-        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden"> {/* Убран mb-6 */}
+        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {videoSource ? (
             <ReactPlayer
-              src={videoSource}
+              url={videoSource} // Используем url вместо src для ReactPlayer
               playing={true}
               controls={true}
               width="100%"
               height="100%"
               className="z-10"
+              onProgress={(state) => setPlayerPosition(state.playedSeconds)} // Обновляем позицию плеера
             />
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-400">
@@ -96,7 +98,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         </div>
 
         {/* VOD Details and Streamer Info */}
-        <div className="container mx-auto px-4 py-4"> {/* Изменен py-8 на py-4 */}
+        <div className="container mx-auto px-4 py-4">
           <VodDetailsSection vod={vod} streamer={streamer} profile={profile} />
         </div>
       </div>
@@ -109,7 +111,12 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
           "hidden lg:flex"
         )}
       >
-        <VodChatSection onCloseChat={() => setIsChatVisible(false)} />
+        <VodChatSection
+          onCloseChat={() => setIsChatVisible(false)}
+          vodId={vod.id}
+          vodCreatedAt={vod.createdAt}
+          playerPosition={playerPosition}
+        />
       </div>
 
       {/* VOD Chat (отображается на маленьких экранах, если чат виден) */}
@@ -117,7 +124,12 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         <div
           className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh] overflow-y-auto"
         >
-          <VodChatSection onCloseChat={() => setIsChatVisible(false)} />
+          <VodChatSection
+            onCloseChat={() => setIsChatVisible(false)}
+            vodId={vod.id}
+            vodCreatedAt={vod.createdAt}
+            playerPosition={playerPosition}
+          />
         </div>
       )}
     </div>
