@@ -22,6 +22,7 @@ interface VodChatSectionProps {
   streamerId: string;
   vodCreatedAt: string;
   playerPosition: number;
+  historyStartFrom: string | null; // Новый пропс
 }
 
 const MESSAGE_ITEM_BASE_HEIGHT = 50;
@@ -62,7 +63,7 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
   );
 });
 
-export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPosition }: VodChatSectionProps) {
+export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPosition, historyStartFrom }: VodChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
@@ -88,12 +89,10 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useGetChatMessagesHistoryQuery({
     variables: {
       chatId: chatId!,
-      startFrom: nextFromCursor || vodCreatedAt,
-      // Removed: order: [{ createdAt: SortEnumType.Asc }], // This was causing the TS error
+      startFrom: historyStartFrom || vodCreatedAt, // Используем historyStartFrom здесь
     },
-    skip: !chatId || !vodCreatedAt,
-    pollInterval: 5000,
-    // onCompleted удален, логика перенесена в useEffect
+    skip: !chatId || !vodCreatedAt || !historyStartFrom, // Пропускаем, если historyStartFrom равен null
+    // pollInterval удален, refetch будет запускаться при перемотке
   });
 
   // Эффект для обработки данных, полученных из useGetChatMessagesHistoryQuery
@@ -107,7 +106,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
       });
       setNextFromCursor(historyData.chatMessagesHistory.nextFrom);
     }
-  }, [historyData]); // Зависимость от historyData
+  }, [historyData]);
 
   // ResizeObserver для динамической высоты/ширины VariableSizeList
   useEffect(() => {
@@ -154,14 +153,20 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     }
   }, [playerPosition, allFetchedMessages, vodCreatedAt, isUserAtBottom, initialScrollDone]);
 
-  // Сброс сообщений при смене VOD или streamerId
+  // Сброс сообщений и курсора истории при смене VOD, streamerId или historyStartFrom
   useEffect(() => {
     setAllFetchedMessages([]);
     setNextFromCursor(null);
     setDisplayedMessages([]);
     setInitialScrollDone(false);
     setIsUserAtBottom(true);
-  }, [streamerId, vodCreatedAt]);
+    if (chatId && historyStartFrom) { // Только перезапрашиваем, если chatId и historyStartFrom доступны
+      refetchHistory({
+        chatId: chatId,
+        startFrom: historyStartFrom,
+      });
+    }
+  }, [streamerId, vodCreatedAt, historyStartFrom, chatId, refetchHistory]); // Добавлен historyStartFrom в зависимости
 
   // Функция для получения размера элемента для VariableSizeList
   const getItemSize = useCallback((index: number) => {

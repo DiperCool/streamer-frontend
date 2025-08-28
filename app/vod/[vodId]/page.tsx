@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useGetVodQuery, useGetStreamerQuery, useGetProfileQuery } from "@/graphql/__generated__/graphql"
 import { Loader2, MessageSquare } from "lucide-react"
 import { getMinioUrl } from "@/utils/utils"
@@ -22,6 +22,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
   const { vodId } = params
   const [isChatVisible, setIsChatVisible] = useState(true);
   const [playerPosition, setPlayerPosition] = useState(0); // Состояние для отслеживания позиции плеера в секундах
+  const [historyStartFrom, setHistoryStartFrom] = useState<string | null>(null); // Новое состояние для времени начала истории чата
 
   const { data: vodData, loading: vodLoading, error: vodError } = useGetVodQuery({
     variables: { vodId },
@@ -31,15 +32,22 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
 
   const { data: streamerData, loading: streamerLoading, error: streamerError } = useGetStreamerQuery({
     variables: { userName: streamerUserName },
-    skip: !streamerUserName, // Пропускаем запрос, если userName еще не получен
+    skip: !streamerUserName,
   })
 
-  const streamerId = streamerData?.streamer?.id ?? ""; // Получаем streamerId здесь
+  const streamerId = streamerData?.streamer?.id ?? "";
 
   const { data: profileData, loading: profileLoading, error: profileError } = useGetProfileQuery({
     variables: { streamerId },
     skip: !streamerId,
   })
+
+  // Инициализируем historyStartFrom, когда vodData доступен
+  useEffect(() => {
+    if (vodData?.vod?.createdAt && !historyStartFrom) {
+      setHistoryStartFrom(vodData.vod.createdAt);
+    }
+  }, [vodData, historyStartFrom]);
 
   if (vodLoading || streamerLoading || profileLoading) {
     return (
@@ -71,6 +79,18 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
 
   const videoSource = vod.source ? getMinioUrl(vod.source) : null;
 
+  // Функция для обработки события перемотки плеера
+  const handlePlayerSeek = (seconds: number) => {
+    if (!vod.createdAt) return;
+
+    // Вычисляем новое время начала для истории чата на основе времени создания VOD и позиции перемотки
+    const vodStartTime = new Date(vod.createdAt).getTime();
+    const newChatHistoryStartTime = new Date(vodStartTime + seconds * 1000).toISOString();
+    
+    setHistoryStartFrom(newChatHistoryStartTime); // Обновляем состояние, которое контролирует запрос истории чата
+    setPlayerPosition(seconds); // Также обновляем позицию плеера для VodChatSection
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row">
       <div className={cn(
@@ -81,13 +101,14 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {videoSource ? (
             <ReactPlayer
-              url={videoSource} // Используем url вместо src для ReactPlayer
+              url={videoSource} // Используем 'url' пропс, так как он правильный для ReactPlayer
               playing={true}
               controls={true}
               width="100%"
               height="100%"
               className="z-10"
-              onProgress={(state: ProgressState) => setPlayerPosition(state.playedSeconds)} // Обновляем позицию плеера
+              onProgress={(state: ProgressState) => setPlayerPosition(state.playedSeconds)}
+              onSeek={handlePlayerSeek} // Используем onSeek для обработки событий перемотки
             />
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-400">
@@ -123,9 +144,10 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
       >
         <VodChatSection
           onCloseChat={() => setIsChatVisible(false)}
-          streamerId={streamerId} // Передаем streamerId
+          streamerId={streamerId}
           vodCreatedAt={vod.createdAt}
           playerPosition={playerPosition}
+          historyStartFrom={historyStartFrom} // Передаем новое состояние
         />
       </div>
 
@@ -136,9 +158,10 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         >
           <VodChatSection
             onCloseChat={() => setIsChatVisible(false)}
-            streamerId={streamerId} // Передаем streamerId
+            streamerId={streamerId}
             vodCreatedAt={vod.createdAt}
             playerPosition={playerPosition}
+            historyStartFrom={historyStartFrom} // Передаем новое состояние
           />
         </div>
       )}
