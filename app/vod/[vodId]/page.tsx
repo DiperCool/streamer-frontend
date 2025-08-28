@@ -19,12 +19,14 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
     variables: { vodId },
   })
 
-  const streamerId = vodData?.vod?.streamer?.id ?? ""
+  const streamerUserName = vodData?.vod?.streamer?.userName ?? ""
 
   const { data: streamerData, loading: streamerLoading, error: streamerError } = useGetStreamerQuery({
-    variables: { userName: vodData?.vod?.streamer?.userName ?? "" },
-    skip: !streamerId,
+    variables: { userName: streamerUserName },
+    skip: !streamerUserName, // Пропускаем запрос, если userName еще не получен
   })
+
+  const streamerId = streamerData?.streamer?.id ?? ""; // Получаем streamerId здесь
 
   const { data: profileData, loading: profileLoading, error: profileError } = useGetProfileQuery({
     variables: { streamerId },
@@ -113,7 +115,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
       >
         <VodChatSection
           onCloseChat={() => setIsChatVisible(false)}
-          vodId={vod.id}
+          streamerId={streamerId} // Передаем streamerId
           vodCreatedAt={vod.createdAt}
           playerPosition={playerPosition}
         />
@@ -126,7 +128,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         >
           <VodChatSection
             onCloseChat={() => setIsChatVisible(false)}
-            vodId={vod.id}
+            streamerId={streamerId} // Передаем streamerId
             vodCreatedAt={vod.createdAt}
             playerPosition={playerPosition}
           />

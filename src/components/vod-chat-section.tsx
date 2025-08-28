@@ -20,9 +20,9 @@ import { MessageItem } from "@/src/components/chat/message-item" // Переис
 
 interface VodChatSectionProps {
   onCloseChat?: () => void;
-  vodId: string; // Добавлен vodId
-  vodCreatedAt: string; // Добавлен vodCreatedAt
-  playerPosition: number; // Добавлена playerPosition в секундах
+  streamerId: string; // Изменено с vodId на streamerId
+  vodCreatedAt: string;
+  playerPosition: number;
 }
 
 const MESSAGE_ITEM_BASE_HEIGHT = 50;
@@ -64,7 +64,7 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
   );
 });
 
-export function VodChatSection({ onCloseChat, vodId, vodCreatedAt, playerPosition }: VodChatSectionProps) {
+export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPosition }: VodChatSectionProps) { // Обновлены пропсы
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
@@ -79,8 +79,8 @@ export function VodChatSection({ onCloseChat, vodId, vodCreatedAt, playerPositio
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
-    variables: { streamerId: vodId }, // Используем vodId как streamerId для получения чата
-    skip: !vodId,
+    variables: { streamerId }, // Используем streamerId
+    skip: !streamerId,
   });
 
   const chatId = chatData?.chat.id;
@@ -90,11 +90,11 @@ export function VodChatSection({ onCloseChat, vodId, vodCreatedAt, playerPositio
   const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useGetChatMessagesHistoryQuery({
     variables: {
       chatId: chatId!,
-      startFrom: nextFromCursor || vodCreatedAt, // Используем nextFromCursor для последующих запросов
-      order: [{ createdAt: SortEnumType.Asc }], // Сортируем по возрастанию для истории
+      startFrom: nextFromCursor || vodCreatedAt,
+      order: [{ createdAt: SortEnumType.Asc }],
     },
     skip: !chatId || !vodCreatedAt,
-    pollInterval: 5000, // Опрашиваем каждые 5 секунд
+    pollInterval: 5000,
     onCompleted: (data) => {
       if (data?.chatMessagesHistory) {
         const newMessages = data.chatMessagesHistory.messages;
@@ -153,14 +153,14 @@ export function VodChatSection({ onCloseChat, vodId, vodCreatedAt, playerPositio
     }
   }, [playerPosition, allFetchedMessages, vodCreatedAt, isUserAtBottom, initialScrollDone]);
 
-  // Сброс сообщений при смене VOD
+  // Сброс сообщений при смене VOD или streamerId
   useEffect(() => {
     setAllFetchedMessages([]);
     setNextFromCursor(null);
     setDisplayedMessages([]);
     setInitialScrollDone(false);
     setIsUserAtBottom(true);
-  }, [vodId]);
+  }, [streamerId, vodCreatedAt]); // Добавлен streamerId в зависимости
 
   // Функция для получения размера элемента для VariableSizeList
   const getItemSize = useCallback((index: number) => {
