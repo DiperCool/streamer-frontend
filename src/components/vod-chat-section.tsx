@@ -89,6 +89,12 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     skip: !chatId || !vodCreatedAt, // Skip if basic info is not available
   });
 
+  // Ref to hold the latest historyStartFrom without being a dependency of the interval effect
+  const latestHistoryStartFromRef = useRef(historyStartFrom);
+  useEffect(() => {
+    latestHistoryStartFromRef.current = historyStartFrom;
+  }, [historyStartFrom]);
+
   // Effect to handle data received from useGetChatMessagesHistoryLazyQuery
   useEffect(() => {
     if (historyData?.chatMessagesHistory) {
@@ -156,19 +162,20 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
 
   // Effect to handle initial fetch and subsequent interval fetches
   useEffect(() => {
-    if (!chatId || !vodCreatedAt || !historyStartFrom) {
-      // Don't start fetching until all necessary data is available
+    if (!chatId || !vodCreatedAt) { // historyStartFrom is NOT a dependency here
       return;
     }
 
     // Function to perform the fetch
     const fetchMessages = () => {
-      getChatMessagesHistory({
-        variables: {
-          chatId: chatId,
-          startFrom: historyStartFrom,
-        },
-      });
+      if (latestHistoryStartFromRef.current) { // Use the ref for the latest value
+        getChatMessagesHistory({
+          variables: {
+            chatId: chatId,
+            startFrom: latestHistoryStartFromRef.current,
+          },
+        });
+      }
     };
 
     // Initial fetch
@@ -181,7 +188,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     return () => {
       clearInterval(intervalId);
     };
-  }, [chatId, vodCreatedAt, historyStartFrom, getChatMessagesHistory]); // Dependencies for the effect
+  }, [chatId, vodCreatedAt, getChatMessagesHistory]); // Dependencies for the effect are now only those that should *re-setup* the interval
 
   // Function to get item size for VariableSizeList
   const getItemSize = useCallback((index: number) => {
