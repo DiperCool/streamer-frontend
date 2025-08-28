@@ -90,11 +90,11 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useGetChatMessagesHistoryQuery({
     variables: {
       chatId: chatId!,
-      startFrom: nextFromCursor || vodCreatedAt,
-      order: [{ createdAt: SortEnumType.Asc }],
+      startFrom: nextFromCursor || vodCreatedAt, // Используем nextFromCursor для последующих запросов
+      // order: [{ createdAt: SortEnumType.Asc }], // УДАЛЕНО: Некорректный аргумент согласно схеме
     },
     skip: !chatId || !vodCreatedAt,
-    pollInterval: 5000,
+    pollInterval: 5000, // Опрашиваем каждые 5 секунд
     onCompleted: (data) => {
       if (data?.chatMessagesHistory) {
         const newMessages = data.chatMessagesHistory.messages;
