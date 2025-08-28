@@ -111,9 +111,9 @@ export const GET_CHAT_SETTINGS = gql`
 export const GET_CHAT_MESSAGES_HISTORY = gql`
     query GetChatMessagesHistory(
         $chatId: UUID!
-        $order: [GetMessageHistoryResponseSortInput!]
+        $order: [ChatMessageDtoSortInput!]
         $startFrom: DateTime!
-        $where: GetMessageHistoryResponseFilterInput
+        $where: ChatMessageDtoFilterInput
     ) {
         chatMessagesHistory(
             chatId: $chatId
@@ -121,31 +121,28 @@ export const GET_CHAT_MESSAGES_HISTORY = gql`
             startFrom: $startFrom
             where: $where
         ) {
-            messages {
-                createdAt
+            createdAt
+            id
+            isActive
+            isDeleted
+            message
+            replyId
+            senderId
+            type
+            sender {
                 id
-                isActive
+                userName
+                avatar
+            }
+            reply {
+                id
                 isDeleted
                 message
-                replyId
-                senderId
-                type
                 sender {
                     id
                     userName
-                    avatar
-                }
-                reply {
-                    id
-                    isDeleted
-                    message
-                    sender {
-                        id
-                        userName
-                    }
                 }
             }
-            nextFrom
         }
     }
 `

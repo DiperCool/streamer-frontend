@@ -182,30 +182,6 @@ export type GetEmailResponse = {
   email: Scalars['String']['output'];
 };
 
-export type GetMessageHistoryResponse = {
-  __typename?: 'GetMessageHistoryResponse';
-  messages: Array<ChatMessageDto>;
-  nextFrom: Scalars['DateTime']['output'];
-};
-
-export type GetMessageHistoryResponseFilterInput = {
-  and?: InputMaybe<Array<GetMessageHistoryResponseFilterInput>>;
-  messages?: InputMaybe<ListFilterInputTypeOfChatMessageDtoFilterInput>;
-  nextFrom?: InputMaybe<DateTimeOperationFilterInput>;
-  or?: InputMaybe<Array<GetMessageHistoryResponseFilterInput>>;
-};
-
-export type GetMessageHistoryResponseSortInput = {
-  nextFrom?: InputMaybe<SortEnumType>;
-};
-
-export type ListFilterInputTypeOfChatMessageDtoFilterInput = {
-  all?: InputMaybe<ChatMessageDtoFilterInput>;
-  any?: InputMaybe<Scalars['Boolean']['input']>;
-  none?: InputMaybe<ChatMessageDtoFilterInput>;
-  some?: InputMaybe<ChatMessageDtoFilterInput>;
-};
-
 export type LongOperationFilterInput = {
   eq?: InputMaybe<Scalars['Long']['input']>;
   gt?: InputMaybe<Scalars['Long']['input']>;
@@ -358,7 +334,7 @@ export type Query = {
   __typename?: 'Query';
   chat: ChatDto;
   chatMessages?: Maybe<ChatMessagesConnection>;
-  chatMessagesHistory: GetMessageHistoryResponse;
+  chatMessagesHistory: Array<ChatMessageDto>;
   chatSettings: ChatSettingsDto;
   currentStream: StreamDto;
   me: StreamerMeDto;
@@ -390,9 +366,9 @@ export type QueryChatMessagesArgs = {
 
 export type QueryChatMessagesHistoryArgs = {
   chatId: Scalars['UUID']['input'];
-  order?: InputMaybe<Array<GetMessageHistoryResponseSortInput>>;
+  order?: InputMaybe<Array<ChatMessageDtoSortInput>>;
   startFrom: Scalars['DateTime']['input'];
-  where?: InputMaybe<GetMessageHistoryResponseFilterInput>;
+  where?: InputMaybe<ChatMessageDtoFilterInput>;
 };
 
 
@@ -786,13 +762,13 @@ export type GetChatSettingsQuery = { __typename?: 'Query', chatSettings: { __typ
 
 export type GetChatMessagesHistoryQueryVariables = Exact<{
   chatId: Scalars['UUID']['input'];
-  order?: InputMaybe<Array<GetMessageHistoryResponseSortInput> | GetMessageHistoryResponseSortInput>;
+  order?: InputMaybe<Array<ChatMessageDtoSortInput> | ChatMessageDtoSortInput>;
   startFrom: Scalars['DateTime']['input'];
-  where?: InputMaybe<GetMessageHistoryResponseFilterInput>;
+  where?: InputMaybe<ChatMessageDtoFilterInput>;
 }>;
 
 
-export type GetChatMessagesHistoryQuery = { __typename?: 'Query', chatMessagesHistory: { __typename?: 'GetMessageHistoryResponse', nextFrom: string, messages: Array<{ __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null }> } };
+export type GetChatMessagesHistoryQuery = { __typename?: 'Query', chatMessagesHistory: Array<{ __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null }> };
 
 export type ChatMessageCreatedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
@@ -1342,38 +1318,35 @@ export type GetChatSettingsLazyQueryHookResult = ReturnType<typeof useGetChatSet
 export type GetChatSettingsSuspenseQueryHookResult = ReturnType<typeof useGetChatSettingsSuspenseQuery>;
 export type GetChatSettingsQueryResult = Apollo.QueryResult<GetChatSettingsQuery, GetChatSettingsQueryVariables>;
 export const GetChatMessagesHistoryDocument = gql`
-    query GetChatMessagesHistory($chatId: UUID!, $order: [GetMessageHistoryResponseSortInput!], $startFrom: DateTime!, $where: GetMessageHistoryResponseFilterInput) {
+    query GetChatMessagesHistory($chatId: UUID!, $order: [ChatMessageDtoSortInput!], $startFrom: DateTime!, $where: ChatMessageDtoFilterInput) {
   chatMessagesHistory(
     chatId: $chatId
     order: $order
     startFrom: $startFrom
     where: $where
   ) {
-    messages {
-      createdAt
+    createdAt
+    id
+    isActive
+    isDeleted
+    message
+    replyId
+    senderId
+    type
+    sender {
       id
-      isActive
+      userName
+      avatar
+    }
+    reply {
+      id
       isDeleted
       message
-      replyId
-      senderId
-      type
       sender {
         id
         userName
-        avatar
-      }
-      reply {
-        id
-        isDeleted
-        message
-        sender {
-          id
-          userName
-        }
       }
     }
-    nextFrom
   }
 }
     `;

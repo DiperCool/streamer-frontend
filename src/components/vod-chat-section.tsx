@@ -71,7 +71,6 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const [listWidth, setListWidth] = useState(0);
 
   const [allFetchedMessages, setAllFetchedMessages] = useState<ChatMessageDto[]>([]);
-  const [nextFromCursor, setNextFromCursor] = useState<string | null>(null);
   const [displayedMessages, setDisplayedMessages] = useState<ChatMessageDto[]>([]);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
@@ -89,7 +88,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useGetChatMessagesHistoryQuery({
     variables: {
       chatId: chatId!,
-      startFrom: historyStartFrom || vodCreatedAt, // Используем historyStartFrom здесь
+      startFrom: historyStartFrom!, // Используем historyStartFrom здесь
     },
     skip: !chatId || !vodCreatedAt || !historyStartFrom, // Пропускаем, если historyStartFrom равен null
     // pollInterval удален, refetch будет запускаться при перемотке
@@ -98,13 +97,12 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   // Эффект для обработки данных, полученных из useGetChatMessagesHistoryQuery
   useEffect(() => {
     if (historyData?.chatMessagesHistory) {
-      const newMessages = historyData.chatMessagesHistory.messages;
+      const newMessages = historyData.chatMessagesHistory;
       setAllFetchedMessages(prev => {
         const existingIds = new Set(prev.map(msg => msg.id));
         const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
         return [...prev, ...uniqueNewMessages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       });
-      setNextFromCursor(historyData.chatMessagesHistory.nextFrom);
     }
   }, [historyData]);
 
@@ -156,7 +154,6 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   // Сброс сообщений и курсора истории при смене VOD, streamerId или historyStartFrom
   useEffect(() => {
     setAllFetchedMessages([]);
-    setNextFromCursor(null);
     setDisplayedMessages([]);
     setInitialScrollDone(false);
     setIsUserAtBottom(true);
