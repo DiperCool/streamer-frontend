@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMinioUrl } from "@/utils/utils"
 import {
   useGetChatQuery,
-  useGetChatMessagesHistoryQuery,
+  useGetChatMessagesHistoryLazyQuery, // Changed to LazyQuery
   SortEnumType,
   ChatMessageDto,
 } from "@/graphql/__generated__/graphql"
@@ -85,16 +85,11 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const pinnedMessage = chatData?.chat.pinnedMessage;
   const pinnedMessageId = chatData?.chat.pinnedMessageId;
 
-  const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useGetChatMessagesHistoryQuery({
-    variables: {
-      chatId: chatId!,
-      startFrom: historyStartFrom!, // Используем historyStartFrom здесь
-    },
-    skip: !chatId || !vodCreatedAt || !historyStartFrom, // Пропускаем, если historyStartFrom равен null
-    // pollInterval удален, refetch будет запускаться при перемотке
+  const [getChatMessagesHistory, { data: historyData, loading: historyLoading }] = useGetChatMessagesHistoryLazyQuery({
+    skip: !chatId || !vodCreatedAt, // Skip if basic info is not available
   });
 
-  // Эффект для обработки данных, полученных из useGetChatMessagesHistoryQuery
+  // Effect to handle data received from useGetChatMessagesHistoryLazyQuery
   useEffect(() => {
     if (historyData?.chatMessagesHistory) {
       const newMessages = historyData.chatMessagesHistory;
@@ -106,7 +101,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     }
   }, [historyData]);
 
-  // ResizeObserver для динамической высоты/ширины VariableSizeList
+  // ResizeObserver for dynamic height/width of VariableSizeList
   useEffect(() => {
     const currentRef = chatContainerRef.current;
     if (!currentRef) return;
@@ -127,7 +122,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     };
   }, []);
 
-  // Эффект для фильтрации сообщений на основе playerPosition
+  // Effect to filter messages based on playerPosition
   useEffect(() => {
     if (!vodCreatedAt || allFetchedMessages.length === 0) {
       setDisplayedMessages([]);
@@ -142,7 +137,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     );
     setDisplayedMessages(newDisplayedMessages);
 
-    // Прокрутка к низу, если пользователь был внизу или это первый рендер
+    // Scroll to bottom if user was at bottom or it's the initial render
     if (isUserAtBottom && listRef.current && newDisplayedMessages.length > 0) {
       listRef.current.scrollToItem(newDisplayedMessages.length - 1, "end");
     } else if (!initialScrollDone && newDisplayedMessages.length > 0) {
@@ -151,21 +146,44 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     }
   }, [playerPosition, allFetchedMessages, vodCreatedAt, isUserAtBottom, initialScrollDone]);
 
-  // Сброс сообщений и курсора истории при смене VOD, streamerId или historyStartFrom
+  // Effect to reset messages when VOD or streamer changes
   useEffect(() => {
     setAllFetchedMessages([]);
     setDisplayedMessages([]);
     setInitialScrollDone(false);
     setIsUserAtBottom(true);
-    if (chatId && historyStartFrom) { // Только перезапрашиваем, если chatId и historyStartFrom доступны
-      refetchHistory({
-        chatId: chatId,
-        startFrom: historyStartFrom,
-      });
-    }
-  }, [streamerId, vodCreatedAt, historyStartFrom, chatId, refetchHistory]); // Добавлен historyStartFrom в зависимости
+  }, [streamerId, vodCreatedAt, chatId]);
 
-  // Функция для получения размера элемента для VariableSizeList
+  // Effect to handle initial fetch and subsequent interval fetches
+  useEffect(() => {
+    if (!chatId || !vodCreatedAt || !historyStartFrom) {
+      // Don't start fetching until all necessary data is available
+      return;
+    }
+
+    // Function to perform the fetch
+    const fetchMessages = () => {
+      getChatMessagesHistory({
+        variables: {
+          chatId: chatId,
+          startFrom: historyStartFrom,
+        },
+      });
+    };
+
+    // Initial fetch
+    fetchMessages();
+
+    // Set up interval for subsequent fetches
+    const intervalId = setInterval(fetchMessages, 5000); // Every 5 seconds
+
+    // Cleanup function
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [chatId, vodCreatedAt, historyStartFrom, getChatMessagesHistory]); // Dependencies for the effect
+
+  // Function to get item size for VariableSizeList
   const getItemSize = useCallback((index: number) => {
     const message = displayedMessages[index];
     if (!message) return MESSAGE_ITEM_BASE_HEIGHT;

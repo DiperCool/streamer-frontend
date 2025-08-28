@@ -79,16 +79,14 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
 
   const videoSource = vod.source ? getMinioUrl(vod.source) : null;
 
-  // Функция для обработки события перемотки плеера
   const handlePlayerSeek = (seconds: number) => {
     if (!vod.createdAt) return;
 
-    // Вычисляем новое время начала для истории чата на основе времени создания VOD и позиции перемотки
     const vodStartTime = new Date(vod.createdAt).getTime();
     const newChatHistoryStartTime = new Date(vodStartTime + seconds * 1000).toISOString();
-    
-    setHistoryStartFrom(newChatHistoryStartTime); // Обновляем состояние, которое контролирует запрос истории чата
-    setPlayerPosition(seconds); // Также обновляем позицию плеера для VodChatSection
+
+    setHistoryStartFrom(newChatHistoryStartTime);
+    setPlayerPosition(seconds);
   };
 
   return (
@@ -107,7 +105,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
               width="100%"
               height="100%"
               className="z-10"
-              onProgress={(state) => setPlayerPosition(state.currentTarget.currentTime)} // Используем state.playedSeconds
+              onTimeUpdate={(state) => handlePlayerSeek(state.currentTarget.currentTime)} // Используем state.playedSeconds
               onSeeked={(state) => handlePlayerSeek(state.currentTarget.currentTime)} // Используем onSeek и передаем секунды напрямую
             />
           ) : (
