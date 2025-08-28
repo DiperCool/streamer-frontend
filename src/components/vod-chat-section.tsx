@@ -89,10 +89,11 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     variables: {
       chatId: chatId!,
       startFrom: nextFromCursor || vodCreatedAt,
-      // order: [{ createdAt: SortEnumType.Asc }], // Эта строка была причиной ошибки и теперь удалена
+      // Removed: order: [{ createdAt: SortEnumType.Asc }], // This was causing the TS error
     },
     skip: !chatId || !vodCreatedAt,
     pollInterval: 5000,
+    // onCompleted удален, логика перенесена в useEffect
   });
 
   // Эффект для обработки данных, полученных из useGetChatMessagesHistoryQuery
@@ -106,7 +107,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
       });
       setNextFromCursor(historyData.chatMessagesHistory.nextFrom);
     }
-  }, [historyData]);
+  }, [historyData]); // Зависимость от historyData
 
   // ResizeObserver для динамической высоты/ширины VariableSizeList
   useEffect(() => {
