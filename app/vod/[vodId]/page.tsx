@@ -101,14 +101,14 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {videoSource ? (
             <ReactPlayer
-              url={videoSource} // Используем 'url' пропс, так как он правильный для ReactPlayer
+              src={videoSource} // Используем 'url' пропс, так как он правильный для ReactPlayer
               playing={true}
               controls={true}
               width="100%"
               height="100%"
               className="z-10"
-              onProgress={(state: ProgressState) => setPlayerPosition(state.playedSeconds)}
-              onSeek={handlePlayerSeek} // Используем onSeek для обработки событий перемотки
+              onProgress={(state) => setPlayerPosition(state.currentTarget.currentTime)} // Используем state.playedSeconds
+              onSeeked={(state) => handlePlayerSeek(state.currentTarget.currentTime)} // Используем onSeek и передаем секунды напрямую
             />
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-400">
