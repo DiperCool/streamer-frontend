@@ -10,6 +10,14 @@ import { VodChatSection } from "@/src/components/vod-chat-section"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
+// Определяем тип для объекта состояния прогресса ReactPlayer
+interface ProgressState {
+  played: number;
+  playedSeconds: number;
+  loaded: number;
+  loadedSeconds: number;
+}
+
 export default function VodDetailPage({ params }: { params: { vodId: string } }) {
   const { vodId } = params
   const [isChatVisible, setIsChatVisible] = useState(true);
@@ -79,7 +87,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
               width="100%"
               height="100%"
               className="z-10"
-              onProgress={(state) => setPlayerPosition(state.playedSeconds)} // Обновляем позицию плеера
+              onProgress={(state: ProgressState) => setPlayerPosition(state.playedSeconds)} // Обновляем позицию плеера
             />
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-400">
