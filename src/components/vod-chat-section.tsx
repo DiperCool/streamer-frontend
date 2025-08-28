@@ -11,16 +11,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMinioUrl } from "@/utils/utils"
 import {
   useGetChatQuery,
-  useGetChatMessagesHistoryQuery, // Используем новый хук
+  useGetChatMessagesHistoryQuery,
   SortEnumType,
   ChatMessageDto,
-  GetChatMessagesHistoryQuery,
 } from "@/graphql/__generated__/graphql"
-import { MessageItem } from "@/src/components/chat/message-item" // Переиспользуем MessageItem
+import { MessageItem } from "@/src/components/chat/message-item"
 
 interface VodChatSectionProps {
   onCloseChat?: () => void;
-  streamerId: string; // Изменено с vodId на streamerId
+  streamerId: string;
   vodCreatedAt: string;
   playerPosition: number;
 }
@@ -45,7 +44,6 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
 
   const isPinned = message.id === pinnedMessageId;
 
-  // В VOD чате нет функционала ответа, удаления или закрепления, поэтому передаем пустые функции
   return (
     <div style={style}>
       <MessageItem
@@ -58,13 +56,13 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
         currentHoveredMessageId={currentHoveredMessageId}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        chatId={""} // Не используется в VOD чате
+        chatId={""}
       />
     </div>
   );
 });
 
-export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPosition }: VodChatSectionProps) { // Обновлены пропсы
+export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPosition }: VodChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
@@ -79,7 +77,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
-    variables: { streamerId }, // Используем streamerId
+    variables: { streamerId },
     skip: !streamerId,
   });
 
@@ -90,23 +88,26 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const { data: historyData, loading: historyLoading, refetch: refetchHistory } = useGetChatMessagesHistoryQuery({
     variables: {
       chatId: chatId!,
-      startFrom: nextFromCursor || vodCreatedAt, // Используем nextFromCursor для последующих запросов
-      // order: [{ createdAt: SortEnumType.Asc }], // УДАЛЕНО: Некорректный аргумент согласно схеме
+      startFrom: nextFromCursor || vodCreatedAt,
+      order: [{ createdAt: SortEnumType.Asc }], // Сортируем по возрастанию для истории
     },
     skip: !chatId || !vodCreatedAt,
-    pollInterval: 5000, // Опрашиваем каждые 5 секунд
-    onCompleted: (data) => {
-      if (data?.chatMessagesHistory) {
-        const newMessages = data.chatMessagesHistory.messages;
-        setAllFetchedMessages(prev => {
-          const existingIds = new Set(prev.map(msg => msg.id));
-          const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
-          return [...prev, ...uniqueNewMessages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        });
-        setNextFromCursor(data.chatMessagesHistory.nextFrom);
-      }
-    },
+    pollInterval: 5000,
+    // onCompleted удален, логика перенесена в useEffect
   });
+
+  // Эффект для обработки данных, полученных из useGetChatMessagesHistoryQuery
+  useEffect(() => {
+    if (historyData?.chatMessagesHistory) {
+      const newMessages = historyData.chatMessagesHistory.messages;
+      setAllFetchedMessages(prev => {
+        const existingIds = new Set(prev.map(msg => msg.id));
+        const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
+        return [...prev, ...uniqueNewMessages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      });
+      setNextFromCursor(historyData.chatMessagesHistory.nextFrom);
+    }
+  }, [historyData]); // Зависимость от historyData
 
   // ResizeObserver для динамической высоты/ширины VariableSizeList
   useEffect(() => {
@@ -160,7 +161,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     setDisplayedMessages([]);
     setInitialScrollDone(false);
     setIsUserAtBottom(true);
-  }, [streamerId, vodCreatedAt]); // Добавлен streamerId в зависимости
+  }, [streamerId, vodCreatedAt]);
 
   // Функция для получения размера элемента для VariableSizeList
   const getItemSize = useCallback((index: number) => {
