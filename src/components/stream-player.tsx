@@ -16,9 +16,8 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize }: StreamPlayerProps) {
-  // Ищем источник, который будет передан в ReactPlayer через проп src.
-  // Предполагаем, что ReactPlayer сможет обработать этот URL.
-  const streamSource = sources.find(s => s.sourceType === "WEB_RTC") // Или любой другой тип, который ReactPlayer может обработать
+
+  const streamSource = sources.find(s => s.sourceType === "HLS") // Или любой другой тип, который ReactPlayer может обработать
   const urlToPlay = streamSource ? streamSource.url : "";
 
   if (!urlToPlay) {
@@ -32,7 +31,7 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   return (
     <div className="absolute inset-0">
       <ReactPlayer
-        src={urlToPlay} // Используем проп 'src' для ReactPlayer, как вы просили
+        src={urlToPlay}
         playing
         controls={true}
         width="100%"

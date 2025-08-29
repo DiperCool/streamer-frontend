@@ -21,8 +21,8 @@ interface VodChatSectionProps {
   onCloseChat?: () => void;
   streamerId: string;
   vodCreatedAt: string;
-  playerPosition: number;
-  historyStartFrom: string | null; // Новый пропс
+  getPlayerPosition: () => number
+    registerSeekedListener: (listener: () => void) => () => void
 }
 
 const MESSAGE_ITEM_BASE_HEIGHT = 50;
@@ -63,19 +63,25 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
   );
 });
 
-export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPosition, historyStartFrom }: VodChatSectionProps) {
+export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, getPlayerPosition, registerSeekedListener }: VodChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
-
+  const [currentPosition, setCurrentPosition] = useState(0);
   const [allFetchedMessages, setAllFetchedMessages] = useState<ChatMessageDto[]>([]);
   const [displayedMessages, setDisplayedMessages] = useState<ChatMessageDto[]>([]);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [initialScrollDone, setInitialScrollDone] = useState(false);
+    const [historyStartFrom, setHistoryStartFrom] = useState<string | null | undefined>(null); // Новое состояние для времени начала истории чата
 
+    const historyStartFromRef = useRef(historyStartFrom);
+
+    useEffect(() => {
+        historyStartFromRef.current = historyStartFrom;
+    }, [historyStartFrom]);
   const { data: chatData, loading: chatLoading } = useGetChatQuery({
     variables: { streamerId },
     skip: !streamerId,
@@ -84,30 +90,72 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
   const chatId = chatData?.chat.id;
   const pinnedMessage = chatData?.chat.pinnedMessage;
   const pinnedMessageId = chatData?.chat.pinnedMessageId;
+    const allFetchedMessagesRef = useRef<ChatMessageDto[]>([]);
+  const [getChatMessagesHistory, { loading: historyLoading }] = useGetChatMessagesHistoryLazyQuery({
 
-  const [getChatMessagesHistory, { data: historyData, loading: historyLoading }] = useGetChatMessagesHistoryLazyQuery({
-    skip: !chatId || !vodCreatedAt, // Skip if basic info is not available
   });
+    const handleFetched = (messages : ChatMessageDto[], includePrev : boolean)=>{
+        if (messages) {
+            let updatedMessages;
+            if (includePrev) {
+                const existingIds = new Set(allFetchedMessagesRef.current.map(msg => msg.id));
+                const uniqueNewMessages = messages.filter(msg => !existingIds.has(msg.id));
+                updatedMessages = [...allFetchedMessagesRef.current, ...uniqueNewMessages];
+            } else {
+                updatedMessages = [...messages]; // только новые
+            }
 
-  // Ref to hold the latest historyStartFrom without being a dependency of the interval effect
-  const latestHistoryStartFromRef = useRef(historyStartFrom);
-  useEffect(() => {
-    latestHistoryStartFromRef.current = historyStartFrom;
-  }, [historyStartFrom]);
+            updatedMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-  // Effect to handle data received from useGetChatMessagesHistoryLazyQuery
-  useEffect(() => {
-    if (historyData?.chatMessagesHistory) {
-      const newMessages = historyData.chatMessagesHistory;
-      setAllFetchedMessages(prev => {
-        const existingIds = new Set(prev.map(msg => msg.id));
-        const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
-        return [...prev, ...uniqueNewMessages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-      });
+            allFetchedMessagesRef.current = updatedMessages;
+            setAllFetchedMessages(updatedMessages);
+        }
     }
-  }, [historyData]);
 
-  // ResizeObserver for dynamic height/width of VariableSizeList
+    useEffect(() => {
+        const handleSeeked = () => {
+            if(!chatId || !historyStartFromRef.current){
+                return
+            }
+            setAllFetchedMessages([])
+            allFetchedMessagesRef.current = []
+            setDisplayedMessages([])
+            setCurrentPosition(getPlayerPosition())
+            const vodStartTime = new Date(vodCreatedAt).getTime();
+            const newChatHistoryStartTime = new Date(vodStartTime + getPlayerPosition() * 1000).toISOString();
+
+            setHistoryStartFrom(newChatHistoryStartTime);
+            getChatMessagesHistory({
+                variables: {
+                    chatId: chatId,
+                    startFrom: historyStartFromRef.current,
+                },
+            }).then(x=> handleFetched(x.data?.chatMessagesHistory, false));
+
+        };
+
+        const unregister = registerSeekedListener(handleSeeked);
+
+        return () => {
+            unregister();
+        };
+    }, [registerSeekedListener, getChatMessagesHistory, allFetchedMessages]);
+
+
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentPosition(getPlayerPosition());
+            const vodStartTime = new Date(vodCreatedAt).getTime();
+            const newChatHistoryStartTime = new Date(vodStartTime + getPlayerPosition() * 1000).toISOString();
+
+            setHistoryStartFrom(newChatHistoryStartTime);
+
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [getPlayerPosition]);
+
   useEffect(() => {
     const currentRef = chatContainerRef.current;
     if (!currentRef) return;
@@ -136,7 +184,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
     }
 
     const vodStartTime = new Date(vodCreatedAt).getTime();
-    const currentTimeInVod = vodStartTime + playerPosition * 1000;
+    const currentTimeInVod = vodStartTime + currentPosition * 1000;
 
     const newDisplayedMessages = allFetchedMessages.filter(msg =>
       new Date(msg.createdAt).getTime() <= currentTimeInVod
@@ -150,45 +198,43 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
         listRef.current?.scrollToItem(newDisplayedMessages.length - 1, "end");
         setInitialScrollDone(true);
     }
-  }, [playerPosition, allFetchedMessages, vodCreatedAt, isUserAtBottom, initialScrollDone]);
+  }, [currentPosition, allFetchedMessages, vodCreatedAt, isUserAtBottom, initialScrollDone]);
 
   // Effect to reset messages when VOD or streamer changes
   useEffect(() => {
     setAllFetchedMessages([]);
-    setDisplayedMessages([]);
+      allFetchedMessagesRef.current = []
+      setDisplayedMessages([]);
     setInitialScrollDone(false);
     setIsUserAtBottom(true);
   }, [streamerId, vodCreatedAt, chatId]);
 
-  // Effect to handle initial fetch and subsequent interval fetches
-  useEffect(() => {
-    if (!chatId || !vodCreatedAt) { // historyStartFrom is NOT a dependency here
-      return;
-    }
+    useEffect(() => {
+        if (!chatId || !vodCreatedAt) {
+            return;
+        }
 
-    // Function to perform the fetch
-    const fetchMessages = () => {
-      if (latestHistoryStartFromRef.current) { // Use the ref for the latest value
-        getChatMessagesHistory({
-          variables: {
-            chatId: chatId,
-            startFrom: latestHistoryStartFromRef.current,
-          },
-        });
-      }
-    };
+        const fetchMessages = () => {
+            console.log(allFetchedMessages)
 
-    // Initial fetch
-    fetchMessages();
+            if (historyStartFromRef.current) {
+                getChatMessagesHistory({
+                    variables: {
+                        chatId: chatId,
+                        startFrom: historyStartFromRef.current,
+                    },
+                }).then(x=> handleFetched(x.data?.chatMessagesHistory, true));
+            }
+        };
+        fetchMessages();
 
-    // Set up interval for subsequent fetches
-    const intervalId = setInterval(fetchMessages, 5000); // Every 5 seconds
+        const interval = setInterval(() => {
+            fetchMessages();
+        }, 3000);
 
-    // Cleanup function
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [chatId, vodCreatedAt, getChatMessagesHistory]); // Dependencies for the effect are now only those that should *re-setup* the interval
+        return () => clearInterval(interval);
+    }, [chatId, vodCreatedAt, getChatMessagesHistory]);
+
 
   // Function to get item size for VariableSizeList
   const getItemSize = useCallback((index: number) => {
@@ -255,11 +301,7 @@ export function VodChatSection({ onCloseChat, streamerId, vodCreatedAt, playerPo
       )}
 
       <div className="flex-1 overflow-hidden" ref={chatContainerRef}>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-          </div>
-        ) : (
+        {(
           listHeight > 0 && listWidth > 0 && displayedMessages.length > 0 ? (
             <VariableSizeList
               ref={listRef}

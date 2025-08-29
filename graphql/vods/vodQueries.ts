@@ -54,7 +54,7 @@ export const GET_VOD = gql`
             source
             views
             createdAt
-            duration # Added duration
+            duration
             streamer {
                 id
                 userName

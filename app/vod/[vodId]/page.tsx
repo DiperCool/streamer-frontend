@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, {useState, useEffect, useRef, useCallback} from "react"
 import { useGetVodQuery, useGetStreamerQuery, useGetProfileQuery } from "@/graphql/__generated__/graphql"
 import { Loader2, MessageSquare } from "lucide-react"
 import { getMinioUrl } from "@/utils/utils"
@@ -17,16 +17,51 @@ interface ProgressState {
   loaded: number;
   loadedSeconds: number;
 }
+const MemoizedPlayer = React.memo(({ videoSource, onSeeked, playerRef }: any) => {
+    if (!videoSource) return null;
 
+    return (
+        <ReactPlayer
+            ref={playerRef}
+            src={videoSource}
+            playing
+            controls
+            width="100%"
+            height="100%"
+            className="z-10"
+            onSeeked={onSeeked}
+        />
+    );
+});
 export default function VodDetailPage({ params }: { params: { vodId: string } }) {
   const { vodId } = params
   const [isChatVisible, setIsChatVisible] = useState(true);
   const [playerPosition, setPlayerPosition] = useState(0); // Состояние для отслеживания позиции плеера в секундах
-  const [historyStartFrom, setHistoryStartFrom] = useState<string | null>(null); // Новое состояние для времени начала истории чата
-
+  const [historyStartFrom, setHistoryStartFrom] = useState<string | null | undefined>(null); // Новое состояние для времени начала истории чата
+    const playerRef = useRef<HTMLVideoElement | null>(null);
   const { data: vodData, loading: vodLoading, error: vodError } = useGetVodQuery({
     variables: { vodId },
   })
+    const vod = vodData?.vod
+
+    const videoSource = vod?.source ? getMinioUrl(vod.source) : null;
+
+    const [listeners, setListeners] = useState<(() => void)[]>([]);
+
+    const registerSeekedListener: (listener: () => void) => () => void = useCallback((listener: () => void) => {
+        // добавляем listener
+        setListeners(prev => [...prev, listener]);
+
+        // возвращаем функцию для удаления
+        return () => {
+            setListeners(prev => prev.filter(l => l !== listener));
+        };
+    }, []);
+
+    const handleSeeked = () => {
+        listeners.forEach(listener => listener());
+    };
+
 
   const streamerUserName = vodData?.vod?.streamer?.userName ?? ""
 
@@ -65,7 +100,6 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
     )
   }
 
-  const vod = vodData.vod
   const streamer = streamerData?.streamer
   const profile = profileData?.profile
 
@@ -77,18 +111,6 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
     )
   }
 
-  const videoSource = vod.source ? getMinioUrl(vod.source) : null;
-
-  const handlePlayerSeek = (seconds: number) => {
-    if (!vod.createdAt) return;
-
-    const vodStartTime = new Date(vod.createdAt).getTime();
-    const newChatHistoryStartTime = new Date(vodStartTime + seconds * 1000).toISOString();
-
-    setHistoryStartFrom(newChatHistoryStartTime);
-    setPlayerPosition(seconds);
-  };
-
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row">
       <div className={cn(
@@ -98,16 +120,11 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         {/* Video Player Section */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {videoSource ? (
-            <ReactPlayer
-              src={videoSource} // Используем 'url' пропс, так как он правильный для ReactPlayer
-              playing={true}
-              controls={true}
-              width="100%"
-              height="100%"
-              className="z-10"
-              onTimeUpdate={(state) => handlePlayerSeek(state.currentTarget.currentTime)} // Используем state.playedSeconds
-              onSeeked={(state) => handlePlayerSeek(state.currentTarget.currentTime)} // Используем onSeek и передаем секунды напрямую
-            />
+              <MemoizedPlayer
+                  videoSource={videoSource}
+                  playerRef={playerRef}
+                  onSeeked={() => handleSeeked()}
+              />
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-400">
               <p>No video source available for this VOD.</p>
@@ -140,29 +157,14 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
           "hidden lg:flex"
         )}
       >
-        <VodChatSection
-          onCloseChat={() => setIsChatVisible(false)}
-          streamerId={streamerId}
-          vodCreatedAt={vod.createdAt}
-          playerPosition={playerPosition}
-          historyStartFrom={historyStartFrom} // Передаем новое состояние
-        />
-      </div>
-
-      {/* VOD Chat (отображается на маленьких экранах, если чат виден) */}
-      {isChatVisible && (
-        <div
-          className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh] overflow-y-auto"
-        >
           <VodChatSection
-            onCloseChat={() => setIsChatVisible(false)}
-            streamerId={streamerId}
-            vodCreatedAt={vod.createdAt}
-            playerPosition={playerPosition}
-            historyStartFrom={historyStartFrom} // Передаем новое состояние
+              onCloseChat={() => setIsChatVisible(false)}
+              streamerId={streamerId}
+              vodCreatedAt={vod.createdAt}
+              getPlayerPosition={()=> playerRef.current?.currentTime ?? 0}
+              registerSeekedListener={registerSeekedListener}
           />
-        </div>
-      )}
+      </div>
     </div>
   )
 }
