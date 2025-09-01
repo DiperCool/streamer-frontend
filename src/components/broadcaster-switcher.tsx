@@ -14,7 +14,7 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { getMinioUrl } from "@/utils/utils";
 import { RoleDto, StreamerMeDto } from "@/graphql/__generated__/graphql";
-import { useGetMeQuery } from "@/graphql/__generated__/graphql";
+import { useRouter } from "next/navigation"; // Импортируем useRouter
 
 interface ActiveStreamer {
   id: string;
@@ -36,6 +36,7 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
   meData,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter(); // Инициализируем useRouter
 
   const currentStreamerRole = React.useMemo(() => {
     if (!activeStreamer || !meData) return null;
@@ -127,6 +128,8 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
                                 avatar: channel.avatar,
                             });
                             setIsOpen(false);
+                            // Перенаправляем на базовый маршрут дашборда после смены активного стримера
+                            router.push(`/dashboard`); 
                         }
                     }}
                     className={cn(

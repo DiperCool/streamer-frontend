@@ -28,7 +28,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     },
   });
   const [activeStreamer, setActiveStreamerState] = useState<ActiveStreamer | null>(null);
-  const router = useRouter();
+  // useRouter больше не нужен здесь, так как router.push удален
+  // const router = useRouter(); 
 
   // Initialize activeStreamer with current user's data
   useEffect(() => {
@@ -43,8 +44,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const setActiveStreamer = (streamer: ActiveStreamer) => {
     setActiveStreamerState(streamer);
-    // Optionally redirect to the new streamer's dashboard home
-    router.push(`/dashboard/${streamer.userName}`);
+    // Удалено: router.push(`/dashboard/${streamer.userName}`);
   };
 
   const myRoles = myRolesData?.myRoles?.nodes || [];
