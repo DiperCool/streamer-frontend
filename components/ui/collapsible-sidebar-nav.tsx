@@ -36,15 +36,13 @@ const CollapsibleSidebarNav: React.FC<CollapsibleSidebarNavProps> = ({
       <CollapsiblePrimitive.Trigger asChild>
         <SidebarNavItem
           icon={icon} // Иконка передается как пропс
+          rightIcon={<ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isOpen ? "rotate-180" : "rotate-0")} />} // Передаем ChevronDown в rightIcon
           className={cn(
-            "w-full justify-between",
+            "w-full", // Удален justify-between, теперь он управляется внутри SidebarNavItem
             active && "bg-gray-800 text-white" // Highlight parent if any child is active
           )}
         >
-          <span className="flex items-center">
-            {title} {/* Только заголовок здесь */}
-          </span>
-          <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isOpen ? "rotate-180" : "rotate-0")} />
+          {title} {/* Только заголовок здесь */}
         </SidebarNavItem>
       </CollapsiblePrimitive.Trigger>
       <CollapsiblePrimitive.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">

@@ -167,20 +167,25 @@ const SidebarNavItem = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
     icon?: React.ReactNode
     active?: boolean
+    rightIcon?: React.ReactNode // New prop for an icon on the right
   }
->(({ className, icon, active, children, ...props }, ref) => (
+>(({ className, icon, active, children, rightIcon, ...props }, ref) => (
   <Button
     ref={ref}
     variant="ghost"
     className={cn(
-      "w-full justify-start py-2 text-gray-300 hover:bg-gray-800 hover:text-white", // Removed px-3
+      "w-full py-2 text-gray-300 hover:bg-gray-800 hover:text-white",
+      rightIcon ? "justify-between" : "justify-start", // Conditionally apply justify-between
       active && "bg-gray-800 text-white",
       className
     )}
     {...props}
   >
-    {icon && <span className="mr-2 h-4 w-4 flex items-center justify-center">{icon}</span>}
-    {children}
+    <span className="flex items-center"> {/* Wrap icon and children for consistent spacing */}
+      {icon && <span className="mr-2 h-4 w-4 flex items-center justify-center">{icon}</span>}
+      {children}
+    </span>
+    {rightIcon} {/* Render rightIcon at the end */}
   </Button>
 ))
 SidebarNavItem.displayName = "SidebarNavItem"
