@@ -106,8 +106,6 @@ export function ChatSettingsForm() {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-semibold mb-6">Chat Settings</h2>
-
       <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="text-white">Chat Moderation</CardTitle>

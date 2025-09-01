@@ -3,9 +3,10 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings } from "lucide-react" // Import new icons
+import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog } from "lucide-react" // Import new icons
 import Link from "next/link"
 import { usePathname } from "next/navigation" // Import usePathname
+import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav" // Import new component
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
@@ -17,6 +18,9 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className, isMobile, sidebarOpen, onCloseClick, isDashboard = false, ...props }, ref) => {
     const pathname = usePathname(); // Use pathname here
+
+    // Determine if any child of 'Channel' is active
+    const isChannelActive = pathname.startsWith("/dashboard/channel");
 
     return (
       <div
@@ -44,24 +48,39 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                     Analytics
                   </SidebarNavItem>
                 </Link>
-                <Link href="/dashboard/stream-manager" passHref>
-                  <SidebarNavItem icon={<Monitor />} active={pathname === "/dashboard/stream-manager"}>
-                    Stream Manager
-                  </SidebarNavItem>
-                </Link>
+
+                {/* Collapsible Channel Section */}
+                <CollapsibleSidebarNav title="Channel" icon={<Monitor />} active={isChannelActive}>
+                  <Link href="/dashboard/channel/chat" passHref>
+                    <SidebarNavItem icon={<MessageSquare />} active={pathname === "/dashboard/channel/chat"}>
+                      Chat
+                    </SidebarNavItem>
+                  </Link>
+                  <Link href="/dashboard/channel/roles" passHref>
+                    <SidebarNavItem icon={<UserCog />} active={pathname === "/dashboard/channel/roles"}>
+                      Roles
+                    </SidebarNavItem>
+                  </Link>
+                  <Link href="/dashboard/channel/community" passHref>
+                    <SidebarNavItem icon={<Users />} active={pathname === "/dashboard/channel/community"}>
+                      Community
+                    </SidebarNavItem>
+                  </Link>
+                  <Link href="/dashboard/channel/stream-key" passHref>
+                    <SidebarNavItem icon={<Key />} active={pathname === "/dashboard/channel/stream-key"}>
+                      Stream URL & Key
+                    </SidebarNavItem>
+                  </Link>
+                </CollapsibleSidebarNav>
+
                 <Link href="/dashboard/content" passHref>
                   <SidebarNavItem icon={<Video />} active={pathname === "/dashboard/content"}>
                     Content
                   </SidebarNavItem>
                 </Link>
-                <Link href="/dashboard/community" passHref>
-                  <SidebarNavItem icon={<Users />} active={pathname === "/dashboard/community"}>
-                    Community
-                  </SidebarNavItem>
-                </Link>
                 <Link href="/dashboard/settings" passHref>
                   <SidebarNavItem icon={<Settings />} active={pathname === "/dashboard/settings"}>
-                    Settings
+                    Dashboard Settings
                   </SidebarNavItem>
                 </Link>
               </>
