@@ -35,21 +35,20 @@ const CollapsibleSidebarNav: React.FC<CollapsibleSidebarNavProps> = ({
     <CollapsiblePrimitive.Root open={isOpen} onOpenChange={setIsOpen} className="space-y-1">
       <CollapsiblePrimitive.Trigger asChild>
         <SidebarNavItem
-          icon={icon}
+          icon={icon} // Иконка передается как пропс
           className={cn(
             "w-full justify-between",
             active && "bg-gray-800 text-white" // Highlight parent if any child is active
           )}
         >
           <span className="flex items-center">
-            {icon && <span className="mr-3 h-4 w-4 flex items-center justify-center">{icon}</span>}
-            {title}
+            {title} {/* Только заголовок здесь */}
           </span>
           <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isOpen ? "rotate-180" : "rotate-0")} />
         </SidebarNavItem>
       </CollapsiblePrimitive.Trigger>
       <CollapsiblePrimitive.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        <div className="pl-8 space-y-1">
+        <div className="pl-5 space-y-1"> {/* Отступ уменьшен до pl-5 */}
           {children}
         </div>
       </CollapsiblePrimitive.Content>
