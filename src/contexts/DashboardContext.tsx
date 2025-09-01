@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useGetMeQuery, useGetMyRolesQuery, RoleDto } from "@/graphql/__generated__/graphql";
+import { useGetMeQuery, useGetMyRolesQuery, RoleDto, SortEnumType } from "@/graphql/__generated__/graphql"; // Импортируем SortEnumType
 import { useRouter } from "next/navigation";
 
 interface ActiveStreamer {
@@ -22,6 +22,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const { data: meData, loading: meLoading, error: meError } = useGetMeQuery();
   const { data: myRolesData, loading: myRolesLoading, error: myRolesError } = useGetMyRolesQuery({
     skip: !meData?.me.id,
+    variables: {
+      order: [{ type: SortEnumType.Asc }], // Добавляем сортировку по типу роли
+    },
   });
   const [activeStreamer, setActiveStreamerState] = useState<ActiveStreamer | null>(null);
   const router = useRouter();
