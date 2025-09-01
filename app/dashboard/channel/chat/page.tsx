@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { ChatSettingsForm } from "@/app/settings/chat/ChatSettingsForm" // Original import path
+import { ChatSettingsForm } from "./ChatSettingsForm" // Updated import path
 
 export default function ChatSettingsPage() {
   return (
