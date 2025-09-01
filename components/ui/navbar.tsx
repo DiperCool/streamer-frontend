@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Menu, Search, Sparkles, Store, Settings, LogOut, LayoutDashboard } from "lucide-react" // Import LayoutDashboard
+import { Menu, Search, Sparkles, Store, Settings, LogOut, LayoutDashboard } from "lucide-react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { useGetMeQuery } from "@/graphql/__generated__/graphql"
 import {
@@ -19,6 +19,14 @@ import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getMinioUrl } from "@/utils/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select" // Импортируем компоненты Select
+import { useDashboard } from "@/src/contexts/DashboardContext" // Импортируем useDashboard
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void;
@@ -29,13 +37,14 @@ interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
     ({ className, onMenuClick, isMobile, sidebarOpen, ...props }, ref) => {
       const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0()
-      const { data: streamerData, loading: streamerLoading } = useGetMeQuery({
+      const { data: meData, loading: meLoading } = useGetMeQuery({
         skip: !isAuthenticated,
       });
       const router = useRouter();
+      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading } = useDashboard(); // Используем DashboardContext
 
-      const userName = streamerData?.me?.userName;
-      const userAvatar = streamerData?.me?.avatar;
+      const userName = meData?.me?.userName;
+      const userAvatar = meData?.me?.avatar;
 
       const handleLogout = async () => {
         await logout({
@@ -43,6 +52,16 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
             returnTo: typeof window !== "undefined" ? window.location.origin : "/",
           },
         });
+      };
+
+      const handleBroadcasterChange = (broadcasterId: string) => {
+        const selectedRole = myRoles.find(role => role.broadcasterId === broadcasterId);
+        if (selectedRole?.broadcaster) {
+          setActiveStreamer({
+            id: selectedRole.broadcaster.id,
+            userName: selectedRole.broadcaster.userName || "Unknown",
+          });
+        }
       };
 
       return (
@@ -73,14 +92,39 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               )}
             </div>
 
+            {/* Broadcaster Select вместо Search */}
             <div className="flex-1 flex justify-center">
-              <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                    placeholder="Search"
-                    className="w-96 bg-gray-800 border-gray-700 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
-                />
-              </div>
+              {!isMobile && isAuthenticated ? ( // Показываем только на десктопе, если пользователь аутентифицирован
+                <Select
+                  value={activeStreamer?.id || ""}
+                  onValueChange={handleBroadcasterChange}
+                  disabled={myRolesLoading || !myRoles.length}
+                >
+                  <SelectTrigger className="w-[200px] bg-gray-800 border-gray-700 text-white">
+                    <SelectValue placeholder="Select Broadcaster">
+                      {activeStreamer?.userName || "Select Broadcaster"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    {myRoles.map((role) => (
+                      role.broadcaster && (
+                        <SelectItem key={role.broadcaster.id} value={role.broadcaster.id}>
+                          {role.broadcaster.userName}
+                        </SelectItem>
+                      )
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                // Если не аутентифицирован или на мобильном, показываем обычный поиск
+                <div className="relative hidden md:block"> {/* Скрываем на мобильных */}
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                      placeholder="Search"
+                      className="w-96 bg-gray-800 border-gray-700 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -109,7 +153,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               )}
               {!isLoading && isAuthenticated && (
                   <>
-                    {streamerLoading ? (
+                    {meLoading ? (
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500"></div>
                     ) : (
                         <DropdownMenu>
