@@ -48,7 +48,7 @@ const CollapsibleSidebarNav: React.FC<CollapsibleSidebarNavProps> = ({
         </SidebarNavItem>
       </CollapsiblePrimitive.Trigger>
       <CollapsiblePrimitive.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-        <div className="pl-5 space-y-1"> {/* Отступ уменьшен до pl-5 */}
+        <div className="pl-3 space-y-1"> {/* Отступ уменьшен до pl-3 */}
           {children}
         </div>
       </CollapsiblePrimitive.Content>

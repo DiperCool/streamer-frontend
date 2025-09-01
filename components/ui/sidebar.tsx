@@ -173,7 +173,7 @@ const SidebarNavItem = React.forwardRef<
     ref={ref}
     variant="ghost"
     className={cn(
-      "w-full justify-start px-3 py-2 text-gray-300 hover:bg-gray-800 hover:text-white",
+      "w-full justify-start py-2 text-gray-300 hover:bg-gray-800 hover:text-white", // Removed px-3
       active && "bg-gray-800 text-white",
       className
     )}
