@@ -78,6 +78,10 @@ type CreateMessageResponse {
     messageId: UUID!
 }
 
+type CreateRoleResponse {
+    id: UUID!
+}
+
 type DeleteMessageResponse {
     id: UUID!
 }
@@ -96,10 +100,12 @@ type GetEmailResponse {
 
 type Mutation {
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
+    createRole(input: CreateRoleInput!): CreateRoleResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
+    removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
     unfollow(unfollow: UnfollowInput!): UnfollowResponse!
     unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
@@ -110,6 +116,24 @@ type Mutation {
     updateProfile(input: UpdateProfileInput!): UpdateProfileResponse!
     updateStreamSettings: UpdateStreamSettingsResponse!
     upload(input: UploadFileInput!): UploadFileResponse!
+}
+
+"A connection to a list of items."
+type MyRolesConnection {
+    "A list of edges."
+    edges: [MyRolesEdge!]
+    "A flattened list of the nodes."
+    nodes: [RoleDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type MyRolesEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: RoleDto!
 }
 
 "Information about pagination in a connection."
@@ -168,7 +192,33 @@ type Query {
     currentStream(streamerId: String!): StreamDto!
     me: StreamerMeDto!
     myEmail: GetEmailResponse!
+    myRoles(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [RoleDtoSortInput!],
+        where: RoleDtoFilterInput
+    ): MyRolesConnection
     profile(streamerId: String!): ProfileDto!
+    roles(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        broadcasterId: String!,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [RoleDtoSortInput!],
+        roleType: RoleType!,
+        where: RoleDtoFilterInput
+    ): RolesConnection
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
     streamerInteraction(streamerId: String!): StreamerInteractionDto!
@@ -186,6 +236,37 @@ type Query {
         streamerId: String!,
         where: VodDtoFilterInput
     ): VodsConnection
+}
+
+type RemoveRoleResponse {
+    id: UUID!
+}
+
+type RoleDto {
+    broadcaster: StreamerDto
+    broadcasterId: String!
+    id: UUID!
+    streamer: StreamerDto
+    streamerId: String!
+    type: RoleType!
+}
+
+"A connection to a list of items."
+type RolesConnection {
+    "A list of edges."
+    edges: [RolesEdge!]
+    "A flattened list of the nodes."
+    nodes: [RoleDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type RolesEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: RoleDto!
 }
 
 type StreamDto {
@@ -331,6 +412,11 @@ enum ChatMessageType {
     USER_MESSAGE
 }
 
+enum RoleType {
+    ADMINISTRATOR
+    BROADCASTER
+}
+
 enum SortEnumType {
     ASC
     DESC
@@ -394,6 +480,11 @@ input CreateMessageInput {
     replyMessageId: UUID
 }
 
+input CreateRoleInput {
+    roleType: RoleType!
+    streamerId: String!
+}
+
 input DateTimeOperationFilterInput {
     eq: DateTime
     gt: DateTime
@@ -438,6 +529,33 @@ input LongOperationFilterInput {
 
 input PinMessageInput {
     messageId: UUID!
+}
+
+input RemoveRoleInput {
+    roleId: UUID!
+}
+
+input RoleDtoFilterInput {
+    and: [RoleDtoFilterInput!]
+    broadcasterId: StringOperationFilterInput
+    id: UuidOperationFilterInput
+    or: [RoleDtoFilterInput!]
+    streamerId: StringOperationFilterInput
+    type: RoleTypeOperationFilterInput
+}
+
+input RoleDtoSortInput {
+    broadcasterId: SortEnumType
+    id: SortEnumType
+    streamerId: SortEnumType
+    type: SortEnumType
+}
+
+input RoleTypeOperationFilterInput {
+    eq: RoleType
+    in: [RoleType!]
+    neq: RoleType
+    nin: [RoleType!]
 }
 
 input StringOperationFilterInput {
