@@ -1,12 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useGetMeQuery, useGetMyRolesQuery, RoleDto, SortEnumType } from "@/graphql/__generated__/graphql"; // Импортируем SortEnumType
+import { useGetMeQuery, useGetMyRolesQuery, RoleDto, SortEnumType } from "@/graphql/__generated__/graphql";
 import { useRouter } from "next/navigation";
 
 interface ActiveStreamer {
   id: string;
   userName: string;
+  avatar?: string | null; // Добавлено поле avatar
 }
 
 interface DashboardContextType {
@@ -23,7 +24,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const { data: myRolesData, loading: myRolesLoading, error: myRolesError } = useGetMyRolesQuery({
     skip: !meData?.me.id,
     variables: {
-      order: [{ id: SortEnumType.Asc }], // Добавляем сортировку по типу роли
+      order: [{ id: SortEnumType.Asc }],
     },
   });
   const [activeStreamer, setActiveStreamerState] = useState<ActiveStreamer | null>(null);
@@ -34,7 +35,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     if (meData?.me && !activeStreamer) {
       setActiveStreamerState({
         id: meData.me.id,
-        userName: meData.me.userName || "my-channel", // Fallback username
+        userName: meData.me.userName || "my-channel",
+        avatar: meData.me.avatar, // Устанавливаем аватар
       });
     }
   }, [meData, activeStreamer]);
@@ -48,13 +50,11 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const myRoles = myRolesData?.myRoles?.nodes || [];
 
   if (meLoading || myRolesLoading) {
-    // You might want a global loading spinner here or handle it in MainLayout
     return null;
   }
 
   if (meError || myRolesError) {
     console.error("Error loading user or roles data:", meError || myRolesError);
-    // Handle error state, maybe show an error message
     return null;
   }
 

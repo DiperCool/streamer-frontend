@@ -19,6 +19,7 @@ import { useGetMeQuery } from "@/graphql/__generated__/graphql";
 interface ActiveStreamer {
   id: string;
   userName: string;
+  avatar?: string | null; // Обновлено для согласованности
 }
 
 interface BroadcasterSwitcherProps {
@@ -49,18 +50,41 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
     return role ? role.type : null;
   }, [activeStreamer, myRoles, meData]);
 
-  const otherChannels = React.useMemo(() => {
-    if (!meData) return [];
-    return myRoles.filter(
-      (role) => role.broadcasterId !== activeStreamer?.id && role.broadcaster
-    );
-  }, [myRoles, activeStreamer, meData]);
+  const allAvailableChannels = React.useMemo(() => {
+    const channels: Array<{ id: string; userName: string; avatar?: string | null; roleType?: string }> = [];
+
+    // Add current user's own channel
+    if (meData) {
+        channels.push({
+            id: meData.id,
+            userName: meData.userName || "my-channel",
+            avatar: meData.avatar,
+            roleType: "Broadcaster",
+        });
+    }
+
+    // Add other channels from roles
+    myRoles.forEach(role => {
+        if (role.broadcaster) {
+            channels.push({
+                id: role.broadcaster.id,
+                userName: role.broadcaster.userName || "Unknown",
+                avatar: role.broadcaster.avatar,
+                roleType: role.type,
+            });
+        }
+    });
+
+    // Filter out duplicates if a user is a broadcaster of their own channel AND has a role for it
+    const uniqueChannels = Array.from(new Map(channels.map(item => [item.id, item])).values());
+    return uniqueChannels;
+  }, [meData, myRoles]);
 
   if (!activeStreamer || !meData) {
     return null; // Or a loading spinner/placeholder
   }
 
-  const avatarImage = activeStreamer.avatar || meData.avatar || "/placeholder-user.jpg"; // Use activeStreamer's avatar if available, otherwise meData's
+  const avatarImage = activeStreamer.avatar || meData.avatar || "/placeholder-user.jpg";
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -86,60 +110,48 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64 bg-gray-800 border-gray-700 text-white p-1">
-        {otherChannels.length > 0 && (
-          <>
-            <DropdownMenuLabel className="px-2 py-1.5 text-sm font-semibold text-gray-300">
-              Access to other channels
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-gray-700 my-1" />
-            {otherChannels.map((role) => (
-              role.broadcaster && (
+        <DropdownMenuLabel className="px-2 py-1.5 text-sm font-semibold text-gray-300">
+          Switch Channel
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-gray-700 my-1" />
+        {allAvailableChannels.map((channel) => {
+            const isActive = activeStreamer?.id === channel.id;
+            return (
                 <DropdownMenuItem
-                  key={role.broadcaster.id}
-                  onClick={() => {
-                    setActiveStreamer({
-                      id: role.broadcaster!.id,
-                      userName: role.broadcaster!.userName || "Unknown",
-                    });
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center space-x-2 px-2 py-1.5 cursor-pointer hover:bg-green-600 hover:text-white"
+                    key={channel.id}
+                    onClick={() => {
+                        if (!isActive) { // Only switch if not already active
+                            setActiveStreamer({
+                                id: channel.id,
+                                userName: channel.userName,
+                                avatar: channel.avatar,
+                            });
+                            setIsOpen(false);
+                        }
+                    }}
+                    className={cn(
+                        "flex items-center space-x-2 px-2 py-1.5 cursor-pointer",
+                        isActive
+                            ? "bg-gray-700 text-white cursor-default" // Active style
+                            : "hover:bg-green-600 hover:text-white" // Inactive style
+                    )}
+                    disabled={isActive} // Disable interaction for the active item
                 >
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage src={getMinioUrl(role.broadcaster.avatar!)} alt="Channel Avatar" />
-                    <AvatarFallback className="bg-gray-600 text-white text-xs">
-                      {role.broadcaster.userName?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm">{role.broadcaster.userName}</span>
-                  {/* Mute icon from screenshot is omitted as it's not part of core functionality */}
+                    <Avatar className="w-6 h-6">
+                        <AvatarImage src={getMinioUrl(channel.avatar!)} alt="Channel Avatar" />
+                        <AvatarFallback className="bg-gray-600 text-white text-xs">
+                            {channel.userName?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                        <span className="text-sm">{channel.userName}</span>
+                        {channel.roleType && (
+                            <span className="text-gray-400 text-xs">{channel.roleType}</span>
+                        )}
+                    </div>
                 </DropdownMenuItem>
-              )
-            ))}
-            <DropdownMenuSeparator className="bg-gray-700 my-1" />
-          </>
-        )}
-        {/* Option to switch back to own channel if not currently active */}
-        {activeStreamer.id !== meData.id && (
-          <DropdownMenuItem
-            onClick={() => {
-              setActiveStreamer({
-                id: meData.id,
-                userName: meData.userName || "my-channel",
-              });
-              setIsOpen(false);
-            }}
-            className="flex items-center space-x-2 px-2 py-1.5 cursor-pointer hover:bg-green-600 hover:text-white"
-          >
-            <Avatar className="w-6 h-6">
-              <AvatarImage src={getMinioUrl(meData.avatar!)} alt="My Channel Avatar" />
-              <AvatarFallback className="bg-green-600 text-white text-xs">
-                {meData.userName?.charAt(0).toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm">{meData.userName} (My Channel)</span>
-          </DropdownMenuItem>
-        )}
+            );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
