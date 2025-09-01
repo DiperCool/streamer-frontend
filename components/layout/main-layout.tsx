@@ -56,7 +56,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       )}>
         <DashboardProvider> {/* DashboardProvider now wraps Navbar and children */}
           {/* Navbar */}
-          <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} sidebarOpen={sidebarOpen} />
+          <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} sidebarOpen={sidebarOpen} isDashboard={isDashboard} />
           
           {/* Page content */}
           <div className="flex-1 pt-16"> {/* Added pt-16 here to push content below the fixed Navbar */}

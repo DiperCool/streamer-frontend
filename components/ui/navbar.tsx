@@ -33,10 +33,11 @@ interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void;
   isMobile: boolean;
   sidebarOpen: boolean;
+  isDashboard: boolean; // Добавлен пропс isDashboard
 }
 
 const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
-    ({ className, onMenuClick, isMobile, sidebarOpen, ...props }, ref) => {
+    ({ className, onMenuClick, isMobile, sidebarOpen, isDashboard, ...props }, ref) => {
       const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0()
       const { data: meData, loading: meLoading } = useGetMeQuery({
         skip: !isAuthenticated,
@@ -55,17 +56,6 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
         });
       };
 
-      // handleBroadcasterChange теперь не нужен, так как логика переключения будет внутри BroadcasterSwitcher
-      // const handleBroadcasterChange = (broadcasterId: string) => {
-      //   const selectedRole = myRoles.find(role => role.broadcasterId === broadcasterId);
-      //   if (selectedRole?.broadcaster) {
-      //     setActiveStreamer({
-      //       id: selectedRole.broadcaster.id,
-      //       userName: selectedRole.broadcaster.userName || "Unknown",
-      //     });
-      //   }
-      // };
-
       return (
           <div
               ref={ref}
@@ -75,8 +65,8 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               )}
               {...props}
           >
+            {/* Left Section: Menu, Logo, and Broadcaster Switcher (if dashboard) */}
             <div className="flex items-center space-x-4">
-              {/* Кнопка меню всегда видна */}
               <Button
                   variant="ghost"
                   size="icon"
@@ -85,26 +75,26 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              {/* Логотип виден только на десктопе */}
               {!isMobile && (
                 <div className="flex items-center space-x-2">
                   <div className="text-xl font-bold text-green-500">STREAMER</div>
                   <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">BETA</span>
                 </div>
               )}
-            </div>
-
-            {/* Broadcaster Switcher вместо Search */}
-            <div className="flex-1 flex justify-center">
-              {!isMobile && isAuthenticated && activeStreamer && meData ? (
+              {/* Broadcaster Switcher for Dashboard */}
+              {!isMobile && isAuthenticated && activeStreamer && meData && isDashboard && (
                 <BroadcasterSwitcher
                   activeStreamer={activeStreamer}
                   setActiveStreamer={setActiveStreamer}
                   myRoles={myRoles}
                   meData={meData.me}
                 />
-              ) : (
-                // Если не аутентифицирован или на мобильном, показываем обычный поиск
+              )}
+            </div>
+
+            {/* Center Section: Search Input (if not dashboard) */}
+            <div className="flex-1 flex justify-center">
+              {!isMobile && !isDashboard && (
                 <div className="relative hidden md:block">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <Input
@@ -115,6 +105,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               )}
             </div>
 
+            {/* Right Section: Auth Buttons / User Dropdown */}
             <div className="flex items-center space-x-4">
               {!isLoading && !isAuthenticated && (
                   <>
