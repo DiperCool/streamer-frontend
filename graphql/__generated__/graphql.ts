@@ -135,6 +135,16 @@ export type CreateMessageResponse = {
   messageId: Scalars['UUID']['output'];
 };
 
+export type CreateRoleInput = {
+  roleType: RoleType;
+  streamerId: Scalars['String']['input'];
+};
+
+export type CreateRoleResponse = {
+  __typename?: 'CreateRoleResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type DateTimeOperationFilterInput = {
   eq?: InputMaybe<Scalars['DateTime']['input']>;
   gt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -200,10 +210,12 @@ export type LongOperationFilterInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createMessage: CreateMessageResponse;
+  createRole: CreateRoleResponse;
   deleteMessage: DeleteMessageResponse;
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
+  removeRole: RemoveRoleResponse;
   unfollow: UnfollowResponse;
   unpinMessage: UnpinMessageResponse;
   updateAvatar: UpdateAvatarResponse;
@@ -219,6 +231,11 @@ export type Mutation = {
 
 export type MutationCreateMessageArgs = {
   request: CreateMessageInput;
+};
+
+
+export type MutationCreateRoleArgs = {
+  input: CreateRoleInput;
 };
 
 
@@ -239,6 +256,11 @@ export type MutationFollowArgs = {
 
 export type MutationPinMessageArgs = {
   pinMessage: PinMessageInput;
+};
+
+
+export type MutationRemoveRoleArgs = {
+  input: RemoveRoleInput;
 };
 
 
@@ -284,6 +306,26 @@ export type MutationUpdateProfileArgs = {
 
 export type MutationUploadArgs = {
   input: UploadFileInput;
+};
+
+/** A connection to a list of items. */
+export type MyRolesConnection = {
+  __typename?: 'MyRolesConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<MyRolesEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<RoleDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type MyRolesEdge = {
+  __typename?: 'MyRolesEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: RoleDto;
 };
 
 /** Information about pagination in a connection. */
@@ -339,7 +381,9 @@ export type Query = {
   currentStream: StreamDto;
   me: StreamerMeDto;
   myEmail: GetEmailResponse;
+  myRoles?: Maybe<MyRolesConnection>;
   profile: ProfileDto;
+  roles?: Maybe<RolesConnection>;
   streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
   streamerInteraction: StreamerInteractionDto;
@@ -377,8 +421,30 @@ export type QueryCurrentStreamArgs = {
 };
 
 
+export type QueryMyRolesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<RoleDtoSortInput>>;
+  where?: InputMaybe<RoleDtoFilterInput>;
+};
+
+
 export type QueryProfileArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryRolesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  broadcasterId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<RoleDtoSortInput>>;
+  roleType: RoleType;
+  where?: InputMaybe<RoleDtoFilterInput>;
 };
 
 
@@ -405,6 +471,73 @@ export type QueryVodsArgs = {
   order?: InputMaybe<Array<VodDtoSortInput>>;
   streamerId: Scalars['String']['input'];
   where?: InputMaybe<VodDtoFilterInput>;
+};
+
+export type RemoveRoleInput = {
+  roleId: Scalars['UUID']['input'];
+};
+
+export type RemoveRoleResponse = {
+  __typename?: 'RemoveRoleResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type RoleDto = {
+  __typename?: 'RoleDto';
+  broadcaster?: Maybe<StreamerDto>;
+  broadcasterId: Scalars['String']['output'];
+  id: Scalars['UUID']['output'];
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+  type: RoleType;
+};
+
+export type RoleDtoFilterInput = {
+  and?: InputMaybe<Array<RoleDtoFilterInput>>;
+  broadcasterId?: InputMaybe<StringOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<RoleDtoFilterInput>>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+  type?: InputMaybe<RoleTypeOperationFilterInput>;
+};
+
+export type RoleDtoSortInput = {
+  broadcasterId?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+  type?: InputMaybe<SortEnumType>;
+};
+
+export enum RoleType {
+  Administrator = 'ADMINISTRATOR',
+  Broadcaster = 'BROADCASTER'
+}
+
+export type RoleTypeOperationFilterInput = {
+  eq?: InputMaybe<RoleType>;
+  in?: InputMaybe<Array<RoleType>>;
+  neq?: InputMaybe<RoleType>;
+  nin?: InputMaybe<Array<RoleType>>;
+};
+
+/** A connection to a list of items. */
+export type RolesConnection = {
+  __typename?: 'RolesConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<RolesEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<RoleDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type RolesEdge = {
+  __typename?: 'RolesEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: RoleDto;
 };
 
 export enum SortEnumType {
@@ -832,6 +965,46 @@ export type GetProfileQueryVariables = Exact<{
 
 
 export type GetProfileQuery = { __typename?: 'Query', profile: { __typename?: 'ProfileDto', streamerId: string, bio?: string | null, channelBanner?: string | null, discord?: string | null, instagram?: string | null, offlineStreamBanner?: string | null, youtube?: string | null, streamer?: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean } | null } };
+
+export type CreateRoleMutationVariables = Exact<{
+  input: CreateRoleInput;
+}>;
+
+
+export type CreateRoleMutation = { __typename?: 'Mutation', createRole: { __typename?: 'CreateRoleResponse', id: string } };
+
+export type RemoveRoleMutationVariables = Exact<{
+  input: RemoveRoleInput;
+}>;
+
+
+export type RemoveRoleMutation = { __typename?: 'Mutation', removeRole: { __typename?: 'RemoveRoleResponse', id: string } };
+
+export type GetMyRolesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<RoleDtoSortInput> | RoleDtoSortInput>;
+  where?: InputMaybe<RoleDtoFilterInput>;
+}>;
+
+
+export type GetMyRolesQuery = { __typename?: 'Query', myRoles?: { __typename?: 'MyRolesConnection', nodes?: Array<{ __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetRolesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  broadcasterId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<RoleDtoSortInput> | RoleDtoSortInput>;
+  roleType: RoleType;
+  where?: InputMaybe<RoleDtoFilterInput>;
+}>;
+
+
+export type GetRolesQuery = { __typename?: 'Query', roles?: { __typename?: 'RolesConnection', nodes?: Array<{ __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type UpdateAvatarMutationVariables = Exact<{
   input: UpdateAvatarInput;
@@ -1773,6 +1946,222 @@ export type GetProfileQueryHookResult = ReturnType<typeof useGetProfileQuery>;
 export type GetProfileLazyQueryHookResult = ReturnType<typeof useGetProfileLazyQuery>;
 export type GetProfileSuspenseQueryHookResult = ReturnType<typeof useGetProfileSuspenseQuery>;
 export type GetProfileQueryResult = Apollo.QueryResult<GetProfileQuery, GetProfileQueryVariables>;
+export const CreateRoleDocument = gql`
+    mutation CreateRole($input: CreateRoleInput!) {
+  createRole(input: $input) {
+    id
+  }
+}
+    `;
+export type CreateRoleMutationFn = Apollo.MutationFunction<CreateRoleMutation, CreateRoleMutationVariables>;
+
+/**
+ * __useCreateRoleMutation__
+ *
+ * To run a mutation, you first call `useCreateRoleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRoleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createRoleMutation, { data, loading, error }] = useCreateRoleMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateRoleMutation(baseOptions?: Apollo.MutationHookOptions<CreateRoleMutation, CreateRoleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateRoleMutation, CreateRoleMutationVariables>(CreateRoleDocument, options);
+      }
+export type CreateRoleMutationHookResult = ReturnType<typeof useCreateRoleMutation>;
+export type CreateRoleMutationResult = Apollo.MutationResult<CreateRoleMutation>;
+export type CreateRoleMutationOptions = Apollo.BaseMutationOptions<CreateRoleMutation, CreateRoleMutationVariables>;
+export const RemoveRoleDocument = gql`
+    mutation RemoveRole($input: RemoveRoleInput!) {
+  removeRole(input: $input) {
+    id
+  }
+}
+    `;
+export type RemoveRoleMutationFn = Apollo.MutationFunction<RemoveRoleMutation, RemoveRoleMutationVariables>;
+
+/**
+ * __useRemoveRoleMutation__
+ *
+ * To run a mutation, you first call `useRemoveRoleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveRoleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeRoleMutation, { data, loading, error }] = useRemoveRoleMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useRemoveRoleMutation(baseOptions?: Apollo.MutationHookOptions<RemoveRoleMutation, RemoveRoleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveRoleMutation, RemoveRoleMutationVariables>(RemoveRoleDocument, options);
+      }
+export type RemoveRoleMutationHookResult = ReturnType<typeof useRemoveRoleMutation>;
+export type RemoveRoleMutationResult = Apollo.MutationResult<RemoveRoleMutation>;
+export type RemoveRoleMutationOptions = Apollo.BaseMutationOptions<RemoveRoleMutation, RemoveRoleMutationVariables>;
+export const GetMyRolesDocument = gql`
+    query GetMyRoles($after: String, $before: String, $first: Int, $last: Int, $order: [RoleDtoSortInput!], $where: RoleDtoFilterInput) {
+  myRoles(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    where: $where
+  ) {
+    nodes {
+      id
+      type
+      streamerId
+      broadcasterId
+      streamer {
+        id
+        userName
+        avatar
+      }
+      broadcaster {
+        id
+        userName
+        avatar
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetMyRolesQuery__
+ *
+ * To run a query within a React component, call `useGetMyRolesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyRolesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetMyRolesQuery(baseOptions?: Apollo.QueryHookOptions<GetMyRolesQuery, GetMyRolesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMyRolesQuery, GetMyRolesQueryVariables>(GetMyRolesDocument, options);
+      }
+export function useGetMyRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyRolesQuery, GetMyRolesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMyRolesQuery, GetMyRolesQueryVariables>(GetMyRolesDocument, options);
+        }
+export function useGetMyRolesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMyRolesQuery, GetMyRolesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetMyRolesQuery, GetMyRolesQueryVariables>(GetMyRolesDocument, options);
+        }
+export type GetMyRolesQueryHookResult = ReturnType<typeof useGetMyRolesQuery>;
+export type GetMyRolesLazyQueryHookResult = ReturnType<typeof useGetMyRolesLazyQuery>;
+export type GetMyRolesSuspenseQueryHookResult = ReturnType<typeof useGetMyRolesSuspenseQuery>;
+export type GetMyRolesQueryResult = Apollo.QueryResult<GetMyRolesQuery, GetMyRolesQueryVariables>;
+export const GetRolesDocument = gql`
+    query GetRoles($after: String, $before: String, $broadcasterId: String!, $first: Int, $last: Int, $order: [RoleDtoSortInput!], $roleType: RoleType!, $where: RoleDtoFilterInput) {
+  roles(
+    after: $after
+    before: $before
+    broadcasterId: $broadcasterId
+    first: $first
+    last: $last
+    order: $order
+    roleType: $roleType
+    where: $where
+  ) {
+    nodes {
+      id
+      type
+      streamerId
+      broadcasterId
+      streamer {
+        id
+        userName
+        avatar
+      }
+      broadcaster {
+        id
+        userName
+        avatar
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetRolesQuery__
+ *
+ * To run a query within a React component, call `useGetRolesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRolesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      broadcasterId: // value for 'broadcasterId'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      roleType: // value for 'roleType'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetRolesQuery(baseOptions: Apollo.QueryHookOptions<GetRolesQuery, GetRolesQueryVariables> & ({ variables: GetRolesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRolesQuery, GetRolesQueryVariables>(GetRolesDocument, options);
+      }
+export function useGetRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRolesQuery, GetRolesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRolesQuery, GetRolesQueryVariables>(GetRolesDocument, options);
+        }
+export function useGetRolesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetRolesQuery, GetRolesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetRolesQuery, GetRolesQueryVariables>(GetRolesDocument, options);
+        }
+export type GetRolesQueryHookResult = ReturnType<typeof useGetRolesQuery>;
+export type GetRolesLazyQueryHookResult = ReturnType<typeof useGetRolesLazyQuery>;
+export type GetRolesSuspenseQueryHookResult = ReturnType<typeof useGetRolesSuspenseQuery>;
+export type GetRolesQueryResult = Apollo.QueryResult<GetRolesQuery, GetRolesQueryVariables>;
 export const UpdateAvatarDocument = gql`
     mutation UpdateAvatar($input: UpdateAvatarInput!) {
   updateAvatar(input: $input) {

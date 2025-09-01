@@ -8,6 +8,7 @@ import { Home, Heart } from "lucide-react" // Keep these for global nav, but Sid
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DashboardProvider } from "@/src/contexts/DashboardContext"; // Import DashboardProvider
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -58,7 +59,9 @@ export function MainLayout({ children }: MainLayoutProps) {
         
         {/* Page content */}
         <div className="flex-1">
-          {children}
+          <DashboardProvider> {/* Wrap children with DashboardProvider */}
+            {children}
+          </DashboardProvider>
         </div>
       </div>
     </div>
