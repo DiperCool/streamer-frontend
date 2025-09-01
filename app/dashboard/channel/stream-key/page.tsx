@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { StreamSettingsForm } from "@/app/settings/stream/StreamSettingsForm" // Original import path
+import { StreamSettingsForm } from "./StreamSettingsForm" // Updated import path
 
 export default function StreamKeySettingsPage() {
   return (
