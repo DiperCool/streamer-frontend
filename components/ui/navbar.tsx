@@ -25,8 +25,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select" // Импортируем компоненты Select
-import { useDashboard } from "@/src/contexts/DashboardContext" // Импортируем useDashboard
+} from "@/components/ui/select"
+import { useDashboard } from "@/src/contexts/DashboardContext"
+import { BroadcasterSwitcher } from "@/src/components/broadcaster-switcher" // Импортируем новый компонент
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void;
@@ -41,7 +42,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
         skip: !isAuthenticated,
       });
       const router = useRouter();
-      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading } = useDashboard(); // Используем DashboardContext
+      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading } = useDashboard();
 
       const userName = meData?.me?.userName;
       const userAvatar = meData?.me?.avatar;
@@ -54,15 +55,16 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
         });
       };
 
-      const handleBroadcasterChange = (broadcasterId: string) => {
-        const selectedRole = myRoles.find(role => role.broadcasterId === broadcasterId);
-        if (selectedRole?.broadcaster) {
-          setActiveStreamer({
-            id: selectedRole.broadcaster.id,
-            userName: selectedRole.broadcaster.userName || "Unknown",
-          });
-        }
-      };
+      // handleBroadcasterChange теперь не нужен, так как логика переключения будет внутри BroadcasterSwitcher
+      // const handleBroadcasterChange = (broadcasterId: string) => {
+      //   const selectedRole = myRoles.find(role => role.broadcasterId === broadcasterId);
+      //   if (selectedRole?.broadcaster) {
+      //     setActiveStreamer({
+      //       id: selectedRole.broadcaster.id,
+      //       userName: selectedRole.broadcaster.userName || "Unknown",
+      //     });
+      //   }
+      // };
 
       return (
           <div
@@ -92,32 +94,18 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
               )}
             </div>
 
-            {/* Broadcaster Select вместо Search */}
+            {/* Broadcaster Switcher вместо Search */}
             <div className="flex-1 flex justify-center">
-              {!isMobile && isAuthenticated ? ( // Показываем только на десктопе, если пользователь аутентифицирован
-                <Select
-                  value={activeStreamer?.id || ""}
-                  onValueChange={handleBroadcasterChange}
-                  disabled={myRolesLoading || !myRoles.length}
-                >
-                  <SelectTrigger className="w-[200px] bg-gray-800 border-gray-700 text-white">
-                    <SelectValue placeholder="Select Broadcaster">
-                      {activeStreamer?.userName || "Select Broadcaster"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                    {myRoles.map((role) => (
-                      role.broadcaster && (
-                        <SelectItem key={role.broadcaster.id} value={role.broadcaster.id}>
-                          {role.broadcaster.userName}
-                        </SelectItem>
-                      )
-                    ))}
-                  </SelectContent>
-                </Select>
+              {!isMobile && isAuthenticated && activeStreamer && meData ? (
+                <BroadcasterSwitcher
+                  activeStreamer={activeStreamer}
+                  setActiveStreamer={setActiveStreamer}
+                  myRoles={myRoles}
+                  meData={meData.me}
+                />
               ) : (
                 // Если не аутентифицирован или на мобильном, показываем обычный поиск
-                <div className="relative hidden md:block"> {/* Скрываем на мобильных */}
+                <div className="relative hidden md:block">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <Input
                       placeholder="Search"
