@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useGetMyRolesQuery, useGetStreamerLazyQuery, RoleDto, SortEnumType } from "@/graphql/__generated__/graphql";
+import { useGetMyRolesQuery, useGetStreamerQuery, useGetMeQuery, RoleDto, SortEnumType } from "@/graphql/__generated__/graphql";
 import { useRouter, usePathname } from "next/navigation";
 
 interface ActiveStreamer {
@@ -22,17 +22,23 @@ interface DashboardContextType {
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth0();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0(); // Только isAuthenticated и authLoading
+  
+  // Получаем данные текущего пользователя через useGetMeQuery
+  const { data: meData, loading: meLoading } = useGetMeQuery({
+    skip: !isAuthenticated,
+  });
+
   const currentAuthUserStreamer: ActiveStreamer | null = useMemo(() => {
-    if (isAuthenticated && user?.sub && user?.nickname) {
+    if (isAuthenticated && meData?.me.id && meData?.me.userName) {
       return {
-        id: user.sub,
-        userName: user.nickname,
-        avatar: user.picture || null,
+        id: meData.me.id,
+        userName: meData.me.userName,
+        avatar: meData.me.avatar || null,
       };
     }
     return null;
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, meData]);
 
   const { data: myRolesData, loading: myRolesLoading, error: myRolesError } = useGetMyRolesQuery({
     skip: !currentAuthUserStreamer?.id,
@@ -44,11 +50,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const router = useRouter();
   const pathname = usePathname();
 
-  const [
-    getStreamerByUrlUsername,
-    { data: urlStreamerData, loading: urlStreamerLoading, error: urlStreamerError }
-  ] = useGetStreamerLazyQuery();
-
   const usernameFromUrl = useMemo(() => {
     const pathSegments = pathname.split('/').filter(Boolean);
     const dashboardIndex = pathSegments.indexOf('dashboard');
@@ -58,29 +59,22 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     return null;
   }, [pathname]);
 
-  useEffect(() => {
-    if (usernameFromUrl && !urlStreamerData && !urlStreamerLoading && !urlStreamerError) {
-      if (currentAuthUserStreamer?.userName === usernameFromUrl) {
-        setActiveStreamerState(currentAuthUserStreamer);
-        return;
-      }
-      const roleForUrlStreamer = myRolesData?.myRoles?.nodes?.find(
-        (role) => role.broadcaster?.userName === usernameFromUrl
-      );
-      if (roleForUrlStreamer?.broadcaster) {
-        setActiveStreamerState({
-          id: roleForUrlStreamer.broadcaster.id,
-          userName: roleForUrlStreamer.broadcaster.userName,
-          avatar: roleForUrlStreamer.broadcaster.avatar,
-        });
-        return;
-      }
-      getStreamerByUrlUsername({ variables: { userName: usernameFromUrl } });
-    }
-  }, [usernameFromUrl, urlStreamerData, urlStreamerLoading, urlStreamerError, getStreamerByUrlUsername, currentAuthUserStreamer, myRolesData]);
+  const myRoles = myRolesData?.myRoles?.nodes || [];
+
+  // Используем useGetStreamerQuery для получения данных стримера из URL
+  const { data: urlStreamerData, loading: urlStreamerLoading, error: urlStreamerError } = useGetStreamerQuery({
+    variables: { userName: usernameFromUrl! },
+    skip: 
+      !usernameFromUrl || 
+      !isAuthenticated || 
+      meLoading || 
+      !currentAuthUserStreamer || 
+      usernameFromUrl === currentAuthUserStreamer.userName || 
+      myRoles.some(role => role.broadcaster?.userName === usernameFromUrl),
+  });
 
   useEffect(() => {
-    if (authLoading || myRolesLoading || urlStreamerLoading) {
+    if (authLoading || meLoading || myRolesLoading || urlStreamerLoading) {
       return;
     }
 
@@ -98,7 +92,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         if (currentAuthUserStreamer.userName === usernameFromUrl) {
           resolvedStreamer = currentAuthUserStreamer;
         } else {
-          const roleForUrlStreamer = myRolesData?.myRoles?.nodes?.find(
+          const roleForUrlStreamer = myRoles.find(
             (role) => role.broadcaster?.userName === usernameFromUrl
           );
           if (roleForUrlStreamer?.broadcaster) {
@@ -125,9 +119,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         setActiveStreamerState(resolvedStreamer);
         const expectedBaseDashboardPath = `/dashboard/${resolvedStreamer.userName}`;
         
-        // Redirect if the current path is exactly '/dashboard' OR
-        // if the current path starts with '/dashboard/' but the username part is incorrect.
-        // This prevents redirecting sub-routes like /dashboard/user/settings
         if (pathname === "/dashboard" || (usernameFromUrl && !pathname.startsWith(expectedBaseDashboardPath))) {
           router.replace(expectedBaseDashboardPath);
         }
@@ -141,7 +132,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [
     isAuthenticated,
     authLoading,
-    myRolesData,
+    meData, // Добавлено в зависимости
+    meLoading, // Добавлено в зависимости
+    myRoles, // Используем myRoles вместо myRolesData?.myRoles?.nodes
     myRolesLoading,
     activeStreamer,
     usernameFromUrl,
@@ -158,9 +151,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     router.push(`/dashboard/${streamer.userName}`);
   };
 
-  const myRoles = myRolesData?.myRoles?.nodes || [];
-
-  if (authLoading || myRolesLoading || urlStreamerLoading) {
+  if (authLoading || meLoading || myRolesLoading || urlStreamerLoading) {
     return null;
   }
 
