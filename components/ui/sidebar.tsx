@@ -3,24 +3,28 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog } from "lucide-react" // Import new icons
+import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation" // Import usePathname
-import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav" // Corrected import path
+import { usePathname } from "next/navigation"
+import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav"
+import { useDashboard } from "@/src/contexts/DashboardContext" // Import useDashboard
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
   sidebarOpen: boolean;
   onCloseClick: () => void;
-  isDashboard?: boolean; // New prop
+  isDashboard?: boolean;
 }
 
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className, isMobile, sidebarOpen, onCloseClick, isDashboard = false, ...props }, ref) => {
-    const pathname = usePathname(); // Use pathname here
+    const pathname = usePathname();
+    const { activeStreamer } = useDashboard(); // Use useDashboard hook
+
+    const dashboardBaseUrl = activeStreamer ? `/dashboard/${activeStreamer.userName}` : "/dashboard";
 
     // Determine if any child of 'Channel' is active
-    const isChannelActive = pathname.startsWith("/dashboard/channel");
+    const isChannelActive = pathname.startsWith(`${dashboardBaseUrl}/channel`);
 
     return (
       <div
@@ -38,48 +42,48 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
           <SidebarNav>
             {isDashboard ? (
               <>
-                <Link href="/dashboard" passHref>
-                  <SidebarNavItem icon={<Home />} active={pathname === "/dashboard"}>
+                <Link href={dashboardBaseUrl} passHref>
+                  <SidebarNavItem icon={<Home />} active={pathname === dashboardBaseUrl}>
                     Dashboard Home
                   </SidebarNavItem>
                 </Link>
-                <Link href="/dashboard/analytics" passHref>
-                  <SidebarNavItem icon={<BarChart2 />} active={pathname === "/dashboard/analytics"}>
+                <Link href={`${dashboardBaseUrl}/analytics`} passHref>
+                  <SidebarNavItem icon={<BarChart2 />} active={pathname === `${dashboardBaseUrl}/analytics`}>
                     Analytics
                   </SidebarNavItem>
                 </Link>
 
                 {/* Collapsible Channel Section */}
                 <CollapsibleSidebarNav title="Channel" icon={<Monitor />} active={isChannelActive}>
-                  <Link href="/dashboard/channel/chat" passHref>
-                    <SidebarNavItem icon={<MessageSquare />} active={pathname === "/dashboard/channel/chat"}>
+                  <Link href={`${dashboardBaseUrl}/channel/chat`} passHref>
+                    <SidebarNavItem icon={<MessageSquare />} active={pathname === `${dashboardBaseUrl}/channel/chat`}>
                       Chat
                     </SidebarNavItem>
                   </Link>
-                  <Link href="/dashboard/channel/roles" passHref>
-                    <SidebarNavItem icon={<UserCog />} active={pathname === "/dashboard/channel/roles"}>
+                  <Link href={`${dashboardBaseUrl}/channel/roles`} passHref>
+                    <SidebarNavItem icon={<UserCog />} active={pathname === `${dashboardBaseUrl}/channel/roles`}>
                       Roles
                     </SidebarNavItem>
                   </Link>
-                  <Link href="/dashboard/channel/community" passHref>
-                    <SidebarNavItem icon={<Users />} active={pathname === "/dashboard/channel/community"}>
+                  <Link href={`${dashboardBaseUrl}/channel/community`} passHref>
+                    <SidebarNavItem icon={<Users />} active={pathname === `${dashboardBaseUrl}/channel/community`}>
                       Community
                     </SidebarNavItem>
                   </Link>
-                  <Link href="/dashboard/channel/stream-key" passHref>
-                    <SidebarNavItem icon={<Key />} active={pathname === "/dashboard/channel/stream-key"}>
+                  <Link href={`${dashboardBaseUrl}/channel/stream-key`} passHref>
+                    <SidebarNavItem icon={<Key />} active={pathname === `${dashboardBaseUrl}/channel/stream-key`}>
                       Stream URL & Key
                     </SidebarNavItem>
                   </Link>
                 </CollapsibleSidebarNav>
 
-                <Link href="/dashboard/content" passHref>
-                  <SidebarNavItem icon={<Video />} active={pathname === "/dashboard/content"}>
+                <Link href={`${dashboardBaseUrl}/content`} passHref>
+                  <SidebarNavItem icon={<Video />} active={pathname === `${dashboardBaseUrl}/content`}>
                     Content
                   </SidebarNavItem>
                 </Link>
-                <Link href="/dashboard/settings" passHref>
-                  <SidebarNavItem icon={<Settings />} active={pathname === "/dashboard/settings"}>
+                <Link href={`${dashboardBaseUrl}/settings`} passHref>
+                  <SidebarNavItem icon={<Settings />} active={pathname === `${dashboardBaseUrl}/settings`}>
                     Dashboard Settings
                   </SidebarNavItem>
                 </Link>
@@ -167,7 +171,7 @@ const SidebarNavItem = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
     icon?: React.ReactNode
     active?: boolean
-    rightIcon?: React.ReactNode // New prop for an icon on the right
+    rightIcon?: React.ReactNode
   }
 >(({ className, icon, active, children, rightIcon, ...props }, ref) => (
   <Button
@@ -175,17 +179,17 @@ const SidebarNavItem = React.forwardRef<
     variant="ghost"
     className={cn(
       "w-full py-2 text-gray-300 hover:bg-gray-800 hover:text-white",
-      rightIcon ? "justify-between" : "justify-start", // Conditionally apply justify-between
+      rightIcon ? "justify-between" : "justify-start",
       active && "bg-gray-800 text-white",
       className
     )}
     {...props}
   >
-    <span className="flex items-center"> {/* Wrap icon and children for consistent spacing */}
+    <span className="flex items-center">
       {icon && <span className="mr-2 h-4 w-4 flex items-center justify-center">{icon}</span>}
       {children}
     </span>
-    {rightIcon} {/* Render rightIcon at the end */}
+    {rightIcon}
   </Button>
 ))
 SidebarNavItem.displayName = "SidebarNavItem"

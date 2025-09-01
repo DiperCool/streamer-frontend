@@ -27,13 +27,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useDashboard } from "@/src/contexts/DashboardContext"
-import { BroadcasterSwitcher } from "@/src/components/broadcaster-switcher" // Импортируем новый компонент
+import { BroadcasterSwitcher } from "@/src/components/broadcaster-switcher"
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void;
   isMobile: boolean;
   sidebarOpen: boolean;
-  isDashboard: boolean; // Добавлен пропс isDashboard
+  isDashboard: boolean;
 }
 
 const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
@@ -43,7 +43,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
         skip: !isAuthenticated,
       });
       const router = useRouter();
-      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading } = useDashboard();
+      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading } = useDashboard(); // Use useDashboard hook
 
       const userName = meData?.me?.userName;
       const userAvatar = meData?.me?.avatar;
@@ -169,7 +169,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                             <DropdownMenuItem onClick={() => router.push(`/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Store className="h-4 w-4 mr-2" /> Channel
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <LayoutDashboard className="h-4 w-4 mr-2" /> Creator Dashboard
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">

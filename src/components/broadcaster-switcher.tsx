@@ -14,12 +14,12 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { getMinioUrl } from "@/utils/utils";
 import { RoleDto, StreamerMeDto } from "@/graphql/__generated__/graphql";
-import { useRouter } from "next/navigation"; // Импортируем useRouter
+import { useRouter } from "next/navigation";
 
 interface ActiveStreamer {
   id: string;
   userName: string;
-  avatar?: string | null; // Обновлено для согласованности
+  avatar?: string | null;
 }
 
 interface BroadcasterSwitcherProps {
@@ -36,13 +36,13 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
   meData,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter(); // Инициализируем useRouter
+  const router = useRouter();
 
   const currentStreamerRole = React.useMemo(() => {
     if (!activeStreamer || !meData) return null;
 
     if (activeStreamer.id === meData.id) {
-      return "Broadcaster"; // Current user is the broadcaster of their own channel
+      return "Broadcaster";
     }
 
     const role = myRoles.find(
@@ -82,7 +82,7 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
   }, [meData, myRoles]);
 
   if (!activeStreamer || !meData) {
-    return null; // Or a loading spinner/placeholder
+    return null;
   }
 
   const avatarImage = activeStreamer.avatar || meData.avatar || "/placeholder-user.jpg";
@@ -121,24 +121,23 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
                 <DropdownMenuItem
                     key={channel.id}
                     onClick={() => {
-                        if (!isActive) { // Only switch if not already active
+                        if (!isActive) {
                             setActiveStreamer({
                                 id: channel.id,
                                 userName: channel.userName,
                                 avatar: channel.avatar,
                             });
                             setIsOpen(false);
-                            // Перенаправляем на базовый маршрут дашборда после смены активного стримера
-                            router.push(`/dashboard`); 
+                            router.push(`/dashboard/${channel.userName}`); // Navigate to the new streamer's dashboard
                         }
                     }}
                     className={cn(
                         "flex items-center space-x-2 px-2 py-1.5 cursor-pointer",
                         isActive
-                            ? "bg-gray-700 text-white cursor-default" // Active style
-                            : "hover:bg-green-600 hover:text-white" // Inactive style
+                            ? "bg-gray-700 text-white cursor-default"
+                            : "hover:bg-green-600 hover:text-white"
                     )}
-                    disabled={isActive} // Disable interaction for the active item
+                    disabled={isActive}
                 >
                     <Avatar className="w-6 h-6">
                         <AvatarImage src={getMinioUrl(channel.avatar!)} alt="Channel Avatar" />
