@@ -4,11 +4,11 @@ import React, { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarHeader, SidebarContent, SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
 import { Navbar } from "@/components/ui/navbar"
-import { Home, Heart } from "lucide-react" // Keep these for global nav, but Sidebar will handle its own icons
+import { Home, Heart } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DashboardProvider } from "@/src/contexts/DashboardContext"; // Import DashboardProvider
+import { DashboardProvider } from "@/src/contexts/DashboardContext";
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -50,19 +50,19 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main content */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen pt-16",
+        "flex-1 flex flex-col min-h-screen", // Removed pt-16 from here
         "transition-all duration-200 ease-in-out",
         sidebarOpen ? "lg:ml-64" : "lg:ml-0"
       )}>
-        {/* Navbar */}
-        <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} sidebarOpen={sidebarOpen} />
-        
-        {/* Page content */}
-        <div className="flex-1">
-          <DashboardProvider> {/* Wrap children with DashboardProvider */}
+        <DashboardProvider> {/* DashboardProvider now wraps Navbar and children */}
+          {/* Navbar */}
+          <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} sidebarOpen={sidebarOpen} />
+          
+          {/* Page content */}
+          <div className="flex-1 pt-16"> {/* Added pt-16 here to push content below the fixed Navbar */}
             {children}
-          </DashboardProvider>
-        </div>
+          </div>
+        </DashboardProvider>
       </div>
     </div>
   )
