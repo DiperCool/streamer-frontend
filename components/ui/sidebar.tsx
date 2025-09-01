@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog } from "lucide-react" // Import new icons
 import Link from "next/link"
 import { usePathname } from "next/navigation" // Import usePathname
-import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav" // Import new component
+import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav" // Corrected import path
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
