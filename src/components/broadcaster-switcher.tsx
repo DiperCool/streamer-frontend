@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { getMinioUrl } from "@/utils/utils";
-import { RoleDto, StreamerMeDto } from "@/graphql/__generated__/graphql";
+import { RoleDto } from "@/graphql/__generated__/graphql"; // Removed StreamerMeDto
 import { useRouter } from "next/navigation";
+import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDashboard
 
 interface ActiveStreamer {
   id: string;
@@ -26,40 +27,41 @@ interface BroadcasterSwitcherProps {
   activeStreamer: ActiveStreamer | null;
   setActiveStreamer: (streamer: ActiveStreamer) => void;
   myRoles: RoleDto[];
-  meData: StreamerMeDto | undefined;
+  // meData: StreamerMeDto | undefined; // Removed meData prop
 }
 
 export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
   activeStreamer,
   setActiveStreamer,
   myRoles,
-  meData,
+  // meData, // Removed meData from props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const { currentAuthUserStreamer } = useDashboard(); // Get currentAuthUserStreamer from context
 
   const currentStreamerRole = React.useMemo(() => {
-    if (!activeStreamer || !meData) return null;
+    if (!activeStreamer || !currentAuthUserStreamer) return null;
 
-    if (activeStreamer.id === meData.id) {
+    if (activeStreamer.id === currentAuthUserStreamer.id) {
       return "Broadcaster";
     }
 
     const role = myRoles.find(
-      (r) => r.broadcasterId === activeStreamer.id && r.streamerId === meData.id
+      (r) => r.broadcasterId === activeStreamer.id && r.streamerId === currentAuthUserStreamer.id
     );
     return role ? role.type : null;
-  }, [activeStreamer, myRoles, meData]);
+  }, [activeStreamer, myRoles, currentAuthUserStreamer]);
 
   const allAvailableChannels = React.useMemo(() => {
     const channels: Array<{ id: string; userName: string; avatar?: string | null; roleType?: string }> = [];
 
     // Add current user's own channel
-    if (meData) {
+    if (currentAuthUserStreamer) {
         channels.push({
-            id: meData.id,
-            userName: meData.userName || "my-channel",
-            avatar: meData.avatar,
+            id: currentAuthUserStreamer.id,
+            userName: currentAuthUserStreamer.userName || "my-channel",
+            avatar: currentAuthUserStreamer.avatar,
             roleType: "Broadcaster",
         });
     }
@@ -79,13 +81,13 @@ export const BroadcasterSwitcher: React.FC<BroadcasterSwitcherProps> = ({
     // Filter out duplicates if a user is a broadcaster of their own channel AND has a role for it
     const uniqueChannels = Array.from(new Map(channels.map(item => [item.id, item])).values());
     return uniqueChannels;
-  }, [meData, myRoles]);
+  }, [currentAuthUserStreamer, myRoles]);
 
-  if (!activeStreamer || !meData) {
+  if (!activeStreamer || !currentAuthUserStreamer) {
     return null;
   }
 
-  const avatarImage = activeStreamer.avatar || meData.avatar || "/placeholder-user.jpg";
+  const avatarImage = activeStreamer.avatar || currentAuthUserStreamer.avatar || "/placeholder-user.jpg";
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>

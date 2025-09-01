@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Menu, Search, Sparkles, Store, Settings, LogOut, LayoutDashboard } from "lucide-react"
 import { useAuth0 } from "@auth0/auth0-react"
-import { useGetMeQuery } from "@/graphql/__generated__/graphql"
+import { useGetMeQuery } from "@/graphql/__generated__/graphql" // Keep useGetMeQuery for user dropdown info
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,11 +39,13 @@ interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
     ({ className, onMenuClick, isMobile, sidebarOpen, isDashboard, ...props }, ref) => {
       const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0()
+      // Keep useGetMeQuery here for the user dropdown's specific 'me' data (finishedAuth, etc.)
+      // DashboardContext now handles the active streamer for dashboard navigation.
       const { data: meData, loading: meLoading } = useGetMeQuery({
         skip: !isAuthenticated,
       });
       const router = useRouter();
-      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading } = useDashboard(); // Use useDashboard hook
+      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading, currentAuthUserStreamer } = useDashboard(); // Use useDashboard hook
 
       const userName = meData?.me?.userName;
       const userAvatar = meData?.me?.avatar;
@@ -82,12 +84,12 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                 </div>
               )}
               {/* Broadcaster Switcher for Dashboard */}
-              {!isMobile && isAuthenticated && activeStreamer && meData && isDashboard && (
+              {!isMobile && isAuthenticated && activeStreamer && currentAuthUserStreamer && isDashboard && (
                 <BroadcasterSwitcher
                   activeStreamer={activeStreamer}
                   setActiveStreamer={setActiveStreamer}
                   myRoles={myRoles}
-                  meData={meData.me}
+                  // meData={meData.me} // Removed meData prop
                 />
               )}
             </div>
@@ -169,7 +171,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                             <DropdownMenuItem onClick={() => router.push(`/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Store className="h-4 w-4 mr-2" /> Channel
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/${currentAuthUserStreamer?.userName || userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <LayoutDashboard className="h-4 w-4 mr-2" /> Creator Dashboard
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
