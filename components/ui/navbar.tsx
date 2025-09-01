@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Menu, Search, Sparkles, Store, Settings, LogOut } from "lucide-react"
+import { Menu, Search, Sparkles, Store, Settings, LogOut, LayoutDashboard } from "lucide-react" // Import LayoutDashboard
 import { useAuth0 } from "@auth0/auth0-react"
 import { useGetMeQuery } from "@/graphql/__generated__/graphql"
 import {
@@ -49,7 +49,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
           <div
               ref={ref}
               className={cn(
-                  "fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-gray-800 bg-gray-900 px-6", // z-index Navbar теперь 40
+                  "fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-gray-800 bg-gray-900 px-6",
                   className
               )}
               {...props}
@@ -145,6 +145,9 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                             )}
                             <DropdownMenuItem onClick={() => router.push(`/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Store className="h-4 w-4 mr-2" /> Channel
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                              <LayoutDashboard className="h-4 w-4 mr-2" /> Creator Dashboard
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                               <Sparkles className="h-4 w-4 mr-2" /> Subscriptions

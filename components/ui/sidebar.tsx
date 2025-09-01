@@ -3,49 +3,92 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu } from "lucide-react" 
-import Link from "next/link" 
+import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings } from "lucide-react" // Import new icons
+import Link from "next/link"
+import { usePathname } from "next/navigation" // Import usePathname
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
   sidebarOpen: boolean;
-  onCloseClick: () => void; 
+  onCloseClick: () => void;
+  isDashboard?: boolean; // New prop
 }
 
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
-  ({ className, isMobile, sidebarOpen, onCloseClick, ...props }, ref) => ( 
-    <div
-      ref={ref}
-      className={cn(
-        "flex h-full w-64 flex-col bg-gray-900 border-r border-gray-800",
-        className
-      )}
-      {...props}
-    >
-      <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen} onCloseClick={onCloseClick}> 
-        {/* The content of SidebarHeader will now be identical to Navbar's left section */}
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarNav>
-          <Link href="/" passHref>
-            <SidebarNavItem icon={<Home />} active={false}>
-              Home
-            </SidebarNavItem>
-          </Link>
-          <SidebarNavItem icon={<Heart />}>
-            Following
-          </SidebarNavItem>
-        </SidebarNav>
-      </SidebarContent>
-    </div>
-  )
+  ({ className, isMobile, sidebarOpen, onCloseClick, isDashboard = false, ...props }, ref) => {
+    const pathname = usePathname(); // Use pathname here
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "flex h-full w-64 flex-col bg-gray-900 border-r border-gray-800",
+          className
+        )}
+        {...props}
+      >
+        <SidebarHeader isMobile={isMobile} sidebarOpen={sidebarOpen} onCloseClick={onCloseClick}>
+          {/* The content of SidebarHeader will now be identical to Navbar's left section */}
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarNav>
+            {isDashboard ? (
+              <>
+                <Link href="/dashboard" passHref>
+                  <SidebarNavItem icon={<Home />} active={pathname === "/dashboard"}>
+                    Dashboard Home
+                  </SidebarNavItem>
+                </Link>
+                <Link href="/dashboard/analytics" passHref>
+                  <SidebarNavItem icon={<BarChart2 />} active={pathname === "/dashboard/analytics"}>
+                    Analytics
+                  </SidebarNavItem>
+                </Link>
+                <Link href="/dashboard/stream-manager" passHref>
+                  <SidebarNavItem icon={<Monitor />} active={pathname === "/dashboard/stream-manager"}>
+                    Stream Manager
+                  </SidebarNavItem>
+                </Link>
+                <Link href="/dashboard/content" passHref>
+                  <SidebarNavItem icon={<Video />} active={pathname === "/dashboard/content"}>
+                    Content
+                  </SidebarNavItem>
+                </Link>
+                <Link href="/dashboard/community" passHref>
+                  <SidebarNavItem icon={<Users />} active={pathname === "/dashboard/community"}>
+                    Community
+                  </SidebarNavItem>
+                </Link>
+                <Link href="/dashboard/settings" passHref>
+                  <SidebarNavItem icon={<Settings />} active={pathname === "/dashboard/settings"}>
+                    Settings
+                  </SidebarNavItem>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/" passHref>
+                  <SidebarNavItem icon={<Home />} active={pathname === "/"}>
+                    Home
+                  </SidebarNavItem>
+                </Link>
+                <SidebarNavItem icon={<Heart />} active={pathname === "/following"}> {/* Assuming a /following route */}
+                  Following
+                </SidebarNavItem>
+              </>
+            )}
+          </SidebarNav>
+        </SidebarContent>
+      </div>
+    );
+  }
 )
 Sidebar.displayName = "Sidebar"
 
 interface SidebarHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
   sidebarOpen: boolean;
-  onCloseClick?: () => void; 
+  onCloseClick?: () => void;
 }
 
 const SidebarHeader = React.forwardRef<
@@ -54,14 +97,14 @@ const SidebarHeader = React.forwardRef<
 >(({ className, isMobile, sidebarOpen, onCloseClick, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex h-16 items-center px-6", className)} 
+    className={cn("flex h-16 items-center px-6", className)}
     {...props}
   >
-    <div className="flex items-center space-x-4"> 
+    <div className="flex items-center space-x-4">
       <Button
         variant="ghost"
         size="icon"
-        onClick={onCloseClick} 
+        onClick={onCloseClick}
         className="text-gray-300 hover:text-white"
       >
         <Menu className="h-5 w-5" />
