@@ -15,3 +15,11 @@ export const REMOVE_ROLE = gql`
         }
     }
 `
+
+export const EDIT_ROLE = gql`
+    mutation EditRole($input: EditRoleInput!) {
+        editRole(input: $input) {
+            id
+        }
+    }
+`

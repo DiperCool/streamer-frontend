@@ -86,6 +86,10 @@ type DeleteMessageResponse {
     id: UUID!
 }
 
+type EditRoleResponse {
+    id: UUID!
+}
+
 type FinishAuthResponse {
     id: String!
 }
@@ -102,6 +106,7 @@ type Mutation {
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
+    editRole(input: EditRoleInput!): EditRoleResponse!
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
@@ -514,6 +519,11 @@ input DateTimeOperationFilterInput {
 
 input DeleteMessageInput {
     messageId: UUID!
+}
+
+input EditRoleInput {
+    permissions: PermissionsFlagsInput!
+    roleId: UUID!
 }
 
 input FinishAuthInput {
