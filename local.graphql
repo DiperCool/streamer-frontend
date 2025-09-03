@@ -237,6 +237,19 @@ type Query {
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
     streamerInteraction(streamerId: String!): StreamerInteractionDto!
+    streamers(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [StreamerDtoSortInput!],
+        search: String,
+        where: StreamerDtoFilterInput
+    ): StreamersConnection
     vod(vodId: UUID!): VodDto!
     vods(
         "Returns the elements in the list that come after the specified cursor."
@@ -331,6 +344,24 @@ type StreamerMeDto {
     id: String!
     isLive: Boolean!
     userName: String
+}
+
+"A connection to a list of items."
+type StreamersConnection {
+    "A list of edges."
+    edges: [StreamersEdge!]
+    "A flattened list of the nodes."
+    nodes: [StreamerDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type StreamersEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: StreamerDto!
 }
 
 type Subscription {
@@ -596,6 +627,24 @@ input RoleTypeOperationFilterInput {
     in: [RoleType!]
     neq: RoleType
     nin: [RoleType!]
+}
+
+input StreamerDtoFilterInput {
+    and: [StreamerDtoFilterInput!]
+    avatar: StringOperationFilterInput
+    followers: LongOperationFilterInput
+    id: StringOperationFilterInput
+    isLive: BooleanOperationFilterInput
+    or: [StreamerDtoFilterInput!]
+    userName: StringOperationFilterInput
+}
+
+input StreamerDtoSortInput {
+    avatar: SortEnumType
+    followers: SortEnumType
+    id: SortEnumType
+    isLive: SortEnumType
+    userName: SortEnumType
 }
 
 input StringOperationFilterInput {
