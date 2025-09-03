@@ -188,9 +188,9 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent key="create-role-dialog" className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="create-role-dialog-title">
+      <DialogContent key="create-role-dialog" className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
-          <DialogTitle id="create-role-dialog-title" className="text-white">Create New Role</DialogTitle>
+          <DialogTitle className="text-white">Create New Role</DialogTitle>
           <DialogDescription className="text-gray-400">
             Assign a new role to a streamer for this channel.
           </DialogDescription>
@@ -420,9 +420,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent key={roleId} className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
+      <DialogContent key={roleId} className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
-          <DialogTitle id="edit-role-dialog-title" className="text-white">
+          <DialogTitle className="text-white">
             {roleLoading ? "Loading Role..." : roleError ? "Error Loading Role" : `Edit Role for ${roleData?.role?.streamer?.userName || "..."}`}
           </DialogTitle>
           <DialogDescription className="text-gray-400">
