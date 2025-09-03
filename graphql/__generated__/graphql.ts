@@ -426,6 +426,7 @@ export type Query = {
   myRole: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
   profile: ProfileDto;
+  role: RoleDto;
   roles?: Maybe<RolesConnection>;
   streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
@@ -481,6 +482,11 @@ export type QueryMyRolesArgs = {
 
 export type QueryProfileArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryRoleArgs = {
+  id: Scalars['UUID']['input'];
 };
 
 
@@ -1062,7 +1068,7 @@ export type GetRolesQueryVariables = Exact<{
 }>;
 
 
-export type GetRolesQuery = { __typename?: 'Query', roles?: { __typename?: 'RolesConnection', nodes?: Array<{ __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetRolesQuery = { __typename?: 'Query', roles?: { __typename?: 'RolesConnection', nodes?: Array<{ __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetMyRoleQueryVariables = Exact<{
   broadcasterId: Scalars['String']['input'];
@@ -1070,6 +1076,13 @@ export type GetMyRoleQueryVariables = Exact<{
 
 
 export type GetMyRoleQuery = { __typename?: 'Query', myRole: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+
+export type GetRoleByIdQueryVariables = Exact<{
+  roleId: Scalars['UUID']['input'];
+}>;
+
+
+export type GetRoleByIdQuery = { __typename?: 'Query', role: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 export type UpdateAvatarMutationVariables = Exact<{
   input: UpdateAvatarInput;
@@ -2200,13 +2213,6 @@ export const GetRolesDocument = gql`
       type
       streamerId
       broadcasterId
-      permissions {
-        isAll
-        isChat
-        isNone
-        isRoles
-        isStream
-      }
       streamer {
         id
         userName
@@ -2327,6 +2333,66 @@ export type GetMyRoleQueryHookResult = ReturnType<typeof useGetMyRoleQuery>;
 export type GetMyRoleLazyQueryHookResult = ReturnType<typeof useGetMyRoleLazyQuery>;
 export type GetMyRoleSuspenseQueryHookResult = ReturnType<typeof useGetMyRoleSuspenseQuery>;
 export type GetMyRoleQueryResult = Apollo.QueryResult<GetMyRoleQuery, GetMyRoleQueryVariables>;
+export const GetRoleByIdDocument = gql`
+    query GetRoleById($roleId: UUID!) {
+  role(id: $roleId) {
+    id
+    type
+    streamerId
+    broadcasterId
+    permissions {
+      isAll
+      isChat
+      isNone
+      isRoles
+      isStream
+    }
+    streamer {
+      id
+      userName
+      avatar
+    }
+    broadcaster {
+      id
+      userName
+      avatar
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetRoleByIdQuery__
+ *
+ * To run a query within a React component, call `useGetRoleByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRoleByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRoleByIdQuery({
+ *   variables: {
+ *      roleId: // value for 'roleId'
+ *   },
+ * });
+ */
+export function useGetRoleByIdQuery(baseOptions: Apollo.QueryHookOptions<GetRoleByIdQuery, GetRoleByIdQueryVariables> & ({ variables: GetRoleByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoleByIdQuery, GetRoleByIdQueryVariables>(GetRoleByIdDocument, options);
+      }
+export function useGetRoleByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoleByIdQuery, GetRoleByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoleByIdQuery, GetRoleByIdQueryVariables>(GetRoleByIdDocument, options);
+        }
+export function useGetRoleByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetRoleByIdQuery, GetRoleByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetRoleByIdQuery, GetRoleByIdQueryVariables>(GetRoleByIdDocument, options);
+        }
+export type GetRoleByIdQueryHookResult = ReturnType<typeof useGetRoleByIdQuery>;
+export type GetRoleByIdLazyQueryHookResult = ReturnType<typeof useGetRoleByIdLazyQuery>;
+export type GetRoleByIdSuspenseQueryHookResult = ReturnType<typeof useGetRoleByIdSuspenseQuery>;
+export type GetRoleByIdQueryResult = Apollo.QueryResult<GetRoleByIdQuery, GetRoleByIdQueryVariables>;
 export const UpdateAvatarDocument = gql`
     mutation UpdateAvatar($input: UpdateAvatarInput!) {
   updateAvatar(input: $input) {

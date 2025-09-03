@@ -93,6 +93,7 @@ export const GET_ROLES = gql`
                 hasPreviousPage
                 startCursor
             }
+            
         }
     }
 `
@@ -127,7 +128,7 @@ export const GET_MY_ROLE = gql`
 
 export const GET_ROLE_BY_ID = gql`
     query GetRoleById($roleId: UUID!) {
-        role(roleId: $roleId) {
+        role(id: $roleId) {
             id
             type
             streamerId
