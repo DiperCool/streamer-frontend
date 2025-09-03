@@ -136,6 +136,8 @@ export type CreateMessageResponse = {
 };
 
 export type CreateRoleInput = {
+  broadcasterId: Scalars['String']['input'];
+  permissions: PermissionsFlagsInput;
   roleType: RoleType;
   streamerId: Scalars['String']['input'];
 };
@@ -341,6 +343,30 @@ export type PageInfo = {
   startCursor?: Maybe<Scalars['String']['output']>;
 };
 
+export type PermissionsFlags = {
+  __typename?: 'PermissionsFlags';
+  isAll: Scalars['Boolean']['output'];
+  isChat: Scalars['Boolean']['output'];
+  isNone: Scalars['Boolean']['output'];
+  isRoles: Scalars['Boolean']['output'];
+  isStream: Scalars['Boolean']['output'];
+};
+
+export type PermissionsFlagsInput = {
+  isAll?: InputMaybe<Scalars['Boolean']['input']>;
+  isChat?: InputMaybe<Scalars['Boolean']['input']>;
+  isNone?: InputMaybe<Scalars['Boolean']['input']>;
+  isRoles?: InputMaybe<Scalars['Boolean']['input']>;
+  isStream?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type PermissionsOperationFilterInput = {
+  eq?: InputMaybe<PermissionsFlagsInput>;
+  in?: InputMaybe<Array<PermissionsFlagsInput>>;
+  neq?: InputMaybe<PermissionsFlagsInput>;
+  nin?: InputMaybe<Array<PermissionsFlagsInput>>;
+};
+
 export type PinMessageInput = {
   messageId: Scalars['UUID']['input'];
 };
@@ -381,6 +407,7 @@ export type Query = {
   currentStream: StreamDto;
   me: StreamerMeDto;
   myEmail: GetEmailResponse;
+  myRoleASync: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
   profile: ProfileDto;
   roles?: Maybe<RolesConnection>;
@@ -418,6 +445,11 @@ export type QueryChatMessagesHistoryArgs = {
 
 export type QueryCurrentStreamArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryMyRoleASyncArgs = {
+  broadcasterId: Scalars['String']['input'];
 };
 
 
@@ -487,6 +519,7 @@ export type RoleDto = {
   broadcaster?: Maybe<StreamerDto>;
   broadcasterId: Scalars['String']['output'];
   id: Scalars['UUID']['output'];
+  permissions: PermissionsFlags;
   streamer?: Maybe<StreamerDto>;
   streamerId: Scalars['String']['output'];
   type: RoleType;
@@ -497,6 +530,7 @@ export type RoleDtoFilterInput = {
   broadcasterId?: InputMaybe<StringOperationFilterInput>;
   id?: InputMaybe<UuidOperationFilterInput>;
   or?: InputMaybe<Array<RoleDtoFilterInput>>;
+  permissions?: InputMaybe<PermissionsOperationFilterInput>;
   streamerId?: InputMaybe<StringOperationFilterInput>;
   type?: InputMaybe<RoleTypeOperationFilterInput>;
 };
@@ -504,6 +538,7 @@ export type RoleDtoFilterInput = {
 export type RoleDtoSortInput = {
   broadcasterId?: InputMaybe<SortEnumType>;
   id?: InputMaybe<SortEnumType>;
+  permissions?: InputMaybe<SortEnumType>;
   streamerId?: InputMaybe<SortEnumType>;
   type?: InputMaybe<SortEnumType>;
 };

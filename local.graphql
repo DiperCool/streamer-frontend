@@ -148,6 +148,14 @@ type PageInfo {
     startCursor: String
 }
 
+type PermissionsFlags {
+    isAll: Boolean!
+    isChat: Boolean!
+    isNone: Boolean!
+    isRoles: Boolean!
+    isStream: Boolean!
+}
+
 type PinMessageResponse {
     id: UUID!
 }
@@ -192,6 +200,7 @@ type Query {
     currentStream(streamerId: String!): StreamDto!
     me: StreamerMeDto!
     myEmail: GetEmailResponse!
+    myRole(broadcasterId: String!): RoleDto! # Updated query name
     myRoles(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -246,6 +255,7 @@ type RoleDto {
     broadcaster: StreamerDto
     broadcasterId: String!
     id: UUID!
+    permissions: PermissionsFlags!
     streamer: StreamerDto
     streamerId: String!
     type: RoleType!
@@ -481,6 +491,8 @@ input CreateMessageInput {
 }
 
 input CreateRoleInput {
+    broadcasterId: String!
+    permissions: PermissionsFlagsInput!
     roleType: RoleType!
     streamerId: String!
 }
@@ -527,6 +539,21 @@ input LongOperationFilterInput {
     nlte: Long
 }
 
+input PermissionsFlagsInput {
+    isAll: Boolean
+    isChat: Boolean
+    isNone: Boolean
+    isRoles: Boolean
+    isStream: Boolean
+}
+
+input PermissionsOperationFilterInput {
+    eq: PermissionsFlagsInput
+    in: [PermissionsFlagsInput!]
+    neq: PermissionsFlagsInput
+    nin: [PermissionsFlagsInput!]
+}
+
 input PinMessageInput {
     messageId: UUID!
 }
@@ -540,6 +567,7 @@ input RoleDtoFilterInput {
     broadcasterId: StringOperationFilterInput
     id: UuidOperationFilterInput
     or: [RoleDtoFilterInput!]
+    permissions: PermissionsOperationFilterInput
     streamerId: StringOperationFilterInput
     type: RoleTypeOperationFilterInput
 }
@@ -547,6 +575,7 @@ input RoleDtoFilterInput {
 input RoleDtoSortInput {
     broadcasterId: SortEnumType
     id: SortEnumType
+    permissions: SortEnumType
     streamerId: SortEnumType
     type: SortEnumType
 }
