@@ -88,6 +88,7 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
 
   const handleSelectStreamer = (streamerId: string, userName: string, avatar: string | null) => {
     setSearchTerm(userName); // Update internal search term to match selected name
+    // CORRECTED: Pass userName as the first argument and streamerId as the second
     onValueChange(userName, streamerId); // Notify parent of new selection
     setSelectedStreamerAvatar(avatar); // Update internal avatar state
     setOpen(false); // Close popover
