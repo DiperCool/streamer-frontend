@@ -69,7 +69,8 @@ import { toast } from "sonner"; // Import toast from sonner
 // --- Zod Schemas ---
 const createRoleSchema = z.object({
   streamerUserName: z.string().min(1, "Streamer username is required"),
-  streamerId: z.string().uuid("Invalid streamer ID").nullable().refine(val => val !== null, {
+  // ИЗМЕНЕНИЕ: streamerId теперь валидируется как обычная строка, а не UUID
+  streamerId: z.string().min(1, "Streamer ID is required").nullable().refine(val => val !== null, {
     message: "Please select a streamer from the list",
   }),
   roleType: z.nativeEnum(RoleType, {
@@ -470,7 +471,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                 <div className="flex items-center justify-between">
                   <Label htmlFor="editIsStream" className="text-gray-300">Stream Management</Label>
                   <Switch
-                    id="isStream"
+                    id="editIsStream"
                     checked={watch("isStream")}
                     onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
