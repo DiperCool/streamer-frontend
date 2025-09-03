@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface StreamerSelectInputProps {
-  value: string; // Displayed username
+  value: string; // Displayed username (selected by parent)
   onValueChange: (username: string, streamerId: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -29,12 +29,15 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
   className,
   error,
 }) => {
-  const [searchTerm, setSearchTerm] = useState(value);
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const [searchTerm, setSearchTerm] = useState(value); // What's currently in the search input
   const [open, setOpen] = useState(false);
-  const [selectedStreamerAvatar, setSelectedStreamerAvatar] = useState<string | null>(null); // New state for avatar
+  const [selectedStreamerAvatar, setSelectedStreamerAvatar] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Debounce the search term for the GraphQL query
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  // Fetch streamers based on the debounced search term
   const { data, loading, error: queryError } = useGetStreamersQuery({
     variables: {
       search: debouncedSearchTerm,
@@ -42,23 +45,22 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
     },
     skip: !debouncedSearchTerm,
   });
-
   const streamers = data?.streamers?.nodes || [];
 
-  // Update internal searchTerm and avatar when external value changes
+  // Effect to synchronize the *displayed value in the trigger button* and its avatar
+  // This runs when the `value` prop from the parent changes, or when `streamers` data changes.
   useEffect(() => {
-    setSearchTerm(value);
-    // If value is cleared, clear the avatar too
-    if (!value) {
-      setSelectedStreamerAvatar(null);
-    } else {
-      // Attempt to find the avatar for the current value if it's already set
+    // Only update internal state from `value` prop if popover is closed
+    // or if `value` is explicitly cleared by the parent.
+    if (!open && value !== searchTerm) {
+      setSearchTerm(value);
       const foundStreamer = streamers.find(s => s.userName === value);
-      if (foundStreamer) {
-        setSelectedStreamerAvatar(foundStreamer.avatar || null);
-      }
+      setSelectedStreamerAvatar(foundStreamer?.avatar || null);
+    } else if (!value) { // If parent explicitly clears value, ensure internal states are cleared
+        setSearchTerm("");
+        setSelectedStreamerAvatar(null);
     }
-  }, [value, streamers]); // Added streamers to dependency array to update avatar if data loads later
+  }, [value, open, searchTerm, streamers]);
 
   // Focus the input when the popover opens
   useEffect(() => {
@@ -73,17 +75,30 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
     setSearchTerm(newSearchTerm);
+
+    // When user types, if the input is different from the currently selected value,
+    // immediately clear the parent's selected value. This prevents the `useEffect`
+    // from resetting `searchTerm` back to the old `value` prop.
+    if (value !== "" && newSearchTerm !== value) {
+        onValueChange("", null); // Clear parent's selected value
+        setSelectedStreamerAvatar(null); // Clear avatar in trigger
+    }
+    // If input is completely cleared, ensure parent's value is also cleared
     if (!newSearchTerm) {
-      onValueChange("", null);
-      setSelectedStreamerAvatar(null); // Clear avatar when input is cleared
+        onValueChange("", null);
+        setSelectedStreamerAvatar(null);
     }
   };
 
   const handleSelectStreamer = (streamerId: string, userName: string, avatar: string | null) => {
-    onValueChange(userName, streamerId);
-    setSelectedStreamerAvatar(avatar); // Set avatar when streamer is selected
-    setOpen(false);
+    setSearchTerm(userName); // Update internal search term to match selected name
+    onValueChange(userName, streamerId); // Notify parent of new selection
+    setSelectedStreamerAvatar(avatar); // Update internal avatar state
+    setOpen(false); // Close popover
   };
+
+  // The text to display in the trigger button
+  const displayValue = value || placeholder;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -100,7 +115,7 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
           disabled={disabled}
         >
           <div className="flex items-center space-x-2">
-            {selectedStreamerAvatar ? (
+            {selectedStreamerAvatar && value ? ( // Only show avatar if a value is actually selected
               <Avatar className="w-6 h-6">
                 <AvatarImage src={getMinioUrl(selectedStreamerAvatar)} alt={value || "Streamer"} />
                 <AvatarFallback className="bg-green-600 text-white text-xs">
@@ -111,7 +126,7 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
               <Search className="h-4 w-4 text-gray-400" />
             )}
             <span className="truncate">
-              {value || placeholder}
+              {displayValue}
             </span>
           </div>
           {open ? <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" /> : <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
@@ -125,7 +140,7 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
               ref={inputRef}
               placeholder={placeholder}
               className="w-full bg-gray-700 border-gray-600 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
-              value={searchTerm}
+              value={searchTerm} // This is the user's current input
               onChange={handleSearchInputChange}
             />
           </div>
