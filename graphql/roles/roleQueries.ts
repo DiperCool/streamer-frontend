@@ -69,13 +69,6 @@ export const GET_ROLES = gql`
                 type
                 streamerId
                 broadcasterId
-                permissions {
-                    isAll
-                    isChat
-                    isNone
-                    isRoles
-                    isStream
-                }
                 streamer {
                     id
                     userName

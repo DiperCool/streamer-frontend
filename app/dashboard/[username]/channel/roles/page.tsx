@@ -49,7 +49,7 @@ import {
     useCreateRoleMutation,
     useRemoveRoleMutation,
     useEditRoleMutation,
-    PermissionsFlagsInput, SortEnumType,
+    PermissionsFlagsInput, SortEnumType, useGetRoleByIdQuery,
 } from "@/graphql/__generated__/graphql"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
@@ -285,19 +285,24 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
 
 // --- Edit Role Dialog Component ---
 interface EditRoleDialogProps {
-  role: RoleDto;
+  roleId: string; // Now only takes roleId
   refetchRoles: () => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
-  role,
+  roleId,
   refetchRoles,
   isOpen,
   onOpenChange,
 }) => {
   const [editRoleMutation, { loading: editLoading }] = useEditRoleMutation();
+  const { data: roleData, loading: roleLoading, error: roleError } = useGetRoleByIdQuery({
+    variables: { roleId },
+    skip: !isOpen || !roleId, // Only fetch when dialog is open and roleId is available
+  });
+
   const {
     register,
     handleSubmit,
@@ -308,18 +313,19 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
   } = useForm<EditRoleFormValues>({
     resolver: zodResolver(editRoleSchema),
     defaultValues: {
-      roleId: role.id,
-      isChat: role.permissions.isChat,
-      isStream: role.permissions.isStream,
-      isRoles: role.permissions.isRoles,
-      isAll: role.permissions.isAll,
+      roleId: "",
+      isChat: false,
+      isStream: false,
+      isRoles: false,
+      isAll: false,
     },
   });
 
   const isAllChecked = watch("isAll");
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && roleData?.role) {
+      const role = roleData.role;
       reset({
         roleId: role.id,
         isChat: role.permissions.isChat,
@@ -328,7 +334,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
         isAll: role.permissions.isAll,
       });
     }
-  }, [isOpen, reset, role]);
+  }, [isOpen, reset, roleData]);
 
   const onSubmit = async (values: EditRoleFormValues) => {
     try {
@@ -355,6 +361,40 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
       // TODO: Add toast notification for error
     }
   };
+
+  if (roleLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (roleError || !roleData?.role) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Error Loading Role</DialogTitle>
+            <DialogDescription className="text-red-500">
+              Failed to load role details. {roleError?.message || "Role not found."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => onOpenChange(false)} className="bg-gray-700 hover:bg-gray-600 text-white">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  const role = roleData.role;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -435,7 +475,7 @@ export default function RolesPage() {
   const { isAuthenticated } = useAuth0();
   const { activeStreamer, activeStreamerPermissions } = useDashboard();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editRole, setEditRole] = useState<RoleDto | null>(null);
+  const [editRoleId, setEditRoleId] = useState<string | null>(null); // Store only ID
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const {
@@ -524,14 +564,14 @@ export default function RolesPage() {
         onOpenChange={setIsCreateDialogOpen}
       />
 
-      {editRole && (
+      {editRoleId && (
         <EditRoleDialog
-          role={editRole}
+          roleId={editRoleId}
           refetchRoles={refetchRoles}
           isOpen={isEditDialogOpen}
           onOpenChange={(open) => {
             setIsEditDialogOpen(open);
-            if (!open) setEditRole(null);
+            if (!open) setEditRoleId(null);
           }}
         />
       )}
@@ -549,7 +589,7 @@ export default function RolesPage() {
                 <TableRow className="border-gray-700">
                   <TableHead className="text-gray-300">Streamer</TableHead>
                   <TableHead className="text-gray-300">Role Type</TableHead>
-                  <TableHead className="text-gray-300">Permissions</TableHead>
+                  {/* Permissions column removed */}
                   {canManageRoles && <TableHead className="text-right text-gray-300">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
@@ -562,9 +602,7 @@ export default function RolesPage() {
                     <TableCell className="text-gray-300">
                       {role.type.charAt(0).toUpperCase() + role.type.slice(1).toLowerCase()}
                     </TableCell>
-                    <TableCell className="text-gray-300">
-                      {formatPermissions(role.permissions)}
-                    </TableCell>
+                    {/* Permissions cell removed */}
                     {canManageRoles && (
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
@@ -573,7 +611,7 @@ export default function RolesPage() {
                             size="icon"
                             className="text-gray-400 hover:text-green-500"
                             onClick={() => {
-                              setEditRole(role);
+                              setEditRoleId(role.id);
                               setIsEditDialogOpen(true);
                             }}
                           >
