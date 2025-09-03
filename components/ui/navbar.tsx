@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Menu, Search, Sparkles, Store, Settings, LogOut, LayoutDashboard } from "lucide-react"
 import { useAuth0 } from "@auth0/auth0-react"
-import { useGetMeQuery } from "@/graphql/__generated__/graphql" // Keep useGetMeQuery for user dropdown info
+import { useGetMeQuery } from "@/graphql/__generated__/graphql"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { useDashboard } from "@/src/contexts/DashboardContext"
 import { BroadcasterSwitcher } from "@/src/components/broadcaster-switcher"
+import { StreamerSearchPopover } from "@/src/components/streamer-search-popover"; // Import the new component
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void;
@@ -39,13 +40,11 @@ interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
     ({ className, onMenuClick, isMobile, sidebarOpen, isDashboard, ...props }, ref) => {
       const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0()
-      // Keep useGetMeQuery here for the user dropdown's specific 'me' data (finishedAuth, etc.)
-      // DashboardContext now handles the active streamer for dashboard navigation.
       const { data: meData, loading: meLoading } = useGetMeQuery({
         skip: !isAuthenticated,
       });
       const router = useRouter();
-      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading, currentAuthUserStreamer } = useDashboard(); // Use useDashboard hook
+      const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading, currentAuthUserStreamer } = useDashboard();
 
       const userName = meData?.me?.userName;
       const userAvatar = meData?.me?.avatar;
@@ -89,7 +88,6 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                   activeStreamer={activeStreamer}
                   setActiveStreamer={setActiveStreamer}
                   myRoles={myRoles}
-                  // meData={meData.me} // Removed meData prop
                 />
               )}
             </div>
@@ -97,13 +95,15 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
             {/* Center Section: Search Input (if not dashboard) */}
             <div className="flex-1 flex justify-center">
               {!isMobile && !isDashboard && (
-                <div className="relative hidden md:block">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                      placeholder="Search"
-                      className="w-96 bg-gray-800 border-gray-700 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
-                  />
-                </div>
+                <StreamerSearchPopover>
+                  <Button
+                    variant="outline"
+                    className="w-96 bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white justify-start"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    <span>Search streamers...</span>
+                  </Button>
+                </StreamerSearchPopover>
               )}
             </div>
 
