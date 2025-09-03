@@ -205,7 +205,8 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                 value={watch("streamerUserName")}
                 onValueChange={(username, id) => {
                   setValue("streamerUserName", username, { shouldDirty: true });
-                  setValue("streamerId", id, { shouldDirty: true });
+                  // Added shouldValidate: true to force re-validation of streamerId
+                  setValue("streamerId", id, { shouldDirty: true, shouldValidate: true });
                   if (id) {
                     clearErrors("streamerUserName");
                     clearErrors("streamerId"); // Clear error for streamerId as well
@@ -302,7 +303,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
           <DialogFooter>
             <Button
               type="submit"
-              disabled={createLoading || !selectedStreamerId || !isValid} // Disable if no streamer selected or form is invalid
+              disabled={createLoading || !isValid} // Simplified disabled condition
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               {createLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Create Role"}
@@ -469,7 +470,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                 <div className="flex items-center justify-between">
                   <Label htmlFor="editIsStream" className="text-gray-300">Stream Management</Label>
                   <Switch
-                    id="editIsStream"
+                    id="isStream"
                     checked={watch("isStream")}
                     onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
@@ -478,7 +479,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                 <div className="flex items-center justify-between">
                   <Label htmlFor="editIsRoles" className="text-gray-300">Role Management</Label>
                   <Switch
-                    id="editIsRoles"
+                    id="isRoles"
                     checked={watch("isRoles")}
                     onCheckedChange={(checked) => setValue("isRoles", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
