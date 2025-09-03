@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
-import { useGetStreamersQuery } from "@/graphql/__generated__/graphql";
+import { useGetStreamersQuery, SortEnumType } from "@/graphql/__generated__/graphql"; // Import SortEnumType
 import { useDebounce } from "@/hooks/use-debounce";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getMinioUrl } from "@/utils/utils";
@@ -22,7 +22,10 @@ export const StreamerSearchPopover: React.FC<StreamerSearchPopoverProps> = ({ ch
   const [open, setOpen] = useState(false);
 
   const { data, loading, error } = useGetStreamersQuery({
-    variables: { search: debouncedSearchTerm },
+    variables: {
+      search: debouncedSearchTerm,
+      order: [{ id: SortEnumType.Asc }], // Added orderBy id
+    },
     skip: !debouncedSearchTerm, // Only fetch if there's a debounced search term
   });
 

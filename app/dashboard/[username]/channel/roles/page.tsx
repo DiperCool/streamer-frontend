@@ -63,10 +63,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { StreamerSelectInput } from "@/src/components/ui/streamer-select-input"; // Import the new component
 
 // --- Zod Schemas ---
 const createRoleSchema = z.object({
   streamerUserName: z.string().min(1, "Streamer username is required"),
+  streamerId: z.string().uuid("Invalid streamer ID").nullable(), // Now stores the actual ID
   roleType: z.nativeEnum(RoleType, {
     errorMap: () => ({ message: "Please select a role type" }),
   }),
@@ -119,11 +121,14 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
     reset,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<CreateRoleFormValues>({
     resolver: zodResolver(createRoleSchema),
     defaultValues: {
       streamerUserName: "",
+      streamerId: null,
       roleType: RoleType.Administrator, // Default to Administrator
       isChat: false,
       isStream: false,
@@ -133,6 +138,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
   });
 
   const isAllChecked = watch("isAll");
+  const selectedStreamerId = watch("streamerId");
 
   useEffect(() => {
     if (!isOpen) {
@@ -141,6 +147,11 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
   }, [isOpen, reset]);
 
   const onSubmit = async (values: CreateRoleFormValues) => {
+    if (!values.streamerId) {
+      setError("streamerUserName", { type: "manual", message: "Please select a streamer" });
+      return;
+    }
+
     try {
       const permissions: PermissionsFlagsInput = {
         isAll: values.isAll,
@@ -154,7 +165,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
         variables: {
           input: {
             broadcasterId,
-            streamerId: values.streamerUserName, // Assuming streamerUserName is the streamerId
+            streamerId: values.streamerId, // Use the actual streamer ID
             roleType: values.roleType,
             permissions,
           },
@@ -180,25 +191,33 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="streamerUserName" className="text-right text-white">
-              Streamer Username
+              Streamer
             </Label>
-            <Input
-              id="streamerUserName"
-              {...register("streamerUserName")}
-              className="col-span-3 bg-gray-700 border-gray-600 text-white focus:border-green-500"
-            />
-            {errors.streamerUserName && (
-              <p className="col-span-4 text-red-500 text-sm text-right">
-                {errors.streamerUserName.message}
-              </p>
-            )}
+            <div className="col-span-3">
+              <StreamerSelectInput
+                value={watch("streamerUserName")}
+                onValueChange={(username, id) => {
+                  setValue("streamerUserName", username, { shouldDirty: true });
+                  setValue("streamerId", id, { shouldDirty: true });
+                  if (id) {
+                    clearErrors("streamerUserName");
+                  }
+                }}
+                error={errors.streamerUserName?.message}
+              />
+              {errors.streamerUserName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.streamerUserName.message}
+                </p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="roleType" className="text-right text-white">
               Role Type
             </Label>
             <Select
-              onValueChange={(value: RoleType) => setValue("roleType", value)}
+              onValueChange={(value: RoleType) => setValue("roleType", value, { shouldDirty: true })}
               defaultValue={watch("roleType")}
             >
               <SelectTrigger className="col-span-3 bg-gray-700 border-gray-600 text-white focus:border-green-500">
@@ -227,10 +246,10 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                 id="isAll"
                 checked={isAllChecked}
                 onCheckedChange={(checked) => {
-                  setValue("isAll", checked);
-                  setValue("isChat", checked);
-                  setValue("isStream", checked);
-                  setValue("isRoles", checked);
+                  setValue("isAll", checked, { shouldDirty: true });
+                  setValue("isChat", checked, { shouldDirty: true });
+                  setValue("isStream", checked, { shouldDirty: true });
+                  setValue("isRoles", checked, { shouldDirty: true });
                 }}
                 className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
               />
@@ -242,7 +261,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                   <Switch
                     id="isChat"
                     checked={watch("isChat")}
-                    onCheckedChange={(checked) => setValue("isChat", checked)}
+                    onCheckedChange={(checked) => setValue("isChat", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
@@ -251,7 +270,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                   <Switch
                     id="isStream"
                     checked={watch("isStream")}
-                    onCheckedChange={(checked) => setValue("isStream", checked)}
+                    onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
@@ -260,7 +279,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                   <Switch
                     id="isRoles"
                     checked={watch("isRoles")}
-                    onCheckedChange={(checked) => setValue("isRoles", checked)}
+                    onCheckedChange={(checked) => setValue("isRoles", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
@@ -271,7 +290,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
           <DialogFooter>
             <Button
               type="submit"
-              disabled={createLoading}
+              disabled={createLoading || !selectedStreamerId}
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               {createLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Create Role"}
@@ -414,10 +433,10 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                 id="editIsAll"
                 checked={isAllChecked}
                 onCheckedChange={(checked) => {
-                  setValue("isAll", checked);
-                  setValue("isChat", checked);
-                  setValue("isStream", checked);
-                  setValue("isRoles", checked);
+                  setValue("isAll", checked, { shouldDirty: true });
+                  setValue("isChat", checked, { shouldDirty: true });
+                  setValue("isStream", checked, { shouldDirty: true });
+                  setValue("isRoles", checked, { shouldDirty: true });
                 }}
                 className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
               />
@@ -429,7 +448,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                   <Switch
                     id="editIsChat"
                     checked={watch("isChat")}
-                    onCheckedChange={(checked) => setValue("isChat", checked)}
+                    onCheckedChange={(checked) => setValue("isChat", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
@@ -438,7 +457,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                   <Switch
                     id="editIsStream"
                     checked={watch("isStream")}
-                    onCheckedChange={(checked) => setValue("isStream", checked)}
+                    onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
@@ -447,7 +466,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                   <Switch
                     id="editIsRoles"
                     checked={watch("isRoles")}
-                    onCheckedChange={(checked) => setValue("isRoles", checked)}
+                    onCheckedChange={(checked) => setValue("isRoles", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
