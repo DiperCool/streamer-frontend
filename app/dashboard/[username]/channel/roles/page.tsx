@@ -63,12 +63,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { StreamerSelectInput } from "@/src/components/ui/streamer-select-input"; // Import the new component
+import { StreamerSelectInput } from "@/src/components/ui/streamer-select-input";
+import { toast } from "sonner"; // Import toast from sonner
 
 // --- Zod Schemas ---
 const createRoleSchema = z.object({
   streamerUserName: z.string().min(1, "Streamer username is required"),
-  streamerId: z.string().uuid("Invalid streamer ID").nullable(), // Now stores the actual ID
+  streamerId: z.string().uuid("Invalid streamer ID").nullable().refine(val => val !== null, {
+    message: "Please select a streamer from the list",
+  }),
   roleType: z.nativeEnum(RoleType, {
     errorMap: () => ({ message: "Please select a role type" }),
   }),
@@ -123,7 +126,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
     setValue,
     setError,
     clearErrors,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<CreateRoleFormValues>({
     resolver: zodResolver(createRoleSchema),
     defaultValues: {
@@ -138,7 +141,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
   });
 
   const isAllChecked = watch("isAll");
-  const selectedStreamerId = watch("streamerId");
+  const selectedStreamerId = watch("streamerId"); // Watch the actual streamerId from the form
 
   useEffect(() => {
     if (!isOpen) {
@@ -147,8 +150,10 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
   }, [isOpen, reset]);
 
   const onSubmit = async (values: CreateRoleFormValues) => {
+    // Zod resolver should handle streamerId validation, but an extra check doesn't hurt
     if (!values.streamerId) {
-      setError("streamerUserName", { type: "manual", message: "Please select a streamer" });
+      setError("streamerId", { type: "manual", message: "Please select a streamer from the list" });
+      toast.error("Please select a streamer from the list.");
       return;
     }
 
@@ -165,7 +170,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
         variables: {
           input: {
             broadcasterId,
-            streamerId: values.streamerId, // Use the actual streamer ID
+            streamerId: values.streamerId,
             roleType: values.roleType,
             permissions,
           },
@@ -173,9 +178,11 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
       });
       refetchRoles();
       onOpenChange(false);
-    } catch (error) {
+      toast.success("Role created successfully!");
+    } catch (error: any) {
       console.error("Error creating role:", error);
-      // TODO: Add toast notification for error
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Failed to create role. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -201,13 +208,18 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                   setValue("streamerId", id, { shouldDirty: true });
                   if (id) {
                     clearErrors("streamerUserName");
+                    clearErrors("streamerId"); // Clear error for streamerId as well
+                  } else {
+                    // If ID is null, set an error for streamerId
+                    setError("streamerId", { type: "manual", message: "Please select a streamer from the list" });
                   }
                 }}
-                error={errors.streamerUserName?.message}
+                error={errors.streamerUserName?.message || errors.streamerId?.message}
               />
-              {errors.streamerUserName && (
+              {/* Display error message for streamerId if it exists */}
+              {errors.streamerId && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.streamerUserName.message}
+                  {errors.streamerId.message}
                 </p>
               )}
             </div>
@@ -290,7 +302,7 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
           <DialogFooter>
             <Button
               type="submit"
-              disabled={createLoading || !selectedStreamerId}
+              disabled={createLoading || !selectedStreamerId || !isValid} // Disable if no streamer selected or form is invalid
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               {createLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Create Role"}
@@ -375,9 +387,11 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
       });
       refetchRoles();
       onOpenChange(false);
-    } catch (error) {
+      toast.success("Role updated successfully!");
+    } catch (error: any) {
       console.error("Error editing role:", error);
-      // TODO: Add toast notification for error
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Failed to update role. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -523,9 +537,11 @@ export default function RolesPage() {
         },
       });
       refetchRoles();
-    } catch (error) {
+      toast.success("Role removed successfully!");
+    } catch (error: any) {
       console.error("Error removing role:", error);
-      // TODO: Add toast notification for error
+      const errorMessage = error.graphQLErrors?.[0]?.message || "Failed to remove role. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
