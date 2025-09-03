@@ -200,7 +200,7 @@ type Query {
     currentStream(streamerId: String!): StreamDto!
     me: StreamerMeDto!
     myEmail: GetEmailResponse!
-    myRole(broadcasterId: String!): RoleDto! # Updated query name
+    myRole(broadcasterId: String!): RoleDto!
     myRoles(
         "Returns the elements in the list that come after the specified cursor."
         after: String,

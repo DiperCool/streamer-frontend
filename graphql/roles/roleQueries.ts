@@ -89,3 +89,24 @@ export const GET_ROLES = gql`
         }
     }
 `
+
+export const GET_MY_ROLE = gql`
+    query GetMyRole($broadcasterId: String!) {
+        myRole(broadcasterId: $broadcasterId) {
+            id
+            type
+            streamerId
+            broadcasterId
+            streamer {
+                id
+                userName
+                avatar
+            }
+            broadcaster {
+                id
+                userName
+                avatar
+            }
+        }
+    }
+`
