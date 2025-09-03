@@ -49,7 +49,7 @@ import {
     useCreateRoleMutation,
     useRemoveRoleMutation,
     useEditRoleMutation,
-    PermissionsFlagsInput, SortEnumType, useGetRoleByIdQuery,
+    PermissionsFlagsInput, SortEnumType, useGetRoleByIdQuery, GetRolesDocument,
 } from "@/graphql/__generated__/graphql"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
@@ -69,7 +69,6 @@ import { toast } from "sonner"; // Import toast from sonner
 // --- Zod Schemas ---
 const createRoleSchema = z.object({
   streamerUserName: z.string().min(1, "Streamer username is required"),
-  // ИЗМЕНЕНИЕ: streamerId теперь валидируется как обычная строка, а не UUID
   streamerId: z.string().min(1, "Streamer ID is required").nullable().refine(val => val !== null, {
     message: "Please select a streamer from the list",
   }),
@@ -189,9 +188,9 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="create-role-dialog-title">
         <DialogHeader>
-          <DialogTitle className="text-white">Create New Role</DialogTitle>
+          <DialogTitle id="create-role-dialog-title" className="text-white">Create New Role</DialogTitle>
           <DialogDescription className="text-gray-400">
             Assign a new role to a streamer for this channel.
           </DialogDescription>
@@ -330,7 +329,20 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
   isOpen,
   onOpenChange,
 }) => {
-  const [editRoleMutation, { loading: editLoading }] = useEditRoleMutation();
+  const { activeStreamer } = useDashboard(); // Get activeStreamer for refetchQueries
+  const [editRoleMutation, { loading: editLoading }] = useEditRoleMutation({
+    // Добавляем refetchQueries для обновления списка ролей после редактирования
+    refetchQueries: [
+      {
+        query: GetRolesDocument,
+        variables: {
+          broadcasterId: activeStreamer?.id ?? "",
+          roleType: RoleType.Administrator,
+          order: [{ id: SortEnumType.Asc }],
+        },
+      },
+    ],
+  });
   const { data: roleData, loading: roleLoading, error: roleError } = useGetRoleByIdQuery({
     variables: { roleId },
     skip: !isOpen || !roleId, // Only fetch when dialog is open and roleId is available
@@ -387,7 +399,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
           },
         },
       });
-      refetchRoles();
+      // refetchRoles() is no longer strictly necessary here due to refetchQueries,
+      // but keeping it doesn't hurt and provides a fallback.
+      refetchRoles(); 
       onOpenChange(false);
       toast.success("Role updated successfully!");
     } catch (error: any) {
@@ -400,7 +414,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
   if (roleLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
           <div className="flex items-center justify-center h-32">
             <Loader2 className="h-8 w-8 animate-spin text-green-500" />
           </div>
@@ -412,9 +426,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
   if (roleError || !roleData?.role) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
           <DialogHeader>
-            <DialogTitle className="text-white">Error Loading Role</DialogTitle>
+            <DialogTitle id="edit-role-dialog-title" className="text-white">Error Loading Role</DialogTitle>
             <DialogDescription className="text-red-500">
               Failed to load role details. {roleError?.message || "Role not found."}
             </DialogDescription>
@@ -433,9 +447,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white">
+      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
         <DialogHeader>
-          <DialogTitle className="text-white">Edit Role for {role.streamer?.userName}</DialogTitle>
+          <DialogTitle id="edit-role-dialog-title" className="text-white">Edit Role for {role.streamer?.userName}</DialogTitle>
           <DialogDescription className="text-gray-400">
             Update permissions for this role.
           </DialogDescription>
@@ -471,7 +485,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                 <div className="flex items-center justify-between">
                   <Label htmlFor="editIsStream" className="text-gray-300">Stream Management</Label>
                   <Switch
-                    id="editIsStream"
+                    id="isStream"
                     checked={watch("isStream")}
                     onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
