@@ -97,7 +97,7 @@ export const GET_MY_ROLE = gql`
             type
             streamerId
             broadcasterId
-            permissions { # Added permissions field
+            permissions {
                 isAll
                 isChat
                 isNone

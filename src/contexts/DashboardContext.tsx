@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useGetMyRolesQuery, useGetStreamerQuery, useGetMeQuery, RoleDto, SortEnumType } from "@/graphql/__generated__/graphql";
+import { useGetMyRolesQuery, useGetStreamerQuery, useGetMeQuery, RoleDto, SortEnumType, useGetMyRoleQuery, PermissionsFlags } from "@/graphql/__generated__/graphql";
 import { useRouter, usePathname } from "next/navigation";
 
 interface ActiveStreamer {
@@ -17,14 +17,15 @@ interface DashboardContextType {
   myRoles: RoleDto[];
   myRolesLoading: boolean;
   currentAuthUserStreamer: ActiveStreamer | null;
+  activeStreamerPermissions: PermissionsFlags | null; // Добавлено: разрешения для активного стримера
+  activeStreamerPermissionsLoading: boolean; // Добавлено: состояние загрузки разрешений
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading: authLoading } = useAuth0(); // Только isAuthenticated и authLoading
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
   
-  // Получаем данные текущего пользователя через useGetMeQuery
   const { data: meData, loading: meLoading } = useGetMeQuery({
     skip: !isAuthenticated,
   });
@@ -72,6 +73,14 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       usernameFromUrl === currentAuthUserStreamer.userName || 
       myRoles.some(role => role.broadcaster?.userName === usernameFromUrl),
   });
+
+  // Добавляем запрос для получения разрешений активного стримера
+  const { data: myRoleData, loading: myRoleLoading } = useGetMyRoleQuery({
+    variables: { broadcasterId: activeStreamer?.id ?? "" },
+    skip: !isAuthenticated || !activeStreamer?.id,
+  });
+
+  const activeStreamerPermissions = myRoleData?.myRole?.permissions || null;
 
   useEffect(() => {
     if (authLoading || meLoading || myRolesLoading || urlStreamerLoading) {
@@ -132,9 +141,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [
     isAuthenticated,
     authLoading,
-    meData, // Добавлено в зависимости
-    meLoading, // Добавлено в зависимости
-    myRoles, // Используем myRoles вместо myRolesData?.myRoles?.nodes
+    meData,
+    meLoading,
+    myRoles,
     myRolesLoading,
     activeStreamer,
     usernameFromUrl,
@@ -151,7 +160,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     router.push(`/dashboard/${streamer.userName}`);
   };
 
-  if (authLoading || meLoading || myRolesLoading || urlStreamerLoading) {
+  if (authLoading || meLoading || myRolesLoading || urlStreamerLoading || myRoleLoading) {
     return null;
   }
 
@@ -161,7 +170,15 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   }
 
   return (
-    <DashboardContext.Provider value={{ activeStreamer, setActiveStreamer, myRoles, myRolesLoading, currentAuthUserStreamer }}>
+    <DashboardContext.Provider value={{
+      activeStreamer,
+      setActiveStreamer,
+      myRoles,
+      myRolesLoading,
+      currentAuthUserStreamer,
+      activeStreamerPermissions, // Передаем разрешения в контекст
+      activeStreamerPermissionsLoading: myRoleLoading, // Передаем состояние загрузки разрешений
+    }}>
       {children}
     </DashboardContext.Provider>
   );
