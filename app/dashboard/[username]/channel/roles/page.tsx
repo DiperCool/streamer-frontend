@@ -485,7 +485,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                 <div className="flex items-center justify-between">
                   <Label htmlFor="editIsStream" className="text-gray-300">Stream Management</Label>
                   <Switch
-                    id="isStream"
+                    id="editIsStream"
                     checked={watch("isStream")}
                     onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
