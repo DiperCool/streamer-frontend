@@ -29,15 +29,13 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
   className,
   error,
 }) => {
-  const [searchTerm, setSearchTerm] = useState(value); // What's currently in the search input
+  const [searchTerm, setSearchTerm] = useState(value); // What's currently in the search input inside the popover
   const [open, setOpen] = useState(false);
-  const [selectedStreamerAvatar, setSelectedStreamerAvatar] = useState<string | null>(null);
+  const [selectedStreamerAvatar, setSelectedStreamerAvatar] = useState<string | null>(null); // Avatar for the `value` prop
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce the search term for the GraphQL query
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  // Fetch streamers based on the debounced search term
   const { data, loading, error: queryError } = useGetStreamersQuery({
     variables: {
       search: debouncedSearchTerm,
@@ -47,46 +45,44 @@ export const StreamerSelectInput: React.FC<StreamerSelectInputProps> = ({
   });
   const streamers = data?.streamers?.nodes || [];
 
-  // Effect to synchronize the *displayed value in the trigger button* and its avatar
-  // This runs when the `value` prop from the parent changes, or when `streamers` data changes.
+  // Effect to synchronize the `selectedStreamerAvatar` based on the `value` prop
+  // This runs when `value` prop changes or `streamers` data changes.
   useEffect(() => {
-    // Only update internal state from `value` prop if popover is closed
-    // or if `value` is explicitly cleared by the parent.
-    if (!open && value !== searchTerm) {
-      setSearchTerm(value);
+    if (value) {
       const foundStreamer = streamers.find(s => s.userName === value);
       setSelectedStreamerAvatar(foundStreamer?.avatar || null);
-    } else if (!value) { // If parent explicitly clears value, ensure internal states are cleared
-        setSearchTerm("");
-        setSelectedStreamerAvatar(null);
+    } else {
+      setSelectedStreamerAvatar(null);
     }
-  }, [value, open, searchTerm, streamers]);
+  }, [value, streamers]);
 
-  // Focus the input when the popover opens
+  // When popover opens, set searchTerm to current value.
+  // When popover closes, reset searchTerm to current value (if user typed but didn't select).
   useEffect(() => {
     if (open) {
+      setSearchTerm(value); // Initialize search input with current selected value when opening
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
       return () => clearTimeout(timer);
+    } else {
+      // When popover closes, if the search term doesn't match the selected value,
+      // reset search term to the selected value. This handles cases where user types
+      // but doesn't select, or closes without selecting.
+      if (searchTerm !== value) {
+        setSearchTerm(value);
+      }
     }
-  }, [open]);
+  }, [open, value]); // Depend on `open` and `value`
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
     setSearchTerm(newSearchTerm);
 
-    // When user types, if the input is different from the currently selected value,
-    // immediately clear the parent's selected value. This prevents the `useEffect`
-    // from resetting `searchTerm` back to the old `value` prop.
-    if (value !== "" && newSearchTerm !== value) {
-        onValueChange("", null); // Clear parent's selected value
-        setSelectedStreamerAvatar(null); // Clear avatar in trigger
-    }
-    // If input is completely cleared, ensure parent's value is also cleared
-    if (!newSearchTerm) {
-        onValueChange("", null);
-        setSelectedStreamerAvatar(null);
+    // If the user clears the input, and there was a selected value,
+    // notify the parent that the selection is cleared.
+    if (!newSearchTerm && value) {
+      onValueChange("", null);
     }
   };
 
