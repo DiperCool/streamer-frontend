@@ -399,9 +399,8 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
           },
         },
       });
-      // refetchRoles() is no longer strictly necessary here due to refetchQueries,
-      // but keeping it doesn't hurt and provides a fallback.
-      refetchRoles(); 
+      console.log("Edit role mutation successful, calling refetchRoles"); // Debugging log
+      refetchRoles(); // This should trigger the query in RolesPage
       onOpenChange(false);
       toast.success("Role updated successfully!");
     } catch (error: any) {
@@ -411,109 +410,89 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
     }
   };
 
-  if (roleLoading) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
+        <DialogHeader>
+          <DialogTitle id="edit-role-dialog-title" className="text-white">
+            {roleLoading ? "Loading Role..." : roleError ? "Error Loading Role" : `Edit Role for ${roleData?.role?.streamer?.userName || "..."}`}
+          </DialogTitle>
+          <DialogDescription className="text-gray-400">
+            {roleLoading ? "Fetching role details." : roleError ? roleError.message : "Update permissions for this role."}
+          </DialogDescription>
+        </DialogHeader>
+        {roleLoading ? (
           <div className="flex items-center justify-center h-32">
             <Loader2 className="h-8 w-8 animate-spin text-green-500" />
           </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  if (roleError || !roleData?.role) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
-          <DialogHeader>
-            <DialogTitle id="edit-role-dialog-title" className="text-white">Error Loading Role</DialogTitle>
-            <DialogDescription className="text-red-500">
-              Failed to load role details. {roleError?.message || "Role not found."}
-            </DialogDescription>
-          </DialogHeader>
+        ) : roleError ? (
           <DialogFooter>
             <Button onClick={() => onOpenChange(false)} className="bg-gray-700 hover:bg-gray-600 text-white">
               Close
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  const role = roleData.role;
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-white" aria-labelledby="edit-role-dialog-title">
-        <DialogHeader>
-          <DialogTitle id="edit-role-dialog-title" className="text-white">Edit Role for {role.streamer?.userName}</DialogTitle>
-          <DialogDescription className="text-gray-400">
-            Update permissions for this role.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label className="text-white">Permissions</Label>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="editIsAll" className="text-gray-300">All Permissions</Label>
-              <Switch
-                id="editIsAll"
-                checked={isAllChecked}
-                onCheckedChange={(checked) => {
-                  setValue("isAll", checked, { shouldDirty: true });
-                  setValue("isChat", checked, { shouldDirty: true });
-                  setValue("isStream", checked, { shouldDirty: true });
-                  setValue("isRoles", checked, { shouldDirty: true });
-                }}
-                className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
-              />
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-white">Permissions</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="editIsAll" className="text-gray-300">All Permissions</Label>
+                <Switch
+                  id="editIsAll"
+                  checked={isAllChecked}
+                  onCheckedChange={(checked) => {
+                    setValue("isAll", checked, { shouldDirty: true });
+                    setValue("isChat", checked, { shouldDirty: true });
+                    setValue("isStream", checked, { shouldDirty: true });
+                    setValue("isRoles", checked, { shouldDirty: true });
+                  }}
+                  className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                />
+              </div>
+              {!isAllChecked && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="editIsChat" className="text-gray-300">Chat Management</Label>
+                    <Switch
+                      id="editIsChat"
+                      checked={watch("isChat")}
+                      onCheckedChange={(checked) => setValue("isChat", checked, { shouldDirty: true })}
+                      className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="editIsStream" className="text-gray-300">Stream Management</Label>
+                    <Switch
+                      id="editIsStream"
+                      checked={watch("isStream")}
+                      onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
+                      className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="editIsRoles" className="text-gray-300">Role Management</Label>
+                    <Switch
+                      id="isRoles"
+                      checked={watch("isRoles")}
+                      onCheckedChange={(checked) => setValue("isRoles", checked, { shouldDirty: true })}
+                      className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                    />
+                  </div>
+                </>
+              )}
             </div>
-            {!isAllChecked && (
-              <>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="editIsChat" className="text-gray-300">Chat Management</Label>
-                  <Switch
-                    id="editIsChat"
-                    checked={watch("isChat")}
-                    onCheckedChange={(checked) => setValue("isChat", checked, { shouldDirty: true })}
-                    className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="editIsStream" className="text-gray-300">Stream Management</Label>
-                  <Switch
-                    id="editIsStream"
-                    checked={watch("isStream")}
-                    onCheckedChange={(checked) => setValue("isStream", checked, { shouldDirty: true })}
-                    className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="editIsRoles" className="text-gray-300">Role Management</Label>
-                  <Switch
-                    id="isRoles"
-                    checked={watch("isRoles")}
-                    onCheckedChange={(checked) => setValue("isRoles", checked, { shouldDirty: true })}
-                    className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
-                  />
-                </div>
-              </>
-            )}
-          </div>
 
-          <DialogFooter>
-            <Button
-              type="submit"
-              disabled={editLoading}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {editLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Save Changes"}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={editLoading}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {editLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -540,6 +519,14 @@ export default function RolesPage() {
     },
     skip: !isAuthenticated || !activeStreamer?.id,
   });
+
+  // Add this for debugging
+  useEffect(() => {
+    if (!rolesLoading && rolesData) {
+      console.log("Roles data updated in RolesPage:", rolesData);
+    }
+  }, [rolesData, rolesLoading]);
+
 
   const [removeRoleMutation, { loading: removeLoading }] = useRemoveRoleMutation();
 
