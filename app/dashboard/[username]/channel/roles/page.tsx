@@ -343,7 +343,7 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
       },
     ],
   });
-  const { data: roleData, loading: roleLoading, error: roleError } = useGetRoleByIdQuery({
+  const { data: roleData, loading: roleLoading, error: roleError, refetch: refetchRoleById } = useGetRoleByIdQuery({
     variables: { roleId },
     skip: !isOpen || !roleId, // Only fetch when dialog is open and roleId is available
   });
@@ -367,6 +367,14 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
   });
 
   const isAllChecked = watch("isAll");
+
+  // Effect to refetch role data when dialog opens
+  useEffect(() => {
+    if (isOpen && roleId) {
+      console.log(`EditRoleDialog: Dialog opened for roleId ${roleId}, refetching role data.`);
+      refetchRoleById();
+    }
+  }, [isOpen, roleId, refetchRoleById]);
 
   useEffect(() => {
     if (isOpen && roleData?.role) {
