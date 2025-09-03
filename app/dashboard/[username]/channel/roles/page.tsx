@@ -43,13 +43,13 @@ import {
   useDashboard,
 } from "@/src/contexts/DashboardContext"
 import {
-  RoleDto,
-  RoleType,
-  useGetRolesQuery,
-  useCreateRoleMutation,
-  useRemoveRoleMutation,
-  useEditRoleMutation,
-  PermissionsFlagsInput,
+    RoleDto,
+    RoleType,
+    useGetRolesQuery,
+    useCreateRoleMutation,
+    useRemoveRoleMutation,
+    useEditRoleMutation,
+    PermissionsFlagsInput, SortEnumType,
 } from "@/graphql/__generated__/graphql"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
@@ -446,7 +446,8 @@ export default function RolesPage() {
   } = useGetRolesQuery({
     variables: {
       broadcasterId: activeStreamer?.id ?? "",
-      roleType: RoleType.Administrator, // Fetching only Administrator roles for now, can be expanded
+      roleType: RoleType.Administrator,
+      order: [{ id: SortEnumType.Asc }],
     },
     skip: !isAuthenticated || !activeStreamer?.id,
   });

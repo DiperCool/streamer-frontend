@@ -171,6 +171,16 @@ export type DeleteMessageResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type EditRoleInput = {
+  permissions: PermissionsFlagsInput;
+  roleId: Scalars['UUID']['input'];
+};
+
+export type EditRoleResponse = {
+  __typename?: 'EditRoleResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type FinishAuthInput = {
   userName: Scalars['String']['input'];
 };
@@ -214,6 +224,7 @@ export type Mutation = {
   createMessage: CreateMessageResponse;
   createRole: CreateRoleResponse;
   deleteMessage: DeleteMessageResponse;
+  editRole: EditRoleResponse;
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
@@ -243,6 +254,11 @@ export type MutationCreateRoleArgs = {
 
 export type MutationDeleteMessageArgs = {
   request: DeleteMessageInput;
+};
+
+
+export type MutationEditRoleArgs = {
+  input: EditRoleInput;
 };
 
 
@@ -1015,6 +1031,13 @@ export type RemoveRoleMutationVariables = Exact<{
 
 export type RemoveRoleMutation = { __typename?: 'Mutation', removeRole: { __typename?: 'RemoveRoleResponse', id: string } };
 
+export type EditRoleMutationVariables = Exact<{
+  input: EditRoleInput;
+}>;
+
+
+export type EditRoleMutation = { __typename?: 'Mutation', editRole: { __typename?: 'EditRoleResponse', id: string } };
+
 export type GetMyRolesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1039,7 +1062,7 @@ export type GetRolesQueryVariables = Exact<{
 }>;
 
 
-export type GetRolesQuery = { __typename?: 'Query', roles?: { __typename?: 'RolesConnection', nodes?: Array<{ __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetRolesQuery = { __typename?: 'Query', roles?: { __typename?: 'RolesConnection', nodes?: Array<{ __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetMyRoleQueryVariables = Exact<{
   broadcasterId: Scalars['String']['input'];
@@ -2054,6 +2077,39 @@ export function useRemoveRoleMutation(baseOptions?: Apollo.MutationHookOptions<R
 export type RemoveRoleMutationHookResult = ReturnType<typeof useRemoveRoleMutation>;
 export type RemoveRoleMutationResult = Apollo.MutationResult<RemoveRoleMutation>;
 export type RemoveRoleMutationOptions = Apollo.BaseMutationOptions<RemoveRoleMutation, RemoveRoleMutationVariables>;
+export const EditRoleDocument = gql`
+    mutation EditRole($input: EditRoleInput!) {
+  editRole(input: $input) {
+    id
+  }
+}
+    `;
+export type EditRoleMutationFn = Apollo.MutationFunction<EditRoleMutation, EditRoleMutationVariables>;
+
+/**
+ * __useEditRoleMutation__
+ *
+ * To run a mutation, you first call `useEditRoleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditRoleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editRoleMutation, { data, loading, error }] = useEditRoleMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useEditRoleMutation(baseOptions?: Apollo.MutationHookOptions<EditRoleMutation, EditRoleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditRoleMutation, EditRoleMutationVariables>(EditRoleDocument, options);
+      }
+export type EditRoleMutationHookResult = ReturnType<typeof useEditRoleMutation>;
+export type EditRoleMutationResult = Apollo.MutationResult<EditRoleMutation>;
+export type EditRoleMutationOptions = Apollo.BaseMutationOptions<EditRoleMutation, EditRoleMutationVariables>;
 export const GetMyRolesDocument = gql`
     query GetMyRoles($after: String, $before: String, $first: Int, $last: Int, $order: [RoleDtoSortInput!], $where: RoleDtoFilterInput) {
   myRoles(
@@ -2144,6 +2200,13 @@ export const GetRolesDocument = gql`
       type
       streamerId
       broadcasterId
+      permissions {
+        isAll
+        isChat
+        isNone
+        isRoles
+        isStream
+      }
       streamer {
         id
         userName
