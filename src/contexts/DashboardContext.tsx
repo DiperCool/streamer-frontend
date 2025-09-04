@@ -17,8 +17,8 @@ interface DashboardContextType {
   myRoles: RoleDto[];
   myRolesLoading: boolean;
   currentAuthUserStreamer: ActiveStreamer | null;
-  activeStreamerPermissions: PermissionsFlags | null; // Добавлено: разрешения для активного стримера
-  activeStreamerPermissionsLoading: boolean; // Добавлено: состояние загрузки разрешений
+  activeStreamerPermissions: PermissionsFlags | null;
+  activeStreamerPermissionsLoading: boolean;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -62,7 +62,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const myRoles = myRolesData?.myRoles?.nodes || [];
 
-  // Используем useGetStreamerQuery для получения данных стримера из URL
   const { data: urlStreamerData, loading: urlStreamerLoading, error: urlStreamerError } = useGetStreamerQuery({
     variables: { userName: usernameFromUrl! },
     skip: 
@@ -74,8 +73,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       myRoles.some(role => role.broadcaster?.userName === usernameFromUrl),
   });
 
-  // Добавляем запрос для получения разрешений активного стримера
-  const { data: myRoleData, loading: myRoleLoading } = useGetMyRoleQuery({
+  const { data: myRoleData, loading: myRoleLoading, error: myRoleError } = useGetMyRoleQuery({
     variables: { broadcasterId: activeStreamer?.id ?? "" },
     skip: !isAuthenticated || !activeStreamer?.id,
   });
@@ -161,12 +159,20 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   if (authLoading || meLoading || myRolesLoading || urlStreamerLoading || myRoleLoading) {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <Loader2 className="h-12 w-12 animate-spin text-green-500" />
+      </div>
+    );
   }
 
-  if (myRolesError || urlStreamerError) {
-    console.error("Error loading roles or streamer data:", myRolesError || urlStreamerError);
-    return null;
+  if (myRolesError || urlStreamerError || myRoleError) {
+    console.error("Error loading roles or streamer data:", myRolesError || urlStreamerError || myRoleError);
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+        <p className="text-red-500 text-lg">Access Denied: You do not have permission to view this dashboard.</p>
+      </div>
+    );
   }
 
   return (
@@ -176,8 +182,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       myRoles,
       myRolesLoading,
       currentAuthUserStreamer,
-      activeStreamerPermissions, // Передаем разрешения в контекст
-      activeStreamerPermissionsLoading: myRoleLoading, // Передаем состояние загрузки разрешений
+      activeStreamerPermissions,
+      activeStreamerPermissionsLoading: myRoleLoading,
     }}>
       {children}
     </DashboardContext.Provider>
