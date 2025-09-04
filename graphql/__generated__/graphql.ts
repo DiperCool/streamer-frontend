@@ -425,6 +425,7 @@ export type Query = {
   myEmail: GetEmailResponse;
   myRole: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
+  mySystemRole: SystemRoleDto;
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
@@ -772,6 +773,17 @@ export type SubscriptionSubscribeWatchStreamArgs = {
 export type SubscriptionWatchStreamArgs = {
   streamId: Scalars['UUID']['input'];
 };
+
+export type SystemRoleDto = {
+  __typename?: 'SystemRoleDto';
+  roleType: SystemRoleType;
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+};
+
+export enum SystemRoleType {
+  Administrator = 'ADMINISTRATOR'
+}
 
 export type UnfollowInput = {
   streamerId: Scalars['String']['input'];
@@ -1243,6 +1255,11 @@ export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetStreamSettingsQuery = { __typename?: 'Query', streamSettings: { __typename?: 'StreamSettingsDto', id: string, streamKey: string, streamUrl: string } };
+
+export type GetMySystemRoleQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMySystemRoleQuery = { __typename?: 'Query', mySystemRole: { __typename?: 'SystemRoleDto', roleType: SystemRoleType, streamerId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, followers: number, isLive: boolean } | null } };
 
 export type GetVodsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3084,6 +3101,53 @@ export type GetStreamSettingsQueryHookResult = ReturnType<typeof useGetStreamSet
 export type GetStreamSettingsLazyQueryHookResult = ReturnType<typeof useGetStreamSettingsLazyQuery>;
 export type GetStreamSettingsSuspenseQueryHookResult = ReturnType<typeof useGetStreamSettingsSuspenseQuery>;
 export type GetStreamSettingsQueryResult = Apollo.QueryResult<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>;
+export const GetMySystemRoleDocument = gql`
+    query GetMySystemRole {
+  mySystemRole {
+    roleType
+    streamerId
+    streamer {
+      id
+      userName
+      avatar
+      followers
+      isLive
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetMySystemRoleQuery__
+ *
+ * To run a query within a React component, call `useGetMySystemRoleQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMySystemRoleQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMySystemRoleQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetMySystemRoleQuery(baseOptions?: Apollo.QueryHookOptions<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>(GetMySystemRoleDocument, options);
+      }
+export function useGetMySystemRoleLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>(GetMySystemRoleDocument, options);
+        }
+export function useGetMySystemRoleSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>(GetMySystemRoleDocument, options);
+        }
+export type GetMySystemRoleQueryHookResult = ReturnType<typeof useGetMySystemRoleQuery>;
+export type GetMySystemRoleLazyQueryHookResult = ReturnType<typeof useGetMySystemRoleLazyQuery>;
+export type GetMySystemRoleSuspenseQueryHookResult = ReturnType<typeof useGetMySystemRoleSuspenseQuery>;
+export type GetMySystemRoleQueryResult = Apollo.QueryResult<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>;
 export const GetVodsDocument = gql`
     query GetVods($after: String, $before: String, $first: Int, $last: Int, $order: [VodDtoSortInput!], $streamerId: String!, $where: VodDtoFilterInput) {
   vods(
