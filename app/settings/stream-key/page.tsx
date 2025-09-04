@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { StreamSettingsForm } from "./StreamSettingsForm" // Updated import path
+import { StreamSettingsForm } from "@/app/dashboard/[username]/channel/stream-key/StreamSettingsForm" // Используем существующую форму
 
 export default function StreamKeySettingsPage() {
   return (

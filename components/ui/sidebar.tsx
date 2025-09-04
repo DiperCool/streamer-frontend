@@ -72,11 +72,6 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                         Community
                       </SidebarNavItem>
                     </Link>
-                    <Link href={`${dashboardBaseUrl}/channel/stream-key`} passHref>
-                      <SidebarNavItem icon={<Key />} active={pathname === `${dashboardBaseUrl}/channel/stream-key`}>
-                        Stream URL & Key
-                      </SidebarNavItem>
-                    </Link>
                   </CollapsibleSidebarNav>
 
                   <Link href={`${dashboardBaseUrl}/content`} passHref>

@@ -13,12 +13,12 @@ export default function SettingsLayout({
   const pathname = usePathname()
 
   const getActiveTab = () => {
-    // Only 'profile' and 'dashboard-settings' remain as top-level settings
     if (pathname.includes("/settings/profile")) {
       return "profile";
     }
-    // If there were other top-level settings, they would go here.
-    // For now, we default to profile if no match.
+    if (pathname.includes("/settings/stream-key")) {
+      return "stream-key";
+    }
     return "profile"; 
   };
 
@@ -39,10 +39,14 @@ export default function SettingsLayout({
                 Profile
               </TabsTrigger>
             </Link>
-            {/* Stream URL and Key, and Chat tabs are now in the Creator Dashboard */}
+            <Link href="/settings/stream-key" passHref>
+              <TabsTrigger value="stream-key">
+                Stream URL & Key
+              </TabsTrigger>
+            </Link>
           </TabsList>
         </Tabs>
-        {children} {/* This is where the nested page content will be rendered */}
+        {children}
       </div>
     </div>
   )
