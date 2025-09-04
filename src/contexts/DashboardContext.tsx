@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useMe
 import { useAuth0 } from "@auth0/auth0-react";
 import { useGetMyRolesQuery, useGetStreamerQuery, useGetMeQuery, RoleDto, SortEnumType, useGetMyRoleQuery, PermissionsFlags } from "@/graphql/__generated__/graphql";
 import { useRouter, usePathname } from "next/navigation";
+import { Loader2 } from "lucide-react"; // Импортируем Loader2
 
 interface ActiveStreamer {
   id: string;
