@@ -218,6 +218,7 @@ type Query {
         order: [RoleDtoSortInput!],
         where: RoleDtoFilterInput
     ): MyRolesConnection
+    mySystemRole: SystemRoleDto!
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
     roles(
@@ -374,6 +375,12 @@ type Subscription {
     watchStream(streamId: UUID!): StreamWatcher!
 }
 
+type SystemRoleDto {
+    roleType: SystemRoleType!
+    streamer: StreamerDto
+    streamerId: String!
+}
+
 type UnfollowResponse {
     id: UUID!
 }
@@ -472,6 +479,10 @@ enum SortEnumType {
 enum StreamSourceType {
     HLS
     WEB_RTC
+}
+
+enum SystemRoleType {
+    ADMINISTRATOR
 }
 
 "The `DateTime` scalar represents an ISO-8601 compliant date time type."
