@@ -9,7 +9,7 @@ export default function DashboardLayout({
 }) {
   // You can use params.username here if needed for layout-specific logic
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="flex-1"> {/* Removed container mx-auto px-4 py-8 */}
       {children}
     </div>
   );
