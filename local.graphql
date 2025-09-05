@@ -26,6 +26,31 @@ directive @listSize(
     slicingArguments: [String!]
 ) on FIELD_DEFINITION
 
+"A connection to a list of items."
+type CategoriesConnection {
+    "A list of edges."
+    edges: [CategoriesEdge!]
+    "A flattened list of the nodes."
+    nodes: [CategoryDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type CategoriesEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: CategoryDto!
+}
+
+type CategoryDto {
+    id: UUID!
+    image: String!
+    slug: String!
+    title: String!
+}
+
 type ChatDto {
     id: UUID!
     pinnedMessage: PinnedChatMessageDto
@@ -74,6 +99,10 @@ type ChatSettingsDto {
     subscribersOnly: Boolean!
 }
 
+type CreateCategoryResponse {
+    id: UUID!
+}
+
 type CreateMessageResponse {
     messageId: UUID!
 }
@@ -83,6 +112,10 @@ type CreateRoleResponse {
 }
 
 type DeleteMessageResponse {
+    id: UUID!
+}
+
+type EditCategoryResponse {
     id: UUID!
 }
 
@@ -103,6 +136,7 @@ type GetEmailResponse {
 }
 
 type Mutation {
+    createCategory(input: CreateCategoryInput!): CreateCategoryResponse!
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
@@ -110,11 +144,13 @@ type Mutation {
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
+    removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
     unfollow(unfollow: UnfollowInput!): UnfollowResponse!
     unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
     updateBio(input: UpdateBioInput!): UpdateBioResponse!
+    updateCategory(input: EditCategoryInput!): EditCategoryResponse!
     updateChannelBanner(input: UpdateChannelBannerInput!): UpdateChannelBannerResponse!
     updateChatSettings(request: UpdateChatSettingsInput!): UpdateChatSettingsResponse!
     updateOfflineBanner(input: UpdateOfflineBannerInput!): UpdateOfflineBannerResponse!
@@ -186,6 +222,20 @@ type ProfileDto {
 }
 
 type Query {
+    categories(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [CategoryDtoSortInput!],
+        search: String,
+        where: CategoryDtoFilterInput
+    ): CategoriesConnection
+    category(id: UUID!): CategoryDto!
     chat(streamerId: String!): ChatDto!
     chatMessages(
         "Returns the elements in the list that come after the specified cursor."
@@ -265,6 +315,10 @@ type Query {
         streamerId: String!,
         where: VodDtoFilterInput
     ): VodsConnection
+}
+
+type RemoveCategoryResponse {
+    id: UUID!
 }
 
 type RemoveRoleResponse {
@@ -501,6 +555,22 @@ input BooleanOperationFilterInput {
     neq: Boolean
 }
 
+input CategoryDtoFilterInput {
+    and: [CategoryDtoFilterInput!]
+    id: UuidOperationFilterInput
+    image: StringOperationFilterInput
+    or: [CategoryDtoFilterInput!]
+    slug: StringOperationFilterInput
+    title: StringOperationFilterInput
+}
+
+input CategoryDtoSortInput {
+    id: SortEnumType
+    image: SortEnumType
+    slug: SortEnumType
+    title: SortEnumType
+}
+
 input ChatMessageDtoFilterInput {
     and: [ChatMessageDtoFilterInput!]
     createdAt: DateTimeOperationFilterInput
@@ -530,6 +600,11 @@ input ChatMessageTypeOperationFilterInput {
     in: [ChatMessageType!]
     neq: ChatMessageType
     nin: [ChatMessageType!]
+}
+
+input CreateCategoryInput {
+    image: String!
+    title: String!
 }
 
 input CreateMessageInput {
@@ -562,6 +637,12 @@ input DateTimeOperationFilterInput {
 
 input DeleteMessageInput {
     messageId: UUID!
+}
+
+input EditCategoryInput {
+    id: UUID!
+    image: String!
+    title: String!
 }
 
 input EditRoleInput {
@@ -609,6 +690,10 @@ input PermissionsOperationFilterInput {
 
 input PinMessageInput {
     messageId: UUID!
+}
+
+input RemoveCategoryInput {
+    id: UUID!
 }
 
 input RemoveRoleInput {
