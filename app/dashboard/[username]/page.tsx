@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner"
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
-import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-controls-sidebar" // Import the new sidebar
+import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-controls-sidebar"
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -124,8 +124,8 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   }, [layout]);
 
   return (
-    <div className="space-y-8 p-4 relative"> {/* Added relative for sidebar positioning */}
-      <div className="flex items-center justify-between mb-6 pr-16"> {/* Added pr-16 to account for sidebar width */}
+    <div className="space-y-8 p-4 relative">
+      <div className="flex items-center justify-between mb-6 pr-16">
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
         {/* Buttons moved to DashboardControlsSidebar */}
       </div>
@@ -135,7 +135,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
         layouts={{ lg: layout }} // Use 'lg' breakpoint for simplicity
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-        rowHeight={50} {/* Increased rowHeight for better visual spacing */}
+        rowHeight={50}
         isDraggable={isEditing}
         isResizable={isEditing}
         onLayoutChange={(_, allLayouts) => onLayoutChange(allLayouts.lg)}
