@@ -74,6 +74,7 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({
                 disabled={loading}
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                type="button" // Добавлено: явно указываем тип кнопки как "button"
             >
                 {loading ? "Loading..." : children}
             </Button>
