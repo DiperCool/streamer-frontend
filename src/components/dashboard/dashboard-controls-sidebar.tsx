@@ -1,19 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Save, RotateCcw, Edit, Eye, LayoutGrid } from "lucide-react"; // Added LayoutGrid icon
+import { Save, RotateCcw, Edit, Eye, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DashboardWidgetType } from "@/app/dashboard/[username]/page"; // Import DashboardWidgetType
-import { ManageWidgetsDialog } from "./manage-widgets-dialog"; // Import the new dialog
+import { DashboardWidgetType } from "@/app/dashboard/[username]/page";
+import { ManageWidgetsDialog } from "./manage-widgets-dialog";
 
 interface DashboardControlsSidebarProps {
   isEditing: boolean;
   setIsEditing: (editing: boolean) => void;
   saveLayout: () => void;
   resetLayout: () => void;
-  activeWidgets: DashboardWidgetType[]; // New prop
-  onUpdateWidgets: (newActiveWidgets: DashboardWidgetType[]) => void; // New prop
+  activeWidgets: DashboardWidgetType[];
+  onUpdateWidgets: (newActiveWidgets: DashboardWidgetType[]) => void;
 }
 
 export const DashboardControlsSidebar: React.FC<DashboardControlsSidebarProps> = ({
@@ -25,13 +25,27 @@ export const DashboardControlsSidebar: React.FC<DashboardControlsSidebarProps> =
   onUpdateWidgets,
 }) => {
   const [isManageWidgetsDialogOpen, setIsManageWidgetsDialogOpen] = React.useState(false);
+  const [isHovered, setIsHovered] = useState(false); // Новое состояние для отслеживания наведения курсора
+
+  const handleToggleEditMode = () => {
+    setIsEditing((prev) => !prev);
+    // Сбрасываем состояние наведения, чтобы избежать нежелательных эффектов при переключении режима
+    setIsHovered(false); 
+  };
 
   return (
-    <div className="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex flex-col space-y-2 p-2 bg-gray-800 border border-gray-700 rounded-l-lg shadow-lg">
+    <div
+      className={cn(
+        "fixed right-0 top-1/2 -translate-y-1/2 z-50 flex flex-col space-y-2 p-2 bg-gray-800 border border-gray-700 rounded-l-lg shadow-lg transition-transform duration-300 ease-in-out",
+        (isHovered || isEditing) ? "translate-x-0" : "translate-x-[90%]" // Применяем transform в зависимости от наведения или режима редактирования
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setIsEditing((prev) => !prev)}
+        onClick={handleToggleEditMode}
         className="text-gray-300 hover:bg-gray-700 hover:text-white"
         title={isEditing ? "View Mode" : "Edit Mode"}
       >
