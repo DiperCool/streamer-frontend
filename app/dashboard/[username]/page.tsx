@@ -10,6 +10,7 @@ import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-c
 import useLocalStorage from "use-local-storage";
 import { ChatSection } from "@/src/components/chat-section"; // Import ChatSection
 import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDashboard
+import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget"; // Import StreamPreviewWidget
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
@@ -63,9 +64,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Preview</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-              Stream Preview content goes here.
-            </CardContent>
+            <StreamPreviewWidget /> {/* Use the new StreamPreviewWidget */}
           </Card>
         );
       case DashboardWidgetType.ActivityFeed:
