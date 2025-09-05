@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react"
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Save, RotateCcw, Edit, Eye } from "lucide-react" // Removed Plus, Trash2
+import { Save, RotateCcw, Edit, Eye } from "lucide-react"
 import { toast } from "sonner"
 import "react-grid-layout/css/styles.css" // Keep for now if other components use it, but not directly for this layout
 import "react-resizable/css/styles.css" // Keep for now if other components use it, but not directly for this layout
@@ -37,12 +37,12 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   }, []);
 
   return (
-    <div className="flex-1 p-4 relative h-screen-minus-navbar"> {/* Added h-screen-minus-navbar */}
-      <div className="flex items-center justify-between mb-6 pr-16"> {/* Added pr-16 for sidebar */}
+    <div className="flex-1 p-4 relative h-screen-minus-navbar">
+      <div className="flex items-center justify-between mb-6 pr-16">
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
       </div>
 
-      <div className="h-[calc(100%-4rem)]"> {/* Container for PanelGroup to take remaining height */}
+      <div className="h-[calc(100%-4rem)]">
         <PanelGroup direction="horizontal" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY + username + "-main-horizontal"}>
           {/* Left Column */}
           <Panel id="left-column" defaultSize={50} minSize={20}>
@@ -57,7 +57,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
                   </CardContent>
                 </Card>
               </Panel>
-              <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+              <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
               <Panel id="streamPreview-1" defaultSize={44} minSize={20}>
                 <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
                   <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
@@ -68,7 +68,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
                   </CardContent>
                 </Card>
               </Panel>
-              <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+              <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
               <Panel id="activityFeed-1" defaultSize={34} minSize={10}>
                 <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
                   <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
@@ -112,7 +112,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
                   </Panel>
                 </PanelGroup>
               </Panel>
-              <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+              <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
               <Panel id="modActions-1" defaultSize={25} minSize={10}>
                 <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
                   <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
