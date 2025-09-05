@@ -10,9 +10,10 @@ import {
   useGetStreamerQuery,
   useStreamerUpdatedSubscription,
   useGetCurrentStreamQuery,
+  useGetProfileQuery, // Импортируем useGetProfileQuery
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
-import { StreamPlayer } from "@/src/components/stream-player";
+import { StreamPlayer } => "@/src/components/stream-player";
 
 export const StreamPreviewWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
@@ -25,7 +26,13 @@ export const StreamPreviewWidget: React.FC = () => {
   // Fetch current stream data only if streamerData is available and the streamer is live
   const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError } = useGetCurrentStreamQuery({
     variables: { streamerId: activeStreamer?.id ?? "" },
-    skip: !activeStreamer?.id || !streamerData?.streamer?.isLive, // Skip if no activeStreamer ID or if streamer is not live
+    skip: !activeStreamer?.id || !streamerData?.streamer?.isLive,
+  });
+
+  // Fetch profile data to get the offline banner
+  const { data: profileData, loading: profileLoading, error: profileError } = useGetProfileQuery({
+    variables: { streamerId: activeStreamer?.id ?? "" },
+    skip: !activeStreamer?.id, // Skip if no activeStreamer ID
   });
 
   useStreamerUpdatedSubscription({
@@ -38,7 +45,7 @@ export const StreamPreviewWidget: React.FC = () => {
     },
   });
 
-  if (streamerLoading) { // Only check streamerLoading here, currentStreamLoading will be skipped if not live
+  if (streamerLoading || profileLoading || (streamerData?.streamer?.isLive && currentStreamLoading)) {
     return (
       <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -46,20 +53,24 @@ export const StreamPreviewWidget: React.FC = () => {
     );
   }
 
-  if (streamerError) { // Only check streamerError here
+  if (streamerError || profileError || (streamerData?.streamer?.isLive && currentStreamError)) {
     return (
       <CardContent className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
-        Error loading streamer data.
+        Error loading stream or profile data.
       </CardContent>
     );
   }
 
   const streamer = streamerData?.streamer;
+  const profile = profileData?.profile;
   const currentStream = currentStreamData?.currentStream;
+  
   // isLive is true only if streamer is marked as live AND we successfully fetched stream sources
   const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0;
   const streamerName = streamer?.userName || "Streamer";
-  const offlineBanner = "/placeholder.jpg"; // Placeholder for offline banner
+  
+  // Use offlineStreamBanner or channelBanner from profile, fallback to placeholder
+  const offlineBannerImage = profile?.offlineStreamBanner || profile?.channelBanner || "/placeholder.jpg";
 
   return (
     <CardContent className="flex-1 p-0 relative flex items-center justify-center bg-black">
@@ -74,7 +85,7 @@ export const StreamPreviewWidget: React.FC = () => {
       ) : (
         <>
           <Image
-            src={offlineBanner}
+            src={getMinioUrl(offlineBannerImage)} // Используем баннер из профиля
             alt="Offline Banner"
             fill
             style={{ objectFit: "cover" }}
