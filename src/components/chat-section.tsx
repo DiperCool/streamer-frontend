@@ -31,9 +31,10 @@ import { MessageItem } from "@/src/components/chat/message-item"
 import { getMinioUrl } from "@/utils/utils"
 
 interface ChatSectionProps {
-  onCloseChat: () => void
+  onCloseChat?: () => void // Made optional
   streamerId: string
   onScrollToBottom: () => void;
+  hideCardWrapper?: boolean; // New prop
 }
 
 const messageSchema = z.object({
@@ -86,7 +87,7 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
   );
 });
 
-export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatSectionProps) {
+export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCardWrapper = false }: ChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
@@ -519,32 +520,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
   }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId]);
 
 
-  return (
-    <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
-      <CardHeader className="pb-3 flex flex-row items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <CardTitle className="text-white text-lg">Chat</CardTitle>
-          {messagesData?.chatMessages?.pageInfo.hasNextPage && isScrolledToTop && (
-            <Button
-              variant="default"
-              size="icon"
-              onClick={handleLoadMore}
-              disabled={isLoadingMore}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-full p-2 h-8 w-8 flex items-center justify-center"
-            >
-              {isLoadingMore ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <ChevronUp className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-        </div>
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
-          <X className="h-5 w-5" />
-        </Button>
-      </CardHeader>
-
+  const chatContent = (
+    <>
       {/* Pinned Message Display */}
       {pinnedMessage && (
         <div className="bg-blue-900/30 border-b border-blue-800 p-3 flex items-center justify-between text-sm text-blue-200">
@@ -645,6 +622,41 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom }: ChatS
       {errors.message && (
         <p className="text-red-500 text-sm px-4 pb-2">{errors.message.message}</p>
       )}
+    </>
+  );
+
+  if (hideCardWrapper) {
+    return <div className="h-full flex flex-col">{chatContent}</div>;
+  }
+
+  return (
+    <Card className="bg-gray-800 border-gray-700 h-full flex flex-col relative">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <CardTitle className="text-white text-lg">Chat</CardTitle>
+          {messagesData?.chatMessages?.pageInfo.hasNextPage && isScrolledToTop && (
+            <Button
+              variant="default"
+              size="icon"
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+              className="bg-green-600 hover:bg-green-700 text-white rounded-full p-2 h-8 w-8 flex items-center justify-center"
+            >
+              {isLoadingMore ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+        </div>
+        {onCloseChat && ( // Conditionally render close button
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
+            <X className="h-5 w-5" />
+          </Button>
+        )}
+      </CardHeader>
+      {chatContent}
     </Card>
   )
 }

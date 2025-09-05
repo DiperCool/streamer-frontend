@@ -8,6 +8,8 @@ import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
 import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-controls-sidebar"
 import useLocalStorage from "use-local-storage";
+import { ChatSection } from "@/src/components/chat-section"; // Import ChatSection
+import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDashboard
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
@@ -32,80 +34,6 @@ const DEFAULT_ACTIVE_WIDGETS: DashboardWidgetType[] = [
   DashboardWidgetType.ModActions,
 ];
 
-// Helper to render widget content
-const renderWidgetContent = (widgetType: DashboardWidgetType) => {
-  switch (widgetType) {
-    case DashboardWidgetType.SessionInfo:
-      return (
-        <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-            <CardTitle className="text-white text-base">Session Info</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-            Session details go here.
-          </CardContent>
-        </Card>
-      );
-    case DashboardWidgetType.StreamPreview:
-      return (
-        <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-            <CardTitle className="text-white text-base">Stream Preview</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-            Stream Preview content goes here.
-          </CardContent>
-        </Card>
-      );
-    case DashboardWidgetType.ActivityFeed:
-      return (
-        <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-            <CardTitle className="text-white text-base">Activity Feed</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-            Activity Feed content goes here.
-          </CardContent>
-        </Card>
-      );
-    case DashboardWidgetType.Chat:
-      return (
-        <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-            <CardTitle className="text-white text-base">Chat</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-            Chat content goes here.
-          </CardContent>
-        </Card>
-      );
-    case DashboardWidgetType.StreamInfo:
-      return (
-        <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-            <CardTitle className="text-white text-base">Stream Info</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-            Stream information goes here.
-          </CardContent>
-        </Card>
-      );
-    case DashboardWidgetType.ModActions:
-      return (
-        <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-            <CardTitle className="text-white text-base">Mod Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-            Mod Actions content goes here.
-          </CardContent>
-        </Card>
-      );
-    default:
-      return null;
-  }
-};
-
 export default function DashboardHomePage({ params }: { params: { username: string } }) {
   const { username } = params;
   const [isEditing, setIsEditing] = useState(false);
@@ -113,6 +41,85 @@ export default function DashboardHomePage({ params }: { params: { username: stri
     LOCAL_STORAGE_KEY_PREFIX + username + ACTIVE_WIDGETS_KEY_SUFFIX,
     DEFAULT_ACTIVE_WIDGETS
   );
+  const { activeStreamer } = useDashboard(); // Get activeStreamer from context
+
+  // Helper to render widget content
+  const renderWidgetContent = (widgetType: DashboardWidgetType) => {
+    switch (widgetType) {
+      case DashboardWidgetType.SessionInfo:
+        return (
+          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+              <CardTitle className="text-white text-base">Session Info</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+              Session details go here.
+            </CardContent>
+          </Card>
+        );
+      case DashboardWidgetType.StreamPreview:
+        return (
+          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+              <CardTitle className="text-white text-base">Stream Preview</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+              Stream Preview content goes here.
+            </CardContent>
+          </Card>
+        );
+      case DashboardWidgetType.ActivityFeed:
+        return (
+          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+              <CardTitle className="text-white text-base">Activity Feed</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+              Activity Feed content goes here.
+            </CardContent>
+          </Card>
+        );
+      case DashboardWidgetType.Chat:
+        return (
+          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+              <CardTitle className="text-white text-base">Chat</CardTitle>
+            </CardHeader>
+            <div className="flex-1 flex flex-col"> {/* This div ensures ChatSection fills remaining space */}
+              <ChatSection
+                streamerId={activeStreamer?.id ?? ""}
+                onScrollToBottom={() => { /* No-op for dashboard widget */ }}
+                hideCardWrapper={true} // Hide the internal Card wrapper
+              />
+            </div>
+          </Card>
+        );
+      case DashboardWidgetType.StreamInfo:
+        return (
+          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+              <CardTitle className="text-white text-base">Stream Info</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+              Stream information goes here.
+            </CardContent>
+          </Card>
+        );
+      case DashboardWidgetType.ModActions:
+        return (
+          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+              <CardTitle className="text-white text-base">Mod Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+              Mod Actions content goes here.
+            </CardContent>
+          </Card>
+        );
+      default:
+        return null;
+    }
+  };
 
   // Define widget groups for dynamic rendering
   const leftColumnWidgetsOrder = [
