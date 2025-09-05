@@ -124,10 +124,9 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   }, [layout]);
 
   return (
-    <div className="space-y-8 p-4 relative">
-      <div className="flex items-center justify-between mb-6 pr-16">
+    <div className="flex-1 space-y-8 p-4 relative pr-16">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
-        {/* Buttons moved to DashboardControlsSidebar */}
       </div>
 
       <ResponsiveGridLayout
