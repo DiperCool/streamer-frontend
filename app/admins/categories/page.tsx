@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Loader2, Plus, Edit, Trash2, Search } from "lucide-react"
+import { Loader2, Plus, Edit, Trash2, Search, Image as ImageIcon } from "lucide-react" // Добавлен импорт ImageIcon
 import {
   useGetCategoriesQuery,
   useRemoveCategoryMutation,
