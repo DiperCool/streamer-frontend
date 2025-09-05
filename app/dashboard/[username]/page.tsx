@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner"
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
+import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-controls-sidebar" // Import the new sidebar
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -123,70 +124,10 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   }, [layout]);
 
   return (
-    <div className="space-y-8 p-4">
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-8 p-4 relative"> {/* Added relative for sidebar positioning */}
+      <div className="flex items-center justify-between mb-6 pr-16"> {/* Added pr-16 to account for sidebar width */}
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsEditing(prev => !prev)}
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-          >
-            {isEditing ? (
-              <>
-                <Eye className="h-4 w-4 mr-2" /> View Mode
-              </>
-            ) : (
-              <>
-                <Edit className="h-4 w-4 mr-2" /> Edit Mode
-              </>
-            )}
-          </Button>
-
-          {isEditing && (
-            <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="bg-green-600 hover:bg-green-700 text-white">
-                    <Plus className="h-4 w-4 mr-2" /> Add Container
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-48 bg-gray-800 border-gray-700 text-white">
-                  {getAvailableContainerTypes().length > 0 ? (
-                    getAvailableContainerTypes().map(type => (
-                      <DropdownMenuItem
-                        key={type}
-                        onClick={() => addContainer(type)}
-                        className="hover:bg-green-600 hover:text-white cursor-pointer"
-                      >
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <DropdownMenuItem disabled>
-                      All containers added
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Button
-                variant="default"
-                onClick={saveLayout}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Save className="h-4 w-4 mr-2" /> Save Layout
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={resetLayout}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" /> Reset Layout
-              </Button>
-            </>
-          )}
-        </div>
+        {/* Buttons moved to DashboardControlsSidebar */}
       </div>
 
       <ResponsiveGridLayout
@@ -194,7 +135,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
         layouts={{ lg: layout }} // Use 'lg' breakpoint for simplicity
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-        rowHeight={30}
+        rowHeight={50} {/* Increased rowHeight for better visual spacing */}
         isDraggable={isEditing}
         isResizable={isEditing}
         onLayoutChange={(_, allLayouts) => onLayoutChange(allLayouts.lg)}
@@ -233,6 +174,15 @@ export default function DashboardHomePage({ params }: { params: { username: stri
           </div>
         ))}
       </ResponsiveGridLayout>
+
+      <DashboardControlsSidebar
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
+        saveLayout={saveLayout}
+        resetLayout={resetLayout}
+        addContainer={addContainer}
+        getAvailableContainerTypes={getAvailableContainerTypes}
+      />
     </div>
   );
 }
