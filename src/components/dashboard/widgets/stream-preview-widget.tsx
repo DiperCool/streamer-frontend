@@ -6,8 +6,13 @@ import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Camera } from "lucide-react";
 import { useDashboard } from "@/src/contexts/DashboardContext";
-import { useGetStreamerQuery, useStreamerUpdatedSubscription } from "@/graphql/__generated__/graphql";
+import {
+  useGetStreamerQuery,
+  useStreamerUpdatedSubscription,
+  useGetCurrentStreamQuery, // Import useGetCurrentStreamQuery
+} from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
+import { StreamPlayer } from "@/src/components/stream-player"; // Import StreamPlayer
 
 export const StreamPreviewWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
@@ -15,6 +20,11 @@ export const StreamPreviewWidget: React.FC = () => {
   const { data: streamerData, loading: streamerLoading, error: streamerError, refetch } = useGetStreamerQuery({
     variables: { userName: activeStreamer?.userName ?? "" },
     skip: !activeStreamer?.userName,
+  });
+
+  const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError } = useGetCurrentStreamQuery({
+    variables: { streamerId: activeStreamer?.id ?? "" },
+    skip: !activeStreamer?.id,
   });
 
   useStreamerUpdatedSubscription({
@@ -27,7 +37,7 @@ export const StreamPreviewWidget: React.FC = () => {
     },
   });
 
-  if (streamerLoading) {
+  if (streamerLoading || currentStreamLoading) {
     return (
       <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -35,27 +45,30 @@ export const StreamPreviewWidget: React.FC = () => {
     );
   }
 
-  if (streamerError) {
+  if (streamerError || currentStreamError) {
     return (
       <CardContent className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
-        Error loading streamer data.
+        Error loading stream data.
       </CardContent>
     );
   }
 
   const streamer = streamerData?.streamer;
-  const isLive = streamer?.isLive;
+  const currentStream = currentStreamData?.currentStream;
+  const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0;
   const streamerName = streamer?.userName || "Streamer";
   const offlineBanner = "/placeholder.jpg"; // Placeholder for offline banner
 
   return (
     <CardContent className="flex-1 p-0 relative flex items-center justify-center bg-black">
       {isLive ? (
-        <div className="flex flex-col items-center justify-center w-full h-full text-white text-lg font-semibold">
-          <Camera className="h-12 w-12 mb-4 text-green-500" />
-          <span>{streamerName} is LIVE!</span>
-          <span className="text-sm text-gray-400 mt-2">Stream preview will appear here.</span>
-        </div>
+        <StreamPlayer
+          sources={currentStream.sources}
+          playing={true}
+          controls={true}
+          isPlayerMaximized={false} // В виджете предпросмотра плеер не максимизируется
+          onTogglePlayerMaximize={() => {}} // Пустая функция, так как здесь нет кнопки максимизации
+        />
       ) : (
         <>
           <Image
