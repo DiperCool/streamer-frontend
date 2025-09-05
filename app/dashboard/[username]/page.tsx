@@ -1,186 +1,138 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
-import { Responsive, WidthProvider } from "react-grid-layout"
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Save, RotateCcw, Edit, Eye, Trash2 } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Save, RotateCcw, Edit, Eye } from "lucide-react" // Removed Plus, Trash2
 import { toast } from "sonner"
-import "react-grid-layout/css/styles.css"
-import "react-resizable/css/styles.css"
+import "react-grid-layout/css/styles.css" // Keep for now if other components use it, but not directly for this layout
+import "react-resizable/css/styles.css" // Keep for now if other components use it, but not directly for this layout
 import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-controls-sidebar"
-
-const ResponsiveGridLayout = WidthProvider(Responsive)
-
-// Define available container types
-type ContainerType = "chat" | "streamInfo" | "sessionInfo" | "streamPreview" | "activityFeed" | "modActions";
-
-interface DashboardItem {
-  i: string; // Unique ID for the item (e.g., "chat-1", "streamInfo-1")
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  type: ContainerType; // Type of the container
-}
-
-// Default layout for initial setup and reset, based on the provided image
-const DEFAULT_LAYOUT: DashboardItem[] = [
-  { i: "sessionInfo-1", x: 0, y: 0, w: 6, h: 4, type: "sessionInfo" },
-  { i: "streamPreview-1", x: 0, y: 4, w: 6, h: 8, type: "streamPreview" },
-  { i: "activityFeed-1", x: 0, y: 12, w: 6, h: 6, type: "activityFeed" },
-  { i: "chat-1", x: 6, y: 0, w: 3, h: 18, type: "chat" },
-  { i: "streamInfo-1", x: 9, y: 0, w: 3, h: 18, type: "streamInfo" },
-  { i: "modActions-1", x: 6, y: 18, w: 6, h: 6, type: "modActions" },
-];
 
 const LOCAL_STORAGE_KEY = "dashboard_layout_";
 
 export default function DashboardHomePage({ params }: { params: { username: string } }) {
   const { username } = params;
-  const [layout, setLayout] = useState<DashboardItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [nextId, setNextId] = useState(0); // To ensure unique IDs for new items
 
-  // Load layout from localStorage on mount
-  useEffect(() => {
-    const savedLayout = localStorage.getItem(LOCAL_STORAGE_KEY + username);
-    if (savedLayout) {
-      const parsedLayout: DashboardItem[] = JSON.parse(savedLayout);
-      setLayout(parsedLayout);
-      // Determine the next available ID based on existing items
-      const maxId = parsedLayout.reduce((max, item) => {
-        const num = parseInt(item.i.split('-')[1]);
-        return isNaN(num) ? max : Math.max(max, num);
-      }, 0);
-      setNextId(maxId + 1);
-    } else {
-      setLayout(DEFAULT_LAYOUT);
-      setNextId(DEFAULT_LAYOUT.length);
-    }
-  }, [username]);
-
-  // Save layout to localStorage whenever it changes
-  const saveLayout = useCallback(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY + username, JSON.stringify(layout));
-    toast.success("Layout saved successfully!");
-    setIsEditing(false); // Exit edit mode after saving
-  }, [layout, username]);
-
-  // Handle layout changes (drag, resize)
-  const onLayoutChange = useCallback((newLayout: any[]) => {
-    // Merge new layout positions/sizes with existing item types
-    const updatedLayout = layout.map(item => {
-      const newLayoutItem = newLayout.find(l => l.i === item.i);
-      return newLayoutItem ? { ...item, ...newLayoutItem } : item;
-    });
-    setLayout(updatedLayout);
-  }, [layout]);
-
-  // Add a new container
-  const addContainer = useCallback((type: ContainerType) => {
-    const newId = `${type}-${nextId}`;
-    const newContainer: DashboardItem = {
-      i: newId,
-      x: (layout.length * 2) % 12, // Simple placement logic
-      y: Infinity, // Puts it at the bottom
-      w: 4,
-      h: 3,
-      type: type,
-    };
-    setLayout(prevLayout => [...prevLayout, newContainer]);
-    setNextId(prevId => prevId + 1);
-    toast.info(`Added ${type} container.`);
-  }, [layout.length, nextId]);
-
-  // Remove a container
-  const removeContainer = useCallback((id: string) => {
-    setLayout(prevLayout => prevLayout.filter(item => item.i !== id));
-    toast.success("Container removed.");
-  }, []);
-
-  // Reset layout to default
+  // Function to reset layout to default by clearing localStorage for all panel groups
   const resetLayout = useCallback(() => {
     if (window.confirm("Are you sure you want to reset the layout to default?")) {
-      setLayout(DEFAULT_LAYOUT);
-      setNextId(DEFAULT_LAYOUT.length);
-      localStorage.removeItem(LOCAL_STORAGE_KEY + username);
+      localStorage.removeItem(LOCAL_STORAGE_KEY + username + "-main-horizontal");
+      localStorage.removeItem(LOCAL_STORAGE_KEY + username + "-left-vertical");
+      localStorage.removeItem(LOCAL_STORAGE_KEY + username + "-right-vertical");
+      localStorage.removeItem(LOCAL_STORAGE_KEY + username + "-top-right-horizontal");
       toast.success("Layout reset to default.");
       setIsEditing(false); // Exit edit mode after reset
+      // Force a refresh to re-render with default sizes
+      window.location.reload();
     }
   }, [username]);
 
-  // Get available container types (not currently in layout)
-  const getAvailableContainerTypes = useCallback(() => {
-    const existingTypes = new Set(layout.map(item => item.type));
-    const allTypes: ContainerType[] = ["chat", "streamInfo", "sessionInfo", "streamPreview", "activityFeed", "modActions"];
-    return allTypes.filter(type => !existingTypes.has(type));
-  }, [layout]);
+  // Save layout is now handled automatically by autoSaveId, this just shows a toast
+  const saveLayout = useCallback(() => {
+    toast.success("Layout saved successfully!");
+    setIsEditing(false); // Exit edit mode after saving
+  }, []);
 
   return (
-    <div className="flex-1 space-y-8 p-4 relative pr-16">
-      <div className="flex items-center justify-between mb-6">
+    <div className="flex-1 p-4 relative h-screen-minus-navbar"> {/* Added h-screen-minus-navbar */}
+      <div className="flex items-center justify-between mb-6 pr-16"> {/* Added pr-16 for sidebar */}
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
       </div>
 
-      <ResponsiveGridLayout
-        className="layout"
-        layouts={{ lg: layout }} // Use 'lg' breakpoint for simplicity
-        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-        rowHeight={50}
-        isDraggable={isEditing}
-        isResizable={isEditing}
-        onLayoutChange={(_, allLayouts) => onLayoutChange(allLayouts.lg)}
-        measureBeforeMount={true}
-        compactType="vertical"
-        preventCollision={!isEditing} // Prevent collision only in view mode
-      >
-        {layout.map(item => (
-          <div key={item.i} data-grid={{ x: item.x, y: item.y, w: item.w, h: item.h }}>
-            <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-              <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-                <CardTitle className="text-white text-base">
-                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                </CardTitle>
-                {isEditing && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-gray-400 hover:text-red-500"
-                    onClick={() => removeContainer(item.i)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </CardHeader>
-              <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-                {/* Placeholder content for each container type */}
-                {item.type === "chat" && "Chat content goes here."}
-                {item.type === "streamInfo" && "Stream information goes here."}
-                {item.type === "sessionInfo" && "Session details go here."}
-                {item.type === "streamPreview" && "Stream Preview content goes here."}
-                {item.type === "activityFeed" && "Activity Feed content goes here."}
-                {item.type === "modActions" && "Mod Actions content goes here."}
-              </CardContent>
-            </Card>
-          </div>
-        ))}
-      </ResponsiveGridLayout>
+      <div className="h-[calc(100%-4rem)]"> {/* Container for PanelGroup to take remaining height */}
+        <PanelGroup direction="horizontal" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY + username + "-main-horizontal"}>
+          {/* Left Column */}
+          <Panel id="left-column" defaultSize={50} minSize={20}>
+            <PanelGroup direction="vertical" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY + username + "-left-vertical"}>
+              <Panel id="sessionInfo-1" defaultSize={22} minSize={10}>
+                <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+                    <CardTitle className="text-white text-base">Session Info</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+                    Session details go here.
+                  </CardContent>
+                </Card>
+              </Panel>
+              <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+              <Panel id="streamPreview-1" defaultSize={44} minSize={20}>
+                <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+                    <CardTitle className="text-white text-base">Stream Preview</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+                    Stream Preview content goes here.
+                  </CardContent>
+                </Card>
+              </Panel>
+              <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+              <Panel id="activityFeed-1" defaultSize={34} minSize={10}>
+                <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+                    <CardTitle className="text-white text-base">Activity Feed</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+                    Activity Feed content goes here.
+                  </CardContent>
+                </Card>
+              </Panel>
+            </PanelGroup>
+          </Panel>
+
+          <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+
+          {/* Right Column */}
+          <Panel id="right-column" defaultSize={50} minSize={20}>
+            <PanelGroup direction="vertical" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY + username + "-right-vertical"}>
+              <Panel id="top-right-section" defaultSize={75} minSize={30}>
+                <PanelGroup direction="horizontal" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY + username + "-top-right-horizontal"}>
+                  <Panel id="chat-1" defaultSize={50} minSize={20}>
+                    <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+                      <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+                        <CardTitle className="text-white text-base">Chat</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+                        Chat content goes here.
+                      </CardContent>
+                    </Card>
+                  </Panel>
+                  <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+                  <Panel id="streamInfo-1" defaultSize={50} minSize={20}>
+                    <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+                      <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+                        <CardTitle className="text-white text-base">Stream Info</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+                        Stream information goes here.
+                      </CardContent>
+                    </Card>
+                  </Panel>
+                </PanelGroup>
+              </Panel>
+              <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+              <Panel id="modActions-1" defaultSize={25} minSize={10}>
+                <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+                    <CardTitle className="text-white text-base">Mod Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+                    Mod Actions content goes here.
+                  </CardContent>
+                </Card>
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      </div>
 
       <DashboardControlsSidebar
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         saveLayout={saveLayout}
         resetLayout={resetLayout}
-        addContainer={addContainer}
-        getAvailableContainerTypes={getAvailableContainerTypes}
       />
     </div>
   );
