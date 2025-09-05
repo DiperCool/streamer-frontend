@@ -4,7 +4,7 @@ import React from "react"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
-import ReactPlayer from "react-player"; // Импортируем ReactPlayer
+import ReactPlayer from "react-player";
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -13,9 +13,10 @@ interface StreamPlayerProps {
   }>
   isPlayerMaximized: boolean;
   onTogglePlayerMaximize: () => void;
+  showPlayerControls?: boolean; // Новый пропс для управления видимостью элементов управления плеера
 }
 
-export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize }: StreamPlayerProps) {
+export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize, showPlayerControls = true }: StreamPlayerProps) {
 
   const streamSource = sources.find(s => s.sourceType === "HLS") // Или любой другой тип, который ReactPlayer может обработать
   const urlToPlay = streamSource ? streamSource.url : "";
@@ -33,19 +34,21 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
       <ReactPlayer
         src={urlToPlay}
         playing
-        controls={true}
+        controls={showPlayerControls} // Используем новый пропс
         width="100%"
         height="100%"
         className="z-[15]"
       />
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute bottom-4 right-4 z-20 text-white hover:bg-gray-700/50"
-        onClick={onTogglePlayerMaximize}
-      >
-        {isPlayerMaximized ? <Minimize className="h-6 w-6" /> : <Maximize className="h-6 w-6" />}
-      </Button>
+      {showPlayerControls && ( // Условно отображаем кнопку максимизации
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-4 right-4 z-20 text-white hover:bg-gray-700/50"
+          onClick={onTogglePlayerMaximize}
+        >
+          {isPlayerMaximized ? <Minimize className="h-6 w-6" /> : <Maximize className="h-6 w-6" />}
+        </Button>
+      )}
     </div>
   )
 }

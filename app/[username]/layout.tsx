@@ -172,10 +172,11 @@ export default function StreamerProfileLayout({
           {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
             <StreamPlayer
               sources={currentStream.sources}
-              playing={true} // Убедимся, что плеер всегда играет, когда он активен
-              controls={true}
+              playing={true}
+              controls={true} // ReactPlayer controls are still needed for basic playback
               isPlayerMaximized={isPlayerMaximized}
               onTogglePlayerMaximize={handleTogglePlayerMaximize}
+              showPlayerControls={true} // Явно включаем элементы управления плеера
             />
           ) : (
             <Image

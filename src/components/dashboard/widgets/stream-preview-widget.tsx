@@ -10,10 +10,10 @@ import {
   useGetStreamerQuery,
   useStreamerUpdatedSubscription,
   useGetCurrentStreamQuery,
-  useGetProfileQuery, // Импортируем useGetProfileQuery
+  useGetProfileQuery,
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
-import { StreamPlayer } => "@/src/components/stream-player";
+import { StreamPlayer } from "@/src/components/stream-player";
 
 export const StreamPreviewWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
@@ -23,16 +23,14 @@ export const StreamPreviewWidget: React.FC = () => {
     skip: !activeStreamer?.userName,
   });
 
-  // Fetch current stream data only if streamerData is available and the streamer is live
   const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError } = useGetCurrentStreamQuery({
     variables: { streamerId: activeStreamer?.id ?? "" },
     skip: !activeStreamer?.id || !streamerData?.streamer?.isLive,
   });
 
-  // Fetch profile data to get the offline banner
   const { data: profileData, loading: profileLoading, error: profileError } = useGetProfileQuery({
     variables: { streamerId: activeStreamer?.id ?? "" },
-    skip: !activeStreamer?.id, // Skip if no activeStreamer ID
+    skip: !activeStreamer?.id,
   });
 
   useStreamerUpdatedSubscription({
@@ -40,7 +38,7 @@ export const StreamPreviewWidget: React.FC = () => {
     skip: !activeStreamer?.id,
     onData: ({ data }) => {
       if (data.data?.streamerUpdated) {
-        refetch(); // Refetch streamer data to update live status
+        refetch();
       }
     },
   });
@@ -65,27 +63,26 @@ export const StreamPreviewWidget: React.FC = () => {
   const profile = profileData?.profile;
   const currentStream = currentStreamData?.currentStream;
   
-  // isLive is true only if streamer is marked as live AND we successfully fetched stream sources
   const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0;
   const streamerName = streamer?.userName || "Streamer";
   
-  // Use offlineStreamBanner or channelBanner from profile, fallback to placeholder
   const offlineBannerImage = profile?.offlineStreamBanner || profile?.channelBanner || "/placeholder.jpg";
 
   return (
     <CardContent className="flex-1 p-0 relative flex items-center justify-center bg-black">
       {isLive ? (
         <StreamPlayer
-          sources={currentStream!.sources} // currentStream is guaranteed to exist and have sources if isLive is true
+          sources={currentStream!.sources}
           playing={true}
-          controls={true}
+          controls={true} // ReactPlayer controls are still needed for basic playback
           isPlayerMaximized={false}
           onTogglePlayerMaximize={() => {}}
+          showPlayerControls={false} // Отключаем все элементы управления плеера
         />
       ) : (
         <>
           <Image
-            src={getMinioUrl(offlineBannerImage)} // Используем баннер из профиля
+            src={getMinioUrl(offlineBannerImage)}
             alt="Offline Banner"
             fill
             style={{ objectFit: "cover" }}
