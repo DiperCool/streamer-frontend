@@ -7,9 +7,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
   params: { username: string };
 }) {
-  // You can use params.username here if needed for layout-specific logic
+  // Применяем отступ, высоту и flex-контейнер здесь, чтобы все дочерние страницы дашборда имели одинаковый вид.
   return (
-    <div className="flex-1"> {/* Removed container mx-auto px-4 py-8 */}
+    <div className="flex-1 p-4 h-screen-minus-navbar flex flex-col">
       {children}
     </div>
   );

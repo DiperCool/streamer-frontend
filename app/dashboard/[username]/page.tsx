@@ -85,13 +85,16 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Chat</CardTitle>
             </CardHeader>
-            <div className="flex-1 flex flex-col"> {/* This div ensures ChatSection fills remaining space */}
-              <ChatSection
-                streamerId={activeStreamer?.id ?? ""}
-                onScrollToBottom={() => { /* No-op for dashboard widget */ }}
-                hideCardWrapper={true} // Hide the internal Card wrapper
-              />
-            </div>
+            {/* This div ensures ChatSection fills remaining space and is a flex column */}
+            <CardContent className="flex-1 p-0"> 
+              <div className="flex-1 h-full flex flex-col"> 
+                <ChatSection
+                  streamerId={activeStreamer?.id ?? ""}
+                  onScrollToBottom={() => { /* No-op for dashboard widget */ }}
+                  hideCardWrapper={true} // Hide the internal Card wrapper
+                />
+              </div>
+            </CardContent>
           </Card>
         );
       case DashboardWidgetType.StreamInfo:
@@ -205,7 +208,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   const shouldRenderRightColumn = shouldRenderTopRightSection || shouldRenderBottomRightSection;
 
   return (
-    <div className="flex-1 p-4 relative h-screen-minus-navbar flex flex-col"> {/* Added flex flex-col */}
+    <div className="relative h-full flex flex-col"> {/* Removed p-4 and h-screen-minus-navbar */}
       <div className="flex items-center justify-between mb-6 pr-16">
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
       </div>
