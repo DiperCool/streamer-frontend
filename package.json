@@ -66,6 +66,7 @@
     "react-chessboard": "^4.3.0",
     "react-day-picker": "latest",
     "react-dom": "18.3.1",
+    "react-grid-layout": "^1.5.2",
     "react-hook-form": "^7.62.0",
     "react-player": "^3.3.1",
     "react-resizable-panels": "latest",
