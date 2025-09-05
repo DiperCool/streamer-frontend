@@ -9,10 +9,10 @@ import { useDashboard } from "@/src/contexts/DashboardContext";
 import {
   useGetStreamerQuery,
   useStreamerUpdatedSubscription,
-  useGetCurrentStreamQuery, // Import useGetCurrentStreamQuery
+  useGetCurrentStreamQuery,
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
-import { StreamPlayer } from "@/src/components/stream-player"; // Import StreamPlayer
+import { StreamPlayer } from "@/src/components/stream-player";
 
 export const StreamPreviewWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
