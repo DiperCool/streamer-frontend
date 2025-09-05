@@ -22,9 +22,10 @@ export const StreamPreviewWidget: React.FC = () => {
     skip: !activeStreamer?.userName,
   });
 
+  // Fetch current stream data only if streamerData is available and the streamer is live
   const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError } = useGetCurrentStreamQuery({
     variables: { streamerId: activeStreamer?.id ?? "" },
-    skip: !activeStreamer?.id,
+    skip: !activeStreamer?.id || !streamerData?.streamer?.isLive, // Skip if no activeStreamer ID or if streamer is not live
   });
 
   useStreamerUpdatedSubscription({
@@ -37,7 +38,7 @@ export const StreamPreviewWidget: React.FC = () => {
     },
   });
 
-  if (streamerLoading || currentStreamLoading) {
+  if (streamerLoading) { // Only check streamerLoading here, currentStreamLoading will be skipped if not live
     return (
       <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -45,16 +46,17 @@ export const StreamPreviewWidget: React.FC = () => {
     );
   }
 
-  if (streamerError || currentStreamError) {
+  if (streamerError) { // Only check streamerError here
     return (
       <CardContent className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
-        Error loading stream data.
+        Error loading streamer data.
       </CardContent>
     );
   }
 
   const streamer = streamerData?.streamer;
   const currentStream = currentStreamData?.currentStream;
+  // isLive is true only if streamer is marked as live AND we successfully fetched stream sources
   const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0;
   const streamerName = streamer?.userName || "Streamer";
   const offlineBanner = "/placeholder.jpg"; // Placeholder for offline banner
@@ -63,11 +65,11 @@ export const StreamPreviewWidget: React.FC = () => {
     <CardContent className="flex-1 p-0 relative flex items-center justify-center bg-black">
       {isLive ? (
         <StreamPlayer
-          sources={currentStream.sources}
+          sources={currentStream!.sources} // currentStream is guaranteed to exist and have sources if isLive is true
           playing={true}
           controls={true}
-          isPlayerMaximized={false} // В виджете предпросмотра плеер не максимизируется
-          onTogglePlayerMaximize={() => {}} // Пустая функция, так как здесь нет кнопки максимизации
+          isPlayerMaximized={false}
+          onTogglePlayerMaximize={() => {}}
         />
       ) : (
         <>
