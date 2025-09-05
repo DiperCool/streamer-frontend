@@ -18,7 +18,7 @@ import "react-resizable/css/styles.css"
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 // Define available container types
-type ContainerType = "chat" | "streamInfo" | "sessionInfo";
+type ContainerType = "chat" | "streamInfo" | "sessionInfo" | "streamPreview" | "activityFeed" | "modActions";
 
 interface DashboardItem {
   i: string; // Unique ID for the item (e.g., "chat-1", "streamInfo-1")
@@ -29,11 +29,14 @@ interface DashboardItem {
   type: ContainerType; // Type of the container
 }
 
-// Default layout for initial setup and reset
+// Default layout for initial setup and reset, based on the provided image
 const DEFAULT_LAYOUT: DashboardItem[] = [
-  { i: "chat-1", x: 0, y: 0, w: 4, h: 6, type: "chat" },
-  { i: "streamInfo-1", x: 4, y: 0, w: 4, h: 3, type: "streamInfo" },
-  { i: "sessionInfo-1", x: 4, y: 3, w: 4, h: 3, type: "sessionInfo" },
+  { i: "sessionInfo-1", x: 0, y: 0, w: 6, h: 4, type: "sessionInfo" },
+  { i: "streamPreview-1", x: 0, y: 4, w: 6, h: 8, type: "streamPreview" },
+  { i: "activityFeed-1", x: 0, y: 12, w: 6, h: 6, type: "activityFeed" },
+  { i: "chat-1", x: 6, y: 0, w: 3, h: 18, type: "chat" },
+  { i: "streamInfo-1", x: 9, y: 0, w: 3, h: 18, type: "streamInfo" },
+  { i: "modActions-1", x: 6, y: 18, w: 6, h: 6, type: "modActions" },
 ];
 
 const LOCAL_STORAGE_KEY = "dashboard_layout_";
@@ -115,7 +118,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   // Get available container types (not currently in layout)
   const getAvailableContainerTypes = useCallback(() => {
     const existingTypes = new Set(layout.map(item => item.type));
-    const allTypes: ContainerType[] = ["chat", "streamInfo", "sessionInfo"];
+    const allTypes: ContainerType[] = ["chat", "streamInfo", "sessionInfo", "streamPreview", "activityFeed", "modActions"];
     return allTypes.filter(type => !existingTypes.has(type));
   }, [layout]);
 
@@ -222,6 +225,9 @@ export default function DashboardHomePage({ params }: { params: { username: stri
                 {item.type === "chat" && "Chat content goes here."}
                 {item.type === "streamInfo" && "Stream information goes here."}
                 {item.type === "sessionInfo" && "Session details go here."}
+                {item.type === "streamPreview" && "Stream Preview content goes here."}
+                {item.type === "activityFeed" && "Activity Feed content goes here."}
+                {item.type === "modActions" && "Mod Actions content goes here."}
               </CardContent>
             </Card>
           </div>
