@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
 import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-controls-sidebar"
-import { useLocalStorage } from "use-local-storage"; // Import useLocalStorage
+import useLocalStorage from "use-local-storage";
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
@@ -198,45 +198,48 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   const shouldRenderRightColumn = shouldRenderTopRightSection || shouldRenderBottomRightSection;
 
   return (
-    <div className="flex-1 p-4 relative h-screen-minus-navbar">
+    <div className="flex-1 p-4 relative h-screen-minus-navbar flex flex-col"> {/* Added flex flex-col */}
       <div className="flex items-center justify-between mb-6 pr-16">
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
       </div>
 
-      <div className="h-[calc(100%-4rem)]">
-        <PanelGroup direction="horizontal" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY_PREFIX + username + "-main-horizontal"}>
-          {shouldRenderLeftColumn && (
-            <Panel id="left-column" defaultSize={50} minSize={10} order={1}>
-              {renderDynamicPanels(leftColumnWidgetsOrder, "vertical", "-left-vertical")}
-            </Panel>
-          )}
+      {/* This div will now handle horizontal scrolling on smaller screens */}
+      <div className="flex-1 overflow-x-auto lg:overflow-x-hidden"> {/* flex-1 to take remaining vertical space */}
+        <div className="min-w-[1024px] h-full"> {/* min-w to force horizontal scroll, h-full to fill parent */}
+          <PanelGroup direction="horizontal" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY_PREFIX + username + "-main-horizontal"}>
+            {shouldRenderLeftColumn && (
+              <Panel id="left-column" defaultSize={50} minSize={10} order={1}>
+                {renderDynamicPanels(leftColumnWidgetsOrder, "vertical", "-left-vertical")}
+              </Panel>
+            )}
 
-          {shouldRenderLeftColumn && shouldRenderRightColumn && (
-            <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
-          )}
+            {shouldRenderLeftColumn && shouldRenderRightColumn && (
+              <PanelResizeHandle className="w-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+            )}
 
-          {shouldRenderRightColumn && (
-            <Panel id="right-column" defaultSize={50} minSize={10} order={2}>
-              <PanelGroup direction="vertical" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY_PREFIX + username + "-right-vertical"}>
-                {shouldRenderTopRightSection && (
-                  <Panel id="top-right-section" defaultSize={shouldRenderBottomRightSection ? 75 : 100} minSize={10} order={1}>
-                    {renderDynamicPanels(topRightSectionWidgetsOrder, "horizontal", "-top-right-horizontal")}
-                  </Panel>
-                )}
+            {shouldRenderRightColumn && (
+              <Panel id="right-column" defaultSize={50} minSize={10} order={2}>
+                <PanelGroup direction="vertical" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY_PREFIX + username + "-right-vertical"}>
+                  {shouldRenderTopRightSection && (
+                    <Panel id="top-right-section" defaultSize={shouldRenderBottomRightSection ? 75 : 100} minSize={10} order={1}>
+                      {renderDynamicPanels(topRightSectionWidgetsOrder, "horizontal", "-top-right-horizontal")}
+                    </Panel>
+                  )}
 
-                {shouldRenderTopRightSection && shouldRenderBottomRightSection && (
-                  <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
-                )}
+                  {shouldRenderTopRightSection && shouldRenderBottomRightSection && (
+                    <PanelResizeHandle className="h-2 bg-gray-700 hover:bg-green-500 transition-colors" disabled={!isEditing} />
+                  )}
 
-                {shouldRenderBottomRightSection && (
-                  <Panel id="modActions-1" defaultSize={shouldRenderTopRightSection ? 25 : 100} minSize={10} order={2}>
-                    {renderWidgetContent(bottomRightSectionWidget)}
-                  </Panel>
-                )}
-              </PanelGroup>
-            </Panel>
-          )}
-        </PanelGroup>
+                  {shouldRenderBottomRightSection && (
+                    <Panel id="modActions-1" defaultSize={shouldRenderTopRightSection ? 25 : 100} minSize={10} order={2}>
+                      {renderWidgetContent(bottomRightSectionWidget)}
+                    </Panel>
+                  )}
+                </PanelGroup>
+              </Panel>
+            )}
+          </PanelGroup>
+        </div>
       </div>
 
       <DashboardControlsSidebar
