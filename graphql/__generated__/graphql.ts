@@ -36,6 +36,50 @@ export type BooleanOperationFilterInput = {
   neq?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** A connection to a list of items. */
+export type CategoriesConnection = {
+  __typename?: 'CategoriesConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<CategoriesEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<CategoryDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type CategoriesEdge = {
+  __typename?: 'CategoriesEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: CategoryDto;
+};
+
+export type CategoryDto = {
+  __typename?: 'CategoryDto';
+  id: Scalars['UUID']['output'];
+  image: Scalars['String']['output'];
+  slug: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type CategoryDtoFilterInput = {
+  and?: InputMaybe<Array<CategoryDtoFilterInput>>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  image?: InputMaybe<StringOperationFilterInput>;
+  or?: InputMaybe<Array<CategoryDtoFilterInput>>;
+  slug?: InputMaybe<StringOperationFilterInput>;
+  title?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type CategoryDtoSortInput = {
+  id?: InputMaybe<SortEnumType>;
+  image?: InputMaybe<SortEnumType>;
+  slug?: InputMaybe<SortEnumType>;
+  title?: InputMaybe<SortEnumType>;
+};
+
 export type ChatDto = {
   __typename?: 'ChatDto';
   id: Scalars['UUID']['output'];
@@ -124,6 +168,16 @@ export type ChatSettingsDto = {
   subscribersOnly: Scalars['Boolean']['output'];
 };
 
+export type CreateCategoryInput = {
+  image: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type CreateCategoryResponse = {
+  __typename?: 'CreateCategoryResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type CreateMessageInput = {
   chatId: Scalars['UUID']['input'];
   message: Scalars['String']['input'];
@@ -168,6 +222,17 @@ export type DeleteMessageInput = {
 
 export type DeleteMessageResponse = {
   __typename?: 'DeleteMessageResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type EditCategoryInput = {
+  id: Scalars['UUID']['input'];
+  image: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type EditCategoryResponse = {
+  __typename?: 'EditCategoryResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -221,6 +286,7 @@ export type LongOperationFilterInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createCategory: CreateCategoryResponse;
   createMessage: CreateMessageResponse;
   createRole: CreateRoleResponse;
   deleteMessage: DeleteMessageResponse;
@@ -228,17 +294,24 @@ export type Mutation = {
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
+  removeCategory: RemoveCategoryResponse;
   removeRole: RemoveRoleResponse;
   unfollow: UnfollowResponse;
   unpinMessage: UnpinMessageResponse;
   updateAvatar: UpdateAvatarResponse;
   updateBio: UpdateBioResponse;
+  updateCategory: EditCategoryResponse;
   updateChannelBanner: UpdateChannelBannerResponse;
   updateChatSettings: UpdateChatSettingsResponse;
   updateOfflineBanner: UpdateOfflineBannerResponse;
   updateProfile: UpdateProfileResponse;
   updateStreamSettings: UpdateStreamSettingsResponse;
   upload: UploadFileResponse;
+};
+
+
+export type MutationCreateCategoryArgs = {
+  input: CreateCategoryInput;
 };
 
 
@@ -277,6 +350,11 @@ export type MutationPinMessageArgs = {
 };
 
 
+export type MutationRemoveCategoryArgs = {
+  input: RemoveCategoryInput;
+};
+
+
 export type MutationRemoveRoleArgs = {
   input: RemoveRoleInput;
 };
@@ -299,6 +377,11 @@ export type MutationUpdateAvatarArgs = {
 
 export type MutationUpdateBioArgs = {
   input: UpdateBioInput;
+};
+
+
+export type MutationUpdateCategoryArgs = {
+  input: EditCategoryInput;
 };
 
 
@@ -416,6 +499,8 @@ export type ProfileDto = {
 
 export type Query = {
   __typename?: 'Query';
+  categories?: Maybe<CategoriesConnection>;
+  category: CategoryDto;
   chat: ChatDto;
   chatMessages?: Maybe<ChatMessagesConnection>;
   chatMessagesHistory: Array<ChatMessageDto>;
@@ -435,6 +520,22 @@ export type Query = {
   streamers?: Maybe<StreamersConnection>;
   vod: VodDto;
   vods?: Maybe<VodsConnection>;
+};
+
+
+export type QueryCategoriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<CategoryDtoSortInput>>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<CategoryDtoFilterInput>;
+};
+
+
+export type QueryCategoryArgs = {
+  id: Scalars['UUID']['input'];
 };
 
 
@@ -538,6 +639,15 @@ export type QueryVodsArgs = {
   order?: InputMaybe<Array<VodDtoSortInput>>;
   streamerId: Scalars['String']['input'];
   where?: InputMaybe<VodDtoFilterInput>;
+};
+
+export type RemoveCategoryInput = {
+  id: Scalars['UUID']['input'];
+};
+
+export type RemoveCategoryResponse = {
+  __typename?: 'RemoveCategoryResponse';
+  id: Scalars['UUID']['output'];
 };
 
 export type RemoveRoleInput = {
@@ -952,6 +1062,47 @@ export type VodsEdge = {
   node: VodDto;
 };
 
+export type CreateCategoryMutationVariables = Exact<{
+  input: CreateCategoryInput;
+}>;
+
+
+export type CreateCategoryMutation = { __typename?: 'Mutation', createCategory: { __typename?: 'CreateCategoryResponse', id: string } };
+
+export type UpdateCategoryMutationVariables = Exact<{
+  input: EditCategoryInput;
+}>;
+
+
+export type UpdateCategoryMutation = { __typename?: 'Mutation', updateCategory: { __typename?: 'EditCategoryResponse', id: string } };
+
+export type RemoveCategoryMutationVariables = Exact<{
+  input: RemoveCategoryInput;
+}>;
+
+
+export type RemoveCategoryMutation = { __typename?: 'Mutation', removeCategory: { __typename?: 'RemoveCategoryResponse', id: string } };
+
+export type GetCategoriesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<CategoryDtoSortInput> | CategoryDtoSortInput>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<CategoryDtoFilterInput>;
+}>;
+
+
+export type GetCategoriesQuery = { __typename?: 'Query', categories?: { __typename?: 'CategoriesConnection', nodes?: Array<{ __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetCategoryByIdQueryVariables = Exact<{
+  id: Scalars['UUID']['input'];
+}>;
+
+
+export type GetCategoryByIdQuery = { __typename?: 'Query', category: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } };
+
 export type CreateMessageMutationVariables = Exact<{
   request: CreateMessageInput;
 }>;
@@ -1282,6 +1433,213 @@ export type GetVodQueryVariables = Exact<{
 export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 
+export const CreateCategoryDocument = gql`
+    mutation CreateCategory($input: CreateCategoryInput!) {
+  createCategory(input: $input) {
+    id
+  }
+}
+    `;
+export type CreateCategoryMutationFn = Apollo.MutationFunction<CreateCategoryMutation, CreateCategoryMutationVariables>;
+
+/**
+ * __useCreateCategoryMutation__
+ *
+ * To run a mutation, you first call `useCreateCategoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCategoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCategoryMutation, { data, loading, error }] = useCreateCategoryMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCategoryMutation(baseOptions?: Apollo.MutationHookOptions<CreateCategoryMutation, CreateCategoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCategoryMutation, CreateCategoryMutationVariables>(CreateCategoryDocument, options);
+      }
+export type CreateCategoryMutationHookResult = ReturnType<typeof useCreateCategoryMutation>;
+export type CreateCategoryMutationResult = Apollo.MutationResult<CreateCategoryMutation>;
+export type CreateCategoryMutationOptions = Apollo.BaseMutationOptions<CreateCategoryMutation, CreateCategoryMutationVariables>;
+export const UpdateCategoryDocument = gql`
+    mutation UpdateCategory($input: EditCategoryInput!) {
+  updateCategory(input: $input) {
+    id
+  }
+}
+    `;
+export type UpdateCategoryMutationFn = Apollo.MutationFunction<UpdateCategoryMutation, UpdateCategoryMutationVariables>;
+
+/**
+ * __useUpdateCategoryMutation__
+ *
+ * To run a mutation, you first call `useUpdateCategoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCategoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCategoryMutation, { data, loading, error }] = useUpdateCategoryMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCategoryMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCategoryMutation, UpdateCategoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCategoryMutation, UpdateCategoryMutationVariables>(UpdateCategoryDocument, options);
+      }
+export type UpdateCategoryMutationHookResult = ReturnType<typeof useUpdateCategoryMutation>;
+export type UpdateCategoryMutationResult = Apollo.MutationResult<UpdateCategoryMutation>;
+export type UpdateCategoryMutationOptions = Apollo.BaseMutationOptions<UpdateCategoryMutation, UpdateCategoryMutationVariables>;
+export const RemoveCategoryDocument = gql`
+    mutation RemoveCategory($input: RemoveCategoryInput!) {
+  removeCategory(input: $input) {
+    id
+  }
+}
+    `;
+export type RemoveCategoryMutationFn = Apollo.MutationFunction<RemoveCategoryMutation, RemoveCategoryMutationVariables>;
+
+/**
+ * __useRemoveCategoryMutation__
+ *
+ * To run a mutation, you first call `useRemoveCategoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveCategoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeCategoryMutation, { data, loading, error }] = useRemoveCategoryMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useRemoveCategoryMutation(baseOptions?: Apollo.MutationHookOptions<RemoveCategoryMutation, RemoveCategoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveCategoryMutation, RemoveCategoryMutationVariables>(RemoveCategoryDocument, options);
+      }
+export type RemoveCategoryMutationHookResult = ReturnType<typeof useRemoveCategoryMutation>;
+export type RemoveCategoryMutationResult = Apollo.MutationResult<RemoveCategoryMutation>;
+export type RemoveCategoryMutationOptions = Apollo.BaseMutationOptions<RemoveCategoryMutation, RemoveCategoryMutationVariables>;
+export const GetCategoriesDocument = gql`
+    query GetCategories($after: String, $before: String, $first: Int, $last: Int, $order: [CategoryDtoSortInput!], $search: String, $where: CategoryDtoFilterInput) {
+  categories(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    search: $search
+    where: $where
+  ) {
+    nodes {
+      id
+      title
+      slug
+      image
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCategoriesQuery__
+ *
+ * To run a query within a React component, call `useGetCategoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCategoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCategoriesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      search: // value for 'search'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetCategoriesQuery(baseOptions?: Apollo.QueryHookOptions<GetCategoriesQuery, GetCategoriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCategoriesQuery, GetCategoriesQueryVariables>(GetCategoriesDocument, options);
+      }
+export function useGetCategoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCategoriesQuery, GetCategoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCategoriesQuery, GetCategoriesQueryVariables>(GetCategoriesDocument, options);
+        }
+export function useGetCategoriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCategoriesQuery, GetCategoriesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCategoriesQuery, GetCategoriesQueryVariables>(GetCategoriesDocument, options);
+        }
+export type GetCategoriesQueryHookResult = ReturnType<typeof useGetCategoriesQuery>;
+export type GetCategoriesLazyQueryHookResult = ReturnType<typeof useGetCategoriesLazyQuery>;
+export type GetCategoriesSuspenseQueryHookResult = ReturnType<typeof useGetCategoriesSuspenseQuery>;
+export type GetCategoriesQueryResult = Apollo.QueryResult<GetCategoriesQuery, GetCategoriesQueryVariables>;
+export const GetCategoryByIdDocument = gql`
+    query GetCategoryById($id: UUID!) {
+  category(id: $id) {
+    id
+    title
+    slug
+    image
+  }
+}
+    `;
+
+/**
+ * __useGetCategoryByIdQuery__
+ *
+ * To run a query within a React component, call `useGetCategoryByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCategoryByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCategoryByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetCategoryByIdQuery(baseOptions: Apollo.QueryHookOptions<GetCategoryByIdQuery, GetCategoryByIdQueryVariables> & ({ variables: GetCategoryByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCategoryByIdQuery, GetCategoryByIdQueryVariables>(GetCategoryByIdDocument, options);
+      }
+export function useGetCategoryByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCategoryByIdQuery, GetCategoryByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCategoryByIdQuery, GetCategoryByIdQueryVariables>(GetCategoryByIdDocument, options);
+        }
+export function useGetCategoryByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCategoryByIdQuery, GetCategoryByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCategoryByIdQuery, GetCategoryByIdQueryVariables>(GetCategoryByIdDocument, options);
+        }
+export type GetCategoryByIdQueryHookResult = ReturnType<typeof useGetCategoryByIdQuery>;
+export type GetCategoryByIdLazyQueryHookResult = ReturnType<typeof useGetCategoryByIdLazyQuery>;
+export type GetCategoryByIdSuspenseQueryHookResult = ReturnType<typeof useGetCategoryByIdSuspenseQuery>;
+export type GetCategoryByIdQueryResult = Apollo.QueryResult<GetCategoryByIdQuery, GetCategoryByIdQueryVariables>;
 export const CreateMessageDocument = gql`
     mutation CreateMessage($request: CreateMessageInput!) {
   createMessage(request: $request) {
