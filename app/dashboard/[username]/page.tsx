@@ -13,6 +13,7 @@ import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDas
 import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget"; // Import StreamPreviewWidget
 import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget"; // Import StreamInfoWidget
 import { SessionInfoWidget } from "@/src/components/dashboard/widgets/session-info-widget"; // Import SessionInfoWidget
+import { Wifi } from "lucide-react" // Импортируем иконку Wifi
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
