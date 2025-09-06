@@ -69,7 +69,7 @@ export const StreamPreviewWidget: React.FC = () => {
   const offlineBannerImage = profile?.offlineStreamBanner || profile?.channelBanner || "/placeholder.jpg";
 
   return (
-    <div className="flex-1 p-0 relative flex items-center justify-center bg-black">
+    <div className="relative flex items-center justify-center w-full h-full bg-black">
       {isLive ? (
         <StreamPlayer
           sources={currentStream!.sources}
