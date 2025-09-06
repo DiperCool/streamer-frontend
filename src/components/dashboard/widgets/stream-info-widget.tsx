@@ -69,9 +69,9 @@ export const StreamInfoWidget: React.FC = () => {
   const currentCategory = categories.find(cat => cat.id === streamInfo?.categoryId);
 
   return (
-    <div className="flex-1 p-3 flex flex-col space-y-4 overflow-y-auto custom-scrollbar">
+    <div className="flex-1 p-3 flex flex-col overflow-y-auto custom-scrollbar"> {/* Removed space-y-4 */}
       {/* Title */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4"> {/* Added mb-4 */}
         <h3 className="text-lg font-semibold text-white">{streamInfo?.title || "Untitled Stream"}</h3>
         <Button
           variant="ghost"
@@ -84,7 +84,7 @@ export const StreamInfoWidget: React.FC = () => {
       </div>
 
       {/* Category (Image + Title), Language and Tags */}
-      <div className="flex items-start space-x-4"> {/* Main container for category block */}
+      <div className="flex items-start space-x-4 mb-4"> {/* Added mb-4 */}
         {currentCategory ? (
           <>
             <Avatar className="h-12 w-12 rounded-md"> {/* Increased size */}
