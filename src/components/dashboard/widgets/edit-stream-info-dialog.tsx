@@ -43,7 +43,11 @@ const streamInfoSchema = z.object({
   language: z.string().min(1, "Language is required"),
   categoryId: z.string().uuid("Invalid category ID").nullable(),
   tagsInput: z.string().optional(), // For the input field to add new tags
-  tags: z.array(z.string()).max(10, "You can add up to 10 tags").optional(), // Actual tags array
+  tags: z.array(z.string()
+    .min(1, "Tag cannot be empty")
+    .max(25, "Tag must be at most 25 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Tags can only contain letters, numbers, and underscores")
+  ).max(10, "You can add up to 10 tags").optional(), // Actual tags array
 });
 
 type StreamInfoFormValues = z.infer<typeof streamInfoSchema>;
@@ -112,17 +116,51 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
   }, [isOpen, streamInfoData, reset, clearErrors]);
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && tagsInput && currentTags.length < 10) {
+    if (e.key === "Enter") {
       e.preventDefault();
-      const newTag = tagsInput.trim();
-      if (newTag && !currentTags.includes(newTag)) {
-        setValue("tags", [...currentTags, newTag], { shouldDirty: true });
+      const inputVal = tagsInput.trim();
+      if (!inputVal) return;
+
+      const newTagsToAdd = inputVal
+        .split(/[, ]+/) // Split by commas or spaces
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+
+      let updatedTags = [...currentTags];
+      let hasError = false;
+      let errorMessage = "";
+
+      for (const newTag of newTagsToAdd) {
+        if (updatedTags.length >= 10) {
+          errorMessage = "Max 10 tags reached.";
+          hasError = true;
+          break;
+        }
+        if (newTag.length > 25) {
+          errorMessage = `Tag "${newTag}" is too long (max 25 characters).`;
+          hasError = true;
+          break;
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(newTag)) {
+          errorMessage = `Tag "${newTag}" contains invalid characters. Only letters, numbers, and underscores are allowed.`;
+          hasError = true;
+          break;
+        }
+        if (updatedTags.includes(newTag)) {
+          errorMessage = `Tag "${newTag}" already exists.`;
+          hasError = true;
+          break;
+        }
+        updatedTags.push(newTag);
+      }
+
+      if (hasError) {
+        setError("tagsInput", { type: "manual", message: errorMessage });
+      } else {
+        setValue("tags", updatedTags, { shouldDirty: true, shouldValidate: true });
         setValue("tagsInput", "");
-        clearErrors("tags");
-      } else if (currentTags.includes(newTag)) {
-        setError("tagsInput", { type: "manual", message: "Tag already exists" });
-      } else if (currentTags.length >= 10) {
-        setError("tagsInput", { type: "manual", message: "Max 10 tags reached" });
+        clearErrors("tagsInput");
+        clearErrors("tags"); // Clear array-level errors too
       }
     }
   };
@@ -209,7 +247,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
                 id="tagsInput"
                 type="text"
                 {...register("tagsInput")}
-                placeholder="Choose your own tag"
+                placeholder="Choose your own tag (comma-separated)"
                 onKeyDown={handleAddTag}
                 className="bg-gray-700 border-gray-600 text-white focus:border-green-500"
               />
@@ -232,7 +270,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
                 ))}
               </div>
               <p className="text-sm text-gray-400 mt-1">
-                Add up to 10 tags (Max 25 characters, no spaces or symbols). {currentTags.length} / 10
+                Add up to 10 tags (Max 25 characters, only letters, numbers, and underscores). {currentTags.length} / 10
               </p>
               {errors.tags && (
                 <p className="text-red-500 text-sm mt-1">{errors.tags.message}</p>
