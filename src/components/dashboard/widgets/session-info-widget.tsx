@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Wifi } from "lucide-react";
+import { Loader2, Wifi } from "lucide-react"; // Добавлен импорт Wifi
 import { useDashboard } from "@/src/contexts/DashboardContext";
 import {
   useGetCurrentStreamQuery,
