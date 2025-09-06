@@ -12,7 +12,7 @@ import {
   useStreamUpdatedSubscription,
   GetStreamerDocument,
   GetCurrentStreamDocument,
-  useGetStreamInfoQuery // Import useGetStreamInfoQuery
+  useGetStreamInfoQuery
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -36,9 +36,7 @@ export default function StreamerProfileLayout({
   const pathname = usePathname()
   const client = useApolloClient();
 
-  // Состояние видимости чата
   const [isChatVisible, setIsChatVisible] = useState(true); 
-  // Состояние максимизации плеера, теперь управляется локально
   const [isPlayerMaximized, setIsPlayerMaximized] = useState(false);
 
   const { data: streamerData, loading: streamerLoading, refetch: refetchStreamer } = useGetStreamerQuery({
@@ -53,7 +51,6 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   });
 
-  // Fetch stream info for offline display
   const { data: streamInfoData, loading: streamInfoLoading } = useGetStreamInfoQuery({
     variables: { streamerId: streamerData?.streamer.id ?? "" },
     skip: !streamerData?.streamer.id,
@@ -67,7 +64,7 @@ export default function StreamerProfileLayout({
   useWatchStreamSubscription({
     variables: { streamId: currentStreamData?.currentStream?.id ?? "" },
     skip: !currentStreamData?.currentStream?.id,
-    onData: ({ data }) => { /* Nothing to do */ },
+    onData: ({ data }) => { },
   });
   useStreamUpdatedSubscription({
     variables: { streamId: currentStreamData?.currentStream?.id ?? "" },
@@ -100,17 +97,15 @@ export default function StreamerProfileLayout({
     },
   });
 
-  // Ref для контейнера чата, чтобы прокручивать его
   const chatPanelRef = useRef<HTMLDivElement>(null);
 
-  // Функция для прокрутки панели чата до конца
   const scrollChatPanelToBottom = useCallback(() => {
     if (chatPanelRef.current) {
       chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
     }
   }, []);
 
-  if (streamerLoading || profileLoading || currentStreamLoading || streamInfoLoading) { // Add streamInfoLoading
+  if (streamerLoading || profileLoading || currentStreamLoading || streamInfoLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
@@ -121,7 +116,7 @@ export default function StreamerProfileLayout({
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
   const currentStream = currentStreamData?.currentStream;
-  const streamInfo = streamInfoData?.streamInfo; // Get stream info
+  const streamInfo = streamInfoData?.streamInfo;
   const isLive = streamer?.isLive;
 
   if (!streamer || !streamerProfile) {
@@ -134,7 +129,6 @@ export default function StreamerProfileLayout({
 
   const bannerImage = streamerProfile.offlineStreamBanner || streamerProfile.channelBanner || "/placeholder.jpg"
 
-  // Локальное переключение состояния максимизации плеера
   const handleTogglePlayerMaximize = () => {
     setIsPlayerMaximized(prev => !prev);
   };
@@ -142,8 +136,6 @@ export default function StreamerProfileLayout({
   const getActiveTab = () => {
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
-    // Если плеер максимизирован, вкладки скрыты, поэтому активная вкладка не имеет значения для UI
-    // Но для логики можно оставить 'home' или текущую вкладку, если это важно для других частей
     if (lastSegment === username) return 'home';
     if (lastSegment === 'about') return 'about';
     if (lastSegment === 'videos') return 'videos';
@@ -153,26 +145,23 @@ export default function StreamerProfileLayout({
   const activeTab = getActiveTab();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse"> {/* Основной контейнер: вертикальный на мобильных, горизонтальный (обратный порядок) на больших */}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse">
 
-      {/* Чат (закреплен справа на больших экранах) */}
       <div
-        ref={chatPanelRef} // Добавлен ref
+        ref={chatPanelRef}
         className={cn(
           "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
-          isChatVisible ? "translate-x-0" : "translate-x-full", // Используем translateX для плавной анимации
-          "hidden lg:flex" // Скрываем на маленьких экранах, отображаем как flex на больших
+          isChatVisible ? "translate-x-0" : "translate-x-full",
+          "hidden lg:flex"
         )}
       >
         <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
       </div>
 
-      {/* Основная область контента (плеер, инфо-панель, вкладки) */}
       <div className={cn(
           "flex-1 flex flex-col transition-all duration-300 ease-in-out",
-          isChatVisible ? "lg:mr-80" : "", // Применяем lg:mr-80 только если чат виден
+          isChatVisible ? "lg:mr-80" : "",
       )}>
-        {/* Секция плеера */}
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
           isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
@@ -181,10 +170,10 @@ export default function StreamerProfileLayout({
             <StreamPlayer
               sources={currentStream.sources}
               playing={true}
-              controls={true} // ReactPlayer controls are still needed for basic playback
+              controls={true}
               isPlayerMaximized={isPlayerMaximized}
               onTogglePlayerMaximize={handleTogglePlayerMaximize}
-              showPlayerControls={true} // Явно включаем элементы управления плеера
+              showPlayerControls={true}
             />
           ) : (
             <Image
@@ -198,7 +187,6 @@ export default function StreamerProfileLayout({
             />
           )}
 
-          {/* Кнопка "Показать чат" (только если чат скрыт) */}
           {!isChatVisible && (
             <Button
               variant="outline"
@@ -210,7 +198,6 @@ export default function StreamerProfileLayout({
           )}
         </div>
 
-        {/* Инфо-панель стримера */}
         <div className={cn(
           "transition-all duration-300 ease-in-out relative z-30",
           isPlayerMaximized ? "px-4 py-2" : "container mx-auto px-4 py-2"
@@ -219,14 +206,13 @@ export default function StreamerProfileLayout({
             streamer={streamer}
             profile={streamerProfile}
             currentStream={currentStream}
-            streamInfo={streamInfo} {/* Pass streamInfo here */}
+            streamInfo={streamInfo}
             isCurrentUserProfile={false}
             isLive={isLive ?? false}
             onTogglePlayerMaximize={handleTogglePlayerMaximize}
           />
         </div>
 
-        {/* Контейнер вкладок и дочернего контента (скрывается, когда плеер максимизирован) */}
         <div className={cn(
           "flex-grow transition-all duration-300 ease-in-out",
           isPlayerMaximized ? "hidden" : "container mx-auto px-4 py-2"
@@ -252,11 +238,10 @@ export default function StreamerProfileLayout({
           {children}
         </div>
 
-        {/* Чат (отображается на маленьких экранах, если чат виден) */}
         {isChatVisible && (
           <div
-            ref={chatPanelRef} // Добавлен ref
-            className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh] overflow-y-auto" // Добавлен overflow-y-auto
+            ref={chatPanelRef}
+            className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh] overflow-y-auto"
           >
             <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
           </div>
