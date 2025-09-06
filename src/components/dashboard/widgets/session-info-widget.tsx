@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Wifi } from "lucide-react"; // Добавлен импорт Wifi
+import { Loader2, Wifi } from "lucide-react";
 import { useDashboard } from "@/src/contexts/DashboardContext";
 import {
   useGetCurrentStreamQuery,
@@ -38,30 +38,28 @@ export const SessionInfoWidget: React.FC = () => {
   const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError, refetch: refetchCurrentStream } = useGetCurrentStreamQuery({
     variables: { streamerId },
     skip: !streamerId,
-    pollInterval: 5000, // Poll every 5 seconds to catch status changes if subscription fails
+    // pollInterval: 5000, // Удален pollInterval, так как используем подписки
   });
 
-  const { data: streamerData, loading: streamerLoading, error: streamerError, refetch: refetchStreamer } = useDashboard(); // Use useDashboard to get streamer data
-
-  // Subscribe to real-time stream updates
+  // Подписка на обновления стрима в реальном времени
   useStreamUpdatedSubscription({
     variables: { streamId: currentStreamData?.currentStream?.id ?? "" },
     skip: !currentStreamData?.currentStream?.id,
     onData: ({ data }) => {
       if (data.data?.streamUpdated) {
-        refetchCurrentStream(); // Refetch current stream data on update
+        refetchCurrentStream(); // Перезапрашиваем данные текущего стрима при обновлении
       }
     },
   });
 
-  // Subscribe to streamer updates (e.g., isLive status change)
+  // Подписка на обновления стримера (например, изменение статуса isLive)
   useStreamerUpdatedSubscription({
     variables: { streamerId },
     skip: !streamerId,
     onData: ({ data }) => {
       if (data.data?.streamerUpdated) {
-        refetchStreamer(); // Refetch streamer data to update isLive status
-        refetchCurrentStream(); // Also refetch current stream data
+        // refetchStreamer(); // Удален, так как activeStreamer из контекста уже реактивен
+        refetchCurrentStream(); // Также перезапрашиваем данные текущего стрима
       }
     },
   });
@@ -69,7 +67,7 @@ export const SessionInfoWidget: React.FC = () => {
   const isLive = currentStreamData?.currentStream?.active ?? false;
   const startedAt = currentStreamData?.currentStream?.started;
   const currentViewers = currentStreamData?.currentStream?.currentViewers ?? 0;
-  const streamerFollowers = activeStreamer?.followers ?? 0; // Assuming activeStreamer has followers
+  // const streamerFollowers = activeStreamer?.followers ?? 0; // activeStreamer уже содержит followers
 
   // Effect to update "Time Live" every second when live
   useEffect(() => {
@@ -87,7 +85,7 @@ export const SessionInfoWidget: React.FC = () => {
     };
   }, [isLive, startedAt]);
 
-  if (currentStreamLoading || streamerLoading) {
+  if (currentStreamLoading) { // Только currentStreamLoading, так как остальное обрабатывается в DashboardProvider
     return (
       <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -95,7 +93,7 @@ export const SessionInfoWidget: React.FC = () => {
     );
   }
 
-  if (currentStreamError || streamerError) {
+  if (currentStreamError) { // Только currentStreamError
     return (
       <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
         Error loading session info.
