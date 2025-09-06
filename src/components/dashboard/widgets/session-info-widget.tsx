@@ -10,8 +10,10 @@ import {
   useStreamUpdatedSubscription,
   useStreamerUpdatedSubscription,
   useGetStreamerQuery, // Добавлен импорт useGetStreamerQuery
+  GetCurrentStreamDocument, // Импортируем документ запроса
 } from "@/graphql/__generated__/graphql";
 import { formatDistanceToNowStrict, intervalToDuration, formatDuration } from "date-fns";
+import { useApolloClient } from "@apollo/client"; // Импортируем useApolloClient
 
 // Helper function to format duration in HH:MM:SS
 const formatLiveDuration = (startDate: string | null | undefined): string => {
@@ -35,6 +37,7 @@ export const SessionInfoWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
   const streamerId = activeStreamer?.id ?? "";
   const [timeLive, setTimeLive] = useState("00:00:00");
+  const client = useApolloClient(); // Инициализируем Apollo Client
 
   // Получаем данные стримера, чтобы определить статус isLive
   const { data: streamerStatusData, loading: streamerStatusLoading, refetch: refetchStreamerStatus } = useGetStreamerQuery({
@@ -54,10 +57,39 @@ export const SessionInfoWidget: React.FC = () => {
     variables: { streamId: currentStreamData?.currentStream?.id ?? "" },
     skip: !currentStreamData?.currentStream?.id,
     onData: ({ data }) => {
-      // Удален вызов refetchCurrentStream(), так как данные должны обновляться через саму подписку
-      // if (data.data?.streamUpdated) {
-      //   refetchCurrentStream(); 
-      // }
+      const updatedStream = data.data?.streamUpdated;
+      if (updatedStream) {
+        client.cache.updateQuery(
+          {
+            query: GetCurrentStreamDocument,
+            variables: { streamerId: streamerId },
+          },
+          (prev) => {
+            if (!prev || !prev.currentStream) {
+              return prev;
+            }
+            return {
+              ...prev,
+              currentStream: {
+                ...prev.currentStream,
+                ...updatedStream,
+                streamer: {
+                  ...prev.currentStream.streamer,
+                  ...updatedStream.streamer,
+                  __typename: 'StreamerDto',
+                },
+                category: updatedStream.category ? {
+                  ...prev.currentStream.category,
+                  ...updatedStream.category,
+                  __typename: 'CategoryDto',
+                } : prev.currentStream.category,
+                tags: updatedStream.tags || [],
+                __typename: 'StreamDto',
+              },
+            };
+          }
+        );
+      }
     },
   });
 
