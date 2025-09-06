@@ -73,11 +73,9 @@ export const StreamPreviewWidget: React.FC = () => {
       {isLive ? (
         <StreamPlayer
           sources={currentStream!.sources}
-          playing={true}
-          controls={true} // ReactPlayer controls are still needed for basic playback
           isPlayerMaximized={false}
           onTogglePlayerMaximize={() => {}}
-          showPlayerControls={false} // Отключаем все элементы управления плеера
+          showPlayerControls={false}
         />
       ) : (
         <>

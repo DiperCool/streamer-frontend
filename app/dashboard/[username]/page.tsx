@@ -11,6 +11,7 @@ import useLocalStorage from "use-local-storage";
 import { ChatSection } from "@/src/components/chat-section"; // Import ChatSection
 import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDashboard
 import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget"; // Import StreamPreviewWidget
+import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget"; // Import StreamInfoWidget
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
@@ -21,7 +22,7 @@ export enum DashboardWidgetType {
   StreamPreview = "StreamPreview",
   ActivityFeed = "ActivityFeed",
   Chat = "Chat",
-  StreamInfo = "StreamInfo",
+  StreamInfo = "StreamInfo", // Added StreamInfo
   ModActions = "ModActions",
 }
 
@@ -31,7 +32,7 @@ const DEFAULT_ACTIVE_WIDGETS: DashboardWidgetType[] = [
   DashboardWidgetType.StreamPreview,
   DashboardWidgetType.ActivityFeed,
   DashboardWidgetType.Chat,
-  DashboardWidgetType.StreamInfo,
+  DashboardWidgetType.StreamInfo, // Added StreamInfo
   DashboardWidgetType.ModActions,
 ];
 
@@ -96,15 +97,13 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             </CardContent>
           </Card>
         );
-      case DashboardWidgetType.StreamInfo:
+      case DashboardWidgetType.StreamInfo: // New case for StreamInfo
         return (
           <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Info</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-              Stream information goes here.
-            </CardContent>
+            <StreamInfoWidget /> {/* Use the new StreamInfoWidget */}
           </Card>
         );
       case DashboardWidgetType.ModActions:
@@ -131,7 +130,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   ];
   const topRightSectionWidgetsOrder = [
     DashboardWidgetType.Chat,
-    DashboardWidgetType.StreamInfo,
+    DashboardWidgetType.StreamInfo, // Added StreamInfo here
   ];
   const bottomRightSectionWidget = DashboardWidgetType.ModActions; // Single widget for this section
 

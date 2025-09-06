@@ -155,6 +155,7 @@ type Mutation {
     updateChatSettings(request: UpdateChatSettingsInput!): UpdateChatSettingsResponse!
     updateOfflineBanner(input: UpdateOfflineBannerInput!): UpdateOfflineBannerResponse!
     updateProfile(input: UpdateProfileInput!): UpdateProfileResponse!
+    updateStreamInfo(streamInfo: UpdateStreamInfoInput!): UpdateStreamInfoResponse!
     updateStreamSettings: UpdateStreamSettingsResponse!
     upload(input: UploadFileInput!): UploadFileResponse!
 }
@@ -285,6 +286,7 @@ type Query {
         roleType: RoleType!,
         where: RoleDtoFilterInput
     ): RolesConnection
+    streamInfo(streamerId: String!): StreamInfoDto!
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
     streamerInteraction(streamerId: String!): StreamerInteractionDto!
@@ -355,12 +357,26 @@ type RolesEdge {
 
 type StreamDto {
     active: Boolean!
+    category: CategoryDto
+    categoryId: UUID
     currentViewers: Long!
     id: UUID!
+    language: String!
     sources: [StreamSourceDto!]!
     streamer: StreamerDto
     streamerId: String!
+    tags: [TagDto!]!
     title: String!
+}
+
+type StreamInfoDto {
+    category: CategoryDto
+    categoryId: UUID
+    id: UUID!
+    language: String!
+    streamerId: String!
+    tags: [TagDto!]!
+    title: String
 }
 
 type StreamSettingsDto {
@@ -435,6 +451,11 @@ type SystemRoleDto {
     streamerId: String!
 }
 
+type TagDto {
+    id: UUID!
+    title: String!
+}
+
 type UnfollowResponse {
     id: UUID!
 }
@@ -467,6 +488,10 @@ type UpdateProfileResponse {
     id: UUID!
 }
 
+type UpdateStreamInfoResponse {
+    id: UUID!
+}
+
 type UpdateStreamSettingsResponse {
     id: UUID!
 }
@@ -476,14 +501,18 @@ type UploadFileResponse {
 }
 
 type VodDto {
+    category: CategoryDto
+    categoryId: UUID
     createdAt: DateTime!
     description: String
     duration: Long!
     id: UUID!
+    language: String!
     preview: String
     source: String
     streamer: StreamerDto
     streamerId: String!
+    tags: [TagDto!]!
     title: String
     views: Long!
 }
@@ -796,6 +825,14 @@ input UpdateProfileInput {
     youtube: String
 }
 
+input UpdateStreamInfoInput {
+    categoryId: UUID
+    language: String!
+    streamerId: String!
+    tags: [String!]!
+    title: String!
+}
+
 input UploadFileInput {
     file: Upload!
 }
@@ -817,10 +854,12 @@ input UuidOperationFilterInput {
 
 input VodDtoFilterInput {
     and: [VodDtoFilterInput!]
+    categoryId: UuidOperationFilterInput
     createdAt: DateTimeOperationFilterInput
     description: StringOperationFilterInput
     duration: LongOperationFilterInput
     id: UuidOperationFilterInput
+    language: StringOperationFilterInput
     or: [VodDtoFilterInput!]
     preview: StringOperationFilterInput
     source: StringOperationFilterInput
@@ -830,10 +869,12 @@ input VodDtoFilterInput {
 }
 
 input VodDtoSortInput {
+    categoryId: SortEnumType
     createdAt: SortEnumType
     description: SortEnumType
     duration: SortEnumType
     id: SortEnumType
+    language: SortEnumType
     preview: SortEnumType
     source: SortEnumType
     streamerId: SortEnumType

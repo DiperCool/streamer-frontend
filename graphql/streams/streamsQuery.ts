@@ -8,6 +8,7 @@ export const GET_CURRENT_STREAM = gql`
             active
             title
             currentViewers
+            language
             streamer {
                 id
                 isLive
@@ -20,6 +21,16 @@ export const GET_CURRENT_STREAM = gql`
                 url
                 sourceType
             }
+            category {
+                id
+                title
+                slug
+                image
+            }
+            tags {
+                id
+                title
+            }
         }
     }
 `
@@ -30,6 +41,26 @@ export const GET_STREAM_SETTINGS = gql`
             id
             streamKey
             streamUrl
+        }
+    }
+`
+
+export const GET_STREAM_INFO = gql`
+    query GetStreamInfo($streamerId: String!) {
+        streamInfo(streamerId: $streamerId) {
+            id
+            streamerId
+            title
+            language
+            categoryId
+            category {
+                id
+                title
+            }
+            tags {
+                id
+                title
+            }
         }
     }
 `

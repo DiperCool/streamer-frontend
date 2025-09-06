@@ -7,11 +7,22 @@ export const STREAM_UPDATED_SUBSCRIPTION = gql`
             active
             title
             currentViewers
+            language
             streamer {
                 id
                 userName
                 avatar
                 followers
+            }
+            category {
+                id
+                title
+                slug
+                image
+            }
+            tags {
+                id
+                title
             }
         }
     }

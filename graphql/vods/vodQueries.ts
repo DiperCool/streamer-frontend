@@ -27,11 +27,20 @@ export const GET_VODS = gql`
                 source
                 views
                 createdAt
-                duration # Added duration
+                duration
+                language
                 streamer {
                     id
                     userName
                     avatar
+                }
+                category {
+                    id
+                    title
+                }
+                tags {
+                    id
+                    title
                 }
             }
             pageInfo {
@@ -55,10 +64,19 @@ export const GET_VOD = gql`
             views
             createdAt
             duration
+            language
             streamer {
                 id
                 userName
                 avatar
+            }
+            category {
+                id
+                title
+            }
+            tags {
+                id
+                title
             }
         }
     }

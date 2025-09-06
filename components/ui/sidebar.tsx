@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog } from "lucide-react"
+import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog, Info } from "lucide-react" // Added Info icon
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav"
@@ -57,6 +57,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                   </Link>
 
                   <CollapsibleSidebarNav title="Channel" icon={<Monitor />} active={isChannelActive}>
+                    <Link href={`${dashboardBaseUrl}/channel/stream-info`} passHref> {/* New item */}
+                      <SidebarNavItem icon={<Info />} active={pathname === `${dashboardBaseUrl}/channel/stream-info`}>
+                        Stream Info
+                      </SidebarNavItem>
+                    </Link>
                     <Link href={`${dashboardBaseUrl}/channel/chat`} passHref>
                       <SidebarNavItem icon={<MessageSquare />} active={pathname === `${dashboardBaseUrl}/channel/chat`}>
                         Chat

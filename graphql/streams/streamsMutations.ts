@@ -7,3 +7,11 @@ export const UPDATE_STREAM_SETTINGS = gql`
         }
     }
 `
+
+export const UPDATE_STREAM_INFO = gql`
+    mutation UpdateStreamInfo($streamInfo: UpdateStreamInfoInput!) {
+        updateStreamInfo(streamInfo: $streamInfo) {
+            id
+        }
+    }
+`
