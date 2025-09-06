@@ -363,6 +363,7 @@ type StreamDto {
     id: UUID!
     language: String!
     sources: [StreamSourceDto!]!
+    started: DateTime!
     streamer: StreamerDto
     streamerId: String!
     tags: [TagDto!]!

@@ -9,6 +9,7 @@ export const GET_CURRENT_STREAM = gql`
             title
             currentViewers
             language
+            started # Добавлено новое поле
             streamer {
                 id
                 isLive

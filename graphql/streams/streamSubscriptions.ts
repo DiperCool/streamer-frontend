@@ -8,6 +8,7 @@ export const STREAM_UPDATED_SUBSCRIPTION = gql`
             title
             currentViewers
             language
+            started # Добавлено новое поле
             streamer {
                 id
                 userName
