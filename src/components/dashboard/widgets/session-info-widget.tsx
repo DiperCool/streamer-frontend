@@ -9,6 +9,7 @@ import {
   useGetCurrentStreamQuery,
   useStreamUpdatedSubscription,
   useStreamerUpdatedSubscription,
+  useGetStreamerQuery, // Добавлен импорт useGetStreamerQuery
 } from "@/graphql/__generated__/graphql";
 import { formatDistanceToNowStrict, intervalToDuration, formatDuration } from "date-fns";
 
@@ -35,10 +36,17 @@ export const SessionInfoWidget: React.FC = () => {
   const streamerId = activeStreamer?.id ?? "";
   const [timeLive, setTimeLive] = useState("00:00:00");
 
+  // Получаем данные стримера, чтобы определить статус isLive
+  const { data: streamerStatusData, loading: streamerStatusLoading, refetch: refetchStreamerStatus } = useGetStreamerQuery({
+    variables: { userName: activeStreamer?.userName ?? "" },
+    skip: !activeStreamer?.userName,
+  });
+
+  const isStreamerActuallyLive = streamerStatusData?.streamer?.isLive ?? false;
+
   const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError, refetch: refetchCurrentStream } = useGetCurrentStreamQuery({
     variables: { streamerId },
-    skip: !streamerId,
-    // pollInterval: 5000, // Удален pollInterval, так как используем подписки
+    skip: !streamerId || !isStreamerActuallyLive, // Пропускаем запрос, если стример не в сети
   });
 
   // Подписка на обновления стрима в реальном времени
@@ -58,7 +66,7 @@ export const SessionInfoWidget: React.FC = () => {
     skip: !streamerId,
     onData: ({ data }) => {
       if (data.data?.streamerUpdated) {
-        // refetchStreamer(); // Удален, так как activeStreamer из контекста уже реактивен
+        refetchStreamerStatus(); // Перезапрашиваем статус стримера
         refetchCurrentStream(); // Также перезапрашиваем данные текущего стрима
       }
     },
@@ -67,7 +75,6 @@ export const SessionInfoWidget: React.FC = () => {
   const isLive = currentStreamData?.currentStream?.active ?? false;
   const startedAt = currentStreamData?.currentStream?.started;
   const currentViewers = currentStreamData?.currentStream?.currentViewers ?? 0;
-  // const streamerFollowers = activeStreamer?.followers ?? 0; // activeStreamer уже содержит followers
 
   // Effect to update "Time Live" every second when live
   useEffect(() => {
@@ -85,7 +92,7 @@ export const SessionInfoWidget: React.FC = () => {
     };
   }, [isLive, startedAt]);
 
-  if (currentStreamLoading) { // Только currentStreamLoading, так как остальное обрабатывается в DashboardProvider
+  if (streamerStatusLoading || (isStreamerActuallyLive && currentStreamLoading)) {
     return (
       <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -93,12 +100,17 @@ export const SessionInfoWidget: React.FC = () => {
     );
   }
 
-  if (currentStreamError) { // Только currentStreamError
-    return (
-      <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
-        Error loading session info.
-      </div>
-    );
+  if (currentStreamError) {
+    // Если есть ошибка при загрузке стрима, но стример не в сети, это не критично.
+    // Если стример должен быть в сети, но есть ошибка, то это проблема.
+    // Для простоты, если isStreamerActuallyLive = false, мы не показываем ошибку currentStreamError.
+    if (isStreamerActuallyLive) {
+      return (
+        <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
+          Error loading session info.
+        </div>
+      );
+    }
   }
 
   return (
