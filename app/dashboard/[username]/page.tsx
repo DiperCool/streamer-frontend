@@ -13,7 +13,6 @@ import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDas
 import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget"; // Import StreamPreviewWidget
 import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget"; // Import StreamInfoWidget
 import { SessionInfoWidget } from "@/src/components/dashboard/widgets/session-info-widget"; // Import SessionInfoWidget
-import { Wifi } from "lucide-react" // Импортируем иконку Wifi
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
@@ -54,10 +53,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
         return (
           <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-              <div className="flex items-center space-x-2">
-                <Wifi className="h-4 w-4 text-green-500" />
                 <CardTitle className="text-white text-base">Session Info</CardTitle>
-              </div>
             </CardHeader>
             <SessionInfoWidget />
           </Card>
