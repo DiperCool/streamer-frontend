@@ -18,12 +18,12 @@ import { StreamPlayer } from "@/src/components/stream-player";
 export const StreamPreviewWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
 
-  const { data: streamerData, loading: streamerLoading, error: streamerError, refetch } = useGetStreamerQuery({
+  const { data: streamerData, loading: streamerLoading, error: streamerError, refetch: refetchStreamerData } = useGetStreamerQuery({
     variables: { userName: activeStreamer?.userName ?? "" },
     skip: !activeStreamer?.userName,
   });
 
-  const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError } = useGetCurrentStreamQuery({
+  const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError, refetch: refetchCurrentStreamData } = useGetCurrentStreamQuery({
     variables: { streamerId: activeStreamer?.id ?? "" },
     skip: !activeStreamer?.id || !streamerData?.streamer?.isLive,
   });
@@ -38,7 +38,8 @@ export const StreamPreviewWidget: React.FC = () => {
     skip: !activeStreamer?.id,
     onData: ({ data }) => {
       if (data.data?.streamerUpdated) {
-        refetch();
+        refetchStreamerData(); // Refetch streamer's general data
+        refetchCurrentStreamData(); // Refetch current stream data
       }
     },
   });
@@ -92,7 +93,7 @@ export const StreamPreviewWidget: React.FC = () => {
           />
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <div className="flex items-center space-x-2 bg-gray-800 p-3 rounded-md shadow-lg">
-              <Badge className="bg-gray-700 text-gray-300 px-2 py-1 rounded-md text-xs font-semibold">
+              <Badge className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs font-semibold">
                 OFFLINE
               </Badge>
               <span className="text-white text-base font-semibold">
