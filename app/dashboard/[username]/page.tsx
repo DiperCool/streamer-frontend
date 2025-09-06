@@ -65,7 +65,9 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Preview</CardTitle>
             </CardHeader>
-            <StreamPreviewWidget /> {/* Use the new StreamPreviewWidget */}
+            <CardContent className="flex-1 p-0"> {/* Wrap StreamPreviewWidget in CardContent */}
+              <StreamPreviewWidget />
+            </CardContent>
           </Card>
         );
       case DashboardWidgetType.ActivityFeed:
@@ -103,7 +105,9 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Info</CardTitle>
             </CardHeader>
-            <StreamInfoWidget /> {/* Use the new StreamInfoWidget */}
+            <CardContent className="flex-1 p-0"> {/* Wrap StreamInfoWidget in CardContent */}
+              <StreamInfoWidget />
+            </CardContent>
           </Card>
         );
       case DashboardWidgetType.ModActions:
