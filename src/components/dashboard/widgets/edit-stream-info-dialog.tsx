@@ -84,6 +84,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
     setValue,
     setError,
     clearErrors,
+    trigger, // Import trigger
     formState: { errors, isDirty },
   } = useForm<StreamInfoFormValues>({
     resolver: zodResolver(streamInfoSchema),
@@ -161,12 +162,14 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
         setValue("tagsInput", "");
         clearErrors("tagsInput");
         clearErrors("tags"); // Clear array-level errors too
+        trigger("tags"); // Trigger validation for the tags array
       }
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
     setValue("tags", currentTags.filter((tag) => tag !== tagToRemove), { shouldDirty: true });
+    trigger("tags"); // Trigger validation for the tags array
     clearErrors("tags");
   };
 
@@ -181,7 +184,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
             title: values.title,
             language: values.language,
             categoryId: values.categoryId,
-            tags: values.tags || [],
+            tags: values.tags || [], // Ensure tags array is passed
           },
         },
       });
