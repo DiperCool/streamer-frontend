@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Share2, Settings, ExternalLink, Users, CheckCircle } from "lucide-react"
-import { ProfileDto, StreamerDto, StreamDto, useFollowStreamerMutation, useStreamerInteractionQuery, useUnfollowStreamerMutation } from "@/graphql/__generated__/graphql"
+import { ProfileDto, StreamerDto, StreamDto, StreamInfoDto, useFollowStreamerMutation, useStreamerInteractionQuery, useUnfollowStreamerMutation } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
@@ -25,12 +25,13 @@ interface StreamerInfoBarProps {
   streamer: StreamerDto
   profile: ProfileDto
   currentStream?: StreamDto | null
+  streamInfo?: StreamInfoDto | null // Add streamInfo prop
   isCurrentUserProfile: boolean
   isLive: boolean;
   onTogglePlayerMaximize: () => void;
 }
 
-export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUserProfile, isLive, onTogglePlayerMaximize }: StreamerInfoBarProps) {
+export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, isCurrentUserProfile, isLive, onTogglePlayerMaximize }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
   const [showUnfollowDialog, setShowUnfollowDialog] = useState(false); // Состояние для диалога
@@ -64,6 +65,11 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
     refetchInteraction();
     setShowUnfollowDialog(false); // Закрываем диалог после отписки
   };
+
+  // Determine which data source to use for title, language, and tags
+  const displayTitle = isLive ? currentStream?.title : streamInfo?.title;
+  const displayLanguage = isLive ? currentStream?.language : streamInfo?.language;
+  const displayTags = isLive ? currentStream?.tags : streamInfo?.tags;
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
@@ -152,16 +158,16 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
         <div className="flex items-center space-x-3">
           {isLive ? (
             <>
-              {currentStream?.title && (
-                <p className="text-white text-lg font-semibold">{currentStream.title}</p>
+              {displayTitle && (
+                <p className="text-white text-lg font-semibold">{displayTitle}</p>
               )}
-              {currentStream?.language && (
+              {displayLanguage && (
                 <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                  {currentStream.language}
+                  {displayLanguage}
                 </Badge>
               )}
-              {currentStream?.tags && currentStream.tags.length > 0 && (
-                currentStream.tags.map((tag) => (
+              {displayTags && displayTags.length > 0 && (
+                displayTags.map((tag) => (
                   <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
                     {tag.title}
                   </Badge>
@@ -169,9 +175,26 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
               )}
             </>
           ) : (
-            <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
-              OFFLINE
-            </Badge>
+            <>
+              <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
+                OFFLINE
+              </Badge>
+              {displayTitle && (
+                <p className="text-white text-lg font-semibold">{displayTitle}</p>
+              )}
+              {displayLanguage && (
+                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                  {displayLanguage}
+                </Badge>
+              )}
+              {displayTags && displayTags.length > 0 && (
+                displayTags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                    {tag.title}
+                  </Badge>
+                ))
+              )}
+            </>
           )}
         </div>
         <div className="flex items-center space-x-2"> {/* Group for Viewers, Share, Settings */}

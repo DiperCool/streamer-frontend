@@ -11,7 +11,8 @@ import {
   useWatchStreamSubscription,
   useStreamUpdatedSubscription,
   GetStreamerDocument,
-  GetCurrentStreamDocument
+  GetCurrentStreamDocument,
+  useGetStreamInfoQuery // Import useGetStreamInfoQuery
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -48,6 +49,12 @@ export default function StreamerProfileLayout({
     skip: !streamerData?.streamer.id,
   })
   const { data: currentStreamData, loading: currentStreamLoading, refetch: refetchStream } = useGetCurrentStreamQuery({
+    variables: { streamerId: streamerData?.streamer.id ?? "" },
+    skip: !streamerData?.streamer.id,
+  });
+
+  // Fetch stream info for offline display
+  const { data: streamInfoData, loading: streamInfoLoading } = useGetStreamInfoQuery({
     variables: { streamerId: streamerData?.streamer.id ?? "" },
     skip: !streamerData?.streamer.id,
   });
@@ -103,7 +110,7 @@ export default function StreamerProfileLayout({
     }
   }, []);
 
-  if (streamerLoading || profileLoading || currentStreamLoading) {
+  if (streamerLoading || profileLoading || currentStreamLoading || streamInfoLoading) { // Add streamInfoLoading
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
@@ -114,6 +121,7 @@ export default function StreamerProfileLayout({
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
   const currentStream = currentStreamData?.currentStream;
+  const streamInfo = streamInfoData?.streamInfo; // Get stream info
   const isLive = streamer?.isLive;
 
   if (!streamer || !streamerProfile) {
@@ -211,6 +219,7 @@ export default function StreamerProfileLayout({
             streamer={streamer}
             profile={streamerProfile}
             currentStream={currentStream}
+            streamInfo={streamInfo} {/* Pass streamInfo here */}
             isCurrentUserProfile={false}
             isLive={isLive ?? false}
             onTogglePlayerMaximize={handleTogglePlayerMaximize}
