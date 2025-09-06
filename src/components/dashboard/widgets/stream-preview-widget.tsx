@@ -14,16 +14,21 @@ import {
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { StreamPlayer } from "@/src/components/stream-player";
-import { ApolloError } from "@apollo/client"; // Import ApolloError
+import { ApolloError } from "@apollo/client";
 
 // Helper to check if the error indicates a "stream not found" scenario
+// This function is now less critical for the main error display, but good for debugging/clarity
 const isStreamNotFoundError = (error: ApolloError | undefined) => {
   if (!error) return false;
-  // Check for GraphQL errors with specific messages
-  const graphQLError = error.graphQLErrors?.find(
-    (err) => err.message.includes("Stream not found") || err.message.includes("No current stream found")
-  );
-  return !!graphQLError;
+  const graphQLErrorMessages = error.graphQLErrors?.map(err => err.message);
+  if (graphQLErrorMessages?.some(msg => msg.includes("Stream not found") || msg.includes("No current stream found"))) {
+    return true;
+  }
+  // Also check for network errors like 404 directly
+  if (error.networkError && 'statusCode' in error.networkError && (error.networkError as any).statusCode === 404) {
+    return true;
+  }
+  return false;
 };
 
 export const StreamPreviewWidget: React.FC = () => {
@@ -34,9 +39,12 @@ export const StreamPreviewWidget: React.FC = () => {
     skip: !activeStreamer?.userName,
   });
 
+  // Only fetch current stream if streamer is marked as live
+  const shouldFetchCurrentStream = !!activeStreamer?.id && !!streamerData?.streamer?.isLive;
+
   const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError, refetch: refetchCurrentStreamData } = useGetCurrentStreamQuery({
     variables: { streamerId: activeStreamer?.id ?? "" },
-    skip: !activeStreamer?.id || !streamerData?.streamer?.isLive, // Only fetch if streamer is potentially live
+    skip: !shouldFetchCurrentStream,
   });
 
   const { data: profileData, loading: profileLoading, error: profileError } = useGetProfileQuery({
@@ -49,16 +57,14 @@ export const StreamPreviewWidget: React.FC = () => {
     skip: !activeStreamer?.id,
     onData: ({ data }) => {
       if (data.data?.streamerUpdated) {
-        refetchStreamerData(); // Refetch streamer's general data
-        refetchCurrentStreamData(); // Refetch current stream data
+        refetchStreamerData();
+        refetchCurrentStreamData();
       }
     },
   });
 
-  // Determine if currentStreamError is specifically a "stream not found" error
-  const isStreamNotFound = isStreamNotFoundError(currentStreamError);
-
-  if (streamerLoading || profileLoading || (streamerData?.streamer?.isLive && currentStreamLoading)) {
+  // --- Loading State ---
+  if (streamerLoading || profileLoading || (shouldFetchCurrentStream && currentStreamLoading)) {
     return (
       <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -66,11 +72,13 @@ export const StreamPreviewWidget: React.FC = () => {
     );
   }
 
-  // Display a general error only if it's not a "stream not found" error
-  if (streamerError || profileError || (currentStreamError && !isStreamNotFound)) {
+  // --- Critical Error State (for streamer/profile data) ---
+  // If there's an error fetching streamer or profile data, it's a critical issue.
+  // We explicitly ignore currentStreamError here, as it will be handled by the isLive logic.
+  if (streamerError || profileError) {
     return (
       <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
-        Error loading stream or profile data.
+        Error loading streamer or profile data.
       </div>
     );
   }
@@ -79,11 +87,10 @@ export const StreamPreviewWidget: React.FC = () => {
   const profile = profileData?.profile;
   const currentStream = currentStreamData?.currentStream;
   
-  // A streamer is considered truly live if:
-  // 1. The streamer's `isLive` status is true.
-  // 2. We successfully fetched `currentStream` data with sources.
-  // 3. There was no "stream not found" error when trying to fetch `currentStream`.
-  const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0 && !isStreamNotFound;
+  // Determine if the streamer is truly live and has a playable stream.
+  // If streamer.isLive is true, but currentStreamData is null/undefined (e.g., due to 404),
+  // then isLive will be false, and the offline banner will be shown.
+  const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0;
   const streamerName = streamer?.userName || "Streamer";
   
   const offlineBannerImage = profile?.offlineStreamBanner || profile?.channelBanner || "/placeholder.jpg";
@@ -94,10 +101,10 @@ export const StreamPreviewWidget: React.FC = () => {
         <StreamPlayer
           sources={currentStream!.sources}
           playing={true}
-          controls={true} // ReactPlayer controls are still needed for basic playback
+          controls={true}
           isPlayerMaximized={false}
           onTogglePlayerMaximize={() => {}}
-          showPlayerControls={false} // Отключаем все элементы управления плеера
+          showPlayerControls={false}
         />
       ) : (
         <>
