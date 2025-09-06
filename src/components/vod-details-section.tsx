@@ -66,9 +66,6 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
   const timeAgo = formatDistanceToNowStrict(new Date(vod.createdAt), { addSuffix: true });
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
 
-  // Placeholder for tags, as VodDto doesn't have them yet
-  const tags = ["Gaming", "Action", "FPS", "English"]; // Example tags
-
   return (
     <div className="bg-gray-900 text-white">
       <div className="flex items-start justify-between mb-4">
@@ -112,11 +109,18 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
               </div>
             )}
             <div className="flex flex-wrap gap-2 mt-2">
-              {tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                  {tag}
+              {vod.language && (
+                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                  {vod.language}
                 </Badge>
-              ))}
+              )}
+              {vod.tags && vod.tags.length > 0 && (
+                vod.tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                    {tag.title}
+                  </Badge>
+                ))
+              )}
             </div>
           </div>
         </div>

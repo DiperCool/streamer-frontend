@@ -155,22 +155,24 @@ export function StreamerInfoBar({ streamer, profile, currentStream, isCurrentUse
               {currentStream?.title && (
                 <p className="text-white text-lg font-semibold">{currentStream.title}</p>
               )}
+              {currentStream?.language && (
+                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                  {currentStream.language}
+                </Badge>
+              )}
+              {currentStream?.tags && currentStream.tags.length > 0 && (
+                currentStream.tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                    {tag.title}
+                  </Badge>
+                ))
+              )}
             </>
           ) : (
             <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
               OFFLINE
             </Badge>
           )}
-          {/* Placeholder for tags - these would typically come from the stream or profile data */}
-          <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-            Live DJ
-          </Badge>
-          <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-            English
-          </Badge>
-          <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-            Music
-          </Badge>
         </div>
         <div className="flex items-center space-x-2"> {/* Group for Viewers, Share, Settings */}
           {isLive && currentStream?.currentViewers !== undefined && (
