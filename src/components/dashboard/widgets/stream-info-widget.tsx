@@ -70,54 +70,53 @@ export const StreamInfoWidget: React.FC = () => {
 
   return (
     <div className="flex-1 p-3 flex flex-col space-y-4 overflow-y-auto custom-scrollbar">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">{streamInfo?.title || "Untitled Stream"}</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-400 hover:text-white"
-          onClick={() => setIsEditDialogOpen(true)}
-        >
-          <Edit className="h-5 w-5" />
-        </Button>
-      </div>
+      {/* Title */}
+      <h3 className="text-lg font-semibold text-white">{streamInfo?.title || "Untitled Stream"}</h3>
 
-      <div className="space-y-2">
-        <Label className="text-white">Category</Label>
+      {/* Category (Image + Title) */}
+      <div className="flex items-center space-x-2">
         {currentCategory ? (
-          <div className="flex items-center space-x-2">
+          <>
             <Avatar className="h-8 w-8 rounded-md">
               <AvatarImage src={getMinioUrl(currentCategory.image)} alt={currentCategory.title} />
               <AvatarFallback className="bg-gray-600 text-white text-xs">
                 {currentCategory.title.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <span className="text-gray-300">{currentCategory.title}</span>
-          </div>
+            <span className="text-green-400 text-base font-semibold">{currentCategory.title}</span>
+          </>
         ) : (
           <p className="text-gray-400">No category selected</p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-white">Tags</Label>
-        {streamInfo?.tags && streamInfo.tags.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {streamInfo.tags.map((tag) => (
-              <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                {tag.title}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-400">No tags added</p>
+      {/* Language and Tags */}
+      <div className="flex flex-wrap gap-2 items-center">
+        {streamInfo?.language && (
+          <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+            {streamInfo.language}
+          </Badge>
+        )}
+        {streamInfo?.tags && streamInfo.tags.length > 0 && (
+          streamInfo.tags.map((tag) => (
+            <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+              {tag.title}
+            </Badge>
+          ))
+        )}
+        {(!streamInfo?.language && (!streamInfo?.tags || streamInfo.tags.length === 0)) && (
+          <p className="text-gray-400 text-sm">No language or tags specified</p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-white">Language</Label>
-        <p className="text-gray-300">{streamInfo?.language || "Not specified"}</p>
-      </div>
+      {/* Edit Button - pushed to bottom */}
+      <Button
+        variant="secondary"
+        className="w-full mt-auto bg-gray-700 hover:bg-gray-600 text-white"
+        onClick={() => setIsEditDialogOpen(true)}
+      >
+        <Edit className="h-5 w-5 mr-2" /> Edit
+      </Button>
 
       {/* Edit Dialog */}
       {streamerId && (
