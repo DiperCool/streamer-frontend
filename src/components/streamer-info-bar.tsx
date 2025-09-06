@@ -25,7 +25,7 @@ interface StreamerInfoBarProps {
   streamer: StreamerDto
   profile: ProfileDto
   currentStream?: StreamDto | null
-  streamInfo?: StreamInfoDto | null // Add streamInfo prop
+  streamInfo?: StreamInfoDto | null
   isCurrentUserProfile: boolean
   isLive: boolean;
   onTogglePlayerMaximize: () => void;
@@ -34,7 +34,7 @@ interface StreamerInfoBarProps {
 export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, isCurrentUserProfile, isLive, onTogglePlayerMaximize }: StreamerInfoBarProps) {
   const avatarImage = streamer.avatar || "/placeholder-user.jpg";
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
-  const [showUnfollowDialog, setShowUnfollowDialog] = useState(false); // Состояние для диалога
+  const [showUnfollowDialog, setShowUnfollowDialog] = useState(false);
 
   const { data: streamerInteractionData, loading: interactionLoading, refetch: refetchInteraction } = useStreamerInteractionQuery({
     variables: { streamerId: streamer.id },
@@ -63,13 +63,14 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
     }
     await unfollowStreamer({ variables: { input: { streamerId: streamer.id } } });
     refetchInteraction();
-    setShowUnfollowDialog(false); // Закрываем диалог после отписки
+    setShowUnfollowDialog(false);
   };
 
   // Determine which data source to use for title, language, and tags
-  const displayTitle = isLive ? currentStream?.title : streamInfo?.title;
-  const displayLanguage = isLive ? currentStream?.language : streamInfo?.language;
-  const displayTags = isLive ? currentStream?.tags : streamInfo?.tags;
+  // These variables are now only used within the `isLive` block.
+  const displayTitle = currentStream?.title;
+  const displayLanguage = currentStream?.language;
+  const displayTags = currentStream?.tags;
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
@@ -179,21 +180,6 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
               <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
                 OFFLINE
               </Badge>
-              {displayTitle && (
-                <p className="text-white text-lg font-semibold">{displayTitle}</p>
-              )}
-              {displayLanguage && (
-                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                  {displayLanguage}
-                </Badge>
-              )}
-              {displayTags && displayTags.length > 0 && (
-                displayTags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                    {tag.title}
-                  </Badge>
-                ))
-              )}
             </>
           )}
         </div>
