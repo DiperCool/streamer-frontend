@@ -83,41 +83,40 @@ export const StreamInfoWidget: React.FC = () => {
         </Button>
       </div>
 
-      {/* Category, Language and Tags */}
-      <div className="flex items-center space-x-4"> {/* Main container for category, language, and tags */}
-        {/* Category (Image + Title) */}
+      {/* Category (Image + Title), Language and Tags */}
+      <div className="flex items-start space-x-4"> {/* Main container for category block */}
         {currentCategory ? (
-          <div className="flex items-center space-x-2">
+          <>
             <Avatar className="h-12 w-12 rounded-md"> {/* Increased size */}
               <AvatarImage src={getMinioUrl(currentCategory.image)} alt={currentCategory.title} />
               <AvatarFallback className="bg-gray-600 text-white text-xs">
                 {currentCategory.title.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <span className="text-green-400 text-base font-semibold">{currentCategory.title}</span>
-          </div>
+            <div className="flex flex-col space-y-1"> {/* Container for title, language, and tags */}
+              <span className="text-green-400 text-base font-semibold">{currentCategory.title}</span>
+              <div className="flex flex-wrap gap-2 items-center"> {/* Language and Tags */}
+                {streamInfo?.language && (
+                  <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                    {streamInfo.language}
+                  </Badge>
+                )}
+                {streamInfo?.tags && streamInfo.tags.length > 0 && (
+                  streamInfo.tags.map((tag) => (
+                    <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                      {tag.title}
+                    </Badge>
+                  ))
+                )}
+                {(!streamInfo?.language && (!streamInfo?.tags || streamInfo.tags.length === 0)) && (
+                  <p className="text-gray-400 text-sm">No language or tags specified</p>
+                )}
+              </div>
+            </div>
+          </>
         ) : (
           <p className="text-gray-400">No category selected</p>
         )}
-
-        {/* Language and Tags (to the right of category) */}
-        <div className="flex flex-wrap gap-2 items-center">
-          {streamInfo?.language && (
-            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-              {streamInfo.language}
-            </Badge>
-          )}
-          {streamInfo?.tags && streamInfo.tags.length > 0 && (
-            streamInfo.tags.map((tag) => (
-              <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                {tag.title}
-              </Badge>
-            ))
-          )}
-          {(!streamInfo?.language && (!streamInfo?.tags || streamInfo.tags.length === 0)) && (
-            <p className="text-gray-400 text-sm">No language or tags specified</p>
-          )}
-        </div>
       </div>
 
       {/* Edit Button - pushed to bottom */}
