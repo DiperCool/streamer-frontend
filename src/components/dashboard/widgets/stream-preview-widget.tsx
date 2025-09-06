@@ -14,6 +14,17 @@ import {
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { StreamPlayer } from "@/src/components/stream-player";
+import { ApolloError } from "@apollo/client"; // Import ApolloError
+
+// Helper to check if the error indicates a "stream not found" scenario
+const isStreamNotFoundError = (error: ApolloError | undefined) => {
+  if (!error) return false;
+  // Check for GraphQL errors with specific messages
+  const graphQLError = error.graphQLErrors?.find(
+    (err) => err.message.includes("Stream not found") || err.message.includes("No current stream found")
+  );
+  return !!graphQLError;
+};
 
 export const StreamPreviewWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
@@ -25,7 +36,7 @@ export const StreamPreviewWidget: React.FC = () => {
 
   const { data: currentStreamData, loading: currentStreamLoading, error: currentStreamError, refetch: refetchCurrentStreamData } = useGetCurrentStreamQuery({
     variables: { streamerId: activeStreamer?.id ?? "" },
-    skip: !activeStreamer?.id || !streamerData?.streamer?.isLive,
+    skip: !activeStreamer?.id || !streamerData?.streamer?.isLive, // Only fetch if streamer is potentially live
   });
 
   const { data: profileData, loading: profileLoading, error: profileError } = useGetProfileQuery({
@@ -44,6 +55,9 @@ export const StreamPreviewWidget: React.FC = () => {
     },
   });
 
+  // Determine if currentStreamError is specifically a "stream not found" error
+  const isStreamNotFound = isStreamNotFoundError(currentStreamError);
+
   if (streamerLoading || profileLoading || (streamerData?.streamer?.isLive && currentStreamLoading)) {
     return (
       <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
@@ -52,7 +66,8 @@ export const StreamPreviewWidget: React.FC = () => {
     );
   }
 
-  if (streamerError || profileError || (streamerData?.streamer?.isLive && currentStreamError)) {
+  // Display a general error only if it's not a "stream not found" error
+  if (streamerError || profileError || (currentStreamError && !isStreamNotFound)) {
     return (
       <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
         Error loading stream or profile data.
@@ -64,7 +79,11 @@ export const StreamPreviewWidget: React.FC = () => {
   const profile = profileData?.profile;
   const currentStream = currentStreamData?.currentStream;
   
-  const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0;
+  // A streamer is considered truly live if:
+  // 1. The streamer's `isLive` status is true.
+  // 2. We successfully fetched `currentStream` data with sources.
+  // 3. There was no "stream not found" error when trying to fetch `currentStream`.
+  const isLive = streamer?.isLive && currentStream?.sources && currentStream.sources.length > 0 && !isStreamNotFound;
   const streamerName = streamer?.userName || "Streamer";
   
   const offlineBannerImage = profile?.offlineStreamBanner || profile?.channelBanner || "/placeholder.jpg";
