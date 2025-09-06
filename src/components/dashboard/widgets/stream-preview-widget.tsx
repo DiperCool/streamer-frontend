@@ -45,17 +45,17 @@ export const StreamPreviewWidget: React.FC = () => {
 
   if (streamerLoading || profileLoading || (streamerData?.streamer?.isLive && currentStreamLoading)) {
     return (
-      <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+      <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-      </CardContent>
+      </div>
     );
   }
 
   if (streamerError || profileError || (streamerData?.streamer?.isLive && currentStreamError)) {
     return (
-      <CardContent className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
+      <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
         Error loading stream or profile data.
-      </CardContent>
+      </div>
     );
   }
 
@@ -69,13 +69,15 @@ export const StreamPreviewWidget: React.FC = () => {
   const offlineBannerImage = profile?.offlineStreamBanner || profile?.channelBanner || "/placeholder.jpg";
 
   return (
-    <CardContent className="flex-1 p-0 relative flex items-center justify-center bg-black">
+    <div className="flex-1 p-0 relative flex items-center justify-center bg-black">
       {isLive ? (
         <StreamPlayer
           sources={currentStream!.sources}
+          playing={true}
+          controls={true} // ReactPlayer controls are still needed for basic playback
           isPlayerMaximized={false}
           onTogglePlayerMaximize={() => {}}
-          showPlayerControls={false}
+          showPlayerControls={false} // Отключаем все элементы управления плеера
         />
       ) : (
         <>
@@ -100,6 +102,6 @@ export const StreamPreviewWidget: React.FC = () => {
           </div>
         </>
       )}
-    </CardContent>
+    </div>
   );
 };

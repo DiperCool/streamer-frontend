@@ -120,24 +120,24 @@ export const StreamInfoWidget: React.FC = () => {
 
   if (streamInfoLoading || categoriesLoading) {
     return (
-      <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+      <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-      </CardContent>
+      </div>
     );
   }
 
   if (streamInfoError || categoriesError) {
     return (
-      <CardContent className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
+      <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
         Error loading stream info or categories: {streamInfoError?.message || categoriesError?.message}
-      </CardContent>
+      </div>
     );
   }
 
   const categories = categoriesData?.categories?.nodes || [];
 
   return (
-    <CardContent className="flex-1 p-3 flex flex-col space-y-4 overflow-y-auto custom-scrollbar">
+    <div className="flex-1 p-3 flex flex-col space-y-4 overflow-y-auto custom-scrollbar">
       <div className="space-y-2">
         <Label htmlFor="title" className="text-white">Title</Label>
         <Input
@@ -228,6 +228,6 @@ export const StreamInfoWidget: React.FC = () => {
           {updateLoading ? "Saving..." : "Save changes"}
         </Button>
       </div>
-    </CardContent>
+    </div
   );
 };
