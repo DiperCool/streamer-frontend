@@ -54,7 +54,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Session Info</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col"> {/* Added flex-col */}
               Session details go here.
             </CardContent>
           </Card>
@@ -65,7 +65,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Preview</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-0"> {/* Wrap StreamPreviewWidget in CardContent */}
+            <CardContent className="flex-1 p-0 flex flex-col"> {/* Added flex flex-col */}
               <StreamPreviewWidget />
             </CardContent>
           </Card>
@@ -76,7 +76,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Activity Feed</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col"> {/* Added flex-col */}
               Activity Feed content goes here.
             </CardContent>
           </Card>
@@ -88,7 +88,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
               <CardTitle className="text-white text-base">Chat</CardTitle>
             </CardHeader>
             {/* This div ensures ChatSection fills remaining space and is a flex column */}
-            <CardContent className="flex-1 p-0"> 
+            <CardContent className="flex-1 p-0 flex flex-col"> {/* Added flex flex-col */}
               <div className="flex-1 h-full flex flex-col"> 
                 <ChatSection
                   streamerId={activeStreamer?.id ?? ""}
@@ -105,7 +105,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Info</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-0"> {/* Wrap StreamInfoWidget in CardContent */}
+            <CardContent className="flex-1 p-0 flex flex-col"> {/* Added flex flex-col */}
               <StreamInfoWidget />
             </CardContent>
           </Card>
@@ -116,7 +116,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Mod Actions</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col"> {/* Added flex-col */}
               Mod Actions content goes here.
             </CardContent>
           </Card>
