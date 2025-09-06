@@ -178,14 +178,14 @@ export const StreamInfoWidget: React.FC = () => {
       <div className="space-y-2">
         <Label htmlFor="category" className="text-white">Category</Label>
         <Select
-          value={watch("categoryId") || ""}
-          onValueChange={(value) => setValue("categoryId", value === "" ? null : value, { shouldDirty: true })}
+          value={watch("categoryId") || "none-selected"} {/* Изменено: используем "none-selected" как значение по умолчанию */}
+          onValueChange={(value) => setValue("categoryId", value === "none-selected" ? null : value, { shouldDirty: true })} {/* Изменено: проверяем "none-selected" */}
         >
           <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white focus:border-green-500">
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent className="bg-gray-800 border-gray-700 text-white">
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none-selected">None</SelectItem> {/* Изменено: значение не является пустой строкой */}
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.title}

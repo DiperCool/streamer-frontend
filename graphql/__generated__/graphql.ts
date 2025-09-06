@@ -305,6 +305,7 @@ export type Mutation = {
   updateChatSettings: UpdateChatSettingsResponse;
   updateOfflineBanner: UpdateOfflineBannerResponse;
   updateProfile: UpdateProfileResponse;
+  updateStreamInfo: UpdateStreamInfoResponse;
   updateStreamSettings: UpdateStreamSettingsResponse;
   upload: UploadFileResponse;
 };
@@ -402,6 +403,11 @@ export type MutationUpdateOfflineBannerArgs = {
 
 export type MutationUpdateProfileArgs = {
   input: UpdateProfileInput;
+};
+
+
+export type MutationUpdateStreamInfoArgs = {
+  streamInfo: UpdateStreamInfoInput;
 };
 
 
@@ -514,6 +520,7 @@ export type Query = {
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
+  streamInfo: StreamInfoDto;
   streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
   streamerInteraction: StreamerInteractionDto;
@@ -602,6 +609,11 @@ export type QueryRolesArgs = {
   order?: InputMaybe<Array<RoleDtoSortInput>>;
   roleType: RoleType;
   where?: InputMaybe<RoleDtoFilterInput>;
+};
+
+
+export type QueryStreamInfoArgs = {
+  streamerId: Scalars['String']['input'];
 };
 
 
@@ -728,12 +740,27 @@ export enum SortEnumType {
 export type StreamDto = {
   __typename?: 'StreamDto';
   active: Scalars['Boolean']['output'];
+  category?: Maybe<CategoryDto>;
+  categoryId?: Maybe<Scalars['UUID']['output']>;
   currentViewers: Scalars['Long']['output'];
   id: Scalars['UUID']['output'];
+  language: Scalars['String']['output'];
   sources: Array<StreamSourceDto>;
   streamer?: Maybe<StreamerDto>;
   streamerId: Scalars['String']['output'];
+  tags: Array<TagDto>;
   title: Scalars['String']['output'];
+};
+
+export type StreamInfoDto = {
+  __typename?: 'StreamInfoDto';
+  category?: Maybe<CategoryDto>;
+  categoryId?: Maybe<Scalars['UUID']['output']>;
+  id: Scalars['UUID']['output'];
+  language: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
+  tags: Array<TagDto>;
+  title?: Maybe<Scalars['String']['output']>;
 };
 
 export type StreamSettingsDto = {
@@ -895,6 +922,12 @@ export enum SystemRoleType {
   Administrator = 'ADMINISTRATOR'
 }
 
+export type TagDto = {
+  __typename?: 'TagDto';
+  id: Scalars['UUID']['output'];
+  title: Scalars['String']['output'];
+};
+
 export type UnfollowInput = {
   streamerId: Scalars['String']['input'];
 };
@@ -973,6 +1006,19 @@ export type UpdateProfileResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type UpdateStreamInfoInput = {
+  categoryId?: InputMaybe<Scalars['UUID']['input']>;
+  language: Scalars['String']['input'];
+  streamerId: Scalars['String']['input'];
+  tags: Array<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+};
+
+export type UpdateStreamInfoResponse = {
+  __typename?: 'UpdateStreamInfoResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type UpdateStreamSettingsResponse = {
   __typename?: 'UpdateStreamSettingsResponse';
   id: Scalars['UUID']['output'];
@@ -1004,24 +1050,30 @@ export type UuidOperationFilterInput = {
 
 export type VodDto = {
   __typename?: 'VodDto';
+  category?: Maybe<CategoryDto>;
+  categoryId?: Maybe<Scalars['UUID']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
   duration: Scalars['Long']['output'];
   id: Scalars['UUID']['output'];
+  language: Scalars['String']['output'];
   preview?: Maybe<Scalars['String']['output']>;
   source?: Maybe<Scalars['String']['output']>;
   streamer?: Maybe<StreamerDto>;
   streamerId: Scalars['String']['output'];
+  tags: Array<TagDto>;
   title?: Maybe<Scalars['String']['output']>;
   views: Scalars['Long']['output'];
 };
 
 export type VodDtoFilterInput = {
   and?: InputMaybe<Array<VodDtoFilterInput>>;
+  categoryId?: InputMaybe<UuidOperationFilterInput>;
   createdAt?: InputMaybe<DateTimeOperationFilterInput>;
   description?: InputMaybe<StringOperationFilterInput>;
   duration?: InputMaybe<LongOperationFilterInput>;
   id?: InputMaybe<UuidOperationFilterInput>;
+  language?: InputMaybe<StringOperationFilterInput>;
   or?: InputMaybe<Array<VodDtoFilterInput>>;
   preview?: InputMaybe<StringOperationFilterInput>;
   source?: InputMaybe<StringOperationFilterInput>;
@@ -1031,10 +1083,12 @@ export type VodDtoFilterInput = {
 };
 
 export type VodDtoSortInput = {
+  categoryId?: InputMaybe<SortEnumType>;
   createdAt?: InputMaybe<SortEnumType>;
   description?: InputMaybe<SortEnumType>;
   duration?: InputMaybe<SortEnumType>;
   id?: InputMaybe<SortEnumType>;
+  language?: InputMaybe<SortEnumType>;
   preview?: InputMaybe<SortEnumType>;
   source?: InputMaybe<SortEnumType>;
   streamerId?: InputMaybe<SortEnumType>;
@@ -1374,7 +1428,7 @@ export type StreamUpdatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type StreamUpdatedSubscription = { __typename?: 'Subscription', streamUpdated: { __typename?: 'StreamDto', id: string, active: boolean, title: string, currentViewers: number, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, followers: number } | null } };
+export type StreamUpdatedSubscription = { __typename?: 'Subscription', streamUpdated: { __typename?: 'StreamDto', id: string, active: boolean, title: string, currentViewers: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, followers: number } | null, category?: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 export type WatchStreamSubscriptionVariables = Exact<{
   streamId: Scalars['UUID']['input'];
@@ -1395,17 +1449,31 @@ export type UpdateStreamSettingsMutationVariables = Exact<{ [key: string]: never
 
 export type UpdateStreamSettingsMutation = { __typename?: 'Mutation', updateStreamSettings: { __typename?: 'UpdateStreamSettingsResponse', id: string } };
 
+export type UpdateStreamInfoMutationVariables = Exact<{
+  streamInfo: UpdateStreamInfoInput;
+}>;
+
+
+export type UpdateStreamInfoMutation = { __typename?: 'Mutation', updateStreamInfo: { __typename?: 'UpdateStreamInfoResponse', id: string } };
+
 export type GetCurrentStreamQueryVariables = Exact<{
   streamerId: Scalars['String']['input'];
 }>;
 
 
-export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: string, streamerId: string, active: boolean, title: string, currentViewers: number, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }> } };
+export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: string, streamerId: string, active: boolean, title: string, currentViewers: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }>, category?: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetStreamSettingsQuery = { __typename?: 'Query', streamSettings: { __typename?: 'StreamSettingsDto', id: string, streamKey: string, streamUrl: string } };
+
+export type GetStreamInfoQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type GetStreamInfoQuery = { __typename?: 'Query', streamInfo: { __typename?: 'StreamInfoDto', id: string, streamerId: string, title?: string | null, language: string, categoryId?: string | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 export type GetMySystemRoleQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1423,14 +1491,14 @@ export type GetVodsQueryVariables = Exact<{
 }>;
 
 
-export type GetVodsQuery = { __typename?: 'Query', vods?: { __typename?: 'VodsConnection', nodes?: Array<{ __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetVodsQuery = { __typename?: 'Query', vods?: { __typename?: 'VodsConnection', nodes?: Array<{ __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetVodQueryVariables = Exact<{
   vodId: Scalars['UUID']['input'];
 }>;
 
 
-export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 
 export const CreateCategoryDocument = gql`
@@ -3238,11 +3306,22 @@ export const StreamUpdatedDocument = gql`
     active
     title
     currentViewers
+    language
     streamer {
       id
       userName
       avatar
       followers
+    }
+    category {
+      id
+      title
+      slug
+      image
+    }
+    tags {
+      id
+      title
     }
   }
 }
@@ -3362,6 +3441,39 @@ export function useUpdateStreamSettingsMutation(baseOptions?: Apollo.MutationHoo
 export type UpdateStreamSettingsMutationHookResult = ReturnType<typeof useUpdateStreamSettingsMutation>;
 export type UpdateStreamSettingsMutationResult = Apollo.MutationResult<UpdateStreamSettingsMutation>;
 export type UpdateStreamSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateStreamSettingsMutation, UpdateStreamSettingsMutationVariables>;
+export const UpdateStreamInfoDocument = gql`
+    mutation UpdateStreamInfo($streamInfo: UpdateStreamInfoInput!) {
+  updateStreamInfo(streamInfo: $streamInfo) {
+    id
+  }
+}
+    `;
+export type UpdateStreamInfoMutationFn = Apollo.MutationFunction<UpdateStreamInfoMutation, UpdateStreamInfoMutationVariables>;
+
+/**
+ * __useUpdateStreamInfoMutation__
+ *
+ * To run a mutation, you first call `useUpdateStreamInfoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateStreamInfoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateStreamInfoMutation, { data, loading, error }] = useUpdateStreamInfoMutation({
+ *   variables: {
+ *      streamInfo: // value for 'streamInfo'
+ *   },
+ * });
+ */
+export function useUpdateStreamInfoMutation(baseOptions?: Apollo.MutationHookOptions<UpdateStreamInfoMutation, UpdateStreamInfoMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateStreamInfoMutation, UpdateStreamInfoMutationVariables>(UpdateStreamInfoDocument, options);
+      }
+export type UpdateStreamInfoMutationHookResult = ReturnType<typeof useUpdateStreamInfoMutation>;
+export type UpdateStreamInfoMutationResult = Apollo.MutationResult<UpdateStreamInfoMutation>;
+export type UpdateStreamInfoMutationOptions = Apollo.BaseMutationOptions<UpdateStreamInfoMutation, UpdateStreamInfoMutationVariables>;
 export const GetCurrentStreamDocument = gql`
     query GetCurrentStream($streamerId: String!) {
   currentStream(streamerId: $streamerId) {
@@ -3370,6 +3482,7 @@ export const GetCurrentStreamDocument = gql`
     active
     title
     currentViewers
+    language
     streamer {
       id
       isLive
@@ -3381,6 +3494,16 @@ export const GetCurrentStreamDocument = gql`
       streamId
       url
       sourceType
+    }
+    category {
+      id
+      title
+      slug
+      image
+    }
+    tags {
+      id
+      title
     }
   }
 }
@@ -3459,6 +3582,58 @@ export type GetStreamSettingsQueryHookResult = ReturnType<typeof useGetStreamSet
 export type GetStreamSettingsLazyQueryHookResult = ReturnType<typeof useGetStreamSettingsLazyQuery>;
 export type GetStreamSettingsSuspenseQueryHookResult = ReturnType<typeof useGetStreamSettingsSuspenseQuery>;
 export type GetStreamSettingsQueryResult = Apollo.QueryResult<GetStreamSettingsQuery, GetStreamSettingsQueryVariables>;
+export const GetStreamInfoDocument = gql`
+    query GetStreamInfo($streamerId: String!) {
+  streamInfo(streamerId: $streamerId) {
+    id
+    streamerId
+    title
+    language
+    categoryId
+    category {
+      id
+      title
+    }
+    tags {
+      id
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetStreamInfoQuery__
+ *
+ * To run a query within a React component, call `useGetStreamInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetStreamInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetStreamInfoQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useGetStreamInfoQuery(baseOptions: Apollo.QueryHookOptions<GetStreamInfoQuery, GetStreamInfoQueryVariables> & ({ variables: GetStreamInfoQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetStreamInfoQuery, GetStreamInfoQueryVariables>(GetStreamInfoDocument, options);
+      }
+export function useGetStreamInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetStreamInfoQuery, GetStreamInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetStreamInfoQuery, GetStreamInfoQueryVariables>(GetStreamInfoDocument, options);
+        }
+export function useGetStreamInfoSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetStreamInfoQuery, GetStreamInfoQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetStreamInfoQuery, GetStreamInfoQueryVariables>(GetStreamInfoDocument, options);
+        }
+export type GetStreamInfoQueryHookResult = ReturnType<typeof useGetStreamInfoQuery>;
+export type GetStreamInfoLazyQueryHookResult = ReturnType<typeof useGetStreamInfoLazyQuery>;
+export type GetStreamInfoSuspenseQueryHookResult = ReturnType<typeof useGetStreamInfoSuspenseQuery>;
+export type GetStreamInfoQueryResult = Apollo.QueryResult<GetStreamInfoQuery, GetStreamInfoQueryVariables>;
 export const GetMySystemRoleDocument = gql`
     query GetMySystemRole {
   mySystemRole {
@@ -3526,10 +3701,19 @@ export const GetVodsDocument = gql`
       views
       createdAt
       duration
+      language
       streamer {
         id
         userName
         avatar
+      }
+      category {
+        id
+        title
+      }
+      tags {
+        id
+        title
       }
     }
     pageInfo {
@@ -3591,10 +3775,19 @@ export const GetVodDocument = gql`
     views
     createdAt
     duration
+    language
     streamer {
       id
       userName
       avatar
+    }
+    category {
+      id
+      title
+    }
+    tags {
+      id
+      title
     }
   }
 }
