@@ -54,9 +54,10 @@ export const SessionInfoWidget: React.FC = () => {
     variables: { streamId: currentStreamData?.currentStream?.id ?? "" },
     skip: !currentStreamData?.currentStream?.id,
     onData: ({ data }) => {
-      if (data.data?.streamUpdated) {
-        refetchCurrentStream(); // Перезапрашиваем данные текущего стрима при обновлении
-      }
+      // Удален вызов refetchCurrentStream(), так как данные должны обновляться через саму подписку
+      // if (data.data?.streamUpdated) {
+      //   refetchCurrentStream(); 
+      // }
     },
   });
 
