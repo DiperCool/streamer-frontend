@@ -746,6 +746,7 @@ export type StreamDto = {
   id: Scalars['UUID']['output'];
   language: Scalars['String']['output'];
   sources: Array<StreamSourceDto>;
+  started: Scalars['DateTime']['output'];
   streamer?: Maybe<StreamerDto>;
   streamerId: Scalars['String']['output'];
   tags: Array<TagDto>;
@@ -1428,7 +1429,7 @@ export type StreamUpdatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type StreamUpdatedSubscription = { __typename?: 'Subscription', streamUpdated: { __typename?: 'StreamDto', id: string, active: boolean, title: string, currentViewers: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, followers: number } | null, category?: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
+export type StreamUpdatedSubscription = { __typename?: 'Subscription', streamUpdated: { __typename?: 'StreamDto', id: string, active: boolean, title: string, currentViewers: number, language: string, started: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, followers: number } | null, category?: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 export type WatchStreamSubscriptionVariables = Exact<{
   streamId: Scalars['UUID']['input'];
@@ -1461,7 +1462,7 @@ export type GetCurrentStreamQueryVariables = Exact<{
 }>;
 
 
-export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: string, streamerId: string, active: boolean, title: string, currentViewers: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }>, category?: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
+export type GetCurrentStreamQuery = { __typename?: 'Query', currentStream: { __typename?: 'StreamDto', id: string, streamerId: string, active: boolean, title: string, currentViewers: number, language: string, started: string, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }>, category?: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 export type GetStreamSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3307,6 +3308,7 @@ export const StreamUpdatedDocument = gql`
     title
     currentViewers
     language
+    started
     streamer {
       id
       userName
@@ -3483,6 +3485,7 @@ export const GetCurrentStreamDocument = gql`
     title
     currentViewers
     language
+    started
     streamer {
       id
       isLive

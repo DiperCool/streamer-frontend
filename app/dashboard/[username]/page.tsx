@@ -12,6 +12,7 @@ import { ChatSection } from "@/src/components/chat-section"; // Import ChatSecti
 import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDashboard
 import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget"; // Import StreamPreviewWidget
 import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget"; // Import StreamInfoWidget
+import { SessionInfoWidget } from "@/src/components/dashboard/widgets/session-info-widget"; // Import SessionInfoWidget
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
@@ -22,7 +23,7 @@ export enum DashboardWidgetType {
   StreamPreview = "StreamPreview",
   ActivityFeed = "ActivityFeed",
   Chat = "Chat",
-  StreamInfo = "StreamInfo", // Added StreamInfo
+  StreamInfo = "StreamInfo",
   ModActions = "ModActions",
 }
 
@@ -32,7 +33,7 @@ const DEFAULT_ACTIVE_WIDGETS: DashboardWidgetType[] = [
   DashboardWidgetType.StreamPreview,
   DashboardWidgetType.ActivityFeed,
   DashboardWidgetType.Chat,
-  DashboardWidgetType.StreamInfo, // Added StreamInfo
+  DashboardWidgetType.StreamInfo,
   DashboardWidgetType.ModActions,
 ];
 
@@ -52,11 +53,12 @@ export default function DashboardHomePage({ params }: { params: { username: stri
         return (
           <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-              <CardTitle className="text-white text-base">Session Info</CardTitle>
+              <div className="flex items-center space-x-2">
+                <Wifi className="h-4 w-4 text-green-500" />
+                <CardTitle className="text-white text-base">Session Info</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col"> {/* Added flex-col */}
-              Session details go here.
-            </CardContent>
+            <SessionInfoWidget />
           </Card>
         );
       case DashboardWidgetType.StreamPreview:
@@ -65,7 +67,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Preview</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-0 flex flex-col"> {/* Added flex flex-col */}
+            <CardContent className="flex-1 p-0 flex flex-col">
               <StreamPreviewWidget />
             </CardContent>
           </Card>
@@ -76,7 +78,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Activity Feed</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col"> {/* Added flex-col */}
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col">
               Activity Feed content goes here.
             </CardContent>
           </Card>
@@ -87,25 +89,24 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Chat</CardTitle>
             </CardHeader>
-            {/* This div ensures ChatSection fills remaining space and is a flex column */}
-            <CardContent className="flex-1 p-0 flex flex-col"> {/* Added flex flex-col */}
+            <CardContent className="flex-1 p-0 flex flex-col">
               <div className="flex-1 h-full flex flex-col"> 
                 <ChatSection
                   streamerId={activeStreamer?.id ?? ""}
                   onScrollToBottom={() => { /* No-op for dashboard widget */ }}
-                  hideCardWrapper={true} // Hide the internal Card wrapper
+                  hideCardWrapper={true}
                 />
               </div>
             </CardContent>
           </Card>
         );
-      case DashboardWidgetType.StreamInfo: // New case for StreamInfo
+      case DashboardWidgetType.StreamInfo:
         return (
           <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Stream Info</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-0 flex flex-col"> {/* Added flex flex-col */}
+            <CardContent className="flex-1 p-0 flex flex-col">
               <StreamInfoWidget />
             </CardContent>
           </Card>
@@ -116,7 +117,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Mod Actions</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col"> {/* Added flex-col */}
+            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col">
               Mod Actions content goes here.
             </CardContent>
           </Card>
@@ -134,7 +135,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   ];
   const topRightSectionWidgetsOrder = [
     DashboardWidgetType.Chat,
-    DashboardWidgetType.StreamInfo, // Added StreamInfo here
+    DashboardWidgetType.StreamInfo,
   ];
   const bottomRightSectionWidget = DashboardWidgetType.ModActions; // Single widget for this section
 
@@ -210,14 +211,13 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   const shouldRenderRightColumn = shouldRenderTopRightSection || shouldRenderBottomRightSection;
 
   return (
-    <div className="relative h-full flex flex-col"> {/* Removed p-4 and h-screen-minus-navbar */}
+    <div className="relative h-full flex flex-col">
       <div className="flex items-center justify-between mb-6 pr-16">
         <h1 className="text-3xl font-bold text-white">Creator Dashboard for {username}</h1>
       </div>
 
-      {/* This div will now handle horizontal scrolling on smaller screens */}
-      <div className="flex-1 overflow-x-auto lg:overflow-x-hidden"> {/* flex-1 to take remaining vertical space */}
-        <div className="min-w-[1024px] h-full"> {/* min-w to force horizontal scroll, h-full to fill parent */}
+      <div className="flex-1 overflow-x-auto lg:overflow-x-hidden">
+        <div className="min-w-[1024px] h-full">
           <PanelGroup direction="horizontal" className="h-full w-full" autoSaveId={LOCAL_STORAGE_KEY_PREFIX + username + "-main-horizontal"}>
             {shouldRenderLeftColumn && (
               <Panel id="left-column" defaultSize={50} minSize={10} order={1}>
