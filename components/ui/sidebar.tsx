@@ -3,13 +3,13 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog, Info } from "lucide-react" // Added Info icon
+import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog, Info } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav"
 import { useDashboard } from "@/src/contexts/DashboardContext"
 import { AdminSidebar } from "@/src/components/admin-sidebar"
-import { FollowingStreamersSidebar } from "@/src/components/following-streamers-sidebar" // Import new component
+import { FollowingStreamersSidebar } from "@/src/components/following-streamers-sidebar"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
@@ -58,7 +58,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                   </Link>
 
                   <CollapsibleSidebarNav title="Channel" icon={<Monitor />} active={isChannelActive}>
-                    <Link href={`${dashboardBaseUrl}/channel/stream-info`} passHref> {/* New item */}
+                    <Link href={`${dashboardBaseUrl}/channel/stream-info`} passHref>
                       <SidebarNavItem icon={<Info />} active={pathname === `${dashboardBaseUrl}/channel/stream-info`}>
                         Stream Info
                       </SidebarNavItem>
@@ -98,7 +98,16 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                       Home
                     </SidebarNavItem>
                   </Link>
-                  {/* Replaced static "Following" item with the new component */}
+                  <Link href="/browse" passHref>
+                    <SidebarNavItem icon={<Video />} active={pathname === "/browse"}>
+                      Browse
+                    </SidebarNavItem>
+                  </Link>
+                  
+                  {/* Separator with increased vertical margin */}
+                  <div className="my-6 border-b border-gray-700 mx-3" /> 
+
+                  {/* Following Streamers List */}
                   <FollowingStreamersSidebar />
                 </>
               )}

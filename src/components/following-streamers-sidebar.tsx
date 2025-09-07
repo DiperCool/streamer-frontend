@@ -86,7 +86,6 @@ export const FollowingStreamersSidebar: React.FC = () => {
   return (
     <div className="space-y-1">
       <h3 className="text-xs font-semibold text-gray-400 uppercase px-3 mb-2">Following</h3>
-      <div className="my-2 border-b border-gray-700 mx-3" /> {/* Добавлен разделитель */}
       {streamers.map((streamer) => (
         <Link key={streamer.id} href={`/${streamer.userName}`} passHref>
           <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 transition-colors cursor-pointer">
