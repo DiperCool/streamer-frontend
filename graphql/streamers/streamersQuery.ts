@@ -35,3 +35,45 @@ export const GET_STREAMERS = gql`
         }
     }
 `
+
+export const GET_MY_FOLLOWINGS = gql`
+    query GetMyFollowings(
+        $after: String
+        $before: String
+        $first: Int
+        $last: Int
+        $order: [StreamerDtoSortInput!]
+        $where: StreamerDtoFilterInput
+    ) {
+        myFollowings(
+            after: $after
+            before: $before
+            first: $first
+            last: $last
+            order: $order
+            where: $where
+        ) {
+            nodes {
+                id
+                userName
+                avatar
+                isLive
+                currentStream {
+                    id
+                    title
+                    category {
+                        id
+                        title
+                    }
+                    currentViewers
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                hasPreviousPage
+                startCursor
+            }
+        }
+    }
+`

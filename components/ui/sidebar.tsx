@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation"
 import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav"
 import { useDashboard } from "@/src/contexts/DashboardContext"
 import { AdminSidebar } from "@/src/components/admin-sidebar"
+import { FollowingStreamersSidebar } from "@/src/components/following-streamers-sidebar" // Import new component
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isMobile: boolean;
@@ -97,9 +98,8 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                       Home
                     </SidebarNavItem>
                   </Link>
-                  <SidebarNavItem icon={<Heart />} active={pathname === "/following"}>
-                    Following
-                  </SidebarNavItem>
+                  {/* Replaced static "Following" item with the new component */}
+                  <FollowingStreamersSidebar />
                 </>
               )}
             </SidebarNav>
