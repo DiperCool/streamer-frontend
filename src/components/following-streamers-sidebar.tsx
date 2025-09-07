@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 import {
   useGetMyFollowingsQuery,
   SortEnumType,
-  StreamerDto,
+  StreamerFollowerDto,
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 
@@ -98,17 +98,17 @@ export const FollowingStreamersSidebar: React.FC = () => {
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-white font-medium text-sm">{streamer.userName}</span>
-                {streamer.isLive && streamer.currentStream?.category?.title && (
+                {streamer.isLive && streamer.currentStream?.category?.title && ( // Changed back to currentStream
                   <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
                 )}
               </div>
             </div>
-            {streamer.isLive && streamer.currentStream?.currentViewers !== undefined && (
+            {streamer.isLive && streamer.currentStream?.currentViewers !== undefined && ( // Changed back to currentStream
               <div className="flex items-center space-x-1">
                 <span className="h-2 w-2 rounded-full bg-green-500" />
                 <span className="text-gray-400 text-xs">
-                  {streamer.currentStream.currentViewers >= 1000 ? 
-                    `${(streamer.currentStream.currentViewers / 1000).toFixed(1)}K` : 
+                  {streamer.currentStream.currentViewers >= 1000 ? // Changed back to currentStream
+                    `${(streamer.currentStream.currentViewers / 1000).toFixed(1)}K` : // Changed back to currentStream
                     streamer.currentStream.currentViewers}
                 </span>
               </div>

@@ -165,7 +165,7 @@ type MyFollowingsConnection {
     "A list of edges."
     edges: [MyFollowingsEdge!]
     "A flattened list of the nodes."
-    nodes: [StreamerDto!]
+    nodes: [StreamerFollowerDto!]
     "Information to aid in pagination."
     pageInfo: PageInfo!
 }
@@ -175,7 +175,7 @@ type MyFollowingsEdge {
     "A cursor for use in pagination."
     cursor: String!
     "The item at the end of the edge."
-    node: StreamerDto!
+    node: StreamerFollowerDto!
 }
 
 "A connection to a list of items."
@@ -283,9 +283,9 @@ type Query {
         first: Int,
         "Returns the last _n_ elements from the list."
         last: Int,
-        order: [StreamerDtoSortInput!],
+        order: [StreamerFollowerDtoSortInput!],
         search: String,
-        where: StreamerDtoFilterInput
+        where: StreamerFollowerDtoFilterInput
     ): MyFollowingsConnection
     myRole(broadcasterId: String!): RoleDto!
     myRoles(
@@ -431,6 +431,15 @@ type StreamWatcher {
 type StreamerDto {
     avatar: String
     followers: Long!
+    id: String!
+    isLive: Boolean!
+    userName: String
+}
+
+type StreamerFollowerDto {
+    avatar: String
+    currentStream: StreamDto
+    currentStreamId: UUID
     id: String!
     isLive: Boolean!
     userName: String
@@ -800,6 +809,24 @@ input StreamerDtoFilterInput {
 input StreamerDtoSortInput {
     avatar: SortEnumType
     followers: SortEnumType
+    id: SortEnumType
+    isLive: SortEnumType
+    userName: SortEnumType
+}
+
+input StreamerFollowerDtoFilterInput {
+    and: [StreamerFollowerDtoFilterInput!]
+    avatar: StringOperationFilterInput
+    currentStreamId: UuidOperationFilterInput
+    id: StringOperationFilterInput
+    isLive: BooleanOperationFilterInput
+    or: [StreamerFollowerDtoFilterInput!]
+    userName: StringOperationFilterInput
+}
+
+input StreamerFollowerDtoSortInput {
+    avatar: SortEnumType
+    currentStreamId: SortEnumType
     id: SortEnumType
     isLive: SortEnumType
     userName: SortEnumType

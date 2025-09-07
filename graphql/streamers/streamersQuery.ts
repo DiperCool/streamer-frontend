@@ -42,8 +42,8 @@ export const GET_MY_FOLLOWINGS = gql`
         $before: String
         $first: Int
         $last: Int
-        $order: [StreamerDtoSortInput!]
-        $where: StreamerDtoFilterInput
+        $order: [StreamerFollowerDtoSortInput!]
+        $where: StreamerFollowerDtoFilterInput
     ) {
         myFollowings(
             after: $after
@@ -58,7 +58,7 @@ export const GET_MY_FOLLOWINGS = gql`
                 userName
                 avatar
                 isLive
-                currentStream {
+                currentStream { # Changed back to currentStream
                     id
                     title
                     category {
