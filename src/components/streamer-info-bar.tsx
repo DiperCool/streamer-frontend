@@ -162,6 +162,12 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
               {displayTitle && (
                 <p className="text-white text-lg font-semibold">{displayTitle}</p>
               )}
+              {/* New: Category from streamInfo */}
+              {streamInfo?.category?.title && (
+                <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
+                  {streamInfo.category.title}
+                </Badge>
+              )}
               {displayLanguage && (
                 <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
                   {displayLanguage}
