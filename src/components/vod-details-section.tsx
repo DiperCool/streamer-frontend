@@ -82,7 +82,7 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
               <Link href={`/${streamer.userName}`} passHref>
-                <h1 className="text-xl font-bold text-white hover:text-green-400 cursor-pointer">{streamer.userName}</h1>
+                <h1 className="text-2xl font-bold text-white hover:text-green-400 cursor-pointer">{streamer.userName}</h1>
               </Link>
               <CheckCircle className="w-4 h-4 text-green-500" /> {/* Verified badge */}
             </div>
@@ -181,12 +181,6 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
                 )}
               </>
             )}
-            <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
-              Gift Subs
-            </Button>
-            <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
-              Subscribe
-            </Button>
           </div>
           <div className="flex items-center space-x-3 text-gray-400 text-sm mt-2">
             <span>{vod.views} views</span>
