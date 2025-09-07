@@ -97,13 +97,17 @@ export const FollowingStreamersSidebar: React.FC = () => {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-white font-medium text-sm">{streamer.userName}</span>
-                {streamer.isLive && streamer.currentStream?.category?.title && (
+                <span className={cn("font-medium text-sm", streamer.isLive ? "text-white" : "text-gray-500")}>
+                  {streamer.userName}
+                </span>
+                {streamer.isLive && streamer.currentStream?.category?.title ? (
                   <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
+                ) : (
+                  <span className="text-gray-500 text-xs">Offline</span> // Display "Offline" when not live
                 )}
               </div>
             </div>
-            {streamer.isLive && streamer.currentStream?.currentViewers !== undefined && (
+            {streamer.isLive && streamer.currentStream?.currentViewers !== undefined ? (
               <div className="flex items-center space-x-1">
                 <span className="h-2 w-2 rounded-full bg-green-500" />
                 <span className="text-gray-400 text-xs">
@@ -111,6 +115,10 @@ export const FollowingStreamersSidebar: React.FC = () => {
                     `${(streamer.currentStream.currentViewers / 1000).toFixed(1)}K` : 
                     streamer.currentStream.currentViewers}
                 </span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1">
+                <span className="h-2 w-2 rounded-full bg-gray-500" /> {/* Grey circle for offline */}
               </div>
             )}
           </div>
