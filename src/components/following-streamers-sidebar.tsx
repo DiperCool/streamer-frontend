@@ -18,6 +18,7 @@ const ITEMS_PER_LOAD = 5;
 
 export const FollowingStreamersSidebar: React.FC = () => {
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
+  const [hoveredStreamerId, setHoveredStreamerId] = useState<string | null>(null); // State to track hovered streamer
 
   const {
     data,
@@ -88,7 +89,11 @@ export const FollowingStreamersSidebar: React.FC = () => {
       <h3 className="text-xs font-semibold text-gray-400 uppercase px-3 mb-2">Following</h3>
       {streamers.map((streamer) => (
         <Link key={streamer.id} href={`/${streamer.userName}`} passHref>
-          <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 transition-colors cursor-pointer">
+          <div
+            className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 transition-colors cursor-pointer"
+            onMouseEnter={() => setHoveredStreamerId(streamer.id)}
+            onMouseLeave={() => setHoveredStreamerId(null)}
+          >
             <div className="flex items-center space-x-3">
               <Avatar className="w-8 h-8">
                 <AvatarImage src={getMinioUrl(streamer.avatar!)} alt={streamer.userName || "Streamer"} />
@@ -101,10 +106,14 @@ export const FollowingStreamersSidebar: React.FC = () => {
                   {streamer.userName}
                 </span>
                 {streamer.isLive ? (
-                  streamer.currentStream?.category?.title ? (
-                    <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
+                  hoveredStreamerId === streamer.id && streamer.currentStream?.title ? (
+                    <span className="text-gray-400 text-xs">{streamer.currentStream.title}</span>
                   ) : (
-                    <span className="text-gray-400 text-xs"></span> // Show nothing if live but no category
+                    streamer.currentStream?.category?.title ? (
+                      <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
+                    ) : (
+                      <span className="text-gray-400 text-xs"></span> // Show nothing if live but no category
+                    )
                   )
                 ) : (
                   <span className="text-gray-500 text-xs">Offline</span> // Display "Offline" when not live
