@@ -146,12 +146,6 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
               )}
             </>
           )}
-          <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
-            Gift Subs
-          </Button>
-          <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
-            Subscribe
-          </Button>
         </div>
       </div>
 
