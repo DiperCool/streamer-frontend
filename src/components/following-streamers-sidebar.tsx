@@ -86,6 +86,7 @@ export const FollowingStreamersSidebar: React.FC = () => {
   return (
     <div className="space-y-1">
       <h3 className="text-xs font-semibold text-gray-400 uppercase px-3 mb-2">Following</h3>
+      <div className="my-2 border-b border-gray-700 mx-3" /> {/* Добавлен разделитель */}
       {streamers.map((streamer) => (
         <Link key={streamer.id} href={`/${streamer.userName}`} passHref>
           <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 transition-colors cursor-pointer">
@@ -98,17 +99,17 @@ export const FollowingStreamersSidebar: React.FC = () => {
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-white font-medium text-sm">{streamer.userName}</span>
-                {streamer.isLive && streamer.currentStream?.category?.title && ( // Changed back to currentStream
+                {streamer.isLive && streamer.currentStream?.category?.title && (
                   <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
                 )}
               </div>
             </div>
-            {streamer.isLive && streamer.currentStream?.currentViewers !== undefined && ( // Changed back to currentStream
+            {streamer.isLive && streamer.currentStream?.currentViewers !== undefined && (
               <div className="flex items-center space-x-1">
                 <span className="h-2 w-2 rounded-full bg-green-500" />
                 <span className="text-gray-400 text-xs">
-                  {streamer.currentStream.currentViewers >= 1000 ? // Changed back to currentStream
-                    `${(streamer.currentStream.currentViewers / 1000).toFixed(1)}K` : // Changed back to currentStream
+                  {streamer.currentStream.currentViewers >= 1000 ? 
+                    `${(streamer.currentStream.currentViewers / 1000).toFixed(1)}K` : 
                     streamer.currentStream.currentViewers}
                 </span>
               </div>
