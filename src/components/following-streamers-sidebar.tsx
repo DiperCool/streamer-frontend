@@ -100,8 +100,12 @@ export const FollowingStreamersSidebar: React.FC = () => {
                 <span className={cn("font-medium text-sm", streamer.isLive ? "text-white" : "text-gray-500")}>
                   {streamer.userName}
                 </span>
-                {streamer.isLive && streamer.currentStream?.category?.title ? (
-                  <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
+                {streamer.isLive ? (
+                  streamer.currentStream?.category?.title ? (
+                    <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
+                  ) : (
+                    <span className="text-gray-400 text-xs">Live</span> // Display "Live" if online but no category
+                  )
                 ) : (
                   <span className="text-gray-500 text-xs">Offline</span> // Display "Offline" when not live
                 )}
