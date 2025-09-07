@@ -159,14 +159,14 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
         <div className="flex items-center space-x-3">
           {isLive ? (
             <>
-              {displayTitle && (
-                <p className="text-white text-lg font-semibold">{displayTitle}</p>
-              )}
-              {/* New: Category from streamInfo */}
+              {/* Категория теперь в самом начале */}
               {streamInfo?.category?.title && (
                 <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
                   {streamInfo.category.title}
                 </Badge>
+              )}
+              {displayTitle && (
+                <p className="text-white text-lg font-semibold">{displayTitle}</p>
               )}
               {displayLanguage && (
                 <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
