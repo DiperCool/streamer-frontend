@@ -72,8 +72,8 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
-        <div className="flex items-center space-x-4 mb-4 md:mb-0 cursor-pointer" onClick={onTogglePlayerMaximize}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start space-x-4 flex-1 cursor-pointer" onClick={onTogglePlayerMaximize}>
           <div className="relative flex-shrink-0">
             <Avatar className="w-20 h-20 border-2 border-green-500">
               <AvatarImage src={getMinioUrl(avatarImage)} alt="Streamer Avatar" />
@@ -87,16 +87,47 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
               </Badge>
             )}
           </div>
-          <div>
+          <div className="flex-1 flex flex-col">
             <div className="flex items-center space-x-2">
-              <h1 className="text-3xl font-bold text-white">{streamer.userName}</h1>
+              <h1 className="text-2xl font-bold text-white">{streamer.userName}</h1>
               <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
+
+            {displayTitle && (
+              <p className="text-lg font-normal text-white uppercase mt-1">{displayTitle}</p>
+            )}
+
             <p className="text-gray-400">{streamer.followers} followers</p>
+
+            <div className="flex items-center flex-wrap gap-2 mt-2">
+              {isLive ? (
+                <>
+                  {streamInfo?.category?.title && (
+                    <span className="text-green-400 text-base font-semibold">{streamInfo.category.title}</span>
+                  )}
+                  {displayLanguage && (
+                    <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                      {displayLanguage}
+                    </Badge>
+                  )}
+                  {displayTags && displayTags.length > 0 && (
+                    displayTags.map((tag) => (
+                      <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                        {tag.title}
+                      </Badge>
+                    ))
+                  )}
+                </>
+              ) : (
+                <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
+                  OFFLINE
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 mt-4 md:mt-0">
+        <div className="flex items-center space-x-2 flex-shrink-0 mt-4 md:mt-0">
           {!isCurrentUserProfile && isAuthenticated && (
             <>
               {isFollowing ? (
@@ -146,54 +177,6 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
           </Button>
           <Button variant="secondary" className="bg-gray-800 hover:bg-gray-700 text-white">
             Subscribe
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between mt-2">
-        <div className="flex items-center space-x-3">
-          {isLive ? (
-            <>
-              {streamInfo?.category?.title && (
-                <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
-                  {streamInfo.category.title}
-                </Badge>
-              )}
-              {displayTitle && (
-                <p className="text-white text-lg font-semibold">{displayTitle}</p>
-              )}
-              {displayLanguage && (
-                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                  {displayLanguage}
-                </Badge>
-              )}
-              {displayTags && displayTags.length > 0 && (
-                displayTags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                    {tag.title}
-                  </Badge>
-                ))
-              )}
-            </>
-          ) : (
-            <>
-              <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
-                OFFLINE
-              </Badge>
-            </>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          {isLive && currentStream?.currentViewers !== undefined && (
-            <span className="text-white text-sm flex items-center">
-              <Users className="w-4 h-4 mr-1" /> {currentStream.currentViewers} Viewers
-            </span>
-          )}
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Share2 className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Settings className="w-5 h-5" />
           </Button>
         </div>
       </div>
