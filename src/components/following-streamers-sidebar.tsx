@@ -12,13 +12,17 @@ import {
   StreamerFollowerDto,
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip" // Import Tooltip components
 
 const INITIAL_DISPLAY_COUNT = 5;
 const ITEMS_PER_LOAD = 5;
 
 export const FollowingStreamersSidebar: React.FC = () => {
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
-  const [hoveredStreamerId, setHoveredStreamerId] = useState<string | null>(null); // State to track hovered streamer
 
   const {
     data,
@@ -88,54 +92,57 @@ export const FollowingStreamersSidebar: React.FC = () => {
     <div className="space-y-1">
       <h3 className="text-xs font-semibold text-gray-400 uppercase px-3 mb-2">Following</h3>
       {streamers.map((streamer) => (
-        <Link key={streamer.id} href={`/${streamer.userName}`} passHref>
-          <div
-            className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 transition-colors cursor-pointer"
-            onMouseEnter={() => setHoveredStreamerId(streamer.id)}
-            onMouseLeave={() => setHoveredStreamerId(null)}
-          >
-            <div className="flex items-center space-x-3">
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={getMinioUrl(streamer.avatar!)} alt={streamer.userName || "Streamer"} />
-                <AvatarFallback className="bg-green-600 text-white text-sm">
-                  {streamer.userName?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className={cn("font-medium text-sm", streamer.isLive ? "text-white" : "text-gray-500")}>
-                  {streamer.userName}
-                </span>
-                {streamer.isLive ? (
-                  hoveredStreamerId === streamer.id && streamer.currentStream?.title ? (
-                    <span className="text-gray-400 text-xs">{streamer.currentStream.title}</span>
-                  ) : (
-                    streamer.currentStream?.category?.title ? (
-                      <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
+        <Tooltip key={streamer.id} delayDuration={300}>
+          <TooltipTrigger asChild>
+            <Link href={`/${streamer.userName}`} passHref>
+              <div
+                className="flex items-center justify-between p-2 rounded-md hover:bg-gray-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={getMinioUrl(streamer.avatar!)} alt={streamer.userName || "Streamer"} />
+                    <AvatarFallback className="bg-green-600 text-white text-sm">
+                      {streamer.userName?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className={cn("font-medium text-sm", streamer.isLive ? "text-white" : "text-gray-500")}>
+                      {streamer.userName}
+                    </span>
+                    {streamer.isLive ? (
+                      streamer.currentStream?.category?.title ? (
+                        <span className="text-gray-400 text-xs">{streamer.currentStream.category.title}</span>
+                      ) : (
+                        <span className="text-gray-400 text-xs"></span> // Show nothing if live but no category
+                      )
                     ) : (
-                      <span className="text-gray-400 text-xs"></span> // Show nothing if live but no category
-                    )
-                  )
+                      <span className="text-gray-500 text-xs">Offline</span> // Display "Offline" when not live
+                    )}
+                  </div>
+                </div>
+                {streamer.isLive && streamer.currentStream?.currentViewers !== undefined ? (
+                  <div className="flex items-center space-x-1">
+                    <span className="h-2 w-2 rounded-full bg-green-500" />
+                    <span className="text-gray-400 text-xs">
+                      {streamer.currentStream.currentViewers >= 1000 ? 
+                        `${(streamer.currentStream.currentViewers / 1000).toFixed(1)}K` : 
+                        streamer.currentStream.currentViewers}
+                    </span>
+                  </div>
                 ) : (
-                  <span className="text-gray-500 text-xs">Offline</span> // Display "Offline" when not live
+                  <div className="flex items-center space-x-1">
+                    <span className="h-2 w-2 rounded-full bg-gray-500" /> {/* Grey circle for offline */}
+                  </div>
                 )}
               </div>
-            </div>
-            {streamer.isLive && streamer.currentStream?.currentViewers !== undefined ? (
-              <div className="flex items-center space-x-1">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                <span className="text-gray-400 text-xs">
-                  {streamer.currentStream.currentViewers >= 1000 ? 
-                    `${(streamer.currentStream.currentViewers / 1000).toFixed(1)}K` : 
-                    streamer.currentStream.currentViewers}
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-1">
-                <span className="h-2 w-2 rounded-full bg-gray-500" /> {/* Grey circle for offline */}
-              </div>
-            )}
-          </div>
-        </Link>
+            </Link>
+          </TooltipTrigger>
+          {streamer.isLive && streamer.currentStream?.title && (
+            <TooltipContent side="right" className="bg-gray-700 border-gray-600 text-white">
+              {streamer.currentStream.title}
+            </TooltipContent>
+          )}
+        </Tooltip>
       ))}
 
       <div className="flex justify-between px-3 pt-2">
