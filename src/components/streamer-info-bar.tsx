@@ -155,33 +155,27 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
         </div>
       </div>
 
-      <div className="flex items-center flex-wrap gap-2 mt-2">
-        {isLive ? (
-          <>
-            {streamInfo?.category?.title && (
-              <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
-                {streamInfo.category.title}
+      {isLive && (
+        <div className="flex items-center flex-wrap gap-2 mt-2">
+          {streamInfo?.category?.title && (
+            <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
+              {streamInfo.category.title}
+            </Badge>
+          )}
+          {displayLanguage && (
+            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+              {displayLanguage}
+            </Badge>
+          )}
+          {displayTags && displayTags.length > 0 && (
+            displayTags.map((tag) => (
+              <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                {tag.title}
               </Badge>
-            )}
-            {displayLanguage && (
-              <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                {displayLanguage}
-              </Badge>
-            )}
-            {displayTags && displayTags.length > 0 && (
-              displayTags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
-                  {tag.title}
-                </Badge>
-              ))
-            )}
-          </>
-        ) : (
-          <Badge className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm font-semibold">
-            OFFLINE
-          </Badge>
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   )
 }
