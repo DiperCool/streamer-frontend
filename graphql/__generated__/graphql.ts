@@ -62,6 +62,7 @@ export type CategoryDto = {
   image: Scalars['String']['output'];
   slug: Scalars['String']['output'];
   title: Scalars['String']['output'];
+  watchers: Scalars['Long']['output'];
 };
 
 export type CategoryDtoFilterInput = {
@@ -527,6 +528,7 @@ export type Query = {
   __typename?: 'Query';
   categories?: Maybe<CategoriesConnection>;
   category: CategoryDto;
+  categoryBySlug: CategoryDto;
   chat: ChatDto;
   chatMessages?: Maybe<ChatMessagesConnection>;
   chatMessagesHistory: Array<ChatMessageDto>;
@@ -546,6 +548,10 @@ export type Query = {
   streamer: StreamerDto;
   streamerInteraction: StreamerInteractionDto;
   streamers?: Maybe<StreamersConnection>;
+  streams?: Maybe<StreamsConnection>;
+  tags?: Maybe<TagsConnection>;
+  topCategories: Array<CategoryDto>;
+  topStreams: Array<StreamDto>;
   vod: VodDto;
   vods?: Maybe<VodsConnection>;
 };
@@ -558,12 +564,18 @@ export type QueryCategoriesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<Array<CategoryDtoSortInput>>;
   search?: InputMaybe<Scalars['String']['input']>;
+  tag?: InputMaybe<Scalars['UUID']['input']>;
   where?: InputMaybe<CategoryDtoFilterInput>;
 };
 
 
 export type QueryCategoryArgs = {
   id: Scalars['UUID']['input'];
+};
+
+
+export type QueryCategoryBySlugArgs = {
+  slug: Scalars['String']['input'];
 };
 
 
@@ -667,6 +679,29 @@ export type QueryStreamersArgs = {
   order?: InputMaybe<Array<StreamerDtoSortInput>>;
   search?: InputMaybe<Scalars['String']['input']>;
   where?: InputMaybe<StreamerDtoFilterInput>;
+};
+
+
+export type QueryStreamsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  categoryId?: InputMaybe<Scalars['UUID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  languages?: InputMaybe<Array<Scalars['String']['input']>>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<StreamDtoSortInput>>;
+  tag?: InputMaybe<Scalars['UUID']['input']>;
+  where?: InputMaybe<StreamDtoFilterInput>;
+};
+
+
+export type QueryTagsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<TagDtoSortInput>>;
+  where?: InputMaybe<TagDtoFilterInput>;
 };
 
 
@@ -784,6 +819,32 @@ export type StreamDto = {
   streamerId: Scalars['String']['output'];
   tags: Array<TagDto>;
   title: Scalars['String']['output'];
+};
+
+export type StreamDtoFilterInput = {
+  active?: InputMaybe<BooleanOperationFilterInput>;
+  and?: InputMaybe<Array<StreamDtoFilterInput>>;
+  categoryId?: InputMaybe<UuidOperationFilterInput>;
+  currentViewers?: InputMaybe<LongOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  language?: InputMaybe<StringOperationFilterInput>;
+  or?: InputMaybe<Array<StreamDtoFilterInput>>;
+  preview?: InputMaybe<StringOperationFilterInput>;
+  started?: InputMaybe<DateTimeOperationFilterInput>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+  title?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type StreamDtoSortInput = {
+  active?: InputMaybe<SortEnumType>;
+  categoryId?: InputMaybe<SortEnumType>;
+  currentViewers?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  language?: InputMaybe<SortEnumType>;
+  preview?: InputMaybe<SortEnumType>;
+  started?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+  title?: InputMaybe<SortEnumType>;
 };
 
 export type StreamInfoDto = {
@@ -912,6 +973,26 @@ export type StreamersEdge = {
   node: StreamerDto;
 };
 
+/** A connection to a list of items. */
+export type StreamsConnection = {
+  __typename?: 'StreamsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<StreamsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<StreamDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type StreamsEdge = {
+  __typename?: 'StreamsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: StreamDto;
+};
+
 export type StringOperationFilterInput = {
   and?: InputMaybe<Array<StringOperationFilterInput>>;
   contains?: InputMaybe<Scalars['String']['input']>;
@@ -988,6 +1069,38 @@ export type TagDto = {
   __typename?: 'TagDto';
   id: Scalars['UUID']['output'];
   title: Scalars['String']['output'];
+};
+
+export type TagDtoFilterInput = {
+  and?: InputMaybe<Array<TagDtoFilterInput>>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<TagDtoFilterInput>>;
+  title?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type TagDtoSortInput = {
+  id?: InputMaybe<SortEnumType>;
+  title?: InputMaybe<SortEnumType>;
+};
+
+/** A connection to a list of items. */
+export type TagsConnection = {
+  __typename?: 'TagsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<TagsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<TagDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type TagsEdge = {
+  __typename?: 'TagsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: TagDto;
 };
 
 export type UnfollowInput = {
@@ -1218,6 +1331,18 @@ export type GetCategoryByIdQueryVariables = Exact<{
 
 
 export type GetCategoryByIdQuery = { __typename?: 'Query', category: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string } };
+
+export type GetCategoryBySlugQueryVariables = Exact<{
+  slug: Scalars['String']['input'];
+}>;
+
+
+export type GetCategoryBySlugQuery = { __typename?: 'Query', categoryBySlug: { __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string, watchers: number } };
+
+export type GetTopCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetTopCategoriesQuery = { __typename?: 'Query', topCategories: Array<{ __typename?: 'CategoryDto', id: string, title: string, slug: string, image: string, watchers: number }> };
 
 export type CreateMessageMutationVariables = Exact<{
   request: CreateMessageInput;
@@ -1549,10 +1674,42 @@ export type GetStreamInfoQueryVariables = Exact<{
 
 export type GetStreamInfoQuery = { __typename?: 'Query', streamInfo: { __typename?: 'StreamInfoDto', id: string, streamerId: string, title?: string | null, language: string, categoryId?: string | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
+export type GetStreamsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<StreamDtoSortInput> | StreamDtoSortInput>;
+  categoryId?: InputMaybe<Scalars['UUID']['input']>;
+  languages?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  tag?: InputMaybe<Scalars['UUID']['input']>;
+  where?: InputMaybe<StreamDtoFilterInput>;
+}>;
+
+
+export type GetStreamsQuery = { __typename?: 'Query', streams?: { __typename?: 'StreamsConnection', nodes?: Array<{ __typename?: 'StreamDto', id: string, title: string, preview?: string | null, currentViewers: number, language: string, started: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean } | null, category?: { __typename?: 'CategoryDto', id: string, title: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetTopStreamsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetTopStreamsQuery = { __typename?: 'Query', topStreams: Array<{ __typename?: 'StreamDto', id: string, title: string, preview?: string | null, currentViewers: number, language: string, started: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean } | null, category?: { __typename?: 'CategoryDto', id: string, title: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> };
+
 export type GetMySystemRoleQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetMySystemRoleQuery = { __typename?: 'Query', mySystemRole: { __typename?: 'SystemRoleDto', roleType: SystemRoleType, streamerId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, followers: number, isLive: boolean } | null } };
+
+export type GetTagsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<TagDtoSortInput> | TagDtoSortInput>;
+  where?: InputMaybe<TagDtoFilterInput>;
+}>;
+
+
+export type GetTagsQuery = { __typename?: 'Query', tags?: { __typename?: 'TagsConnection', nodes?: Array<{ __typename?: 'TagDto', id: string, title: string }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetVodsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1782,6 +1939,93 @@ export type GetCategoryByIdQueryHookResult = ReturnType<typeof useGetCategoryByI
 export type GetCategoryByIdLazyQueryHookResult = ReturnType<typeof useGetCategoryByIdLazyQuery>;
 export type GetCategoryByIdSuspenseQueryHookResult = ReturnType<typeof useGetCategoryByIdSuspenseQuery>;
 export type GetCategoryByIdQueryResult = Apollo.QueryResult<GetCategoryByIdQuery, GetCategoryByIdQueryVariables>;
+export const GetCategoryBySlugDocument = gql`
+    query GetCategoryBySlug($slug: String!) {
+  categoryBySlug(slug: $slug) {
+    id
+    title
+    slug
+    image
+    watchers
+  }
+}
+    `;
+
+/**
+ * __useGetCategoryBySlugQuery__
+ *
+ * To run a query within a React component, call `useGetCategoryBySlugQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCategoryBySlugQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCategoryBySlugQuery({
+ *   variables: {
+ *      slug: // value for 'slug'
+ *   },
+ * });
+ */
+export function useGetCategoryBySlugQuery(baseOptions: Apollo.QueryHookOptions<GetCategoryBySlugQuery, GetCategoryBySlugQueryVariables> & ({ variables: GetCategoryBySlugQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCategoryBySlugQuery, GetCategoryBySlugQueryVariables>(GetCategoryBySlugDocument, options);
+      }
+export function useGetCategoryBySlugLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCategoryBySlugQuery, GetCategoryBySlugQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCategoryBySlugQuery, GetCategoryBySlugQueryVariables>(GetCategoryBySlugDocument, options);
+        }
+export function useGetCategoryBySlugSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCategoryBySlugQuery, GetCategoryBySlugQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCategoryBySlugQuery, GetCategoryBySlugQueryVariables>(GetCategoryBySlugDocument, options);
+        }
+export type GetCategoryBySlugQueryHookResult = ReturnType<typeof useGetCategoryBySlugQuery>;
+export type GetCategoryBySlugLazyQueryHookResult = ReturnType<typeof useGetCategoryBySlugLazyQuery>;
+export type GetCategoryBySlugSuspenseQueryHookResult = ReturnType<typeof useGetCategoryBySlugSuspenseQuery>;
+export type GetCategoryBySlugQueryResult = Apollo.QueryResult<GetCategoryBySlugQuery, GetCategoryBySlugQueryVariables>;
+export const GetTopCategoriesDocument = gql`
+    query GetTopCategories {
+  topCategories {
+    id
+    title
+    slug
+    image
+    watchers
+  }
+}
+    `;
+
+/**
+ * __useGetTopCategoriesQuery__
+ *
+ * To run a query within a React component, call `useGetTopCategoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTopCategoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTopCategoriesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetTopCategoriesQuery(baseOptions?: Apollo.QueryHookOptions<GetTopCategoriesQuery, GetTopCategoriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTopCategoriesQuery, GetTopCategoriesQueryVariables>(GetTopCategoriesDocument, options);
+      }
+export function useGetTopCategoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTopCategoriesQuery, GetTopCategoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTopCategoriesQuery, GetTopCategoriesQueryVariables>(GetTopCategoriesDocument, options);
+        }
+export function useGetTopCategoriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopCategoriesQuery, GetTopCategoriesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetTopCategoriesQuery, GetTopCategoriesQueryVariables>(GetTopCategoriesDocument, options);
+        }
+export type GetTopCategoriesQueryHookResult = ReturnType<typeof useGetTopCategoriesQuery>;
+export type GetTopCategoriesLazyQueryHookResult = ReturnType<typeof useGetTopCategoriesLazyQuery>;
+export type GetTopCategoriesSuspenseQueryHookResult = ReturnType<typeof useGetTopCategoriesSuspenseQuery>;
+export type GetTopCategoriesQueryResult = Apollo.QueryResult<GetTopCategoriesQuery, GetTopCategoriesQueryVariables>;
 export const CreateMessageDocument = gql`
     mutation CreateMessage($request: CreateMessageInput!) {
   createMessage(request: $request) {
@@ -3782,6 +4026,151 @@ export type GetStreamInfoQueryHookResult = ReturnType<typeof useGetStreamInfoQue
 export type GetStreamInfoLazyQueryHookResult = ReturnType<typeof useGetStreamInfoLazyQuery>;
 export type GetStreamInfoSuspenseQueryHookResult = ReturnType<typeof useGetStreamInfoSuspenseQuery>;
 export type GetStreamInfoQueryResult = Apollo.QueryResult<GetStreamInfoQuery, GetStreamInfoQueryVariables>;
+export const GetStreamsDocument = gql`
+    query GetStreams($after: String, $before: String, $first: Int, $last: Int, $order: [StreamDtoSortInput!], $categoryId: UUID, $languages: [String!], $tag: UUID, $where: StreamDtoFilterInput) {
+  streams(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    categoryId: $categoryId
+    languages: $languages
+    tag: $tag
+    where: $where
+  ) {
+    nodes {
+      id
+      title
+      preview
+      currentViewers
+      language
+      started
+      streamer {
+        id
+        userName
+        avatar
+        isLive
+      }
+      category {
+        id
+        title
+        image
+      }
+      tags {
+        id
+        title
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetStreamsQuery__
+ *
+ * To run a query within a React component, call `useGetStreamsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetStreamsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetStreamsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      categoryId: // value for 'categoryId'
+ *      languages: // value for 'languages'
+ *      tag: // value for 'tag'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetStreamsQuery(baseOptions?: Apollo.QueryHookOptions<GetStreamsQuery, GetStreamsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetStreamsQuery, GetStreamsQueryVariables>(GetStreamsDocument, options);
+      }
+export function useGetStreamsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetStreamsQuery, GetStreamsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetStreamsQuery, GetStreamsQueryVariables>(GetStreamsDocument, options);
+        }
+export function useGetStreamsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetStreamsQuery, GetStreamsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetStreamsQuery, GetStreamsQueryVariables>(GetStreamsDocument, options);
+        }
+export type GetStreamsQueryHookResult = ReturnType<typeof useGetStreamsQuery>;
+export type GetStreamsLazyQueryHookResult = ReturnType<typeof useGetStreamsLazyQuery>;
+export type GetStreamsSuspenseQueryHookResult = ReturnType<typeof useGetStreamsSuspenseQuery>;
+export type GetStreamsQueryResult = Apollo.QueryResult<GetStreamsQuery, GetStreamsQueryVariables>;
+export const GetTopStreamsDocument = gql`
+    query GetTopStreams {
+  topStreams {
+    id
+    title
+    preview
+    currentViewers
+    language
+    started
+    streamer {
+      id
+      userName
+      avatar
+      isLive
+    }
+    category {
+      id
+      title
+      image
+    }
+    tags {
+      id
+      title
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetTopStreamsQuery__
+ *
+ * To run a query within a React component, call `useGetTopStreamsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTopStreamsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTopStreamsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetTopStreamsQuery(baseOptions?: Apollo.QueryHookOptions<GetTopStreamsQuery, GetTopStreamsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTopStreamsQuery, GetTopStreamsQueryVariables>(GetTopStreamsDocument, options);
+      }
+export function useGetTopStreamsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTopStreamsQuery, GetTopStreamsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTopStreamsQuery, GetTopStreamsQueryVariables>(GetTopStreamsDocument, options);
+        }
+export function useGetTopStreamsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopStreamsQuery, GetTopStreamsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetTopStreamsQuery, GetTopStreamsQueryVariables>(GetTopStreamsDocument, options);
+        }
+export type GetTopStreamsQueryHookResult = ReturnType<typeof useGetTopStreamsQuery>;
+export type GetTopStreamsLazyQueryHookResult = ReturnType<typeof useGetTopStreamsLazyQuery>;
+export type GetTopStreamsSuspenseQueryHookResult = ReturnType<typeof useGetTopStreamsSuspenseQuery>;
+export type GetTopStreamsQueryResult = Apollo.QueryResult<GetTopStreamsQuery, GetTopStreamsQueryVariables>;
 export const GetMySystemRoleDocument = gql`
     query GetMySystemRole {
   mySystemRole {
@@ -3829,6 +4218,67 @@ export type GetMySystemRoleQueryHookResult = ReturnType<typeof useGetMySystemRol
 export type GetMySystemRoleLazyQueryHookResult = ReturnType<typeof useGetMySystemRoleLazyQuery>;
 export type GetMySystemRoleSuspenseQueryHookResult = ReturnType<typeof useGetMySystemRoleSuspenseQuery>;
 export type GetMySystemRoleQueryResult = Apollo.QueryResult<GetMySystemRoleQuery, GetMySystemRoleQueryVariables>;
+export const GetTagsDocument = gql`
+    query GetTags($after: String, $before: String, $first: Int, $last: Int, $order: [TagDtoSortInput!], $where: TagDtoFilterInput) {
+  tags(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    where: $where
+  ) {
+    nodes {
+      id
+      title
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetTagsQuery__
+ *
+ * To run a query within a React component, call `useGetTagsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTagsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTagsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetTagsQuery(baseOptions?: Apollo.QueryHookOptions<GetTagsQuery, GetTagsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTagsQuery, GetTagsQueryVariables>(GetTagsDocument, options);
+      }
+export function useGetTagsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTagsQuery, GetTagsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTagsQuery, GetTagsQueryVariables>(GetTagsDocument, options);
+        }
+export function useGetTagsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTagsQuery, GetTagsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetTagsQuery, GetTagsQueryVariables>(GetTagsDocument, options);
+        }
+export type GetTagsQueryHookResult = ReturnType<typeof useGetTagsQuery>;
+export type GetTagsLazyQueryHookResult = ReturnType<typeof useGetTagsLazyQuery>;
+export type GetTagsSuspenseQueryHookResult = ReturnType<typeof useGetTagsSuspenseQuery>;
+export type GetTagsQueryResult = Apollo.QueryResult<GetTagsQuery, GetTagsQueryVariables>;
 export const GetVodsDocument = gql`
     query GetVods($after: String, $before: String, $first: Int, $last: Int, $order: [VodDtoSortInput!], $streamerId: String!, $where: VodDtoFilterInput) {
   vods(

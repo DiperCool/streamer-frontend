@@ -17,12 +17,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip" // Import Tooltip components
+import { useAuth0 } from "@auth0/auth0-react" // Import useAuth0
 
 const INITIAL_DISPLAY_COUNT = 5;
 const ITEMS_PER_LOAD = 5;
 
 export const FollowingStreamersSidebar: React.FC = () => {
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
+  const { isAuthenticated, isLoading: authLoading } = useAuth0(); // Get authentication status
 
   const {
     data,
@@ -35,6 +37,7 @@ export const FollowingStreamersSidebar: React.FC = () => {
       first: displayCount,
       order: [{ isLive: SortEnumType.Desc }, { userName: SortEnumType.Asc }], // Live streamers first, then alphabetical
     },
+    skip: !isAuthenticated || authLoading, // Skip query if not authenticated or still loading auth
     notifyOnNetworkStatusChange: true,
   });
 
@@ -72,7 +75,19 @@ export const FollowingStreamersSidebar: React.FC = () => {
     setDisplayCount(INITIAL_DISPLAY_COUNT);
   };
 
-  if (loading && networkStatus === 1) { // Initial load
+  if (authLoading) { // Show loading state for Auth0
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 className="h-6 w-6 animate-spin text-green-500" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) { // If not authenticated, show a message
+    return <div className="text-gray-400 text-sm p-4">Log in to see your followed streamers.</div>;
+  }
+
+  if (loading && networkStatus === 1) { // Initial load for the query itself
     return (
       <div className="flex items-center justify-center py-4">
         <Loader2 className="h-6 w-6 animate-spin text-green-500" />
