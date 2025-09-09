@@ -122,12 +122,12 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="w-full h-[30vh] flex">
+      <div className="w-full h-[50vh] flex"> {/* Increased height to 50vh */}
         {/* Left Section: Streamer Info and Details */}
-        <div className="w-1/2 flex flex-col bg-gray-900 z-20"> {/* Removed p-8 */}
+        <div className="w-1/2 p-8 flex flex-col bg-gray-900 z-20"> {/* Applied p-8 here */}
           
-          {/* Top content block with padding */}
-          <div className="pt-8 px-8">
+          {/* Top content block */}
+          <div> {/* Removed pt-8 px-8 */}
             {/* Row 1: Avatar, Streamer Name, Viewers */}
             <div className="flex items-center space-x-3 mb-4">
               <Avatar className="w-12 h-12 border-2 border-green-500">
@@ -172,8 +172,8 @@ export default function HomePage() {
           {/* This div will take up all available space, pushing the carousel controls to the bottom */}
           <div className="flex-grow" /> 
 
-          {/* Bottom Section: Top Stream Previews and Carousel Controls with padding */}
-          <div className="pb-8 px-8"> {/* Changed pt-8 to pb-8 px-8 */}
+          {/* Bottom Section: Top Stream Previews and Carousel Controls */}
+          <div> {/* Removed pb-8 px-8 */}
             <h3 className="text-lg font-semibold text-white mb-4">Top Streams</h3>
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
               {topStreams.map((stream, index) => (
