@@ -117,7 +117,7 @@ export default function HomePage() {
   const currentViewers = featuredStream?.currentViewers || 0;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="flex-1 bg-gray-900 text-white">
       {topStreams.length > 0 ? (
         <div className="w-full h-[50vh] flex">
           <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20">
@@ -243,13 +243,13 @@ export default function HomePage() {
           </div>
         </div>
       ) : (
-        <div className="container mx-auto px-4 py-8 text-center">
+        <div className="px-4 py-8 text-center">
           <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
           <p className="text-gray-400">No live streams currently available. Check back later!</p>
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="px-4 py-8">
         {/* Top Categories Section */}
         {topCategories.length > 0 && (
           <>
