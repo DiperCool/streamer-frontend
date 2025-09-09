@@ -122,9 +122,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="w-full h-[calc(100vh-4rem)] flex"> {/* Changed to flex container */}
+      <div className="w-full h-[30vh] flex"> {/* Changed height to 30vh */}
         {/* Left Section: Streamer Info and Details */}
-        <div className="w-1/2 p-8 flex flex-col justify-start space-y-4 bg-gray-900 z-20"> {/* Removed absolute, added w-1/2, solid bg */}
+        <div className="w-1/2 p-8 flex flex-col justify-start space-y-4 bg-gray-900 z-20">
           
           {/* Row 1: Avatar, Streamer Name, Viewers */}
           <div className="flex items-center space-x-3">
@@ -215,7 +215,7 @@ export default function HomePage() {
         </div>
 
         {/* Right Section: Stream Player (now a black square) */}
-        <div className="w-1/2 h-full"> {/* Removed absolute, added w-1/2 */}
+        <div className="w-1/2 h-full">
           <div className="embla h-full w-full" ref={emblaRef}>
             <div className="embla__container h-full">
               {topStreams.map((stream) => (
