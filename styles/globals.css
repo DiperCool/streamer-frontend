@@ -10,6 +10,24 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .h-screen-minus-navbar {
+    height: calc(100vh - 4rem); /* Assuming navbar height is h-16 (4rem) */
+  }
+  /* Custom scrollbar for embla carousel */
+  .embla__container::-webkit-scrollbar {
+    height: 8px;
+  }
+  .embla__container::-webkit-scrollbar-track {
+    background: #374151; /* gray-700 */
+    border-radius: 10px;
+  }
+  .embla__container::-webkit-scrollbar-thumb {
+    background: #10B981; /* green-500 */
+    border-radius: 10px;
+  }
+  .embla__container::-webkit-scrollbar-thumb:hover {
+    background: #059669; /* green-600 */
+  }
 }
 
 @layer base {
