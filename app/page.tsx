@@ -212,10 +212,10 @@ export default function HomePage() {
         </div>
 
         <div className="w-1/2 h-full">
-          <div className="embla w-full h-full" ref={emblaRef}> {/* Изменено: убрано min-h-full */}
-            <div className="embla__container w-full h-full"> {/* Изменено: убрано min-h-full */}
+          <div className="embla w-full h-full" ref={emblaRef}>
+            <div className="embla__container w-full h-full">
               {topStreams.map((stream) => (
-                <div className="embla__slide w-full aspect-video relative bg-gray-800" key={stream.id}> {/* Изменено: h-full и min-h-full заменены на w-full aspect-video */}
+                <div className="embla__slide w-full aspect-video relative bg-gray-800" key={stream.id}>
                   {stream.sources && stream.sources.length > 0 ? (
                     <StreamPlayer
                       sources={stream.sources}
@@ -235,7 +235,7 @@ export default function HomePage() {
                       priority
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-end p-4">
+                  <div className="absolute top-0 bottom-0 right-0 left-[-100px] bg-gradient-to-r from-black/80 to-transparent flex items-end p-4">
                     {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
                   </div>
                 </div>
