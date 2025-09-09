@@ -164,7 +164,7 @@ export default function HomePage() {
           <div className="flex-grow" /> 
 
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Top Streams</h3>
+            {/* Removed the h3 "Top Streams" heading */}
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
               {topStreams.map((stream, index) => (
                 <div
