@@ -122,12 +122,12 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="w-full h-[30vh] flex"> {/* Changed height to 30vh */}
+      <div className="w-full h-[30vh] flex">
         {/* Left Section: Streamer Info and Details */}
-        <div className="w-1/2 p-8 flex flex-col justify-start space-y-4 bg-gray-900 z-20">
+        <div className="w-1/2 p-8 flex flex-col bg-gray-900 z-20">
           
           {/* Row 1: Avatar, Streamer Name, Viewers */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 mb-4">
             <Avatar className="w-12 h-12 border-2 border-green-500">
               <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
               <AvatarFallback className="bg-green-600 text-white text-lg">
@@ -148,17 +148,17 @@ export default function HomePage() {
           </div>
 
           {/* Row 2: Stream Title */}
-          <h2 className="text-3xl font-bold text-white line-clamp-2">
+          <h2 className="text-3xl font-bold text-white line-clamp-2 mb-4">
             {featuredStream.title || "Untitled Stream"}
           </h2>
 
           {/* Row 3: Category */}
           {featuredStream.category?.title && (
-            <p className="text-lg text-gray-300">{featuredStream.category.title}</p>
+            <p className="text-lg text-gray-300 mb-4">{featuredStream.category.title}</p>
           )}
 
           {/* Row 4: Tags */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mb-4">
             {featuredStream.tags.map((tag) => (
               <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm">
                 {tag.title}
@@ -166,8 +166,11 @@ export default function HomePage() {
             ))}
           </div>
 
+          {/* This div will take up all available space, pushing the carousel controls to the bottom */}
+          <div className="flex-grow" /> 
+
           {/* Bottom Section: Top Stream Previews and Carousel Controls */}
-          <div className="mt-auto pt-8"> {/* Push to bottom */}
+          <div className="pt-8">
             <h3 className="text-lg font-semibold text-white mb-4">Top Streams</h3>
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
               {topStreams.map((stream, index) => (
