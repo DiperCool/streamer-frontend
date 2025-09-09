@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import NextImage from "next/image" // Aliased import to avoid conflict
 import { getMinioUrl } from "@/utils/utils"
-import { StreamPlayer } from "@/src/components/stream-player"
+// import { StreamPlayer } from "@/src/components/stream-player" // Removed StreamPlayer import
 import { cn } from "@/lib/utils"
 import useEmblaCarousel from "embla-carousel-react"
 import { Button } from "@/components/ui/button"
@@ -180,7 +180,7 @@ export default function HomePage() {
                   )}
                   onClick={() => scrollTo(index)}
                 >
-                  <NextImage // Changed to NextImage
+                  <NextImage
                     src={getMinioUrl(stream.preview || "/placeholder.jpg")}
                     alt={stream.title || "Stream preview"}
                     fill
@@ -215,20 +215,17 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Right Section: Stream Player */}
+        {/* Right Section: Stream Player (now a black square) */}
         <div className="absolute inset-0 w-full h-full">
           <div className="embla h-full w-full" ref={emblaRef}>
             <div className="embla__container h-full">
               {topStreams.map((stream) => (
                 <div className="embla__slide h-full" key={stream.id}>
-                  <StreamPlayer
-                    sources={stream.sources}
-                    playing={true}
-                    controls={false}
-                    isPlayerMaximized={false}
-                    onTogglePlayerMaximize={() => {}}
-                    showPlayerControls={false}
-                  />
+                  {/* Replaced StreamPlayer with a black div */}
+                  <div className="flex items-center justify-center w-full h-full bg-black text-white">
+                    {/* Optional: Add some text or an icon here if desired */}
+                    <span className="text-lg text-gray-400">Video Player Placeholder</span>
+                  </div>
                 </div>
               ))}
             </div>
