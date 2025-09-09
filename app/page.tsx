@@ -16,7 +16,7 @@ import { getMinioUrl } from "@/utils/utils"
 import { cn } from "@/lib/utils"
 import useEmblaCarousel from "embla-carousel-react"
 import { Button } from "@/components/ui/button"
-import { StreamPlayer } from "@/src/components/stream-player" // Импортируем StreamPlayer
+import { StreamPlayer } from "@/src/components/stream-player"
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -164,7 +164,7 @@ export default function HomePage() {
 
           {/* This is the area for the carousel selection mechanism */}
           <div className="flex-grow flex flex-col justify-end">
-            <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
+            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar"> {/* Changed pb-4 to pb-2 */}
               {topStreams.map((stream, index) => (
                 <div
                   key={stream.id}
@@ -188,7 +188,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="flex items-center justify-center space-x-2 mt-4">
+            <div className="flex items-center justify-center space-x-2 mt-2"> {/* Changed mt-4 to mt-2 */}
               <ArrowButton onClick={scrollPrev}>
                 <ChevronLeft className="h-5 w-5" />
               </ArrowButton>
@@ -217,10 +217,10 @@ export default function HomePage() {
                     <StreamPlayer
                       sources={stream.sources}
                       playing={true}
-                      controls={false} // Отключаем элементы управления
+                      controls={false}
                       isPlayerMaximized={false}
                       onTogglePlayerMaximize={() => {}}
-                      showPlayerControls={false} // Явно указываем, что не показывать элементы управления
+                      showPlayerControls={false}
                     />
                   ) : (
                     <NextImage
@@ -232,7 +232,6 @@ export default function HomePage() {
                       priority
                     />
                   )}
-                  {/* Затемнение поверх плеера или изображения */}
                   <div className="absolute inset-0 bg-black/30 flex items-end p-4">
                     {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
                   </div>
