@@ -4,18 +4,16 @@ import React, { useCallback, useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
   useGetTopStreamsQuery,
-  useGetStreamsQuery,
   StreamDto,
   SortEnumType,
 } from "@/graphql/__generated__/graphql"
-import { Loader2, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Users } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { getMinioUrl } from "@/utils/utils"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { TopStreamCard } from "@/src/components/top-stream-card"
-import useEmblaCarousel from "embla-carousel-react"
 import { cn } from "@/lib/utils"
 
 export default function HomePage() {
@@ -24,31 +22,7 @@ export default function HomePage() {
   const { data: topStreamsData, loading: topStreamsLoading, error: topStreamsError } = useGetTopStreamsQuery();
   const featuredStream = topStreamsData?.topStreams?.[0];
 
-  const { data: otherStreamsData, loading: otherStreamsLoading, error: otherStreamsError } = useGetStreamsQuery({
-    variables: {
-      first: 10, // Fetch a few more streams for the carousel
-      order: [{ currentViewers: SortEnumType.Desc }],
-      where: featuredStream ? { id: { neq: featuredStream.id } } : undefined, // Exclude the featured stream
-    },
-    skip: !topStreamsData, // Only fetch other streams if top streams are loaded
-  });
-  const otherStreams = otherStreamsData?.streams?.nodes || [];
-
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    loop: false,
-    dragFree: true,
-  });
-
-  const scrollPrev = useCallback(() => {
-    emblaApi?.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    emblaApi?.scrollNext();
-  }, [emblaApi]);
-
-  if (authLoading || topStreamsLoading || otherStreamsLoading) {
+  if (authLoading || topStreamsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <Loader2 className="h-12 w-12 animate-spin text-green-500" />
@@ -56,10 +30,10 @@ export default function HomePage() {
     )
   }
 
-  if (topStreamsError || otherStreamsError) {
+  if (topStreamsError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <p className="text-red-500">Error loading streams: {topStreamsError?.message || otherStreamsError?.message}</p>
+        <p className="text-red-500">Error loading top streams: {topStreamsError?.message}</p>
       </div>
     )
   }
@@ -130,34 +104,6 @@ export default function HomePage() {
           />
         </div>
       </div>
-
-      {/* Other Streams Carousel */}
-      {otherStreams.length > 0 && (
-        <div className="relative px-8 py-6 bg-gray-900 border-t border-gray-800">
-          <h3 className="text-xl font-semibold text-white mb-4">More Streams</h3>
-          <div className="embla" ref={emblaRef}>
-            <div className="embla__container flex -ml-4">
-              {otherStreams.map((stream) => (
-                <div key={stream.id} className="embla__slide flex-none min-w-0 pl-4" style={{ flex: '0 0 25%' }}>
-                  <TopStreamCard stream={stream} />
-                </div>
-              ))}
-            </div>
-            <button
-              className="embla__button embla__button--prev absolute top-1/2 left-0 -translate-y-1/2 bg-gray-800/70 hover:bg-gray-700/90 text-white p-2 rounded-full z-10"
-              onClick={scrollPrev}
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              className="embla__button embla__button--next absolute top-1/2 right-0 -translate-y-1/2 bg-gray-800/70 hover:bg-gray-700/90 text-white p-2 rounded-full z-10"
-              onClick={scrollNext}
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
