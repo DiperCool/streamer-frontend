@@ -137,6 +137,11 @@ export const GET_TOP_STREAMS = gql`
                 avatar
                 isLive
             }
+            sources { # Добавлено поле sources
+                streamId
+                url
+                sourceType
+            }
             category {
                 id
                 title
