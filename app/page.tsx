@@ -122,7 +122,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="w-full h-[50vh] flex">
-        <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20"> {/* Изменено с p-8 на pt-8 px-8 */}
+        <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20">
           
           <div>
             <div className="flex items-center space-x-3 mb-2">
@@ -165,7 +165,7 @@ export default function HomePage() {
           </div>
 
           {/* This is the area for the carousel selection mechanism */}
-          <div className="flex-grow flex flex-col justify-end pb-4"> {/* pb-4 оставлен здесь */}
+          <div className="flex-grow flex flex-col justify-end pb-4">
             <div className="flex gap-2 overflow-x-auto custom-scrollbar">
               {topStreams.map((stream, index) => (
                 <div
@@ -234,7 +234,7 @@ export default function HomePage() {
                       priority
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent flex items-end p-4">
+                  <div className="absolute top-0 bottom-0 right-0 left-[-100px] bg-gradient-to-r from-black/80 to-transparent flex items-end p-4">
                     {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
                   </div>
                 </div>
