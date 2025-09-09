@@ -16,6 +16,7 @@ import { getMinioUrl } from "@/utils/utils"
 import { cn } from "@/lib/utils"
 import useEmblaCarousel from "embla-carousel-react"
 import { Button } from "@/components/ui/button"
+import { StreamPlayer } from "@/src/components/stream-player" // Импортируем StreamPlayer
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -168,7 +169,7 @@ export default function HomePage() {
                 <div
                   key={stream.id}
                   className={cn(
-                    "relative flex-shrink-0 w-32 h-20 rounded-md overflow-hidden cursor-pointer border-2", // Changed h-18 to h-20
+                    "relative flex-shrink-0 w-32 h-20 rounded-md overflow-hidden cursor-pointer border-2",
                     selectedIndex === index ? "border-green-500" : "border-transparent hover:border-gray-500"
                   )}
                   onClick={() => scrollTo(index)}
@@ -212,23 +213,28 @@ export default function HomePage() {
             <div className="embla__container h-full min-h-full">
               {topStreams.map((stream) => (
                 <div className="embla__slide h-full relative bg-gray-800 min-h-full" key={stream.id}>
-                  <NextImage
-                    src={getMinioUrl(stream.preview || "/placeholder.jpg")}
-                    alt={stream.title || "Stream preview"}
-                    fill
-                    sizes="50vw"
-                    style={{ objectFit: "cover" }}
-                    priority
-                  />
+                  {stream.sources && stream.sources.length > 0 ? (
+                    <StreamPlayer
+                      sources={stream.sources}
+                      playing={true}
+                      controls={false} // Отключаем элементы управления
+                      isPlayerMaximized={false}
+                      onTogglePlayerMaximize={() => {}}
+                      showPlayerControls={false} // Явно указываем, что не показывать элементы управления
+                    />
+                  ) : (
+                    <NextImage
+                      src={getMinioUrl(stream.preview || "/placeholder.jpg")}
+                      alt={stream.title || "Stream preview"}
+                      fill
+                      sizes="50vw"
+                      style={{ objectFit: "cover" }}
+                      priority
+                    />
+                  )}
+                  {/* Затемнение поверх плеера или изображения */}
                   <div className="absolute inset-0 bg-black/30 flex items-end p-4">
-                    <div className="flex items-center space-x-2">
-                      <Badge className="bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold">
-                        LIVE
-                      </Badge>
-                      <span className="text-white text-sm font-semibold">
-                        {stream.currentViewers} watching
-                      </span>
-                    </div>
+                    {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
                   </div>
                 </div>
               ))}
