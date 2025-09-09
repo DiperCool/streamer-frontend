@@ -164,7 +164,6 @@ export default function HomePage() {
           <div className="flex-grow" /> 
 
           <div>
-            {/* Removed the h3 "Top Streams" heading */}
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
               {topStreams.map((stream, index) => (
                 <div
@@ -213,9 +212,25 @@ export default function HomePage() {
           <div className="embla h-full w-full" ref={emblaRef}>
             <div className="embla__container h-full">
               {topStreams.map((stream) => (
-                <div className="embla__slide h-full" key={stream.id}>
-                  <div className="flex items-center justify-center w-full h-full bg-black text-white">
-                    <span className="text-lg text-gray-400">Video Player Placeholder</span>
+                <div className="embla__slide h-full relative bg-gray-800" key={stream.id}> {/* Добавлен relative и bg-gray-800 */}
+                  <NextImage
+                    src={getMinioUrl(stream.preview || "/placeholder.jpg")}
+                    alt={stream.title || "Stream preview"}
+                    fill
+                    sizes="50vw"
+                    style={{ objectFit: "cover" }}
+                    priority
+                    // Удалены redundant absolute positioning classes
+                  />
+                  <div className="absolute inset-0 bg-black/30 flex items-end p-4">
+                    <div className="flex items-center space-x-2">
+                      <Badge className="bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold">
+                        LIVE
+                      </Badge>
+                      <span className="text-white text-sm font-semibold">
+                        {stream.currentViewers} watching
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
