@@ -13,6 +13,7 @@ interface StreamsByCategorySectionProps {
 }
 
 const INITIAL_DISPLAY_COUNT = 4; // Number of streams to show initially
+const MAX_DISPLAY_COUNT_ON_SHOW_MORE = 8; // Maximum number of streams to show when "Show More" is active
 
 export const StreamsByCategorySection: React.FC<StreamsByCategorySectionProps> = ({ category }) => {
   const [showAll, setShowAll] = useState(false);
@@ -20,14 +21,17 @@ export const StreamsByCategorySection: React.FC<StreamsByCategorySectionProps> =
   const { data, loading, error } = useGetStreamsQuery({
     variables: {
       categoryId: category.id,
-      first: 12, // Fetch a reasonable number of streams for initial display and "show more"
+      first: MAX_DISPLAY_COUNT_ON_SHOW_MORE, // Fetch enough streams to cover the "show more" limit
       order: [{ currentViewers: SortEnumType.Desc }], // Order by most viewers
     },
   });
 
   const streams = data?.streams?.nodes || [];
-  const displayedStreams = showAll ? streams : streams.slice(0, INITIAL_DISPLAY_COUNT);
-  const hasMoreStreams = streams.length > INITIAL_DISPLAY_COUNT;
+  const displayedStreams = showAll
+    ? streams.slice(0, MAX_DISPLAY_COUNT_ON_SHOW_MORE) // Show up to 8 streams
+    : streams.slice(0, INITIAL_DISPLAY_COUNT); // Show 4 streams initially
+
+  const canToggleMore = streams.length > INITIAL_DISPLAY_COUNT; // Button appears if there are more than 4 streams
 
   if (loading) {
     return (
@@ -53,7 +57,7 @@ export const StreamsByCategorySection: React.FC<StreamsByCategorySectionProps> =
             {category.title}
           </Link>
         </h2>
-        {hasMoreStreams && (
+        {canToggleMore && (
           <Button
             variant="ghost"
             onClick={() => setShowAll(!showAll)}
