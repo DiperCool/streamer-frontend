@@ -122,23 +122,23 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="w-full h-[50vh] flex"> {/* Increased height to 50vh */}
+      <div className="w-full h-[50vh] flex">
         {/* Left Section: Streamer Info and Details */}
-        <div className="w-1/2 p-8 flex flex-col bg-gray-900 z-20"> {/* Applied p-8 here */}
+        <div className="w-1/2 p-8 flex flex-col bg-gray-900 z-20">
           
           {/* Top content block */}
-          <div> {/* Removed pt-8 px-8 */}
+          <div>
             {/* Row 1: Avatar, Streamer Name, Viewers */}
-            <div className="flex items-center space-x-3 mb-4">
-              <Avatar className="w-12 h-12 border-2 border-green-500">
+            <div className="flex items-center space-x-3 mb-2"> {/* mb-2 */}
+              <Avatar className="w-10 h-10 border-2 border-green-500"> {/* w-10 h-10 */}
                 <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                <AvatarFallback className="bg-green-600 text-white text-lg">
+                <AvatarFallback className="bg-green-600 text-white text-base"> {/* text-base */}
                   {streamerName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <Link href={`/${streamerName}`} passHref>
-                  <span className="text-xl font-bold text-white hover:text-green-400 cursor-pointer">
+                  <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer"> {/* text-lg */}
                     {streamerName}
                   </span>
                 </Link>
@@ -150,19 +150,19 @@ export default function HomePage() {
             </div>
 
             {/* Row 2: Stream Title */}
-            <h2 className="text-3xl font-bold text-white line-clamp-2 mb-4">
+            <h2 className="text-2xl font-bold text-white truncate mb-2"> {/* text-2xl, truncate, mb-2 */}
               {featuredStream.title || "Untitled Stream"}
             </h2>
 
             {/* Row 3: Category */}
             {featuredStream.category?.title && (
-              <p className="text-lg text-gray-300 mb-4">{featuredStream.category.title}</p>
+              <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p> {/* text-base, mb-2 */}
             )}
 
             {/* Row 4: Tags */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-1 mb-2"> {/* gap-1, mb-2 */}
               {featuredStream.tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm">
+                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs"> {/* px-2 py-0.5, text-xs */}
                   {tag.title}
                 </Badge>
               ))}
@@ -173,7 +173,7 @@ export default function HomePage() {
           <div className="flex-grow" /> 
 
           {/* Bottom Section: Top Stream Previews and Carousel Controls */}
-          <div> {/* Removed pb-8 px-8 */}
+          <div>
             <h3 className="text-lg font-semibold text-white mb-4">Top Streams</h3>
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
               {topStreams.map((stream, index) => (
