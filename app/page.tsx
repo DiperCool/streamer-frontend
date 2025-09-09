@@ -11,14 +11,12 @@ import { Loader2, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import NextImage from "next/image" // Aliased import to avoid conflict
+import NextImage from "next/image"
 import { getMinioUrl } from "@/utils/utils"
-// import { StreamPlayer } from "@/src/components/stream-player" // Removed StreamPlayer import
 import { cn } from "@/lib/utils"
 import useEmblaCarousel from "embla-carousel-react"
 import { Button } from "@/components/ui/button"
 
-// --- Carousel Navigation Components (internal to this file) ---
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
 }
@@ -123,22 +121,19 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="w-full h-[50vh] flex">
-        {/* Left Section: Streamer Info and Details */}
         <div className="w-1/2 p-8 flex flex-col bg-gray-900 z-20">
           
-          {/* Top content block */}
           <div>
-            {/* Row 1: Avatar, Streamer Name, Viewers */}
-            <div className="flex items-center space-x-3 mb-2"> {/* mb-2 */}
-              <Avatar className="w-10 h-10 border-2 border-green-500"> {/* w-10 h-10 */}
+            <div className="flex items-center space-x-3 mb-2">
+              <Avatar className="w-10 h-10 border-2 border-green-500">
                 <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                <AvatarFallback className="bg-green-600 text-white text-base"> {/* text-base */}
+                <AvatarFallback className="bg-green-600 text-white text-base">
                   {streamerName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <Link href={`/${streamerName}`} passHref>
-                  <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer"> {/* text-lg */}
+                  <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
                     {streamerName}
                   </span>
                 </Link>
@@ -149,30 +144,25 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Row 2: Stream Title */}
-            <h2 className="text-2xl font-bold text-white truncate mb-2"> {/* text-2xl, truncate, mb-2 */}
+            <h2 className="text-2xl font-bold text-white truncate mb-2">
               {featuredStream.title || "Untitled Stream"}
             </h2>
 
-            {/* Row 3: Category */}
             {featuredStream.category?.title && (
-              <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p> {/* text-base, mb-2 */}
+              <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
             )}
 
-            {/* Row 4: Tags */}
-            <div className="flex flex-wrap gap-1 mb-2"> {/* gap-1, mb-2 */}
+            <div className="flex flex-wrap gap-1 mb-2">
               {featuredStream.tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs"> {/* px-2 py-0.5, text-xs */}
+                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
                   {tag.title}
                 </Badge>
               ))}
             </div>
           </div>
 
-          {/* This div will take up all available space, pushing the carousel controls to the bottom */}
           <div className="flex-grow" /> 
 
-          {/* Bottom Section: Top Stream Previews and Carousel Controls */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Top Streams</h3>
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
@@ -199,7 +189,6 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Carousel Dots and Arrows */}
             <div className="flex items-center justify-center space-x-2 mt-4">
               <ArrowButton onClick={scrollPrev}>
                 <ChevronLeft className="h-5 w-5" />
@@ -220,15 +209,12 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Right Section: Stream Player (now a black square) */}
         <div className="w-1/2 h-full">
           <div className="embla h-full w-full" ref={emblaRef}>
             <div className="embla__container h-full">
               {topStreams.map((stream) => (
                 <div className="embla__slide h-full" key={stream.id}>
-                  {/* Replaced StreamPlayer with a black div */}
                   <div className="flex items-center justify-center w-full h-full bg-black text-white">
-                    {/* Optional: Add some text or an icon here if desired */}
                     <span className="text-lg text-gray-400">Video Player Placeholder</span>
                   </div>
                 </div>
