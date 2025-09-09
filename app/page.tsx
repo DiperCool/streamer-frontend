@@ -133,14 +133,16 @@ export default function HomePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <Link href={`/${streamerName}`} passHref>
-                  <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
-                    {streamerName}
-                  </span>
-                </Link>
-                <div className="flex items-center text-gray-400 text-sm">
-                  <Users className="w-4 h-4 mr-1" />
-                  <span>{currentViewers} watching</span>
+                <div className="flex items-center space-x-2"> {/* Новый контейнер для имени и зрителей */}
+                  <Link href={`/${streamerName}`} passHref>
+                    <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
+                      {streamerName}
+                    </span>
+                  </Link>
+                  <div className="flex items-center text-gray-400 text-sm">
+                    <Users className="w-4 h-4 mr-1" />
+                    <span>{currentViewers} watching</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -164,7 +166,7 @@ export default function HomePage() {
 
           {/* This is the area for the carousel selection mechanism */}
           <div className="flex-grow flex flex-col justify-end">
-            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar"> {/* Changed pb-4 to pb-2 */}
+            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
               {topStreams.map((stream, index) => (
                 <div
                   key={stream.id}
@@ -188,7 +190,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="flex items-center justify-center space-x-2 mt-2"> {/* Changed mt-4 to mt-2 */}
+            <div className="flex items-center justify-center space-x-2 mt-2">
               <ArrowButton onClick={scrollPrev}>
                 <ChevronLeft className="h-5 w-5" />
               </ArrowButton>
