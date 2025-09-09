@@ -1,26 +1,33 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { CategoryDto, useGetStreamsQuery, SortEnumType } from "@/graphql/__generated__/graphql"
-import { Loader2 } from "lucide-react"
+import { Loader2, ChevronDown, ChevronUp } from "lucide-react" // Import ChevronDown, ChevronUp
 import { TopStreamCard } from "@/src/components/top-stream-card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface StreamsByCategorySectionProps {
   category: CategoryDto
 }
 
+const INITIAL_DISPLAY_COUNT = 4; // Number of streams to show initially
+
 export const StreamsByCategorySection: React.FC<StreamsByCategorySectionProps> = ({ category }) => {
+  const [showAll, setShowAll] = useState(false);
+
   const { data, loading, error } = useGetStreamsQuery({
     variables: {
       categoryId: category.id,
-      first: 6, // Fetch a fixed number of streams
+      first: 12, // Fetch a reasonable number of streams for initial display and "show more"
       order: [{ currentViewers: SortEnumType.Desc }], // Order by most viewers
     },
   });
 
   const streams = data?.streams?.nodes || [];
+  const displayedStreams = showAll ? streams : streams.slice(0, INITIAL_DISPLAY_COUNT);
+  const hasMoreStreams = streams.length > INITIAL_DISPLAY_COUNT;
 
   if (loading) {
     return (
@@ -46,17 +53,23 @@ export const StreamsByCategorySection: React.FC<StreamsByCategorySectionProps> =
             {category.title}
           </Link>
         </h2>
-        <Link href={`/browse?category=${category.slug}`} passHref>
-          <Button variant="ghost" className="text-green-500 hover:text-green-400">
-            See All
+        {hasMoreStreams && (
+          <Button
+            variant="ghost"
+            onClick={() => setShowAll(!showAll)}
+            className="text-green-500 hover:text-green-400"
+          >
+            {showAll ? (
+              <>Show Less <ChevronUp className="ml-1 h-4 w-4" /></>
+            ) : (
+              <>Show More <ChevronDown className="ml-1 h-4 w-4" /></>
+            )}
           </Button>
-        </Link>
+        )}
       </div>
-      <div className="flex overflow-x-auto space-x-4 pb-4 custom-scrollbar">
-        {streams.map((stream) => (
-          <div key={stream.id} className="flex-shrink-0 w-72"> {/* Fixed width for horizontal scroll */}
-            <TopStreamCard stream={stream} />
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"> {/* Responsive grid */}
+        {displayedStreams.map((stream) => (
+          <TopStreamCard key={stream.id} stream={stream} />
         ))}
       </div>
     </div>
