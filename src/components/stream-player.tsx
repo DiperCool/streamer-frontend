@@ -17,6 +17,14 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize, showPlayerControls = true }: StreamPlayerProps) {
+  // Добавляем проверку на существование sources
+  if (!sources || sources.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-black text-white">
+        No stream source available.
+      </div>
+    );
+  }
 
   const streamSource = sources.find(s => s.sourceType === "HLS") // Или любой другой тип, который ReactPlayer может обработать
   const urlToPlay = streamSource ? streamSource.url : "";
