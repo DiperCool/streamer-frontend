@@ -69,6 +69,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
   const displayTitle = currentStream?.title;
   const displayLanguage = currentStream?.language;
   const displayTags = currentStream?.tags;
+  const currentViewers = currentStream?.currentViewers; // Получаем количество зрителей
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
@@ -97,7 +98,15 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
               <p className="text-lg font-normal text-white uppercase mt-1">{displayTitle}</p>
             )}
 
-            <p className="text-gray-400">{streamer.followers} followers</p>
+            <div className="flex items-center space-x-2 text-gray-400"> {/* Контейнер для подписчиков и зрителей */}
+              <p>{streamer.followers} followers</p>
+              {isLive && currentViewers !== undefined && (
+                <>
+                  <span className="text-gray-500">•</span>
+                  <p>{currentViewers} viewers</p>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
