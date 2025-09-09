@@ -117,10 +117,10 @@ export default function HomePage() {
   const currentViewers = featuredStream?.currentViewers || 0;
 
   return (
-    <div className="flex-1 bg-gray-900 text-white">
+    <div className="flex-1 bg-gray-900 text-white overflow-x-hidden"> {/* Added overflow-x-hidden */}
       {topStreams.length > 0 ? (
         <div className="w-full h-[50vh] flex">
-          <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20">
+          <div className="flex-1 pt-8 px-8 flex flex-col bg-gray-900 z-20"> {/* Changed w-1/2 to flex-1 */}
             
             <div>
               <div className="flex items-center space-x-3 mb-2">
@@ -209,7 +209,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="w-1/2 h-full">
+          <div className="flex-1 h-full"> {/* Changed w-1/2 to flex-1 */}
             <div className="embla w-full h-full" ref={emblaRef}>
               <div className="embla__container w-full h-full">
                 {topStreams.map((stream) => (
