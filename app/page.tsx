@@ -133,7 +133,7 @@ export default function HomePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <div className="flex items-center space-x-2"> {/* Новый контейнер для имени и зрителей */}
+                <div className="flex items-center space-x-2">
                   <Link href={`/${streamerName}`} passHref>
                     <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
                       {streamerName}
@@ -165,8 +165,8 @@ export default function HomePage() {
           </div>
 
           {/* This is the area for the carousel selection mechanism */}
-          <div className="flex-grow flex flex-col justify-end">
-            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+          <div className="flex-grow flex flex-col justify-end pb-4"> {/* Добавлен pb-4 */}
+            <div className="flex gap-2 overflow-x-auto custom-scrollbar"> {/* Удален pb-2 */}
               {topStreams.map((stream, index) => (
                 <div
                   key={stream.id}
@@ -190,7 +190,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="flex items-center justify-center space-x-2 mt-2">
+            <div className="flex items-center justify-center space-x-2"> {/* Удален mt-2 */}
               <ArrowButton onClick={scrollPrev}>
                 <ChevronLeft className="h-5 w-5" />
               </ArrowButton>
