@@ -7,20 +7,87 @@ import {
   StreamDto,
   SortEnumType,
 } from "@/graphql/__generated__/graphql"
-import { Loader2, Users } from "lucide-react"
+import { Loader2, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { getMinioUrl } from "@/utils/utils"
 import { StreamPlayer } from "@/src/components/stream-player"
-import { TopStreamCard } from "@/src/components/top-stream-card"
 import { cn } from "@/lib/utils"
+import useEmblaCarousel from "embla-carousel-react"
+import { Button } from "@/components/ui/button"
+
+// --- Carousel Navigation Components (internal to this file) ---
+interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  selected: boolean;
+}
+
+const DotButton: React.FC<DotButtonProps> = ({ selected, onClick }) => (
+  <button
+    className={cn(
+      "w-2 h-2 rounded-full bg-gray-500 transition-colors duration-200",
+      selected ? "bg-green-500" : "hover:bg-gray-400"
+    )}
+    type="button"
+    onClick={onClick}
+  />
+);
+
+interface ArrowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+}
+
+const ArrowButton: React.FC<ArrowButtonProps> = ({ children, onClick, disabled }) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={onClick}
+    disabled={disabled}
+    className="text-gray-400 hover:text-white"
+  >
+    {children}
+  </Button>
+);
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
 
   const { data: topStreamsData, loading: topStreamsLoading, error: topStreamsError } = useGetTopStreamsQuery();
-  const featuredStream = topStreamsData?.topStreams?.[0];
+  const topStreams = topStreamsData?.topStreams || [];
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi, setSelectedIndex]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollTo = useCallback((index: number) => {
+    if (!emblaApi) return;
+    emblaApi.scrollTo(index);
+  }, [emblaApi]);
+
+  const scrollPrev = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollNext();
+  }, [emblaApi]);
 
   if (authLoading || topStreamsLoading) {
     return (
@@ -38,7 +105,7 @@ export default function HomePage() {
     )
   }
 
-  if (!featuredStream) {
+  if (topStreams.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 min-h-screen bg-gray-900 text-white">
         <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
@@ -47,6 +114,7 @@ export default function HomePage() {
     )
   }
 
+  const featuredStream = topStreams[selectedIndex];
   const streamerName = featuredStream.streamer?.userName || "Unknown Streamer";
   const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
   const currentViewers = featuredStream.currentViewers || 0;
@@ -55,7 +123,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="relative w-full h-[calc(100vh-4rem)] flex">
         {/* Left Section: Streamer Info and Details */}
-        <div className="absolute top-0 left-0 z-20 p-8 w-full md:w-1/2 lg:w-2/5 xl:w-1/3 flex flex-col justify-start space-y-4">
+        <div className="absolute top-0 left-0 z-20 p-8 w-full md:w-1/2 lg:w-2/5 xl:w-1/3 flex flex-col justify-start space-y-4
+                    bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent">
+          
+          {/* Row 1: Avatar, Streamer Name, Viewers */}
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12 border-2 border-green-500">
               <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
@@ -76,13 +147,17 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Row 2: Stream Title */}
           <h2 className="text-3xl font-bold text-white line-clamp-2">
             {featuredStream.title || "Untitled Stream"}
           </h2>
+
+          {/* Row 3: Category */}
           {featuredStream.category?.title && (
             <p className="text-lg text-gray-300">{featuredStream.category.title}</p>
           )}
 
+          {/* Row 4: Tags */}
           <div className="flex flex-wrap gap-2">
             {featuredStream.tags.map((tag) => (
               <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm">
@@ -90,18 +165,73 @@ export default function HomePage() {
               </Badge>
             ))}
           </div>
+
+          {/* Bottom Section: Top Stream Previews and Carousel Controls */}
+          <div className="mt-auto pt-8"> {/* Push to bottom */}
+            <h3 className="text-lg font-semibold text-white mb-4">Top Streams</h3>
+            <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
+              {topStreams.map((stream, index) => (
+                <div
+                  key={stream.id}
+                  className={cn(
+                    "relative flex-shrink-0 w-32 h-18 rounded-md overflow-hidden cursor-pointer border-2",
+                    selectedIndex === index ? "border-green-500" : "border-transparent hover:border-gray-500"
+                  )}
+                  onClick={() => scrollTo(index)}
+                >
+                  <Image
+                    src={getMinioUrl(stream.preview || "/placeholder.jpg")}
+                    alt={stream.title || "Stream preview"}
+                    fill
+                    sizes="128px"
+                    style={{ objectFit: "cover" }}
+                  />
+                  {selectedIndex === index && (
+                    <div className="absolute inset-0 bg-green-500/30" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Carousel Dots and Arrows */}
+            <div className="flex items-center justify-center space-x-2 mt-4">
+              <ArrowButton onClick={scrollPrev}>
+                <ChevronLeft className="h-5 w-5" />
+              </ArrowButton>
+              <div className="flex space-x-2">
+                {topStreams.map((_, index) => (
+                  <DotButton
+                    key={index}
+                    selected={index === selectedIndex}
+                    onClick={() => scrollTo(index)}
+                  />
+                ))}
+              </div>
+              <ArrowButton onClick={scrollNext}>
+                <ChevronRight className="h-5 w-5" />
+              </ArrowButton>
+            </div>
+          </div>
         </div>
 
         {/* Right Section: Stream Player */}
         <div className="absolute inset-0 w-full h-full">
-          <StreamPlayer
-            sources={featuredStream.sources}
-            playing={true}
-            controls={false} // Hide controls for a cleaner look as per screenshot
-            isPlayerMaximized={false}
-            onTogglePlayerMaximize={() => {}}
-            showPlayerControls={false} // Ensure no player controls are shown
-          />
+          <div className="embla h-full w-full" ref={emblaRef}>
+            <div className="embla__container h-full">
+              {topStreams.map((stream) => (
+                <div className="embla__slide h-full" key={stream.id}>
+                  <StreamPlayer
+                    sources={stream.sources}
+                    playing={true}
+                    controls={false}
+                    isPlayerMaximized={false}
+                    onTogglePlayerMaximize={() => {}}
+                    showPlayerControls={false}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
