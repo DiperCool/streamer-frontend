@@ -171,7 +171,8 @@ export default function HomePage() {
                 <div
                   key={stream.id}
                   className={cn(
-                    "relative flex-shrink-0 w-32 h-20 rounded-md overflow-hidden cursor-pointer border-2",
+                    "relative h-20 rounded-md overflow-hidden cursor-pointer border-2",
+                    "flex-shrink-0 basis-[calc((100%-1rem)/3)]", // Изменено здесь
                     selectedIndex === index ? "border-green-500" : "border-transparent hover:border-gray-500"
                   )}
                   onClick={() => scrollTo(index)}
@@ -234,7 +235,7 @@ export default function HomePage() {
                       priority
                     />
                   )}
-                  <div className="absolute top-0 bottom-0 right-0 left-[-100px] bg-gradient-to-r from-black/80 to-transparent flex items-end p-4">
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-end p-4">
                     {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
                   </div>
                 </div>
