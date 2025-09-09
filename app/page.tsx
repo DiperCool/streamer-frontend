@@ -234,7 +234,7 @@ export default function HomePage() {
                       priority
                     />
                   )}
-                  <div className="absolute inset-0 bg-black/30 flex items-end p-4">
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent flex items-end p-4">
                     {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
                   </div>
                 </div>
