@@ -122,7 +122,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="w-full h-[50vh] flex">
-        <div className="w-1/2 p-8 flex flex-col bg-gray-900 z-20">
+        <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20"> {/* Изменено с p-8 на pt-8 px-8 */}
           
           <div>
             <div className="flex items-center space-x-3 mb-2">
@@ -165,8 +165,8 @@ export default function HomePage() {
           </div>
 
           {/* This is the area for the carousel selection mechanism */}
-          <div className="flex-grow flex flex-col justify-end pb-4"> {/* Добавлен pb-4 */}
-            <div className="flex gap-2 overflow-x-auto custom-scrollbar"> {/* Удален pb-2 */}
+          <div className="flex-grow flex flex-col justify-end pb-4"> {/* pb-4 оставлен здесь */}
+            <div className="flex gap-2 overflow-x-auto custom-scrollbar">
               {topStreams.map((stream, index) => (
                 <div
                   key={stream.id}
@@ -190,7 +190,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="flex items-center justify-center space-x-2"> {/* Удален mt-2 */}
+            <div className="flex items-center justify-center space-x-2">
               <ArrowButton onClick={scrollPrev}>
                 <ChevronLeft className="h-5 w-5" />
               </ArrowButton>
