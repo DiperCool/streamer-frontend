@@ -11,6 +11,7 @@ import { Loader2, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import NextImage from "next/image" // Aliased import to avoid conflict
 import { getMinioUrl } from "@/utils/utils"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { cn } from "@/lib/utils"
@@ -179,7 +180,7 @@ export default function HomePage() {
                   )}
                   onClick={() => scrollTo(index)}
                 >
-                  <Image
+                  <NextImage // Changed to NextImage
                     src={getMinioUrl(stream.preview || "/placeholder.jpg")}
                     alt={stream.title || "Stream preview"}
                     fill
