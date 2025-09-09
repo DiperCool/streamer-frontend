@@ -161,19 +161,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* NEW: Featured Stream Preview Image */}
-          <div className="relative w-full aspect-video rounded-md overflow-hidden my-4 bg-gray-800">
-            <NextImage
-              src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
-              alt={featuredStream.title || "Stream preview"}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              style={{ objectFit: "cover" }}
-              priority
-            />
-          </div>
-
-          <div>
+          {/* This is the area for the carousel selection mechanism */}
+          <div className="flex-grow flex flex-col justify-end"> {/* Added flex-grow and flex-col justify-end */}
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
               {topStreams.map((stream, index) => (
                 <div
