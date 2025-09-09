@@ -209,10 +209,10 @@ export default function HomePage() {
         </div>
 
         <div className="w-1/2 h-full">
-          <div className="embla h-full w-full" ref={emblaRef}>
-            <div className="embla__container h-full">
+          <div className="embla h-full w-full min-h-full" ref={emblaRef}>
+            <div className="embla__container h-full min-h-full">
               {topStreams.map((stream) => (
-                <div className="embla__slide h-full relative bg-gray-800" key={stream.id}> {/* Добавлен relative и bg-gray-800 */}
+                <div className="embla__slide h-full relative bg-gray-800 min-h-full" key={stream.id}>
                   <NextImage
                     src={getMinioUrl(stream.preview || "/placeholder.jpg")}
                     alt={stream.title || "Stream preview"}
@@ -220,7 +220,6 @@ export default function HomePage() {
                     sizes="50vw"
                     style={{ objectFit: "cover" }}
                     priority
-                    // Удалены redundant absolute positioning classes
                   />
                   <div className="absolute inset-0 bg-black/30 flex items-end p-4">
                     <div className="flex items-center space-x-2">
