@@ -162,13 +162,13 @@ export default function HomePage() {
           </div>
 
           {/* This is the area for the carousel selection mechanism */}
-          <div className="flex-grow flex flex-col justify-end"> {/* Added flex-grow and flex-col justify-end */}
+          <div className="flex-grow flex flex-col justify-end">
             <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar">
               {topStreams.map((stream, index) => (
                 <div
                   key={stream.id}
                   className={cn(
-                    "relative flex-shrink-0 w-32 h-18 rounded-md overflow-hidden cursor-pointer border-2",
+                    "relative flex-shrink-0 w-32 h-20 rounded-md overflow-hidden cursor-pointer border-2", // Changed h-18 to h-20
                     selectedIndex === index ? "border-green-500" : "border-transparent hover:border-gray-500"
                   )}
                   onClick={() => scrollTo(index)}
