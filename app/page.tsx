@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
   useGetTopStreamsQuery,
+  useGetTopCategoriesQuery, // Import useGetTopCategoriesQuery
   StreamDto,
   SortEnumType,
 } from "@/graphql/__generated__/graphql"
@@ -17,6 +18,8 @@ import { cn } from "@/lib/utils"
 import useEmblaCarousel from "embla-carousel-react"
 import { Button } from "@/components/ui/button"
 import { StreamPlayer } from "@/src/components/stream-player"
+import { CategoryCard } from "@/src/components/category-card" // Import CategoryCard
+import { StreamsByCategorySection } from "@/src/components/streams-by-category-section" // Import StreamsByCategorySection
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -55,6 +58,9 @@ export default function HomePage() {
   const { data: topStreamsData, loading: topStreamsLoading, error: topStreamsError } = useGetTopStreamsQuery();
   const topStreams = topStreamsData?.topStreams || [];
 
+  const { data: topCategoriesData, loading: topCategoriesLoading, error: topCategoriesError } = useGetTopCategoriesQuery();
+  const topCategories = topCategoriesData?.topCategories || [];
+
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -89,7 +95,7 @@ export default function HomePage() {
     emblaApi.scrollNext();
   }, [emblaApi]);
 
-  if (authLoading || topStreamsLoading) {
+  if (authLoading || topStreamsLoading || topCategoriesLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <Loader2 className="h-12 w-12 animate-spin text-green-500" />
@@ -97,152 +103,169 @@ export default function HomePage() {
     )
   }
 
-  if (topStreamsError) {
+  if (topStreamsError || topCategoriesError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <p className="text-red-500">Error loading top streams: {topStreamsError?.message}</p>
-      </div>
-    )
-  }
-
-  if (topStreams.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8 min-h-screen bg-gray-900 text-white">
-        <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
-        <p className="text-gray-400">No live streams currently available. Check back later!</p>
+        <p className="text-red-500">Error loading data: {topStreamsError?.message || topCategoriesError?.message}</p>
       </div>
     )
   }
 
   const featuredStream = topStreams[selectedIndex];
-  const streamerName = featuredStream.streamer?.userName || "Unknown Streamer";
-  const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
-  const currentViewers = featuredStream.currentViewers || 0;
+  const streamerName = featuredStream?.streamer?.userName || "Unknown Streamer";
+  const streamerAvatar = featuredStream?.streamer?.avatar || "/placeholder-user.jpg";
+  const currentViewers = featuredStream?.currentViewers || 0;
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="w-full h-[50vh] flex">
-        <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20">
-          
-          <div>
-            <div className="flex items-center space-x-3 mb-2">
-              <Avatar className="w-10 h-10 border-2 border-green-500">
-                <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                <AvatarFallback className="bg-green-600 text-white text-base">
-                  {streamerName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <div className="flex items-center space-x-2">
-                  <Link href={`/${streamerName}`} passHref>
-                    <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
-                      {streamerName}
-                    </span>
-                  </Link>
-                  <div className="flex items-center text-gray-400 text-sm">
-                    <Users className="w-4 h-4 mr-1" />
-                    <span>{currentViewers} watching</span>
+      {topStreams.length > 0 ? (
+        <div className="w-full h-[50vh] flex">
+          <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20">
+            
+            <div>
+              <div className="flex items-center space-x-3 mb-2">
+                <Avatar className="w-10 h-10 border-2 border-green-500">
+                  <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+                  <AvatarFallback className="bg-green-600 text-white text-base">
+                    {streamerName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <div className="flex items-center space-x-2">
+                    <Link href={`/${streamerName}`} passHref>
+                      <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
+                        {streamerName}
+                      </span>
+                    </Link>
+                    <div className="flex items-center text-gray-400 text-sm">
+                      <Users className="w-4 h-4 mr-1" />
+                      <span>{currentViewers} watching</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <h2 className="text-2xl font-bold text-white truncate mb-2">
-              {featuredStream.title || "Untitled Stream"}
-            </h2>
+              <h2 className="text-2xl font-bold text-white truncate mb-2">
+                {featuredStream.title || "Untitled Stream"}
+              </h2>
 
-            {featuredStream.category?.title && (
-              <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
-            )}
+              {featuredStream.category?.title && (
+                <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
+              )}
 
-            <div className="flex flex-wrap gap-1 mb-2">
-              {featuredStream.tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
-                  {tag.title}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* This is the area for the carousel selection mechanism */}
-          <div className="flex-grow flex flex-col justify-end pb-4">
-            <div className="flex gap-2 overflow-x-auto custom-scrollbar">
-              {topStreams.map((stream, index) => (
-                <div
-                  key={stream.id}
-                  className={cn(
-                    "relative rounded-md overflow-hidden cursor-pointer border-2",
-                    "flex-shrink-0 basis-[calc((100%-1rem)/3)] aspect-video",
-                    selectedIndex === index ? "border-green-500" : "border-transparent hover:border-gray-500"
-                  )}
-                  onClick={() => scrollTo(index)}
-                >
-                  <NextImage
-                    src={getMinioUrl(stream.preview || "/placeholder.jpg")}
-                    alt={stream.title || "Stream preview"}
-                    fill
-                    sizes="128px"
-                    style={{ objectFit: "cover" }}
-                  />
-                  {selectedIndex === index && (
-                    <div className="absolute inset-0 bg-green-500/30" />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-center space-x-2">
-              <ArrowButton onClick={scrollPrev}>
-                <ChevronLeft className="h-5 w-5" />
-              </ArrowButton>
-              <div className="flex space-x-2">
-                {topStreams.map((_, index) => (
-                  <DotButton
-                    key={index}
-                    selected={index === selectedIndex}
-                    onClick={() => scrollTo(index)}
-                  />
+              <div className="flex flex-wrap gap-1 mb-2">
+                {featuredStream.tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                    {tag.title}
+                  </Badge>
                 ))}
               </div>
-              <ArrowButton onClick={scrollNext}>
-                <ChevronRight className="h-5 w-5" />
-              </ArrowButton>
             </div>
-          </div>
-        </div>
 
-        <div className="w-1/2 h-full">
-          <div className="embla w-full h-full" ref={emblaRef}>
-            <div className="embla__container w-full h-full">
-              {topStreams.map((stream) => (
-                <div className="embla__slide w-full aspect-video relative bg-gray-800" key={stream.id}>
-                  {stream.sources && stream.sources.length > 0 ? (
-                    <StreamPlayer
-                      sources={stream.sources}
-                      playing={true}
-                      controls={false}
-                      isPlayerMaximized={false}
-                      onTogglePlayerMaximize={() => {}}
-                      showPlayerControls={false}
-                    />
-                  ) : (
+            {/* This is the area for the carousel selection mechanism */}
+            <div className="flex-grow flex flex-col justify-end pb-4">
+              <div className="flex gap-2 overflow-x-auto custom-scrollbar">
+                {topStreams.map((stream, index) => (
+                  <div
+                    key={stream.id}
+                    className={cn(
+                      "relative rounded-md overflow-hidden cursor-pointer border-2",
+                      "flex-shrink-0 basis-[calc((100%-1rem)/3)] aspect-video",
+                      selectedIndex === index ? "border-green-500" : "border-transparent hover:border-gray-500"
+                    )}
+                    onClick={() => scrollTo(index)}
+                  >
                     <NextImage
                       src={getMinioUrl(stream.preview || "/placeholder.jpg")}
                       alt={stream.title || "Stream preview"}
                       fill
-                      sizes="50vw"
+                      sizes="128px"
                       style={{ objectFit: "cover" }}
-                      priority
                     />
-                  )}
-                  <div className="absolute top-0 bottom-0 right-0 left-[-100px] bg-gradient-to-r from-black/80 to-transparent flex items-end p-4 z-20">
-                    {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
+                    {selectedIndex === index && (
+                      <div className="absolute inset-0 bg-green-500/30" />
+                    )}
                   </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-center space-x-2">
+                <ArrowButton onClick={scrollPrev}>
+                  <ChevronLeft className="h-5 w-5" />
+                </ArrowButton>
+                <div className="flex space-x-2">
+                  {topStreams.map((_, index) => (
+                    <DotButton
+                      key={index}
+                      selected={index === selectedIndex}
+                      onClick={() => scrollTo(index)}
+                    />
+                  ))}
                 </div>
-              ))}
+                <ArrowButton onClick={scrollNext}>
+                  <ChevronRight className="h-5 w-5" />
+                </ArrowButton>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-1/2 h-full">
+            <div className="embla w-full h-full" ref={emblaRef}>
+              <div className="embla__container w-full h-full">
+                {topStreams.map((stream) => (
+                  <div className="embla__slide w-full aspect-video relative bg-gray-800" key={stream.id}>
+                    {stream.sources && stream.sources.length > 0 ? (
+                      <StreamPlayer
+                        sources={stream.sources}
+                        playing={true}
+                        controls={false}
+                        isPlayerMaximized={false}
+                        onTogglePlayerMaximize={() => {}}
+                        showPlayerControls={false}
+                      />
+                    ) : (
+                      <NextImage
+                        src={getMinioUrl(stream.preview || "/placeholder.jpg")}
+                        alt={stream.title || "Stream preview"}
+                        fill
+                        sizes="50vw"
+                        style={{ objectFit: "cover" }}
+                        priority
+                      />
+                    )}
+                    <div className="absolute top-0 bottom-0 right-0 left-[-100px] bg-gradient-to-r from-black/80 to-transparent flex items-end p-4 z-20">
+                      {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+      ) : (
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
+          <p className="text-gray-400">No live streams currently available. Check back later!</p>
+        </div>
+      )}
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Top Categories Section */}
+        {topCategories.length > 0 && (
+          <>
+            <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
+              {topCategories.map(category => (
+                <CategoryCard key={category.id} category={category} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Streams by Category Sections */}
+        {topCategories.map(category => (
+          <StreamsByCategorySection key={category.id} category={category} />
+        ))}
       </div>
     </div>
   )
