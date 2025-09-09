@@ -65,3 +65,87 @@ export const GET_STREAM_INFO = gql`
         }
     }
 `
+
+export const GET_STREAMS = gql`
+    query GetStreams(
+        $after: String
+        $before: String
+        $first: Int
+        $last: Int
+        $order: [StreamDtoSortInput!]
+        $categoryId: UUID
+        $languages: [String!]
+        $tag: UUID
+        $where: StreamDtoFilterInput
+    ) {
+        streams(
+            after: $after
+            before: $before
+            first: $first
+            last: $last
+            order: $order
+            categoryId: $categoryId
+            languages: $languages
+            tag: $tag
+            where: $where
+        ) {
+            nodes {
+                id
+                title
+                preview
+                currentViewers
+                language
+                started
+                streamer {
+                    id
+                    userName
+                    avatar
+                    isLive
+                }
+                category {
+                    id
+                    title
+                    image
+                }
+                tags {
+                    id
+                    title
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                hasPreviousPage
+                startCursor
+            }
+        }
+    }
+`
+
+export const GET_TOP_STREAMS = gql`
+    query GetTopStreams {
+        topStreams {
+            id
+            title
+            preview
+            currentViewers
+            language
+            started
+            streamer {
+                id
+                userName
+                avatar
+                isLive
+            }
+            category {
+                id
+                title
+                image
+            }
+            tags {
+                id
+                title
+            }
+        }
+    }
+`

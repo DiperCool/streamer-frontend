@@ -49,6 +49,7 @@ type CategoryDto {
     image: String!
     slug: String!
     title: String!
+    watchers: Long!
 }
 
 type ChatDto {
@@ -252,9 +253,11 @@ type Query {
         last: Int,
         order: [CategoryDtoSortInput!],
         search: String,
+        tag: UUID,
         where: CategoryDtoFilterInput
     ): CategoriesConnection
     category(id: UUID!): CategoryDto!
+    categoryBySlug(slug: String!): CategoryDto!
     chat(streamerId: String!): ChatDto!
     chatMessages(
         "Returns the elements in the list that come after the specified cursor."
@@ -334,6 +337,35 @@ type Query {
         search: String,
         where: StreamerDtoFilterInput
     ): StreamersConnection
+    streams(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        categoryId: UUID,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        languages: [String!],
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [StreamDtoSortInput!],
+        tag: UUID,
+        where: StreamDtoFilterInput
+    ): StreamsConnection
+    tags(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [TagDtoSortInput!],
+        where: TagDtoFilterInput
+    ): TagsConnection
+    topCategories: [CategoryDto!]!
+    topStreams: [StreamDto!]!
     vod(vodId: UUID!): VodDto!
     vods(
         "Returns the elements in the list that come after the specified cursor."
@@ -477,6 +509,24 @@ type StreamersEdge {
     node: StreamerDto!
 }
 
+"A connection to a list of items."
+type StreamsConnection {
+    "A list of edges."
+    edges: [StreamsEdge!]
+    "A flattened list of the nodes."
+    nodes: [StreamDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type StreamsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: StreamDto!
+}
+
 type Subscription {
     chatMessageCreated(chatId: UUID!): ChatMessageDto!
     chatMessageDeleted(chatId: UUID!): ChatMessageDto!
@@ -496,6 +546,24 @@ type SystemRoleDto {
 type TagDto {
     id: UUID!
     title: String!
+}
+
+"A connection to a list of items."
+type TagsConnection {
+    "A list of edges."
+    edges: [TagsEdge!]
+    "A flattened list of the nodes."
+    nodes: [TagDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type TagsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: TagDto!
 }
 
 type UnfollowResponse {
@@ -796,6 +864,32 @@ input RoleTypeOperationFilterInput {
     nin: [RoleType!]
 }
 
+input StreamDtoFilterInput {
+    active: BooleanOperationFilterInput
+    and: [StreamDtoFilterInput!]
+    categoryId: UuidOperationFilterInput
+    currentViewers: LongOperationFilterInput
+    id: UuidOperationFilterInput
+    language: StringOperationFilterInput
+    or: [StreamDtoFilterInput!]
+    preview: StringOperationFilterInput
+    started: DateTimeOperationFilterInput
+    streamerId: StringOperationFilterInput
+    title: StringOperationFilterInput
+}
+
+input StreamDtoSortInput {
+    active: SortEnumType
+    categoryId: SortEnumType
+    currentViewers: SortEnumType
+    id: SortEnumType
+    language: SortEnumType
+    preview: SortEnumType
+    started: SortEnumType
+    streamerId: SortEnumType
+    title: SortEnumType
+}
+
 input StreamerDtoFilterInput {
     and: [StreamerDtoFilterInput!]
     avatar: StringOperationFilterInput
@@ -845,6 +939,18 @@ input StringOperationFilterInput {
     nstartsWith: String
     or: [StringOperationFilterInput!]
     startsWith: String
+}
+
+input TagDtoFilterInput {
+    and: [TagDtoFilterInput!]
+    id: UuidOperationFilterInput
+    or: [TagDtoFilterInput!]
+    title: StringOperationFilterInput
+}
+
+input TagDtoSortInput {
+    id: SortEnumType
+    title: SortEnumType
 }
 
 input UnfollowInput {
