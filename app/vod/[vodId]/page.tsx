@@ -5,40 +5,35 @@ import { useGetVodQuery, useGetStreamerQuery, useGetProfileQuery } from "@/graph
 import { Loader2, MessageSquare } from "lucide-react"
 import { getMinioUrl } from "@/utils/utils"
 import { VodDetailsSection } from "@/src/components/vod-details-section"
-import ReactHlsPlayer from "react-hls-player"; // Используем react-hls-player
+import ReactHlsPlayer from "react-hls-player";
 import { VodChatSection } from "@/src/components/vod-chat-section"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
-// Определяем тип для объекта состояния прогресса ReactPlayer
-// interface ProgressState {
-//   played: number;
-//   playedSeconds: number;
-//   loaded: number;
-//   loadedSeconds: number;
-// }
 const MemoizedPlayer = React.memo(({ videoSource, onSeeked, playerRef }: any) => {
     if (!videoSource) return null;
 
     return (
-        <ReactHlsPlayer // Заменено на ReactHlsPlayer
-            playerRef={playerRef} // Передаем ref для доступа к видеоэлементу
+        <ReactHlsPlayer
+            playerRef={playerRef}
             src={videoSource}
-            autoPlay={true} // react-hls-player использует autoPlay
+            autoPlay={true}
             controls={true}
             width="100%"
             height="100%"
             className="z-10"
-            // onSeeked больше не пропс для ReactHlsPlayer, слушатель будет прикреплен через ref
+            hlsConfig={{
+              lowLatencyMode: true, // Включаем режим низкой задержки
+            }}
         />
     );
 });
 export default function VodDetailPage({ params }: { params: { vodId: string } }) {
   const { vodId } = params
   const [isChatVisible, setIsChatVisible] = useState(true);
-  const [playerPosition, setPlayerPosition] = useState(0); // Состояние для отслеживания позиции плеера в секундах
-  const [historyStartFrom, setHistoryStartFrom] = useState<string | null | undefined>(null); // Новое состояние для времени начала истории чата
-    const playerRef = useRef<HTMLVideoElement | null>(null); // Ref теперь для HTMLVideoElement
+  const [playerPosition, setPlayerPosition] = useState(0);
+  const [historyStartFrom, setHistoryStartFrom] = useState<string | null | undefined>(null);
+    const playerRef = useRef<HTMLVideoElement | null>(null);
   const { data: vodData, loading: vodLoading, error: vodError } = useGetVodQuery({
     variables: { vodId },
   })
@@ -49,10 +44,8 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
     const [listeners, setListeners] = useState<(() => void)[]>([]);
 
     const registerSeekedListener: (listener: () => void) => () => void = useCallback((listener: () => void) => {
-        // добавляем listener
         setListeners(prev => [...prev, listener]);
 
-        // возвращаем функцию для удаления
         return () => {
             setListeners(prev => prev.filter(l => l !== listener));
         };
@@ -62,7 +55,6 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         listeners.forEach(listener => listener());
     };
 
-    // Прикрепляем слушатель 'seeked' к базовому видеоэлементу
     useEffect(() => {
         const videoElement = playerRef.current;
         if (videoElement) {
@@ -71,7 +63,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
                 videoElement.removeEventListener('seeked', handleSeeked);
             };
         }
-    }, [handleSeeked, playerRef.current]); // Перезапускаем эффект, если изменился playerRef.current
+    }, [handleSeeked, playerRef.current]);
 
 
   const streamerUserName = vodData?.vod?.streamer?.userName ?? ""
@@ -88,7 +80,6 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
     skip: !streamerId,
   })
 
-  // Инициализируем historyStartFrom, когда vodData доступен
   useEffect(() => {
     if (vodData?.vod?.createdAt && !historyStartFrom) {
       setHistoryStartFrom(vodData.vod.createdAt);
@@ -128,13 +119,11 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
         "flex-1 flex flex-col transition-all duration-300 ease-in-out",
         isChatVisible ? "lg:pr-80" : ""
       )}>
-        {/* Video Player Section */}
         <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
           {videoSource ? (
               <MemoizedPlayer
                   videoSource={videoSource}
                   playerRef={playerRef}
-                  // onSeeked пропс удален, слушатель прикрепляется в useEffect
               />
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-400">
@@ -142,7 +131,6 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
             </div>
           )}
 
-          {/* Кнопка "Показать чат" (только если чат скрыт) */}
           {!isChatVisible && (
             <Button
               variant="outline"
@@ -154,13 +142,11 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
           )}
         </div>
 
-        {/* VOD Details and Streamer Info */}
         <div className="container mx-auto px-4 py-4">
           <VodDetailsSection vod={vod} streamer={streamer} profile={profile} />
         </div>
       </div>
 
-      {/* VOD Chat Sidebar */}
       <div
         className={cn(
           "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
