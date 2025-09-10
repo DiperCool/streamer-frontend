@@ -165,8 +165,8 @@ export default function StreamerProfileLayout({
           isChatVisible ? "lg:mr-80" : "",
       )}>
         <div className={cn(
-          "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out aspect-video", // Added aspect-video, removed fixed heights
-          isPlayerMaximized ? "flex-grow" : "" // flex-grow will work with aspect-video
+          "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
+          isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
         )}>
           {isLive && hasStreamSources ? (
             <StreamPlayer
