@@ -38,14 +38,14 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   }
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 bg-black"> {/* Добавлен bg-black */}
       <ReactPlayer
         src={urlToPlay}
         playing
         controls={showPlayerControls} // Используем новый пропс
         width="100%"
         height="100%"
-        className="z-[15]"
+        className="z-[15] !p-0 !m-0" // Добавлены !p-0 !m-0
       />
       {showPlayerControls && ( // Условно отображаем кнопку максимизации
         <Button
