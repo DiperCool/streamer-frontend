@@ -15,7 +15,6 @@ import Link from "next/link"
 import NextImage from "next/image"
 import { getMinioUrl } from "@/utils/utils"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
@@ -90,10 +89,10 @@ export default function HomePage() {
             </div>
           ) : (
             // Desktop layout
-            <div className="container mx-auto px-4 py-8"> {/* Added container and padding here */}
-              <div className="flex w-full aspect-video"> {/* Changed h-[50vh] to aspect-video */}
+            <div className="container mx-auto px-4 py-8">
+              <div className="flex w-full aspect-video">
                 {/* Left section: Main Stream Player with Overlay */}
-                <div className="flex-[2] relative bg-gray-800 rounded-lg overflow-hidden"> {/* Added rounded-lg and overflow-hidden */}
+                <div className="flex-[3] relative bg-gray-800 rounded-lg overflow-hidden"> {/* Increased flex to 3 */}
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -111,7 +110,7 @@ export default function HomePage() {
                       alt={featuredStream.title || "Stream preview"}
                       fill
                       style={{ objectFit: "cover" }}
-                      sizes="(max-width: 768px) 100vw, 66vw"
+                      sizes="(max-width: 768px) 100vw, 75vw"
                       priority
                       className="absolute inset-0 w-full h-full"
                     />
@@ -148,7 +147,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 flex flex-col space-y-4 pl-4"> {/* Adjusted padding to pl-4 */}
+                <div className="flex-1 flex flex-col space-y-4 pl-4">
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
@@ -169,7 +168,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="px-4 py-8"> {/* This div already has padding */}
+      <div className="px-4 py-8">
         {topCategories.length > 0 && (
           <>
             <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2>
