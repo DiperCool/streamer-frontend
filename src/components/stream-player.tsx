@@ -88,7 +88,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   }
 
   return (
-    <div ref={playerWrapperRef} className="absolute inset-0 bg-black"> {/* Этот div теперь становится полноэкранным */}
+    <div ref={playerWrapperRef} className="w-full h-full relative bg-black"> {/* Changed from absolute inset-0 */}
       <HlsPlayerComponent
         src={activeSource.url}
         playerRef={videoElementRef} // Передаем реф видеоэлементу

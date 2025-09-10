@@ -114,7 +114,7 @@ export default function HomePage() {
   const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
 
   return (
-    <div className="bg-gray-900 text-white w-full"> {/* Added w-full here */}
+    <div className="bg-gray-900 text-white w-full">
       {topStreams.length > 0 ? (
         <>
           {isMobile ? ( // Мобильный вид: список TopStreamCard
@@ -127,7 +127,7 @@ export default function HomePage() {
               </div>
             </div>
           ) : ( // Десктопный вид: карусель с двумя колонками
-            <div className="h-[50vh] flex"> {/* Removed flex-none */}
+            <div className="h-[50vh] flex">
               <div className="w-1/2 flex flex-col bg-gray-900 z-20 relative">
                 <div className="pt-8 px-8 flex-1 flex flex-col">
                   <div>
@@ -199,7 +199,7 @@ export default function HomePage() {
 
               <div className="w-1/2 h-full">
                 {/* Main Stream Player */}
-                <div className="w-full h-full relative bg-gray-800 flex-none">
+                <div className="w-full h-full relative bg-gray-800"> {/* Removed flex-none */}
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -211,19 +211,13 @@ export default function HomePage() {
                       startedAt={featuredStream.started}
                     />
                   ) : (
-                    <NextImage
+                    <img // Changed from NextImage to img
                       src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
                       alt={featuredStream.title || "Stream preview"}
-                      fill
-                      sizes="50vw"
-                      style={{ objectFit: "cover" }}
-                      priority
+                      className="w-full h-full object-cover" // Added w-full h-full object-cover
+                      // Removed fill, sizes, style, priority as they are for NextImage
                     />
                   )}
-                  {/* Общее легкое затемнение для плеера */}
-                  {/* <div className="absolute inset-0 bg-black/50" /> */} {/* УДАЛЕНО */}
-                  {/* Градиент для нижней части плеера (20%) */}
-                  {/* <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" /> */} {/* УДАЛЕНО */}
                 </div>
               </div>
             </div>
