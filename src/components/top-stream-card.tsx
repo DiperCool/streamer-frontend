@@ -33,6 +33,8 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
             style={{ objectFit: "cover" }}
             className="transition-transform duration-200 group-hover:scale-105"
           />
+          {/* Overlay for darkening */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           {/* Live Badge */}
           {stream.active && (
             <Badge className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
