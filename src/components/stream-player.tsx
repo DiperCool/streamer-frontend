@@ -88,7 +88,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   }
 
   return (
-    <div ref={playerWrapperRef} className="absolute inset-0 bg-black"> {/* Changed to absolute inset-0 */}
+    <div ref={playerWrapperRef} className="absolute inset-0 bg-black">
       <HlsPlayerComponent
         src={activeSource.url}
         playerRef={videoElementRef} // Передаем реф видеоэлементу
@@ -96,9 +96,9 @@ export const StreamPlayer = React.memo(function StreamPlayer({
       />
       
       {/* Общее легкое затемнение для плеера */}
-      <div className="absolute inset-0 bg-black/50 z-10" /> {/* Усилено затемнение, z-index 10 */}
+      <div className="absolute inset-0 bg-black/50 z-10" />
       {/* Градиент для нижней части плеера (20%) */}
-      <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" /> {/* z-index 10 */}
+      <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/50 to-transparent z-10" /> {/* Изменено с gray-900/90 на gray-900/50 */}
 
       {/* Индикаторы LIVE и времени стрима */}
       <LiveStreamIndicators isLive={isLive} startedAt={startedAt} />
