@@ -59,7 +59,7 @@ export default function HomePage() {
 
   if (!featuredStream) {
     return (
-      <div className="px-4 py-8 text-center">
+      <div className="py-8 text-center"> {/* Removed px-4 */}
         <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
         <p className="text-gray-500">No live streams currently available. Check back later!</p>
       </div>
@@ -78,10 +78,10 @@ export default function HomePage() {
       {topStreams.length > 0 ? (
         <>
           {isMobile ? (
-            <div className="px-4 py-8">
-              <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1>
+            <div className="py-8"> {/* Removed px-4 */}
+              <h1 className="text-3xl font-bold text-white mb-6 pl-4">Top Live Streams</h1> {/* Added pl-4 for mobile title */}
               {/* Mobile horizontal scroll for top streams */}
-              <div className="flex overflow-x-auto whitespace-nowrap space-x-4 pb-4 custom-scrollbar">
+              <div className="flex overflow-x-auto whitespace-nowrap space-x-4 pb-4 custom-scrollbar pl-4"> {/* Added pl-4 */}
                 {topStreams.map((stream) => (
                   <div key={stream.id} className="flex-shrink-0 w-72">
                     <TopStreamCard stream={stream} />
@@ -91,7 +91,7 @@ export default function HomePage() {
             </div>
           ) : (
             // Desktop layout
-            <div className="px-4 py-4">
+            <div className="py-4"> {/* Removed px-4 */}
               <div className="flex w-full items-stretch">
                 {/* Left section: Main Stream Player with Overlay */}
                 <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
@@ -120,7 +120,7 @@ export default function HomePage() {
                   {/* Overlay for featured stream info */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10 flex flex-col">
                     {/* Row 1: Category, Language, Tags, Viewers */}
-                    <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
+                    <div className="flex items-center text-sm text-gray-400 mb-2"> {/* Removed justify-between */}
                       <div className="flex items-center flex-wrap gap-1.5">
                         {featuredStream.category?.title && (
                           <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
@@ -140,7 +140,7 @@ export default function HomePage() {
                       </div>
                       {/* Live indicator with viewer count */}
                       {featuredStream.active && (
-                        <Badge className="bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
+                        <Badge className="bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center ml-auto"> {/* Added ml-auto */}
                           <span className="h-2 w-2 rounded-full bg-white mr-1" />
                           {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
                         </Badge>
@@ -153,13 +153,13 @@ export default function HomePage() {
                     </h2>
 
                     {/* Row 3: Watch Live Button & Streamer Info */}
-                    <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center mt-auto"> {/* Removed justify-between */}
                       <Link href={`/${streamerName}`} passHref>
                         <Button variant="default" size="lg" className="bg-green-600 hover:bg-green-700 text-white">
                           Watch Live
                         </Button>
                       </Link>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 ml-4"> {/* Added ml-4 */}
                         <Link href={`/${streamerName}`} passHref>
                           <Avatar className="w-9 h-9 border-2 border-green-500 cursor-pointer">
                             <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
@@ -197,17 +197,17 @@ export default function HomePage() {
           )}
         </>
       ) : (
-        <div className="px-4 py-8 text-center">
+        <div className="py-8 text-center"> {/* Removed px-4 */}
           <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
           <p className="text-gray-500">No live streams currently available. Check back later!</p>
         </div>
       )}
 
-      <div className="px-4 py-8">
+      <div className="py-8"> {/* Removed px-4 */}
         {topCategories.length > 0 && (
           <>
-            <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4 pl-4">Top Categories</h2> {/* Added pl-4 */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8 pl-4 pr-4"> {/* Added pl-4 pr-4 */}
               {topCategories.map(category => (
                 <CategoryCard key={category.id} category={category} />
               ))}
