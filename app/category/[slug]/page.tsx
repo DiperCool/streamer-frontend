@@ -20,6 +20,7 @@ import { TagSelectInput } from "@/src/components/ui/tag-select-input"
 import Image from "next/image"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge" // Import Badge
 
 const STREAMS_PER_PAGE = 15; // Consistent with browse-streams-tab
 
@@ -124,22 +125,29 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       {/* Category Header */}
       <div className="flex items-start space-x-6 mb-8">
         {/* Image on left */}
-        <div className="relative w-48 h-64 flex-shrink-0 rounded-lg overflow-hidden shadow-lg">
+        <div className="relative w-28 h-36 flex-shrink-0 rounded-lg overflow-hidden shadow-lg"> {/* Adjusted size */}
           <Image
             src={imageUrl}
             alt={category.title}
             fill
             style={{ objectFit: "cover" }}
-            sizes="192px" // w-48
+            sizes="112px" // Adjusted sizes prop
             priority
           />
+          {/* Category Title Badge on Image */}
+          <Badge className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/70 text-white px-2 py-0.5 rounded-md text-xs font-semibold z-10">
+            {category.title}
+          </Badge>
         </div>
         {/* Text content on right */}
-        <div className="flex flex-col justify-center flex-1 py-4"> {/* Added py-4 for vertical alignment */}
+        <div className="flex flex-col flex-1 py-0"> {/* Adjusted padding */}
           <h1 className="text-4xl font-bold text-white mb-2">{category.title}</h1>
-          <div className="flex items-center space-x-4 text-gray-400 text-lg">
-            <p>{category.watchers} watching</p>
-            {/* No "followers" or direct category tags as per schema and request */}
+          <div className="flex items-center space-x-2 text-gray-400 text-lg">
+            {/* Watching count as a badge */}
+            <Badge className="bg-gray-800 text-white px-2 py-1 rounded-md text-sm font-semibold flex items-center">
+              <span className="h-2 w-2 rounded-full bg-red-500 mr-1" />
+              {category.watchers} watching
+            </Badge>
           </div>
         </div>
       </div>
