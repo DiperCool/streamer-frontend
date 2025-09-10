@@ -81,7 +81,7 @@ export default function HomePage() {
               {/* Mobile horizontal scroll for top streams */}
               <div className="flex overflow-x-auto whitespace-nowrap space-x-4 pb-4 custom-scrollbar">
                 {topStreams.map((stream) => (
-                  <div key={stream.id} className="flex-shrink-0 w-72"> {/* Fixed width for mobile cards */}
+                  <div key={stream.id} className="flex-shrink-0 w-72">
                     <TopStreamCard stream={stream} />
                   </div>
                 ))}
@@ -90,9 +90,9 @@ export default function HomePage() {
           ) : (
             // Desktop layout
             <div className="container mx-auto px-4 py-8">
-              <div className="flex w-full h-[66vh]"> {/* Increased height by 10% */}
+              <div className="flex w-full h-[66vh]">
                 {/* Left section: Main Stream Player with Overlay */}
-                <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden"> {/* flex-[4] for main player */}
+                <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden">
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -118,22 +118,22 @@ export default function HomePage() {
                   {/* Overlay for featured stream info */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10">
                     <Link href={`/${streamerName}`} passHref>
-                      <div className="flex items-center space-x-2.5 cursor-pointer"> {/* Increased space-x */}
-                        <Avatar className="w-9 h-9 border-2 border-green-500"> {/* Increased avatar size */}
+                      <div className="flex items-center space-x-2.5 cursor-pointer">
+                        <Avatar className="w-9 h-9 border-2 border-green-500">
                           <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
                           <AvatarFallback className="bg-green-600 text-white text-sm">
                             {streamerName.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-xl font-bold text-white hover:text-green-400"> {/* Increased text size */}
+                        <span className="text-xl font-bold text-white hover:text-green-400">
                           {streamerName}
                         </span>
                       </div>
                     </Link>
-                    <h2 className="text-2xl font-bold text-white truncate mt-1.5"> {/* Increased text size and mt */}
+                    <h2 className="text-2xl font-bold text-white truncate mt-1.5">
                       {featuredStream.title || "Untitled Stream"}
                     </h2>
-                    <div className="flex items-center space-x-2.5 text-gray-400 text-base mt-1.5"> {/* Increased text size and mt */}
+                    <div className="flex items-center space-x-2.5 text-gray-400 text-base mt-1.5">
                       <Users className="w-4 h-4" />
                       <span>{currentViewers} watching</span>
                       {featuredStream.category?.title && (
@@ -147,7 +147,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 flex flex-col space-y-5 pl-5"> {/* Adjusted space-y and pl */}
+                <div className="flex-1 flex flex-col space-y-5 pl-5">
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
