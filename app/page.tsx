@@ -74,11 +74,11 @@ export default function HomePage() {
   const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
 
   return (
-    <div className="bg-gray-900 text-white w-full px-4"> {/* Added px-4 here */}
+    <div className="bg-gray-900 text-white w-full px-4"> {/* Main wrapper with px-4 */}
       {topStreams.length > 0 ? (
         <>
           {isMobile ? (
-            <div className="py-8">
+            <div className="py-8"> {/* No px- on this div, it's handled by parent */}
               <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1> {/* Removed pl-4 */}
               {/* Mobile horizontal scroll for top streams */}
               <div className="flex overflow-x-auto whitespace-nowrap space-x-4 pb-4 custom-scrollbar"> {/* Removed pl-4 */}
@@ -91,7 +91,7 @@ export default function HomePage() {
             </div>
           ) : (
             // Desktop layout
-            <div className="py-4">
+            <div className="py-4"> {/* No px- on this div, it's handled by parent */}
               <div className="flex w-full items-stretch">
                 {/* Left section: Main Stream Player with Overlay */}
                 <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
@@ -137,20 +137,19 @@ export default function HomePage() {
                             {tag.title}
                           </Badge>
                         ))}
-                        {/* Re-added viewer count here, after tags */}
+                        {/* Viewer count and Live badge together */}
                         {featuredStream.active && currentViewers !== undefined && (
                           <Badge className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
                             <Users className="w-3.5 h-3.5 mr-1" />
                             {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
                           </Badge>
                         )}
+                        {featuredStream.active && (
+                          <Badge className="bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
+                            LIVE
+                          </Badge>
+                        )}
                       </div>
-                      {/* Live indicator badge, now without ml-auto to flow with other badges */}
-                      {featuredStream.active && (
-                        <Badge className="bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center ml-2"> {/* Added ml-2 for spacing */}
-                          LIVE
-                        </Badge>
-                      )}
                     </div>
 
                     {/* Row 2: Stream Title */}
@@ -188,7 +187,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 ml-5 flex flex-col space-y-3"> {/* Changed pl-5 to ml-5 */}
+                <div className="flex-1 ml-5 flex flex-col space-y-3">
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
@@ -203,13 +202,13 @@ export default function HomePage() {
           )}
         </>
       ) : (
-        <div className="py-8 text-center">
+        <div className="py-8 px-4 text-center">
           <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
           <p className="text-gray-500">No live streams currently available. Check back later!</p>
         </div>
       )}
 
-      <div className="py-8">
+      <div className="py-8"> {/* No px- on this div, it's handled by parent */}
         {topCategories.length > 0 && (
           <>
             <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2> {/* Removed pl-4 */}
