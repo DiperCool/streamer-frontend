@@ -5,10 +5,20 @@ import { useGetStreamsQuery, SortEnumType } from "@/graphql/__generated__/graphq
 import { Loader2 } from "lucide-react"
 import { TopStreamCard } from "@/src/components/top-stream-card"
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select" // Import Select components for sorting
+import { TagSelectInput } from "@/src/components/ui/tag-select-input" // Import the new TagSelectInput
 
 export const BrowseStreamsTab: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const streamsPerPage = 15; // Number of streams to load per page, updated to 15
+  const streamsPerPage = 15;
+  const [sortBy, setSortBy] = useState<SortEnumType>(SortEnumType.Desc); // Default to most viewers
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null); // New state for selected tag
 
   const {
     data: streamsData,
@@ -16,13 +26,21 @@ export const BrowseStreamsTab: React.FC = () => {
     error: streamsError,
     fetchMore,
     networkStatus,
+    refetch, // Add refetch to manually trigger query
   } = useGetStreamsQuery({
     variables: {
       first: streamsPerPage,
-      order: [{ currentViewers: SortEnumType.Desc }], // Default sort by most viewers
+      order: [{ currentViewers: sortBy }],
+      tag: selectedTagId, // Pass selected tag ID to the query
     },
     notifyOnNetworkStatusChange: true,
   });
+
+  // Refetch streams when sort order or selected tag changes
+  React.useEffect(() => {
+    setCurrentPage(1); // Reset page when filters change
+    refetch();
+  }, [sortBy, selectedTagId, refetch]);
 
   const handleLoadMore = async () => {
     if (!streamsData?.streams?.pageInfo.hasNextPage || networkStatus === 3) return;
@@ -32,7 +50,8 @@ export const BrowseStreamsTab: React.FC = () => {
         variables: {
           after: streamsData.streams.pageInfo.endCursor,
           first: streamsPerPage,
-          order: [{ currentViewers: SortEnumType.Desc }],
+          order: [{ currentViewers: sortBy }],
+          tag: selectedTagId, // Ensure tag filter is passed to fetchMore
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult || !fetchMoreResult.streams?.nodes) {
@@ -71,6 +90,33 @@ export const BrowseStreamsTab: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <div className="flex items-center justify-end space-x-4 mb-6"> {/* Align filters to the right */}
+        {/* Tag Select Input */}
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-400">Filter by Tag:</span>
+          <TagSelectInput
+            value={selectedTagId}
+            onValueChange={setSelectedTagId}
+            placeholder="All Tags"
+          />
+        </div>
+
+        {/* Sort By Select */}
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-400">Sort by:</span>
+          <Select value={sortBy} onValueChange={(value: SortEnumType) => setSortBy(value)}>
+            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
+              <SelectValue placeholder="Select a sort option" />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+              <SelectItem value={SortEnumType.Desc}>Most Viewers</SelectItem>
+              <SelectItem value={SortEnumType.Asc}>Least Viewers</SelectItem>
+              {/* Add more sort options as needed */}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       {streams.length === 0 ? (
         <p className="text-gray-400 text-center py-10">No live streams currently available.</p>
       ) : (
