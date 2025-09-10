@@ -233,9 +233,7 @@ export default function HomePage() {
                         priority
                       />
                     )}
-                    <div className="absolute top-0 bottom-0 right-0 left-[-100px] bg-gradient-to-r from-black/80 to-transparent flex items-end p-4 z-20">
-                      {/* Элементы, которые были здесь (LIVE Badge, viewers), теперь отображаются в левой панели */}
-                    </div>
+                    {/* Removed the darkening overlay div */}
                   </div>
                 ))}
               </div>
