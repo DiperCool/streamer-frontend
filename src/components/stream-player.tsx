@@ -36,7 +36,7 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
       <ReactPlayer
         url={activeSource.url}
         playing={true}
-        controls={true}
+        controls={false} {/* Установлено в false для скрытия встроенных контролов */}
         width="100%"
         height="100%"
         muted={false} // Можно сделать это пропсом, если нужно

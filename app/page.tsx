@@ -183,6 +183,7 @@ export default function HomePage() {
             <div className="w-full h-full relative bg-gray-800 flex-none">
               {featuredStream.sources && featuredStream.sources.length > 0 ? (
                 <StreamPlayer
+                  key={featuredStream.id} {/* Added key here */}
                   sources={featuredStream.sources}
                   playing={true}
                   controls={false}
