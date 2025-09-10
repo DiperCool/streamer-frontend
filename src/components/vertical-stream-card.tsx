@@ -30,12 +30,12 @@ export const VerticalStreamCard: React.FC<VerticalStreamCardProps> = React.memo(
         )}
         onClick={onClick}
       >
-        <div className="relative flex-shrink-0 w-24 h-14 rounded-md overflow-hidden">
+        <div className="relative flex-shrink-0 w-64 h-36 rounded-md overflow-hidden"> {/* Increased size to w-64 h-36 */}
           <Image
             src={previewUrl}
             alt={stream.title || "Stream preview"}
             fill
-            sizes="96px"
+            sizes="256px" // Updated sizes attribute for the new width
             style={{ objectFit: "cover" }}
           />
           {stream.active && (
