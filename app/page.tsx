@@ -119,7 +119,7 @@ export default function HomePage() {
                   )}
                   {/* Overlay for featured stream info */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10 flex flex-col">
-                    {/* Row 1: Category, Language, Tags, Viewers, Live Badge */}
+                    {/* Row 1: Category, Language, Tags, Viewers */}
                     <div className="flex items-center text-sm text-gray-400 mb-2">
                       <div className="flex items-center flex-wrap gap-1.5">
                         {featuredStream.category?.title && (
@@ -137,16 +137,11 @@ export default function HomePage() {
                             {tag.title}
                           </Badge>
                         ))}
-                        {/* Viewer count and Live badge together */}
+                        {/* Viewer count */}
                         {featuredStream.active && currentViewers !== undefined && (
                           <Badge className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
                             <Users className="w-3.5 h-3.5 mr-1" />
                             {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
-                          </Badge>
-                        )}
-                        {featuredStream.active && (
-                          <Badge className="bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
-                            LIVE
                           </Badge>
                         )}
                       </div>

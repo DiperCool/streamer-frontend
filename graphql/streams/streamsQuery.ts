@@ -131,13 +131,14 @@ export const GET_TOP_STREAMS = gql`
             currentViewers
             language
             started
+            active
             streamer {
                 id
                 userName
                 avatar
                 isLive
             }
-            sources { # Добавлено поле sources
+            sources {
                 streamId
                 url
                 sourceType

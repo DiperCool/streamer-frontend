@@ -1692,7 +1692,7 @@ export type GetStreamsQuery = { __typename?: 'Query', streams?: { __typename?: '
 export type GetTopStreamsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTopStreamsQuery = { __typename?: 'Query', topStreams: Array<{ __typename?: 'StreamDto', id: string, title: string, preview?: string | null, currentViewers: number, language: string, started: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }>, category?: { __typename?: 'CategoryDto', id: string, title: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> };
+export type GetTopStreamsQuery = { __typename?: 'Query', topStreams: Array<{ __typename?: 'StreamDto', id: string, title: string, preview?: string | null, currentViewers: number, language: string, started: string, active: boolean, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }>, category?: { __typename?: 'CategoryDto', id: string, title: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> };
 
 export type GetMySystemRoleQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4121,6 +4121,7 @@ export const GetTopStreamsDocument = gql`
     currentViewers
     language
     started
+    active
     streamer {
       id
       userName
