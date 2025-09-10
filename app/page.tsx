@@ -115,7 +115,7 @@ export default function HomePage() {
     <div className="flex-1 bg-gray-900 text-white overflow-x-hidden">
       {topStreams.length > 0 ? (
         <div className="flex-1 h-[50vh] flex">
-          <div className="w-1/2 flex flex-col bg-gray-900 z-20">
+          <div className="w-1/2 flex flex-col bg-gray-900 z-20 relative"> {/* Добавлен relative для позиционирования градиента */}
             <div className="pt-8 px-8 flex-1 flex flex-col">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
@@ -180,6 +180,8 @@ export default function HomePage() {
                 </div>
               )}
             </div>
+            {/* Новый градиент для левой панели */}
+            <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-black/30 to-transparent z-10" />
           </div>
 
           <div className="w-1/2 h-full">
@@ -205,8 +207,8 @@ export default function HomePage() {
                   priority
                 />
               )}
-              {/* Overlay for darkening */}
-              <div className="absolute inset-0 bg-black/30" />
+              {/* Новый градиент для нижней части плеера */}
+              <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-black/70 to-transparent z-10" />
             </div>
           </div>
         </div>
