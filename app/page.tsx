@@ -89,10 +89,10 @@ export default function HomePage() {
             </div>
           ) : (
             // Desktop layout
-            <div className="px-4 py-8">
+            <div className="px-4 py-4"> {/* Changed py-8 to py-4 */}
               <div className="flex w-full items-stretch">
                 {/* Left section: Main Stream Player with Overlay */}
-                <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[8/3]"> {/* Changed aspect-[21/9] to aspect-[8/3] */}
+                <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]"> {/* Changed aspect-[8/3] to aspect-[16/5] */}
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -147,7 +147,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 pl-5 flex flex-col space-y-5">
+                <div className="flex-1 pl-5 flex flex-col space-y-3"> {/* Changed space-y-5 to space-y-3 */}
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
