@@ -147,15 +147,17 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 flex flex-col space-y-5 pl-5 self-start h-fit"> {/* Added h-fit here */}
-                  {topStreams.slice(1, 4).map((stream, index) => (
-                    <VerticalStreamCard
-                      key={stream.id}
-                      stream={stream}
-                      onClick={() => handleSelectStream(index + 1)}
-                      selected={selectedIndex === index + 1}
-                    />
-                  ))}
+                <div className="flex-1 pl-5"> {/* This div handles width distribution */}
+                  <div className="flex flex-col space-y-5 self-start h-fit"> {/* This inner div handles content height */}
+                    {topStreams.slice(1, 4).map((stream, index) => (
+                      <VerticalStreamCard
+                        key={stream.id}
+                        stream={stream}
+                        onClick={() => handleSelectStream(index + 1)}
+                        selected={selectedIndex === index + 1}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
