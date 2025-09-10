@@ -211,7 +211,7 @@ export default function HomePage() {
 
           <div className="flex-1 h-full"> {/* Changed w-1/2 to flex-1 */}
             <div className="embla w-full h-full" ref={emblaRef}>
-              <div className="embla__container w-full h-full">
+              <div className="embla__container flex w-full h-full"> {/* Added 'flex' here */}
                 {topStreams.map((stream) => (
                   <div className="embla__slide w-full aspect-video relative bg-gray-800 flex-none" key={stream.id}> {/* Added flex-none here */}
                     {stream.sources && stream.sources.length > 0 ? (
