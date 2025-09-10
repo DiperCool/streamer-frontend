@@ -39,7 +39,7 @@ export const VerticalStreamCard: React.FC<VerticalStreamCardProps> = React.memo(
           className="absolute inset-0 w-full h-full"
         />
         {/* Overlay for darkening and text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-transparent to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
 
         {stream.active && (
           <Badge className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10 flex items-center">
