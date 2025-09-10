@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
-// StreamSourceType больше не нужен здесь, так как StreamPlayer сам фильтрует источники
+import { useIsMobile } from "@/hooks/use-mobile" // Импортируем useIsMobile
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -54,6 +54,7 @@ const ArrowButton: React.FC<ArrowButtonProps> = ({ children, onClick, disabled }
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
+  const isMobile = useIsMobile(); // Используем хук для определения мобильного устройства
 
   const { data: topStreamsData, loading: topStreamsLoading, error: topStreamsError } = useGetTopStreamsQuery();
   const topStreams = topStreamsData?.topStreams || [];
@@ -114,108 +115,121 @@ export default function HomePage() {
   return (
     <div className="flex-1 bg-gray-900 text-white overflow-x-hidden">
       {topStreams.length > 0 ? (
-        <div className="flex-1 h-[50vh] flex">
-          <div className="w-1/2 flex flex-col bg-gray-900 z-20 relative">
-            <div className="pt-8 px-8 flex-1 flex flex-col">
-              <div>
-                <div className="flex items-center space-x-3 mb-2">
-                  <Avatar className="w-10 h-10 border-2 border-green-500">
-                    <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                    <AvatarFallback className="bg-green-600 text-white text-base">
-                      {streamerName.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <div className="flex items-center space-x-2">
-                      <Link href={`/${streamerName}`} passHref>
-                        <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
-                          {streamerName}
-                        </span>
-                      </Link>
-                      <div className="flex items-center text-gray-400 text-sm">
-                        <Users className="w-4 h-4 mr-1" />
-                        <span>{currentViewers} watching</span>
+        <>
+          {isMobile ? ( // Мобильный вид: список TopStreamCard
+            <div className="px-4 py-8">
+              <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {topStreams.map((stream) => (
+                  <TopStreamCard key={stream.id} stream={stream} />
+                ))}
+              </div>
+            </div>
+          ) : ( // Десктопный вид: карусель с двумя колонками
+            <div className="flex-1 h-[50vh] flex">
+              <div className="w-1/2 flex flex-col bg-gray-900 z-20 relative">
+                <div className="pt-8 px-8 flex-1 flex flex-col">
+                  <div>
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Avatar className="w-10 h-10 border-2 border-green-500">
+                        <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+                        <AvatarFallback className="bg-green-600 text-white text-base">
+                          {streamerName.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <div className="flex items-center space-x-2">
+                          <Link href={`/${streamerName}`} passHref>
+                            <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
+                              {streamerName}
+                            </span>
+                          </Link>
+                          <div className="flex items-center text-gray-400 text-sm">
+                            <Users className="w-4 h-4 mr-1" />
+                            <span>{currentViewers} watching</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <h2 className="2xl font-bold text-white truncate mb-2">
-                  {featuredStream.title || "Untitled Stream"}
-                </h2>
+                    <h2 className="text-2xl font-bold text-white truncate mb-2">
+                      {featuredStream.title || "Untitled Stream"}
+                    </h2>
 
-                {featuredStream.category?.title && (
-                  <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
-                )}
+                    {featuredStream.category?.title && (
+                      <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
+                    )}
 
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {featuredStream.tags.map((tag) => (
-                    <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
-                      {tag.title}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Controls for selecting stream */}
-              {topStreams.length > 1 && (
-                <div className="flex-grow flex flex-col justify-end pb-4">
-                  <div className="flex items-center justify-center space-x-2">
-                    <ArrowButton onClick={scrollPrev} disabled={topStreams.length <= 1}>
-                      <ChevronLeft className="h-5 w-5" />
-                    </ArrowButton>
-                    <div className="flex space-x-2">
-                      {topStreams.map((_, index) => (
-                        <DotButton
-                          key={index}
-                          selected={index === selectedIndex}
-                          onClick={() => scrollTo(index)}
-                        />
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {featuredStream.tags.map((tag) => (
+                        <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                          {tag.title}
+                        </Badge>
                       ))}
                     </div>
-                    <ArrowButton onClick={scrollNext} disabled={topStreams.length <= 1}>
-                      <ChevronRight className="h-5 w-5" />
-                    </ArrowButton>
                   </div>
-                </div>
-              )}
-            </div>
-            {/* Градиент для правой части левой панели */}
-            <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-gray-900/50 to-transparent z-10" />
-          </div>
 
-          <div className="w-1/2 h-full">
-            {/* Main Stream Player */}
-            <div className="w-full h-full relative bg-gray-800 flex-none">
-              {hasStreamSources ? (
-                <StreamPlayer
-                  key={featuredStream.id}
-                  sources={featuredStream.sources}
-                  isPlayerMaximized={false}
-                  onTogglePlayerMaximize={() => {}}
-                  showPlayerControls={false}
-                  isLive={featuredStream.active}
-                  startedAt={featuredStream.started}
-                />
-              ) : (
-                <NextImage
-                  src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
-                  alt={featuredStream.title || "Stream preview"}
-                  fill
-                  sizes="50vw"
-                  style={{ objectFit: "cover" }}
-                  priority
-                />
-              )}
-              {/* Общее легкое затемнение для плеера */}
-              <div className="absolute inset-0 bg-gray-900/20" />
-              {/* Градиент для нижней части плеера (20%) */}
-              <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" />
-              {/* НОВЫЙ: Градиент для левой части плеера */}
-              <div className="absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-gray-900/90 to-transparent z-10" />
+                  {/* Controls for selecting stream */}
+                  {topStreams.length > 1 && (
+                    <div className="flex-grow flex flex-col justify-end pb-4">
+                      <div className="flex items-center justify-center space-x-2">
+                        <ArrowButton onClick={scrollPrev} disabled={topStreams.length <= 1}>
+                          <ChevronLeft className="h-5 w-5" />
+                        </ArrowButton>
+                        <div className="flex space-x-2">
+                          {topStreams.map((_, index) => (
+                            <DotButton
+                              key={index}
+                              selected={index === selectedIndex}
+                              onClick={() => scrollTo(index)}
+                            />
+                          ))}
+                        </div>
+                        <ArrowButton onClick={scrollNext} disabled={topStreams.length <= 1}>
+                          <ChevronRight className="h-5 w-5" />
+                        </ArrowButton>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Градиент для правой части левой панели */}
+                <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-gray-900/50 to-transparent z-10" />
+              </div>
+
+              <div className="w-1/2 h-full">
+                {/* Main Stream Player */}
+                <div className="w-full h-full relative bg-gray-800 flex-none">
+                  {hasStreamSources ? (
+                    <StreamPlayer
+                      key={featuredStream.id}
+                      sources={featuredStream.sources}
+                      isPlayerMaximized={false}
+                      onTogglePlayerMaximize={() => {}}
+                      showPlayerControls={false}
+                      isLive={featuredStream.active}
+                      startedAt={featuredStream.started}
+                    />
+                  ) : (
+                    <NextImage
+                      src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
+                      alt={featuredStream.title || "Stream preview"}
+                      fill
+                      sizes="50vw"
+                      style={{ objectFit: "cover" }}
+                      priority
+                    />
+                  )}
+                  {/* Общее легкое затемнение для плеера */}
+                  <div className="absolute inset-0 bg-gray-900/20" />
+                  {/* Градиент для нижней части плеера (20%) */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" />
+                  {/* НОВЫЙ: Градиент для левой части плеера */}
+                  <div className="absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-gray-900/90 to-transparent z-10" />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+        </>
       ) : (
         <div className="px-4 py-8 text-center">
           <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
