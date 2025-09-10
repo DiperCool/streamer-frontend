@@ -14,24 +14,26 @@ import {
 } from "@/graphql/__generated__/graphql";
 import { formatDistanceToNowStrict, intervalToDuration, formatDuration } from "date-fns";
 import { useApolloClient } from "@apollo/client"; // Импортируем useApolloClient
+import { formatLiveDuration } from "@/utils/utils"; // Импортируем formatLiveDuration из utils
 
 // Helper function to format duration in HH:MM:SS
-const formatLiveDuration = (startDate: string | null | undefined): string => {
-  if (!startDate) return "00:00:00";
+// Эта функция теперь импортируется из utils/utils.ts
+// const formatLiveDuration = (startDate: string | null | undefined): string => {
+//   if (!startDate) return "00:00:00";
   
-  const start = new Date(startDate);
-  const now = new Date();
+//   const start = new Date(startDate);
+//   const now = new Date();
 
-  if (isNaN(start.getTime())) return "00:00:00";
+//   if (isNaN(start.getTime())) return "00:00:00";
 
-  const duration = intervalToDuration({ start, end: now });
+//   const duration = intervalToDuration({ start, end: now });
 
-  const hours = duration.hours ? String(duration.hours).padStart(2, '0') : '00';
-  const minutes = duration.minutes ? String(duration.minutes).padStart(2, '0') : '00';
-  const seconds = duration.seconds ? String(duration.seconds).padStart(2, '0') : '00';
+//   const hours = duration.hours ? String(duration.hours).padStart(2, '0') : '00';
+//   const minutes = duration.minutes ? String(duration.minutes).padStart(2, '0') : '00';
+//   const seconds = duration.seconds ? String(duration.seconds).padStart(2, '0') : '00';
 
-  return `${hours}:${minutes}:${seconds}`;
-};
+//   return `${hours}:${minutes}:${seconds}`;
+// };
 
 export const SessionInfoWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();

@@ -20,6 +20,22 @@ interface StreamPlayerProps {
   startedAt?: string | null; // Новый пропс для времени начала стрима
 }
 
+// Мемоизированный компонент для HLS-плеера, чтобы предотвратить его ненужные перерисовки
+const HlsPlayerComponent = React.memo(function HlsPlayerComponent({ src, playerRef, hlsConfig }: { src: string; playerRef: React.RefObject<HTMLVideoElement>; hlsConfig: any }) {
+  return (
+    <ReactHlsPlayer
+      playerRef={playerRef}
+      src={src}
+      autoPlay={true}
+      controls={false}
+      width="100%"
+      height="100%"
+      muted={false}
+      hlsConfig={hlsConfig}
+    />
+  );
+});
+
 export function StreamPlayer({ 
   sources, 
   isPlayerMaximized, 
@@ -87,25 +103,18 @@ export function StreamPlayer({
 
   return (
     <div className="absolute inset-0 bg-black">
-      <ReactHlsPlayer
-        playerRef={playerRef}
+      <HlsPlayerComponent
         src={activeSource.url}
-        autoPlay={true}
-        controls={false}
-        width="100%"
-        height="100%"
-        muted={false}
-        hlsConfig={{
-          lowLatencyMode: true,
-        }}
+        playerRef={playerRef}
+        hlsConfig={{ lowLatencyMode: true }}
       />
       {isLive && (
-        <Badge className="absolute top-4 left-4 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+        <Badge className="absolute bottom-4 left-4 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
           LIVE
         </Badge>
       )}
       {isLive && (
-        <Badge className="absolute top-4 left-20 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+        <Badge className="absolute bottom-4 left-20 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
           {liveDuration}
         </Badge>
       )}
