@@ -165,8 +165,8 @@ export default function StreamerProfileLayout({
           isChatVisible ? "lg:mr-80" : "",
       )}>
         <div className={cn(
-          "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
+          "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out aspect-video", // Added aspect-video, removed fixed heights
+          isPlayerMaximized ? "flex-grow" : "" // flex-grow will work with aspect-video
         )}>
           {isLive && hasStreamSources ? (
             <StreamPlayer
@@ -203,7 +203,7 @@ export default function StreamerProfileLayout({
 
         <div className={cn(
           "transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "px-4 py-2" : "px-4 py-2" // Removed container mx-auto
+          isPlayerMaximized ? "px-4 py-2" : "px-4 py-2"
         )}>
           <StreamerInfoBar
             streamer={streamer}
@@ -218,7 +218,7 @@ export default function StreamerProfileLayout({
 
         <div className={cn(
           "flex-grow transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "hidden" : "px-4 py-2" // Removed container mx-auto
+          isPlayerMaximized ? "hidden" : "px-4 py-2"
         )}>
           <div className="border-b border-gray-800 mb-2">
             <Tabs value={activeTab} className="w-full">
