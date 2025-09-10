@@ -125,16 +125,15 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       {/* Category Header */}
       <div className="flex items-start space-x-6 mb-8">
         {/* Image on left */}
-        <div className="relative w-14 h-18 flex-shrink-0 rounded-lg overflow-hidden shadow-lg"> {/* Adjusted size to w-14 h-18 */}
+        <div className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-lg bg-gray-700"> {/* Adjusted size and added fallback background */}
           <Image
             src={imageUrl}
             alt={category.title}
             fill
             style={{ objectFit: "cover" }}
-            sizes="56px" // Adjusted sizes prop for w-14
+            sizes="80px" // Adjusted sizes prop for w-20
             priority
           />
-          {/* Removed Category Title Badge on Image */}
         </div>
         {/* Text content on right */}
         <div className="flex flex-col flex-1 py-0"> {/* Adjusted padding */}
