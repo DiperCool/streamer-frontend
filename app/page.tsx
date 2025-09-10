@@ -114,7 +114,7 @@ export default function HomePage() {
   const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
 
   return (
-    <div className="flex-1 bg-gray-900 text-white overflow-x-hidden">
+    <div className="bg-gray-900 text-white"> {/* Removed flex-1 and overflow-y-auto */}
       {topStreams.length > 0 ? (
         <>
           {isMobile ? ( // Мобильный вид: список TopStreamCard
@@ -127,7 +127,7 @@ export default function HomePage() {
               </div>
             </div>
           ) : ( // Десктопный вид: карусель с двумя колонками
-            <div className="flex-1 h-[50vh] flex">
+            <div className="h-[50vh] flex"> {/* Removed flex-none */}
               <div className="w-1/2 flex flex-col bg-gray-900 z-20 relative">
                 <div className="pt-8 px-8 flex-1 flex flex-col">
                   <div>
@@ -224,7 +224,6 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-black/50" /> {/* Усилено затемнение */}
                   {/* Градиент для нижней части плеера (20%) */}
                   <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" />
-                  {/* Градиент для левой части плеера - Удален */}
                 </div>
               </div>
             </div>
@@ -237,7 +236,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="px-4 py-8">
+      <div className="px-4 py-8"> {/* Categories Section */}
         {/* Top Categories Section */}
         {topCategories.length > 0 && (
           <>

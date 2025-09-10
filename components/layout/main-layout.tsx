@@ -42,13 +42,13 @@ export function MainLayout({ children }: MainLayoutProps) {
       )}
 
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen",
+        "flex-1 flex flex-col",
         "transition-all duration-200 ease-in-out",
         sidebarOpen ? "lg:ml-64" : "lg:ml-0"
       )}>
           <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} sidebarOpen={sidebarOpen} isDashboard={isDashboard} isAdmin={isAdmin} />
           
-          <div className="flex-1 pt-16">
+          <div className="flex-1 pt-16 overflow-y-auto"> {/* Added overflow-y-auto here */}
             {children}
           </div>
       </div>
