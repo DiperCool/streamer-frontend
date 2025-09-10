@@ -128,7 +128,7 @@ export default function HomePage() {
             </div>
           ) : ( // Десктопный вид: карусель с двумя колонками
             <div className="h-[50vh] flex">
-              <div className="flex-1 flex flex-col bg-gray-900 z-20 relative"> {/* Changed w-1/2 to flex-1 */}
+              <div className="flex-1 flex flex-col bg-gray-900 z-20 relative">
                 <div className="pt-8 px-8 flex-1 flex flex-col">
                   <div>
                     <div className="flex items-center space-x-3 mb-2">
@@ -197,9 +197,9 @@ export default function HomePage() {
                 <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-gray-900/50 to-transparent z-10" />
               </div>
 
-              <div className="flex-1 h-full"> {/* Changed w-1/2 to flex-1 */}
+              <div className="flex-1 h-full">
                 {/* Main Stream Player */}
-                <div className="w-full h-full relative bg-gray-800">
+                <div className="relative aspect-video bg-gray-800"> {/* Changed to relative aspect-video */}
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -211,7 +211,7 @@ export default function HomePage() {
                       startedAt={featuredStream.started}
                     />
                   ) : (
-                    <img // Changed from NextImage to img
+                    <img
                       src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
                       alt={featuredStream.title || "Stream preview"}
                       className="absolute inset-0 w-full h-full object-cover" // Added absolute inset-0
