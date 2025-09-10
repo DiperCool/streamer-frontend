@@ -80,10 +80,10 @@ export default function HomePage() {
           {isMobile ? (
             <div className="py-8"> {/* No px- on this div, it's handled by parent */}
               <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1> {/* Removed pl-4 */}
-              {/* Mobile horizontal scroll for top streams */}
-              <div className="flex overflow-x-auto whitespace-nowrap space-x-4 pb-4 custom-scrollbar"> {/* Removed pl-4 */}
+              {/* Mobile responsive grid for top streams */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4"> {/* Changed to responsive grid */}
                 {topStreams.map((stream) => (
-                  <div key={stream.id} className="flex-shrink-0 w-72">
+                  <div key={stream.id}> {/* Removed flex-shrink-0 w-72 */}
                     <TopStreamCard stream={stream} />
                   </div>
                 ))}
