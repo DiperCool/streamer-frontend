@@ -21,7 +21,7 @@ import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {TopStreamCard} from "@/src/components/top-stream-card";
-import { SmallStreamPreviewCard } from "@/src/components/small-stream-preview-card"; // Corrected import
+import { VerticalStreamCard } from "@/src/components/vertical-stream-card"; // Import the new component
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
@@ -87,68 +87,8 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="h-[50vh] flex">
-              <div className="flex-1 flex flex-col bg-gray-900 z-20 relative">
-                <div className="pt-8 px-8 flex-1 flex flex-col">
-                  <div>
-                    <div className="flex items-center space-x-3 mb-2">
-                      <Avatar className="w-10 h-10 border-2 border-green-500">
-                        <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                        <AvatarFallback className="bg-green-600 text-white text-base">
-                          {streamerName.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <div className="flex items-center space-x-2">
-                          <Link href={`/${streamerName}`} passHref>
-                            <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
-                              {streamerName}
-                            </span>
-                          </Link>
-                          <div className="flex items-center text-gray-500 text-sm">
-                            <Users className="w-4 h-4 mr-1" />
-                            <span>{currentViewers} watching</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <h2 className="text-2xl font-bold text-white truncate mb-2">
-                      {featuredStream.title || "Untitled Stream"}
-                    </h2>
-
-                    {featuredStream.category?.title && (
-                      <p className="text-base text-gray-400 mb-2">{featuredStream.category.title}</p>
-                    )}
-
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {featuredStream.tags.map((tag) => (
-                        <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full text-xs">
-                          {tag.title}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {topStreams.length > 1 && (
-                    <div className="pr-8 pb-4 mt-auto">
-                      <div className="flex overflow-x-auto whitespace-nowrap space-x-4 p-1 custom-scrollbar">
-                        {topStreams.map((stream, index) => (
-                          <SmallStreamPreviewCard
-                            key={stream.id}
-                            stream={stream}
-                            onClick={handleSelectStream}
-                            index={index}
-                            selected={index === selectedIndex}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-gray-900/50 to-transparent z-10" />
-              </div>
-
-              <div className="flex-1 h-full relative">
+              {/* Left section: Main Stream Player with Overlay */}
+              <div className="flex-[2] h-full relative">
                 <div className="relative bg-gray-800 h-full w-full overflow-hidden">
                   {hasStreamSources ? (
                     <StreamPlayer
@@ -168,7 +108,48 @@ export default function HomePage() {
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   )}
+                  {/* Overlay for featured stream info */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10">
+                    <Link href={`/${streamerName}`} passHref>
+                      <div className="flex items-center space-x-2 cursor-pointer">
+                        <Avatar className="w-8 h-8 border-2 border-green-500">
+                          <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+                          <AvatarFallback className="bg-green-600 text-white text-sm">
+                            {streamerName.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-lg font-bold text-white hover:text-green-400">
+                          {streamerName}
+                        </span>
+                      </div>
+                    </Link>
+                    <h2 className="text-xl font-bold text-white truncate mt-1">
+                      {featuredStream.title || "Untitled Stream"}
+                    </h2>
+                    <div className="flex items-center space-x-2 text-gray-400 text-sm mt-1">
+                      <Users className="w-4 h-4" />
+                      <span>{currentViewers} watching</span>
+                      {featuredStream.category?.title && (
+                        <>
+                          <span className="text-gray-500">•</span>
+                          <span>{featuredStream.category.title}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* Right section: Vertical list of other top streams */}
+              <div className="flex-1 flex flex-col space-y-4 p-4 bg-gray-900">
+                {topStreams.slice(1, 4).map((stream, index) => (
+                  <VerticalStreamCard
+                    key={stream.id}
+                    stream={stream}
+                    onClick={() => handleSelectStream(index + 1)}
+                    selected={selectedIndex === index + 1}
+                  />
+                ))}
               </div>
             </div>
           )}
