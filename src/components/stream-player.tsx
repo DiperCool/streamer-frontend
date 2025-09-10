@@ -5,8 +5,7 @@ import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import ReactHlsPlayer from "react-hls-player";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatLiveDuration } from "@/utils/utils"; // Импортируем новую функцию
+import { LiveStreamIndicators } from "./live-stream-indicators"; // Импортируем новый компонент
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -47,25 +46,8 @@ export function StreamPlayer({
   const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
   const playerRef = useRef<HTMLVideoElement>(null);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
-  const [liveDuration, setLiveDuration] = useState("00:00:00");
 
   const activeSource = hlsSource;
-
-  // Обновление продолжительности стрима
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    if (isLive && startedAt) {
-      interval = setInterval(() => {
-        setLiveDuration(formatLiveDuration(startedAt));
-      }, 1000);
-    } else {
-      setLiveDuration("00:00:00"); // Сброс, если не в эфире
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isLive, startedAt]);
 
   // Обработчик для нативного полноэкранного режима
   const handleFullscreenChange = useCallback(() => {
@@ -108,16 +90,10 @@ export function StreamPlayer({
         playerRef={playerRef}
         hlsConfig={{ lowLatencyMode: true }}
       />
-      {isLive && (
-        <Badge className="absolute bottom-4 left-4 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
-          LIVE
-        </Badge>
-      )}
-      {isLive && (
-        <Badge className="absolute bottom-4 left-20 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
-          {liveDuration}
-        </Badge>
-      )}
+      
+      {/* Индикаторы LIVE и времени стрима */}
+      <LiveStreamIndicators isLive={isLive} startedAt={startedAt} />
+
       {showPlayerControls && (
         <Button
           variant="ghost"
