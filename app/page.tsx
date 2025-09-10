@@ -8,7 +8,7 @@ import {
   StreamDto,
   SortEnumType,
 } from "@/graphql/__generated__/graphql"
-import { Loader2, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Users } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -21,37 +21,7 @@ import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {TopStreamCard} from "@/src/components/top-stream-card";
-
-interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  selected: boolean;
-}
-
-const DotButton: React.FC<DotButtonProps> = ({ selected, onClick }) => (
-  <button
-    className={cn(
-      "w-2 h-2 rounded-full bg-gray-500 transition-colors duration-200",
-      selected ? "bg-green-500" : "hover:bg-gray-400"
-    )}
-    type="button"
-    onClick={onClick}
-  />
-);
-
-interface ArrowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-}
-
-const ArrowButton: React.FC<ArrowButtonProps> = ({ children, onClick, disabled }) => (
-  <Button
-    variant="ghost"
-    size="icon"
-    onClick={onClick}
-    disabled={disabled}
-    className="text-gray-400 hover:text-white"
-  >
-    {children}
-  </Button>
-);
+import { SmallStreamPreviewCard } from "@/src/components/small-stream-preview-card"; // Corrected import
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
@@ -65,19 +35,9 @@ export default function HomePage() {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const scrollTo = useCallback((index: number) => {
-    if (topStreams.length === 0) return;
-    const newIndex = (index + topStreams.length) % topStreams.length;
-    setSelectedIndex(newIndex);
-  }, [topStreams.length]);
-
-  const scrollPrev = useCallback(() => {
-    scrollTo(selectedIndex - 1);
-  }, [selectedIndex, scrollTo]);
-
-  const scrollNext = useCallback(() => {
-    scrollTo(selectedIndex + 1);
-  }, [selectedIndex, scrollTo]);
+  const handleSelectStream = useCallback((index: number) => {
+    setSelectedIndex(index);
+  }, []);
 
   if (authLoading || topStreamsLoading || topCategoriesLoading) {
     return (
@@ -99,9 +59,9 @@ export default function HomePage() {
 
   if (!featuredStream) {
     return (
-      <div className="px-4 py-8 text-center">
+      <div className="pr-4 py-8 text-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
-        <p className="text-gray-400">No live streams currently available. Check back later!</p>
+        <p className="text-gray-500">No live streams currently available. Check back later!</p>
       </div>
     );
   }
@@ -144,7 +104,7 @@ export default function HomePage() {
                               {streamerName}
                             </span>
                           </Link>
-                          <div className="flex items-center text-gray-400 text-sm">
+                          <div className="flex items-center text-gray-500 text-sm">
                             <Users className="w-4 h-4 mr-1" />
                             <span>{currentViewers} watching</span>
                           </div>
@@ -157,12 +117,12 @@ export default function HomePage() {
                     </h2>
 
                     {featuredStream.category?.title && (
-                      <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
+                      <p className="text-base text-gray-400 mb-2">{featuredStream.category.title}</p>
                     )}
 
                     <div className="flex flex-wrap gap-1 mb-2">
                       {featuredStream.tags.map((tag) => (
-                        <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                        <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full text-xs">
                           {tag.title}
                         </Badge>
                       ))}
@@ -170,23 +130,17 @@ export default function HomePage() {
                   </div>
 
                   {topStreams.length > 1 && (
-                    <div className="flex-grow flex flex-col justify-end pb-4">
-                      <div className="flex items-center justify-center space-x-2">
-                        <ArrowButton onClick={scrollPrev} disabled={topStreams.length <= 1}>
-                          <ChevronLeft className="h-5 w-5" />
-                        </ArrowButton>
-                        <div className="flex space-x-2">
-                          {topStreams.map((_, index) => (
-                            <DotButton
-                              key={index}
-                              selected={index === selectedIndex}
-                              onClick={() => scrollTo(index)}
-                            />
-                          ))}
-                        </div>
-                        <ArrowButton onClick={scrollNext} disabled={topStreams.length <= 1}>
-                          <ChevronRight className="h-5 w-5" />
-                        </ArrowButton>
+                    <div className="pr-8 pb-4 mt-auto">
+                      <div className="flex overflow-x-auto whitespace-nowrap space-x-4 p-1 custom-scrollbar">
+                        {topStreams.map((stream, index) => (
+                          <SmallStreamPreviewCard
+                            key={stream.id}
+                            stream={stream}
+                            onClick={handleSelectStream}
+                            index={index}
+                            selected={index === selectedIndex}
+                          />
+                        ))}
                       </div>
                     </div>
                   )}
@@ -194,8 +148,8 @@ export default function HomePage() {
                 <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-gray-900/50 to-transparent z-10" />
               </div>
 
-              <div className="flex-1 h-full">
-                <div className="relative aspect-video bg-gray-800">
+              <div className="flex-1 h-full relative">
+                <div className="relative bg-gray-800 h-full w-full overflow-hidden">
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -220,9 +174,9 @@ export default function HomePage() {
           )}
         </>
       ) : (
-        <div className="px-4 py-8 text-center">
+        <div className="pr-4 py-8 text-center">
           <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
-          <p className="text-gray-400">No live streams currently available. Check back later!</p>
+          <p className="text-gray-500">No live streams currently available. Check back later!</p>
         </div>
       )}
 
