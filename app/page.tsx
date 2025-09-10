@@ -21,7 +21,7 @@ import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {TopStreamCard} from "@/src/components/top-stream-card";
-import { VerticalStreamCard } from "@/src/components/vertical-stream-card"; // Import the new component
+import { VerticalStreamCard } from "@/src/components/vertical-stream-card";
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
@@ -79,17 +79,21 @@ export default function HomePage() {
           {isMobile ? (
             <div className="px-4 py-8">
               <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Mobile horizontal scroll for top streams */}
+              <div className="flex overflow-x-auto whitespace-nowrap space-x-4 pb-4 custom-scrollbar">
                 {topStreams.map((stream) => (
-                  <TopStreamCard key={stream.id} stream={stream} />
+                  <div key={stream.id} className="flex-shrink-0 w-72"> {/* Fixed width for mobile cards */}
+                    <TopStreamCard stream={stream} />
+                  </div>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="h-[50vh] flex">
-              {/* Left section: Main Stream Player with Overlay */}
-              <div className="flex-[2] h-full relative">
-                <div className="relative bg-gray-800 h-full w-full overflow-hidden">
+            // Desktop layout
+            <div className="container mx-auto px-4 py-8"> {/* Added container and padding here */}
+              <div className="flex w-full aspect-video"> {/* Changed h-[50vh] to aspect-video */}
+                {/* Left section: Main Stream Player with Overlay */}
+                <div className="flex-[2] relative bg-gray-800 rounded-lg overflow-hidden"> {/* Added rounded-lg and overflow-hidden */}
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -102,10 +106,14 @@ export default function HomePage() {
                       showOverlays={true}
                     />
                   ) : (
-                    <img
+                    <NextImage
                       src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
                       alt={featuredStream.title || "Stream preview"}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="(max-width: 768px) 100vw, 66vw"
+                      priority
+                      className="absolute inset-0 w-full h-full"
                     />
                   )}
                   {/* Overlay for featured stream info */}
@@ -138,18 +146,18 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Right section: Vertical list of other top streams */}
-              <div className="flex-1 flex flex-col space-y-4 p-4 bg-gray-900">
-                {topStreams.slice(1, 4).map((stream, index) => (
-                  <VerticalStreamCard
-                    key={stream.id}
-                    stream={stream}
-                    onClick={() => handleSelectStream(index + 1)}
-                    selected={selectedIndex === index + 1}
-                  />
-                ))}
+                {/* Right section: Vertical list of other top streams */}
+                <div className="flex-1 flex flex-col space-y-4 pl-4"> {/* Adjusted padding to pl-4 */}
+                  {topStreams.slice(1, 4).map((stream, index) => (
+                    <VerticalStreamCard
+                      key={stream.id}
+                      stream={stream}
+                      onClick={() => handleSelectStream(index + 1)}
+                      selected={selectedIndex === index + 1}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -161,7 +169,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="px-4 py-8">
+      <div className="px-4 py-8"> {/* This div already has padding */}
         {topCategories.length > 0 && (
           <>
             <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2>
