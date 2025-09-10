@@ -19,39 +19,48 @@ export const VerticalStreamCard: React.FC<VerticalStreamCardProps> = React.memo(
   ({ stream, onClick, selected }) => {
     const previewUrl = stream.preview ? getMinioUrl(stream.preview) : "/placeholder.jpg";
     const streamerName = stream.streamer?.userName || "Unknown Streamer";
+    const streamerAvatar = stream.streamer?.avatar || "/placeholder-user.jpg";
     const currentViewers = stream.currentViewers || 0;
 
     return (
       <div
         className={cn(
-          "group relative w-full flex items-center space-x-3 cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200",
+          "group relative w-full h-36 cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200",
           selected && "border-2 border-green-500"
         )}
         onClick={onClick}
       >
-        <div className="relative flex-shrink-0 w-64 h-36 rounded-md overflow-hidden">
-          <Image
-            src={previewUrl}
-            alt={stream.title || "Stream preview"}
-            fill
-            sizes="256px"
-            style={{ objectFit: "cover" }}
-          />
-          {stream.active && (
-            <Badge className="absolute top-1 left-1 bg-red-600 text-white px-1 py-0.5 rounded-md text-xs font-semibold z-10">
-              LIVE
-            </Badge>
-          )}
-        </div>
+        <Image
+          src={previewUrl}
+          alt={stream.title || "Stream preview"}
+          fill
+          sizes="256px"
+          style={{ objectFit: "cover" }}
+          className="absolute inset-0 w-full h-full"
+        />
+        {/* Overlay for darkening and text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent to-black/70" />
 
-        <div className="flex-1 min-w-0 p-3"> {/* Added padding to the text content */}
-          <h3 className="text-sm font-semibold text-white line-clamp-1 group-hover:text-green-400 transition-colors">
-            {stream.title || "Untitled Stream"}
-          </h3>
-          <p className="text-xs text-gray-400 line-clamp-1">{streamerName}</p>
-          <div className="flex items-center text-gray-500 text-xs mt-1">
+        {stream.active && (
+          <Badge className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10 flex items-center">
             <Users className="w-3 h-3 mr-1" />
-            <span>{currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}</span>
+            {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
+          </Badge>
+        )}
+
+        {/* Stream Info Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 z-10 flex items-center space-x-2">
+          <Avatar className="w-8 h-8 flex-shrink-0">
+            <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+            <AvatarFallback className="bg-green-600 text-white text-sm">
+              {streamerName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col min-w-0">
+            <h3 className="text-sm font-semibold text-white line-clamp-1 group-hover:text-green-400 transition-colors">
+              {stream.title || "Untitled Stream"}
+            </h3>
+            <p className="text-xs text-gray-300 line-clamp-1">{streamerName}</p>
           </div>
         </div>
       </div>
