@@ -21,6 +21,7 @@ import { StreamsByCategorySection } from "@/src/components/streams-by-category-s
 import { useIsMobile } from "@/hooks/use-mobile"
 import {TopStreamCard} from "@/src/components/top-stream-card";
 import { VerticalStreamCard } from "@/src/components/vertical-stream-card";
+import { Button } from "@/components/ui/button" // Import Button
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
@@ -68,6 +69,7 @@ export default function HomePage() {
   const streamerName = featuredStream.streamer?.userName || "Unknown Streamer";
   const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
   const currentViewers = featuredStream.currentViewers || 0;
+  const streamerFollowers = featuredStream.streamer?.followers || 0; // Get streamer followers
 
   const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
 
@@ -89,10 +91,10 @@ export default function HomePage() {
             </div>
           ) : (
             // Desktop layout
-            <div className="px-4 py-4"> {/* Changed py-8 to py-4 */}
+            <div className="px-4 py-4">
               <div className="flex w-full items-stretch">
                 {/* Left section: Main Stream Player with Overlay */}
-                <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]"> {/* Changed aspect-[8/3] to aspect-[16/5] */}
+                <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -116,38 +118,66 @@ export default function HomePage() {
                     />
                   )}
                   {/* Overlay for featured stream info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10">
-                    <Link href={`/${streamerName}`} passHref>
-                      <div className="flex items-center space-x-2.5 cursor-pointer">
-                        <Avatar className="w-9 h-9 border-2 border-green-500">
-                          <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                          <AvatarFallback className="bg-green-600 text-white text-sm">
-                            {streamerName.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xl font-bold text-white hover:text-green-400">
-                          {streamerName}
-                        </span>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10 flex flex-col">
+                    {/* Row 1: Category, Language, Tags, Viewers */}
+                    <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
+                      <div className="flex items-center flex-wrap gap-1.5">
+                        {featuredStream.category?.title && (
+                          <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            {featuredStream.category.title}
+                          </Badge>
+                        )}
+                        {featuredStream.language && (
+                          <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            {featuredStream.language}
+                          </Badge>
+                        )}
+                        {featuredStream.tags.map((tag) => (
+                          <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            {tag.title}
+                          </Badge>
+                        ))}
                       </div>
-                    </Link>
-                    <h2 className="text-2xl font-bold text-white truncate mt-1.5">
+                      <div className="flex items-center space-x-1">
+                        <Users className="w-4 h-4" />
+                        <span>{currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers} watching</span>
+                      </div>
+                    </div>
+
+                    {/* Row 2: Stream Title */}
+                    <h2 className="text-4xl font-bold text-white truncate mt-1.5 mb-4">
                       {featuredStream.title || "Untitled Stream"}
                     </h2>
-                    <div className="flex items-center space-x-2.5 text-gray-400 text-base mt-1.5">
-                      <Users className="w-4 h-4" />
-                      <span>{currentViewers} watching</span>
-                      {featuredStream.category?.title && (
-                        <>
-                          <span className="text-gray-500">•</span>
-                          <span>{featuredStream.category.title}</span>
-                        </>
-                      )}
+
+                    {/* Row 3: Watch Live Button & Streamer Info */}
+                    <div className="flex items-center justify-between mt-auto">
+                      <Link href={`/${streamerName}`} passHref>
+                        <Button variant="default" size="lg" className="bg-green-600 hover:bg-green-700 text-white">
+                          Watch Live
+                        </Button>
+                      </Link>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-400">
+                          {streamerFollowers >= 1000 ? `${(streamerFollowers / 1000).toFixed(1)}K` : streamerFollowers} followers
+                        </span>
+                        <Link href={`/${streamerName}`} passHref>
+                          <Avatar className="w-9 h-9 border-2 border-green-500 cursor-pointer">
+                            <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+                            <AvatarFallback className="bg-green-600 text-white text-sm">
+                              {streamerName.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        </Link>
+                        <Link href={`/${streamerName}`} passHref>
+                          <p className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">{streamerName}</p>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 pl-5 flex flex-col space-y-3"> {/* Changed space-y-5 to space-y-3 */}
+                <div className="flex-1 pl-5 flex flex-col space-y-3">
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
