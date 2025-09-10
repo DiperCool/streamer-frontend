@@ -114,11 +114,12 @@ export const StreamPreviewWidget: React.FC = () => {
       {isLive ? (
         <StreamPlayer
           sources={currentStream!.sources}
-          isPlayerMaximized={false} // В виджете предпросмотра всегда false
-          onTogglePlayerMaximize={() => {}} // Dummy function
-          showPlayerControls={false} // В виджете предпросмотра не показываем контролы
+          isPlayerMaximized={false}
+          onTogglePlayerMaximize={() => {}}
+          showPlayerControls={false}
           isLive={isLive}
           startedAt={currentStream?.started}
+          showOverlays={false} {/* Отключено затемнение */}
         />
       ) : (
         <>

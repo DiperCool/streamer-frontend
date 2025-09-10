@@ -5,7 +5,7 @@ import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import ReactHlsPlayer from "react-hls-player";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
-import { LiveStreamIndicators } from "./live-stream-indicators"; // Импортируем новый компонент
+import { LiveStreamIndicators } from "./live-stream-indicators";
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -15,11 +15,11 @@ interface StreamPlayerProps {
   isPlayerMaximized: boolean;
   onTogglePlayerMaximize: () => void;
   showPlayerControls?: boolean;
-  isLive?: boolean; // Новый пропс для статуса LIVE
-  startedAt?: string | null; // Новый пропс для времени начала стрима
+  isLive?: boolean;
+  startedAt?: string | null;
+  showOverlays?: boolean; // Новый пропс для управления видимостью затемнений
 }
 
-// Мемоизированный компонент для HLS-плеера, чтобы предотвратить его ненужные перерисовки
 const HlsPlayerComponent = React.memo(function HlsPlayerComponent({ src, playerRef, hlsConfig }: { src: string; playerRef: React.RefObject<HTMLVideoElement>; hlsConfig: any }) {
   return (
     <ReactHlsPlayer
@@ -40,20 +40,19 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   isPlayerMaximized, 
   onTogglePlayerMaximize, 
   showPlayerControls = true,
-  isLive = false, // Значение по умолчанию
-  startedAt, // Время начала стрима
+  isLive = false,
+  startedAt,
+  showOverlays = false, // По умолчанию затемнения выключены
 }: StreamPlayerProps) {
-  const videoElementRef = useRef<HTMLVideoElement>(null); // Реф для самого видеоэлемента
-  const playerWrapperRef = useRef<HTMLDivElement>(null); // Реф для контейнера, который будет полноэкранным
+  const videoElementRef = useRef<HTMLVideoElement>(null);
+  const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
 
   const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
   const activeSource = hlsSource;
 
-  // Мемоизируем hlsConfig, чтобы он был стабильной ссылкой
   const hlsConfig = React.useMemo(() => ({ lowLatencyMode: true }), []);
 
-  // Обработчик для нативного полноэкранного режима
   const handleFullscreenChange = useCallback(() => {
     setIsNativeFullscreen(document.fullscreenElement === playerWrapperRef.current);
   }, []);
@@ -66,7 +65,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   }, [handleFullscreenChange]);
 
   const handleToggleFullscreen = () => {
-    if (playerWrapperRef.current) { // Теперь делаем полноэкранным контейнер
+    if (playerWrapperRef.current) {
       if (document.fullscreenElement === playerWrapperRef.current) {
         document.exitFullscreen();
       } else {
@@ -75,7 +74,6 @@ export const StreamPlayer = React.memo(function StreamPlayer({
         });
       }
     }
-    // Также вызываем пропс для управления размером плеера в рамках макета
     onTogglePlayerMaximize();
   };
 
@@ -91,16 +89,20 @@ export const StreamPlayer = React.memo(function StreamPlayer({
     <div ref={playerWrapperRef} className="absolute inset-0 bg-black">
       <HlsPlayerComponent
         src={activeSource.url}
-        playerRef={videoElementRef} // Передаем реф видеоэлементу
-        hlsConfig={hlsConfig} // Используем мемоизированный hlsConfig
+        playerRef={videoElementRef}
+        hlsConfig={hlsConfig}
       />
       
-      {/* Общее легкое затемнение для плеера */}
-      <div className="absolute inset-0 bg-black/50 z-10" />
-      {/* Градиент для нижней части плеера (20%) */}
-      <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/50 to-transparent z-10" />
-      {/* НОВЫЙ: Градиент для левой части плеера (20%) */}
-      <div className="absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-gray-900/50 to-transparent z-10" />
+      {showOverlays && ( // Условный рендеринг затемнений
+        <>
+          {/* Общее легкое затемнение для плеера */}
+          <div className="absolute inset-0 bg-black/50 z-10" />
+          {/* Градиент для нижней части плеера (20%) */}
+          <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/50 to-transparent z-10" />
+          {/* Градиент для левой части плеера (20%) */}
+          <div className="absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-gray-900/50 to-transparent z-10" />
+        </>
+      )}
 
       {/* Индикаторы LIVE и времени стрима */}
       <LiveStreamIndicators isLive={isLive} startedAt={startedAt} />

@@ -199,7 +199,7 @@ export default function HomePage() {
 
               <div className="flex-1 h-full">
                 {/* Main Stream Player */}
-                <div className="relative aspect-video bg-gray-800"> {/* Changed to relative aspect-video */}
+                <div className="relative aspect-video bg-gray-800">
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -209,12 +209,13 @@ export default function HomePage() {
                       showPlayerControls={false}
                       isLive={featuredStream.active}
                       startedAt={featuredStream.started}
+                      showOverlays={true} {/* Включено затемнение */}
                     />
                   ) : (
                     <img
                       src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
                       alt={featuredStream.title || "Stream preview"}
-                      className="absolute inset-0 w-full h-full object-cover" // Added absolute inset-0
+                      className="absolute inset-0 w-full h-full object-cover"
                     />
                   )}
                 </div>

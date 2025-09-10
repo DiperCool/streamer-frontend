@@ -171,12 +171,13 @@ export default function StreamerProfileLayout({
         )}>
           {isLive && hasStreamSources ? (
             <StreamPlayer
-              sources={currentStream!.sources} // Передаем все источники, StreamPlayer сам выберет HLS
+              sources={currentStream!.sources}
               isPlayerMaximized={isPlayerMaximized}
               onTogglePlayerMaximize={handleTogglePlayerMaximize}
               showPlayerControls={true}
               isLive={isLive ?? false}
               startedAt={currentStream?.started}
+              showOverlays={false} {/* Отключено затемнение */}
             />
           ) : (
             <Image
