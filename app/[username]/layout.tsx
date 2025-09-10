@@ -144,7 +144,6 @@ export default function StreamerProfileLayout({
   };
   const activeTab = getActiveTab();
 
-  // StreamPlayer теперь сам выбирает HLS-источник
   const hasStreamSources = currentStream?.sources && currentStream.sources.length > 0;
 
   return (
@@ -177,7 +176,7 @@ export default function StreamerProfileLayout({
               showPlayerControls={true}
               isLive={isLive ?? false}
               startedAt={currentStream?.started}
-              showOverlays={false} {/* Отключено затемнение */}
+              showOverlays={false}
             />
           ) : (
             <Image

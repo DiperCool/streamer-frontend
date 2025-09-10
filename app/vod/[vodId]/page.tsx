@@ -23,7 +23,7 @@ const MemoizedPlayer = React.memo(({ videoSource, onSeeked, playerRef }: any) =>
             height="100%"
             className="z-10"
             hlsConfig={{
-              lowLatencyMode: true, // Включаем режим низкой задержки
+              lowLatencyMode: true,
             }}
         />
     );

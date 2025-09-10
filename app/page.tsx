@@ -19,8 +19,8 @@ import { Button } from "@/components/ui/button"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
-import { useIsMobile } from "@/hooks/use-mobile" // Импортируем useIsMobile
-import {TopStreamCard} from "@/src/components/top-stream-card"; // Импортируем TopStreamCard
+import { useIsMobile } from "@/hooks/use-mobile"
+import {TopStreamCard} from "@/src/components/top-stream-card";
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -55,7 +55,7 @@ const ArrowButton: React.FC<ArrowButtonProps> = ({ children, onClick, disabled }
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
-  const isMobile = useIsMobile(); // Используем хук для определения мобильного устройства
+  const isMobile = useIsMobile();
 
   const { data: topStreamsData, loading: topStreamsLoading, error: topStreamsError } = useGetTopStreamsQuery();
   const topStreams = topStreamsData?.topStreams || [];
@@ -110,14 +110,13 @@ export default function HomePage() {
   const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
   const currentViewers = featuredStream.currentViewers || 0;
 
-  // StreamPlayer теперь сам выбирает HLS-источник
   const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
 
   return (
     <div className="bg-gray-900 text-white w-full">
       {topStreams.length > 0 ? (
         <>
-          {isMobile ? ( // Мобильный вид: список TopStreamCard
+          {isMobile ? (
             <div className="px-4 py-8">
               <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -126,7 +125,7 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-          ) : ( // Десктопный вид: карусель с двумя колонками
+          ) : (
             <div className="h-[50vh] flex">
               <div className="flex-1 flex flex-col bg-gray-900 z-20 relative">
                 <div className="pt-8 px-8 flex-1 flex flex-col">
@@ -170,7 +169,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Controls for selecting stream */}
                   {topStreams.length > 1 && (
                     <div className="flex-grow flex flex-col justify-end pb-4">
                       <div className="flex items-center justify-center space-x-2">
@@ -193,12 +191,10 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-                {/* Градиент для правой части левой панели */}
                 <div className="absolute inset-y-0 right-0 w-1/5 bg-gradient-to-l from-gray-900/50 to-transparent z-10" />
               </div>
 
               <div className="flex-1 h-full">
-                {/* Main Stream Player */}
                 <div className="relative aspect-video bg-gray-800">
                   {hasStreamSources ? (
                     <StreamPlayer
@@ -209,7 +205,7 @@ export default function HomePage() {
                       showPlayerControls={false}
                       isLive={featuredStream.active}
                       startedAt={featuredStream.started}
-                      showOverlays={true} {/* Включено затемнение */}
+                      showOverlays={true}
                     />
                   ) : (
                     <img
@@ -230,8 +226,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="px-4 py-8"> {/* Categories Section */}
-        {/* Top Categories Section */}
+      <div className="px-4 py-8">
         {topCategories.length > 0 && (
           <>
             <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2>
@@ -243,7 +238,6 @@ export default function HomePage() {
           </>
         )}
 
-        {/* Streams by Category Sections */}
         {topCategories.map(category => (
           <StreamsByCategorySection key={category.id} category={category} />
         ))}
