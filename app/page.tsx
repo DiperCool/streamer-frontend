@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react" // Removed useCallback, useEffect, useState as they are no longer needed for carousel
+import React, { useCallback, useState } from "react" // Removed useEffect, useRef as they are no longer needed for carousel logic
 import { useAuth0 } from "@auth0/auth0-react"
 import {
   useGetTopStreamsQuery,
@@ -8,19 +8,48 @@ import {
   StreamDto,
   SortEnumType,
 } from "@/graphql/__generated__/graphql"
-import { Loader2, Users } from "lucide-react" // Removed ChevronLeft, ChevronRight
+import { Loader2, Users, ChevronLeft, ChevronRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import NextImage from "next/image"
 import { getMinioUrl } from "@/utils/utils"
-// import useEmblaCarousel from "embla-carousel-react" // Removed
-// import { Button } from "@/components/ui/button" // Button is still used for other sections
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
 
-// Removed DotButtonProps, DotButton, ArrowButtonProps, ArrowButton components
+interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  selected: boolean;
+}
+
+const DotButton: React.FC<DotButtonProps> = ({ selected, onClick }) => (
+  <button
+    className={cn(
+      "w-2 h-2 rounded-full bg-gray-500 transition-colors duration-200",
+      selected ? "bg-green-500" : "hover:bg-gray-400"
+    )}
+    type="button"
+    onClick={onClick}
+  />
+);
+
+interface ArrowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+}
+
+const ArrowButton: React.FC<ArrowButtonProps> = ({ children, onClick, disabled }) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={onClick}
+    disabled={disabled}
+    className="text-gray-400 hover:text-white"
+  >
+    {children}
+  </Button>
+);
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
@@ -31,7 +60,21 @@ export default function HomePage() {
   const { data: topCategoriesData, loading: topCategoriesLoading, error: topCategoriesError } = useGetTopCategoriesQuery();
   const topCategories = topCategoriesData?.topCategories || [];
 
-  // Removed emblaRef, emblaApi, selectedIndex, onSelect, scrollTo, scrollPrev, scrollNext states and callbacks
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const scrollTo = useCallback((index: number) => {
+    if (topStreams.length === 0) return;
+    const newIndex = (index + topStreams.length) % topStreams.length;
+    setSelectedIndex(newIndex);
+  }, [topStreams.length]);
+
+  const scrollPrev = useCallback(() => {
+    scrollTo(selectedIndex - 1);
+  }, [selectedIndex, scrollTo]);
+
+  const scrollNext = useCallback(() => {
+    scrollTo(selectedIndex + 1);
+  }, [selectedIndex, scrollTo]);
 
   if (authLoading || topStreamsLoading || topCategoriesLoading) {
     return (
@@ -49,9 +92,8 @@ export default function HomePage() {
     )
   }
 
-  const featuredStream = topStreams[0]; // Always display the first stream
+  const featuredStream = topStreams[selectedIndex];
 
-  // Only proceed if there's a featured stream to display
   if (!featuredStream) {
     return (
       <div className="px-4 py-8 text-center">
@@ -67,77 +109,106 @@ export default function HomePage() {
 
   return (
     <div className="flex-1 bg-gray-900 text-white overflow-x-hidden">
-      <div className="flex-1 h-[50vh] flex">
-        <div className="w-1/2 flex flex-col bg-gray-900 z-20">
-          <div className="pt-8 px-8 flex-1 flex flex-col">
-            <div>
-              <div className="flex items-center space-x-3 mb-2">
-                <Avatar className="w-10 h-10 border-2 border-green-500">
-                  <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                  <AvatarFallback className="bg-green-600 text-white text-base">
-                    {streamerName.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-2">
-                    <Link href={`/${streamerName}`} passHref>
-                      <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
-                        {streamerName}
-                      </span>
-                    </Link>
-                    <div className="flex items-center text-gray-400 text-sm">
-                      <Users className="w-4 h-4 mr-1" />
-                      <span>{currentViewers} watching</span>
+      {topStreams.length > 0 ? (
+        <div className="flex-1 h-[50vh] flex">
+          <div className="w-1/2 flex flex-col bg-gray-900 z-20">
+            <div className="pt-8 px-8 flex-1 flex flex-col">
+              <div>
+                <div className="flex items-center space-x-3 mb-2">
+                  <Avatar className="w-10 h-10 border-2 border-green-500">
+                    <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+                    <AvatarFallback className="bg-green-600 text-white text-base">
+                      {streamerName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <div className="flex items-center space-x-2">
+                      <Link href={`/${streamerName}`} passHref>
+                        <span className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">
+                          {streamerName}
+                        </span>
+                      </Link>
+                      <div className="flex items-center text-gray-400 text-sm">
+                        <Users className="w-4 h-4 mr-1" />
+                        <span>{currentViewers} watching</span>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                <h2 className="text-2xl font-bold text-white truncate mb-2">
+                  {featuredStream.title || "Untitled Stream"}
+                </h2>
+
+                {featuredStream.category?.title && (
+                  <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
+                )}
+
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {featuredStream.tags.map((tag) => (
+                    <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                      {tag.title}
+                    </Badge>
+                  ))}
+                </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-white truncate mb-2">
-                {featuredStream.title || "Untitled Stream"}
-              </h2>
-
-              {featuredStream.category?.title && (
-                <p className="text-base text-gray-300 mb-2">{featuredStream.category.title}</p>
+              {/* Controls for selecting stream */}
+              {topStreams.length > 1 && (
+                <div className="flex-grow flex flex-col justify-end pb-4">
+                  <div className="flex items-center justify-center space-x-2">
+                    <ArrowButton onClick={scrollPrev} disabled={topStreams.length <= 1}>
+                      <ChevronLeft className="h-5 w-5" />
+                    </ArrowButton>
+                    <div className="flex space-x-2">
+                      {topStreams.map((_, index) => (
+                        <DotButton
+                          key={index}
+                          selected={index === selectedIndex}
+                          onClick={() => scrollTo(index)}
+                        />
+                      ))}
+                    </div>
+                    <ArrowButton onClick={scrollNext} disabled={topStreams.length <= 1}>
+                      <ChevronRight className="h-5 w-5" />
+                    </ArrowButton>
+                  </div>
+                </div>
               )}
-
-              <div className="flex flex-wrap gap-1 mb-2">
-                {featuredStream.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
-                    {tag.title}
-                  </Badge>
-                ))}
-              </div>
             </div>
-            {/* Removed carousel selection mechanism */}
           </div>
-        </div>
 
-        <div className="w-1/2 h-full">
-          {/* Directly render the StreamPlayer for the featuredStream */}
-          <div className="w-full h-full relative bg-gray-800 flex-none">
-            {featuredStream.sources && featuredStream.sources.length > 0 ? (
-              <StreamPlayer
-                sources={featuredStream.sources}
-                playing={true}
-                controls={false}
-                isPlayerMaximized={false}
-                onTogglePlayerMaximize={() => {}}
-                showPlayerControls={false}
-              />
-            ) : (
-              <NextImage
-                src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
-                alt={featuredStream.title || "Stream preview"}
-                fill
-                sizes="50vw"
-                style={{ objectFit: "cover" }}
-                priority
-              />
-            )}
+          <div className="w-1/2 h-full">
+            {/* Main Stream Player */}
+            <div className="w-full h-full relative bg-gray-800 flex-none">
+              {featuredStream.sources && featuredStream.sources.length > 0 ? (
+                <StreamPlayer
+                  sources={featuredStream.sources}
+                  playing={true}
+                  controls={false}
+                  isPlayerMaximized={false}
+                  onTogglePlayerMaximize={() => {}}
+                  showPlayerControls={false}
+                />
+              ) : (
+                <NextImage
+                  src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
+                  alt={featuredStream.title || "Stream preview"}
+                  fill
+                  sizes="50vw"
+                  style={{ objectFit: "cover" }}
+                  priority
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="px-4 py-8 text-center">
+          <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
+          <p className="text-gray-400">No live streams currently available. Check back later!</p>
+        </div>
+      )}
 
       <div className="px-4 py-8">
         {/* Top Categories Section */}
