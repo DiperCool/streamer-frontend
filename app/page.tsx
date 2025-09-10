@@ -140,7 +140,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-bold text-white truncate mb-2">
+                <h2 className="2xl font-bold text-white truncate mb-2">
                   {featuredStream.title || "Untitled Stream"}
                 </h2>
 
@@ -211,6 +211,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gray-900/20" />
               {/* Градиент для нижней части плеера (20%) */}
               <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" />
+              {/* НОВЫЙ: Градиент для левой части плеера */}
+              <div className="absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-gray-900/90 to-transparent z-10" />
             </div>
           </div>
         </div>
