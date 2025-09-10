@@ -114,7 +114,7 @@ export default function HomePage() {
   const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
 
   return (
-    <div className="bg-gray-900 text-white"> {/* Removed flex-1 and overflow-y-auto */}
+    <div className="bg-gray-900 text-white w-full"> {/* Added w-full here */}
       {topStreams.length > 0 ? (
         <>
           {isMobile ? ( // Мобильный вид: список TopStreamCard
