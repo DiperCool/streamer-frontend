@@ -95,6 +95,11 @@ export const StreamPlayer = React.memo(function StreamPlayer({
         hlsConfig={hlsConfig} // Используем мемоизированный hlsConfig
       />
       
+      {/* Общее легкое затемнение для плеера */}
+      <div className="absolute inset-0 bg-black/50 z-10" /> {/* Усилено затемнение, z-index 10 */}
+      {/* Градиент для нижней части плеера (20%) */}
+      <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" /> {/* z-index 10 */}
+
       {/* Индикаторы LIVE и времени стрима */}
       <LiveStreamIndicators isLive={isLive} startedAt={startedAt} />
 
@@ -103,7 +108,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
           variant="ghost"
           size="icon"
           onClick={handleToggleFullscreen}
-          className="absolute bottom-4 right-4 z-10 text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
+          className="absolute bottom-4 right-4 z-20 text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
           title={isNativeFullscreen ? "Minimize Player" : "Maximize Player"}
         >
           {isNativeFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}

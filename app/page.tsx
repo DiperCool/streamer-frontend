@@ -221,9 +221,9 @@ export default function HomePage() {
                     />
                   )}
                   {/* Общее легкое затемнение для плеера */}
-                  <div className="absolute inset-0 bg-black/50" /> {/* Усилено затемнение */}
+                  {/* <div className="absolute inset-0 bg-black/50" /> */} {/* УДАЛЕНО */}
                   {/* Градиент для нижней части плеера (20%) */}
-                  <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" />
+                  {/* <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" /> */} {/* УДАЛЕНО */}
                 </div>
               </div>
             </div>
