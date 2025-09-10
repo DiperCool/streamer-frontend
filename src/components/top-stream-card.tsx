@@ -61,10 +61,19 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
               {stream.title || "Untitled Stream"}
             </h3>
             <p className="text-base text-gray-400">{streamerName}</p>
-            {stream.category?.title && (
-              <p className="text-sm text-gray-500 mt-1">{stream.category.title}</p>
-            )}
+            
+            {/* Category, Language, and Tags as badges */}
             <div className="flex flex-wrap gap-1.5 mt-2">
+              {stream.category?.title && (
+                <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-0.5 rounded-full text-sm">
+                  {stream.category.title}
+                </Badge>
+              )}
+              {stream.language && (
+                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-sm">
+                  {stream.language}
+                </Badge>
+              )}
               {stream.tags.map((tag) => (
                 <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-sm">
                   {tag.title}
