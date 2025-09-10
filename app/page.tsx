@@ -90,7 +90,7 @@ export default function HomePage() {
           ) : (
             // Desktop layout
             <div className="px-4 py-8">
-              <div className="flex w-full items-start"> {/* Parent flex container with items-start */}
+              <div className="flex w-full items-start">
                 {/* Left section: Main Stream Player with Overlay */}
                 <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-video">
                   {hasStreamSources ? (
@@ -147,7 +147,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 flex flex-col space-y-5 pl-5 self-start"> {/* Added self-start */}
+                <div className="flex-1 flex flex-col space-y-5 pl-5 self-start h-fit"> {/* Added h-fit here */}
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
