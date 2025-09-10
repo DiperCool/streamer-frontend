@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
-import { StreamSourceType } from "@/graphql/__generated__/graphql"; // Import StreamSourceType
+// StreamSourceType больше не нужен здесь, так как StreamPlayer сам фильтрует источники
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -108,8 +108,8 @@ export default function HomePage() {
   const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
   const currentViewers = featuredStream.currentViewers || 0;
 
-  // Filter sources to only include HLS
-  const hlsSources = featuredStream.sources.filter(s => s.sourceType === StreamSourceType.Hls);
+  // StreamPlayer теперь сам выбирает HLS-источник
+  const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
 
   return (
     <div className="flex-1 bg-gray-900 text-white overflow-x-hidden">
@@ -185,12 +185,10 @@ export default function HomePage() {
           <div className="w-1/2 h-full">
             {/* Main Stream Player */}
             <div className="w-full h-full relative bg-gray-800 flex-none">
-              {hlsSources.length > 0 ? (
+              {hasStreamSources ? (
                 <StreamPlayer
                   key={featuredStream.id}
-                  sources={hlsSources}
-                  playing={true}
-                  controls={false}
+                  sources={featuredStream.sources} // Передаем все источники, StreamPlayer сам выберет HLS
                   isPlayerMaximized={false}
                   onTogglePlayerMaximize={() => {}}
                   showPlayerControls={false}

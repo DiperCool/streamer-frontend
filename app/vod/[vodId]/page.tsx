@@ -5,31 +5,31 @@ import { useGetVodQuery, useGetStreamerQuery, useGetProfileQuery } from "@/graph
 import { Loader2, MessageSquare } from "lucide-react"
 import { getMinioUrl } from "@/utils/utils"
 import { VodDetailsSection } from "@/src/components/vod-details-section"
-import ReactPlayer from "react-player";
+import ReactHlsPlayer from "react-hls-player"; // Используем react-hls-player
 import { VodChatSection } from "@/src/components/vod-chat-section"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 // Определяем тип для объекта состояния прогресса ReactPlayer
-interface ProgressState {
-  played: number;
-  playedSeconds: number;
-  loaded: number;
-  loadedSeconds: number;
-}
+// interface ProgressState {
+//   played: number;
+//   playedSeconds: number;
+//   loaded: number;
+//   loadedSeconds: number;
+// }
 const MemoizedPlayer = React.memo(({ videoSource, onSeeked, playerRef }: any) => {
     if (!videoSource) return null;
 
     return (
-        <ReactPlayer
-            ref={playerRef}
+        <ReactHlsPlayer // Заменено на ReactHlsPlayer
+            playerRef={playerRef} // Передаем ref для доступа к видеоэлементу
             src={videoSource}
-            playing
-            controls
+            autoPlay={true} // react-hls-player использует autoPlay
+            controls={true}
             width="100%"
             height="100%"
             className="z-10"
-            onSeeked={onSeeked}
+            // onSeeked больше не пропс для ReactHlsPlayer, слушатель будет прикреплен через ref
         />
     );
 });
@@ -38,7 +38,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
   const [isChatVisible, setIsChatVisible] = useState(true);
   const [playerPosition, setPlayerPosition] = useState(0); // Состояние для отслеживания позиции плеера в секундах
   const [historyStartFrom, setHistoryStartFrom] = useState<string | null | undefined>(null); // Новое состояние для времени начала истории чата
-    const playerRef = useRef<HTMLVideoElement | null>(null);
+    const playerRef = useRef<HTMLVideoElement | null>(null); // Ref теперь для HTMLVideoElement
   const { data: vodData, loading: vodLoading, error: vodError } = useGetVodQuery({
     variables: { vodId },
   })
@@ -61,6 +61,17 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
     const handleSeeked = () => {
         listeners.forEach(listener => listener());
     };
+
+    // Прикрепляем слушатель 'seeked' к базовому видеоэлементу
+    useEffect(() => {
+        const videoElement = playerRef.current;
+        if (videoElement) {
+            videoElement.addEventListener('seeked', handleSeeked);
+            return () => {
+                videoElement.removeEventListener('seeked', handleSeeked);
+            };
+        }
+    }, [handleSeeked, playerRef.current]); // Перезапускаем эффект, если изменился playerRef.current
 
 
   const streamerUserName = vodData?.vod?.streamer?.userName ?? ""
@@ -123,7 +134,7 @@ export default function VodDetailPage({ params }: { params: { vodId: string } })
               <MemoizedPlayer
                   videoSource={videoSource}
                   playerRef={playerRef}
-                  onSeeked={() => handleSeeked()}
+                  // onSeeked пропс удален, слушатель прикрепляется в useEffect
               />
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-400">

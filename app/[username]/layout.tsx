@@ -13,7 +13,7 @@ import {
   GetStreamerDocument,
   GetCurrentStreamDocument,
   useGetStreamInfoQuery,
-  StreamSourceType // Import StreamSourceType
+  // StreamSourceType больше не нужен здесь, так как StreamPlayer сам фильтрует источники
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -145,8 +145,8 @@ export default function StreamerProfileLayout({
   };
   const activeTab = getActiveTab();
 
-  // Filter sources to only include HLS
-  const hlsSources = currentStream?.sources ? currentStream.sources.filter(s => s.sourceType === StreamSourceType.Hls) : [];
+  // StreamPlayer теперь сам выбирает HLS-источник
+  const hasStreamSources = currentStream?.sources && currentStream.sources.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse">
@@ -170,11 +170,9 @@ export default function StreamerProfileLayout({
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
           isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
         )}>
-          {isLive && hlsSources.length > 0 ? (
+          {isLive && hasStreamSources ? (
             <StreamPlayer
-              sources={hlsSources}
-              playing={true}
-              controls={true}
+              sources={currentStream!.sources} // Передаем все источники, StreamPlayer сам выберет HLS
               isPlayerMaximized={isPlayerMaximized}
               onTogglePlayerMaximize={handleTogglePlayerMaximize}
               showPlayerControls={true}

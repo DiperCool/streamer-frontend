@@ -2,7 +2,7 @@
 
 import React from "react"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
-import ReactPlayer from "react-player";
+import ReactHlsPlayer from "react-hls-player"; // Используем react-hls-player
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
 
@@ -17,11 +17,10 @@ interface StreamPlayerProps {
 }
 
 export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize, showPlayerControls = true }: StreamPlayerProps) {
-  // Приоритет WebRTC, затем HLS
-  const webRtcSource = sources.find(s => s.sourceType === StreamSourceType.WebRtc);
+  // Теперь мы ищем только HLS-источник, так как WebRTC удален
   const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
 
-  const activeSource = hlsSource || webRtcSource;
+  const activeSource = hlsSource;
 
   if (!activeSource) {
     return (
@@ -33,14 +32,13 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
 
   return (
     <div className="absolute inset-0 bg-black">
-      <ReactPlayer
+      <ReactHlsPlayer
         src={activeSource.url}
-        playing={true}
+        autoPlay={true} // react-hls-player использует autoPlay
         controls={false}
         width="100%"
         height="100%"
-        muted={false} // Можно сделать это пропсом, если нужно
-        playsInline
+        muted={false}
       />
       {showPlayerControls && (
         <Button
