@@ -21,7 +21,7 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   const webRtcSource = sources.find(s => s.sourceType === StreamSourceType.WebRtc);
   const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
 
-  const activeSource = webRtcSource || hlsSource;
+  const activeSource = hlsSource || webRtcSource;
 
   if (!activeSource) {
     return (
@@ -34,18 +34,13 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   return (
     <div className="absolute inset-0 bg-black">
       <ReactPlayer
-        url={activeSource.url}
+        src={activeSource.url}
         playing={true}
         controls={false}
         width="100%"
         height="100%"
         muted={false} // Можно сделать это пропсом, если нужно
         playsInline
-        config={{
-          file: {
-            forceHLS: activeSource.sourceType === StreamSourceType.Hls,
-          },
-        }}
       />
       {showPlayerControls && (
         <Button

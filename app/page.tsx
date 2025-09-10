@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useState } from "react" // Removed useEffect, useRef as they are no longer needed for carousel logic
+import React, { useCallback, useState, useEffect } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
   useGetTopStreamsQuery,
@@ -61,6 +61,7 @@ export default function HomePage() {
   const topCategories = topCategoriesData?.topCategories || [];
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showPlayer, setShowPlayer] = useState(true);
 
   const scrollTo = useCallback((index: number) => {
     if (topStreams.length === 0) return;
@@ -76,6 +77,19 @@ export default function HomePage() {
     scrollTo(selectedIndex + 1);
   }, [selectedIndex, scrollTo]);
 
+  // Effect to control player visibility with a delay
+  useEffect(() => {
+    // When selectedIndex changes, hide the player immediately
+    setShowPlayer(false);
+    // Then, after a short delay, show the player again.
+    // This forces a remount of StreamPlayer, giving the old instance time to clean up.
+    const timer = setTimeout(() => {
+      setShowPlayer(true);
+    }, 100); // 100ms delay
+
+    return () => clearTimeout(timer); // Cleanup the timer if component unmounts or dependency changes
+  }, [selectedIndex]); // Re-run this effect when selectedIndex changes
+
   if (authLoading || topStreamsLoading || topCategoriesLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -89,7 +103,7 @@ export default function HomePage() {
       <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
         <p className="text-red-500">Error loading data: {topStreamsError?.message || topCategoriesError?.message}</p>
       </div>
-    )
+    );
   }
 
   const featuredStream = topStreams[selectedIndex];
@@ -181,7 +195,7 @@ export default function HomePage() {
           <div className="w-1/2 h-full">
             {/* Main Stream Player */}
             <div className="w-full h-full relative bg-gray-800 flex-none">
-              {featuredStream.sources && featuredStream.sources.length > 0 ? (
+              {showPlayer && featuredStream.sources && featuredStream.sources.length > 0 ? (
                 <StreamPlayer
                   key={featuredStream.id}
                   sources={featuredStream.sources}
