@@ -17,7 +17,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   const imageUrl = category.image ? getMinioUrl(category.image) : "/placeholder.jpg";
 
   return (
-    <Link href={`/browse?category=${category.slug}`} passHref>
+    <Link href={`/category/${category.slug}`} passHref> {/* Updated link */}
       <Card className="group relative w-full aspect-square rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
         <Image
           src={imageUrl}

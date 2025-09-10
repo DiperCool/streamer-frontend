@@ -53,7 +53,7 @@ export const StreamsByCategorySection: React.FC<StreamsByCategorySectionProps> =
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-white">
-          <Link href={`/browse?category=${category.slug}`} passHref className="hover:text-green-400 transition-colors">
+          <Link href={`/category/${category.slug}`} passHref className="hover:text-green-400 transition-colors"> {/* Updated link */}
             {category.title}
           </Link>
         </h2>
