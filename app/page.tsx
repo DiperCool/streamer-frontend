@@ -138,14 +138,17 @@ export default function HomePage() {
                           </Badge>
                         ))}
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Users className="w-4 h-4" />
-                        <span>{currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers} watching</span>
-                      </div>
+                      {/* Live indicator with viewer count */}
+                      {featuredStream.active && (
+                        <Badge className="bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
+                          <span className="h-2 w-2 rounded-full bg-white mr-1" />
+                          {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
+                        </Badge>
+                      )}
                     </div>
 
                     {/* Row 2: Stream Title */}
-                    <h2 className="text-4xl font-bold text-white truncate mt-1.5 mb-4">
+                    <h2 className="text-5xl font-bold text-white truncate mt-1.5 mb-4">
                       {featuredStream.title || "Untitled Stream"}
                     </h2>
 
@@ -157,9 +160,6 @@ export default function HomePage() {
                         </Button>
                       </Link>
                       <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-400">
-                          {streamerFollowers >= 1000 ? `${(streamerFollowers / 1000).toFixed(1)}K` : streamerFollowers} followers
-                        </span>
                         <Link href={`/${streamerName}`} passHref>
                           <Avatar className="w-9 h-9 border-2 border-green-500 cursor-pointer">
                             <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
@@ -168,9 +168,14 @@ export default function HomePage() {
                             </AvatarFallback>
                           </Avatar>
                         </Link>
-                        <Link href={`/${streamerName}`} passHref>
-                          <p className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">{streamerName}</p>
-                        </Link>
+                        <div className="flex flex-col items-start">
+                          <Link href={`/${streamerName}`} passHref>
+                            <p className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">{streamerName}</p>
+                          </Link>
+                          <span className="text-sm text-gray-400">
+                            {streamerFollowers >= 1000 ? `${(streamerFollowers / 1000).toFixed(1)}K` : streamerFollowers} followers
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
