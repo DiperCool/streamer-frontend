@@ -58,7 +58,7 @@ export default function HomePage() {
 
   if (!featuredStream) {
     return (
-      <div className="pr-4 py-8 text-center">
+      <div className="px-4 py-8 text-center">
         <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
         <p className="text-gray-500">No live streams currently available. Check back later!</p>
       </div>
@@ -89,7 +89,7 @@ export default function HomePage() {
             </div>
           ) : (
             // Desktop layout
-            <div className="container mx-auto px-4 py-8">
+            <div className="px-4 py-8"> {/* Removed container mx-auto */}
               <div className="flex w-full h-[66vh]">
                 {/* Left section: Main Stream Player with Overlay */}
                 <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden">
@@ -162,7 +162,7 @@ export default function HomePage() {
           )}
         </>
       ) : (
-        <div className="pr-4 py-8 text-center">
+        <div className="px-4 py-8 text-center">
           <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
           <p className="text-gray-500">No live streams currently available. Check back later!</p>
         </div>
