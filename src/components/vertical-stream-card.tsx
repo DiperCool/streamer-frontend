@@ -25,7 +25,7 @@ export const VerticalStreamCard: React.FC<VerticalStreamCardProps> = React.memo(
     return (
       <div
         className={cn(
-          "group relative w-full aspect-video cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200", // Changed h-40 to aspect-video
+          "group relative w-full h-32 cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200", // Changed h-40 to h-32 and removed aspect-video
           selected && "border-2 border-green-500"
         )}
         onClick={onClick}
