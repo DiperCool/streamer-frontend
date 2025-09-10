@@ -1,43 +1,46 @@
 "use client"
 
-import React from "react"
-import { useGetTopStreamsQuery } from "@/graphql/__generated__/graphql"
+import React, { useState } from "react"
 import { Loader2 } from "lucide-react"
-import { TopStreamCard } from "@/src/components/top-stream-card"
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs"
+import { useGetTagsQuery } from "@/graphql/__generated__/graphql" // Import useGetTagsQuery
+import { BrowseStreamsTab } from "@/src/components/browse/browse-streams-tab" // New component
+import { BrowseCategoriesTab } from "@/src/components/browse/browse-categories-tab" // New component
 
 export default function BrowsePage() {
-  const { data, loading, error } = useGetTopStreamsQuery();
+  const [activeTab, setActiveTab] = useState("streams");
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <Loader2 className="h-12 w-12 animate-spin text-green-500" />
-      </div>
-    )
+  // Use getTags hook at the top level as requested
+  const { data: tagsData, loading: tagsLoading, error: tagsError } = useGetTagsQuery();
+
+  // You can decide how to display or use tagsData here.
+  // For now, just fetching it to fulfill the request.
+  if (tagsError) {
+    console.error("Error loading tags:", tagsError.message);
   }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <p className="text-red-500">Error loading top streams: {error.message}</p>
-      </div>
-    )
-  }
-
-  const topStreams = data?.topStreams || [];
 
   return (
-    <div className="px-4 py-8"> {/* Removed container mx-auto */}
-      <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1>
-      {topStreams.length === 0 ? (
-        <p className="text-gray-400 text-center py-10">No live streams currently available.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {topStreams.map((stream) => (
-            <TopStreamCard key={stream.id} stream={stream} />
-          ))}
-        </div>
-      )}
+    <div className="px-4 py-8">
+      <h1 className="text-3xl font-bold text-white mb-6">Browse</h1>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="bg-gray-900 mb-8" currentValue={activeTab}>
+          <TabsTrigger value="streams">Streams</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="streams">
+          <BrowseStreamsTab />
+        </TabsContent>
+        <TabsContent value="categories">
+          <BrowseCategoriesTab />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
