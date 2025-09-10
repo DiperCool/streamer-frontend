@@ -49,14 +49,17 @@ export const TagSelectInput: React.FC<TagSelectInputProps> = ({
   return (
     <div className="flex flex-col space-y-1">
       <Select
-        value={value || ""}
-        onValueChange={(newValue) => onValueChange(newValue === "" ? null : newValue)}
+        value={value || "all-tags-filter"} // Use a distinct value for 'All Tags' when nothing is selected
+        onValueChange={(newValue) => {
+          // Convert the special string back to null for the actual filter logic
+          onValueChange(newValue === "all-tags-filter" ? null : newValue);
+        }}
       >
         <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent className="bg-gray-800 border-gray-700 text-white">
-          <SelectItem value="">All Tags</SelectItem> {/* Option to clear tag filter */}
+          <SelectItem value="all-tags-filter">All Tags</SelectItem> {/* Use a distinct non-empty string value */}
           {tags.map((tag) => (
             <SelectItem key={tag.id} value={tag.id}>
               {tag.title}
