@@ -20,6 +20,7 @@ import { StreamPlayer } from "@/src/components/stream-player"
 import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
 import { useIsMobile } from "@/hooks/use-mobile" // Импортируем useIsMobile
+import {TopStreamCard} from "@/src/components/top-stream-card"; // Импортируем TopStreamCard
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -224,7 +225,7 @@ export default function HomePage() {
                   {/* Градиент для нижней части плеера (20%) */}
                   <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-gray-900/90 to-transparent z-10" />
                   {/* НОВЫЙ: Градиент для левой части плеера */}
-                  <div className="absolute inset-y-0 left-0 w-1/5 bg-gradient-to-r from-gray-900/90 to-transparent z-10" />
+                  <div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-gray-900/90 to-transparent z-10" />
                 </div>
               </div>
             </div>

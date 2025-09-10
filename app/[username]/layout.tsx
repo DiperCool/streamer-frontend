@@ -13,7 +13,6 @@ import {
   GetStreamerDocument,
   GetCurrentStreamDocument,
   useGetStreamInfoQuery,
-  // StreamSourceType больше не нужен здесь, так как StreamPlayer сам фильтрует источники
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -176,7 +175,7 @@ export default function StreamerProfileLayout({
               isPlayerMaximized={isPlayerMaximized}
               onTogglePlayerMaximize={handleTogglePlayerMaximize}
               showPlayerControls={true}
-              isLive={isLive}
+              isLive={isLive ?? false}
               startedAt={currentStream?.started}
             />
           ) : (
