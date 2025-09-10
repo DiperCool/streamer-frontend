@@ -5,7 +5,8 @@ import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import ReactHlsPlayer from "react-hls-player";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
-import { LiveStreamIndicators } from "./live-stream-indicators"; // Импортируем новый компонент
+import { Badge } from "@/components/ui/badge";
+import { formatLiveDuration } from "@/utils/utils"; // Импортируем новую функцию
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -35,7 +36,7 @@ const HlsPlayerComponent = React.memo(function HlsPlayerComponent({ src, playerR
   );
 });
 
-export function StreamPlayer({ 
+export const StreamPlayer = React.memo(function StreamPlayer({ 
   sources, 
   isPlayerMaximized, 
   onTogglePlayerMaximize, 
@@ -48,6 +49,9 @@ export function StreamPlayer({
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
 
   const activeSource = hlsSource;
+
+  // Мемоизируем hlsConfig, чтобы он был стабильной ссылкой
+  const hlsConfig = React.useMemo(() => ({ lowLatencyMode: true }), []);
 
   // Обработчик для нативного полноэкранного режима
   const handleFullscreenChange = useCallback(() => {
@@ -88,7 +92,7 @@ export function StreamPlayer({
       <HlsPlayerComponent
         src={activeSource.url}
         playerRef={playerRef}
-        hlsConfig={{ lowLatencyMode: true }}
+        hlsConfig={hlsConfig} // Используем мемоизированный hlsConfig
       />
       
       {/* Индикаторы LIVE и времени стрима */}
@@ -107,4 +111,4 @@ export function StreamPlayer({
       )}
     </div>
   );
-}
+});
