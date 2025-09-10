@@ -37,36 +37,36 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           {/* Live Badge */}
           {stream.active && (
-            <Badge className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+            <Badge className="absolute top-2.5 left-2.5 bg-red-600 text-white px-2 py-1 rounded-md text-sm font-semibold z-10"> {/* Increased text size and position */}
               LIVE
             </Badge>
           )}
           {/* Viewers Count */}
-          <Badge className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10 flex items-center">
-            <Users className="w-3 h-3 mr-1" />
+          <Badge className="absolute bottom-2.5 left-2.5 bg-black/70 text-white px-2 py-1 rounded-md text-sm font-semibold z-10 flex items-center"> {/* Increased text size and position */}
+            <Users className="w-3.5 h-3.5 mr-1" /> {/* Increased icon size */}
             {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers} watching
           </Badge>
         </div>
 
         {/* Streamer Info and Title */}
-        <div className="p-3 flex items-start space-x-3">
-          <Avatar className="w-10 h-10 flex-shrink-0">
+        <div className="p-3.5 flex items-start space-x-3"> {/* Increased padding */}
+          <Avatar className="w-11 h-11 flex-shrink-0"> {/* Increased avatar size */}
             <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
             <AvatarFallback className="bg-green-600 text-white text-sm">
               {streamerName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="text-base font-semibold text-white line-clamp-2 group-hover:text-green-400 transition-colors">
+            <h3 className="text-lg font-semibold text-white line-clamp-2 group-hover:text-green-400 transition-colors"> {/* Increased text size */}
               {stream.title || "Untitled Stream"}
             </h3>
-            <p className="text-sm text-gray-400">{streamerName}</p>
+            <p className="text-base text-gray-400">{streamerName}</p> {/* Increased text size */}
             {stream.category?.title && (
-              <p className="text-xs text-gray-500 mt-1">{stream.category.title}</p>
+              <p className="text-sm text-gray-500 mt-1">{stream.category.title}</p> {/* Increased text size */}
             )}
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="flex flex-wrap gap-1.5 mt-2"> {/* Increased gap */}
               {stream.tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-sm"> {/* Increased text size */}
                   {tag.title}
                 </Badge>
               ))}

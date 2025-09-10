@@ -25,7 +25,7 @@ export const VerticalStreamCard: React.FC<VerticalStreamCardProps> = React.memo(
     return (
       <div
         className={cn(
-          "group relative w-full h-36 cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200",
+          "group relative w-full h-40 cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200", // Increased height
           selected && "border-2 border-green-500"
         )}
         onClick={onClick}
@@ -42,25 +42,25 @@ export const VerticalStreamCard: React.FC<VerticalStreamCardProps> = React.memo(
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
 
         {stream.active && (
-          <Badge className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10 flex items-center">
-            <Users className="w-3 h-3 mr-1" />
+          <Badge className="absolute top-2.5 left-2.5 bg-red-600 text-white px-2 py-1 rounded-md text-sm font-semibold z-10 flex items-center"> {/* Increased text size and position */}
+            <Users className="w-3.5 h-3.5 mr-1" /> {/* Increased icon size */}
             {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
           </Badge>
         )}
 
         {/* Stream Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 z-10 flex items-center space-x-2">
-          <Avatar className="w-8 h-8 flex-shrink-0">
+        <div className="absolute bottom-0 left-0 right-0 p-3.5 z-10 flex items-center space-x-2.5"> {/* Increased padding and space-x */}
+          <Avatar className="w-9 h-9 flex-shrink-0"> {/* Increased avatar size */}
             <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
             <AvatarFallback className="bg-green-600 text-white text-sm">
               {streamerName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <h3 className="text-sm font-semibold text-white line-clamp-1 group-hover:text-green-400 transition-colors">
+            <h3 className="text-base font-semibold text-white line-clamp-1 group-hover:text-green-400 transition-colors"> {/* Increased text size */}
               {stream.title || "Untitled Stream"}
             </h3>
-            <p className="text-xs text-gray-300 line-clamp-1">{streamerName}</p>
+            <p className="text-sm text-gray-300 line-clamp-1">{streamerName}</p> {/* Increased text size */}
           </div>
         </div>
       </div>

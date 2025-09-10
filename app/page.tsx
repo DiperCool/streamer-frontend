@@ -90,7 +90,7 @@ export default function HomePage() {
           ) : (
             // Desktop layout
             <div className="container mx-auto px-4 py-8">
-              <div className="flex w-full h-[60vh]"> {/* Changed aspect-video to fixed height h-[60vh] */}
+              <div className="flex w-full h-[66vh]"> {/* Increased height by 10% */}
                 {/* Left section: Main Stream Player with Overlay */}
                 <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden"> {/* flex-[4] for main player */}
                   {hasStreamSources ? (
@@ -118,22 +118,22 @@ export default function HomePage() {
                   {/* Overlay for featured stream info */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10">
                     <Link href={`/${streamerName}`} passHref>
-                      <div className="flex items-center space-x-2 cursor-pointer">
-                        <Avatar className="w-8 h-8 border-2 border-green-500">
+                      <div className="flex items-center space-x-2.5 cursor-pointer"> {/* Increased space-x */}
+                        <Avatar className="w-9 h-9 border-2 border-green-500"> {/* Increased avatar size */}
                           <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
                           <AvatarFallback className="bg-green-600 text-white text-sm">
                             {streamerName.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-lg font-bold text-white hover:text-green-400">
+                        <span className="text-xl font-bold text-white hover:text-green-400"> {/* Increased text size */}
                           {streamerName}
                         </span>
                       </div>
                     </Link>
-                    <h2 className="text-xl font-bold text-white truncate mt-1">
+                    <h2 className="text-2xl font-bold text-white truncate mt-1.5"> {/* Increased text size and mt */}
                       {featuredStream.title || "Untitled Stream"}
                     </h2>
-                    <div className="flex items-center space-x-2 text-gray-400 text-sm mt-1">
+                    <div className="flex items-center space-x-2.5 text-gray-400 text-base mt-1.5"> {/* Increased text size and mt */}
                       <Users className="w-4 h-4" />
                       <span>{currentViewers} watching</span>
                       {featuredStream.category?.title && (
@@ -147,7 +147,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 flex flex-col space-y-4 pl-4 max-w-[300px]"> {/* Adjusted max-w to 300px */}
+                <div className="flex-1 flex flex-col space-y-5 pl-5"> {/* Adjusted space-y and pl */}
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
