@@ -1,56 +1,26 @@
 "use client"
 
-import React, { useCallback, useEffect, useState } from "react"
+import React from "react" // Removed useCallback, useEffect, useState as they are no longer needed for carousel
 import { useAuth0 } from "@auth0/auth0-react"
 import {
   useGetTopStreamsQuery,
-  useGetTopCategoriesQuery, // Import useGetTopCategoriesQuery
+  useGetTopCategoriesQuery,
   StreamDto,
   SortEnumType,
 } from "@/graphql/__generated__/graphql"
-import { Loader2, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Users } from "lucide-react" // Removed ChevronLeft, ChevronRight
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import NextImage from "next/image"
 import { getMinioUrl } from "@/utils/utils"
-import { cn } from "@/lib/utils"
-import useEmblaCarousel from "embla-carousel-react"
-import { Button } from "@/components/ui/button"
+// import useEmblaCarousel from "embla-carousel-react" // Removed
+// import { Button } from "@/components/ui/button" // Button is still used for other sections
 import { StreamPlayer } from "@/src/components/stream-player"
-import { CategoryCard } from "@/src/components/category-card" // Import CategoryCard
-import { StreamsByCategorySection } from "@/src/components/streams-by-category-section" // Import StreamsByCategorySection
+import { CategoryCard } from "@/src/components/category-card"
+import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
 
-interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  selected: boolean;
-}
-
-const DotButton: React.FC<DotButtonProps> = ({ selected, onClick }) => (
-  <button
-    className={cn(
-      "w-2 h-2 rounded-full bg-gray-500 transition-colors duration-200",
-      selected ? "bg-green-500" : "hover:bg-gray-400"
-    )}
-    type="button"
-    onClick={onClick}
-  />
-);
-
-interface ArrowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-}
-
-const ArrowButton: React.FC<ArrowButtonProps> = ({ children, onClick, disabled }) => (
-  <Button
-    variant="ghost"
-    size="icon"
-    onClick={onClick}
-    disabled={disabled}
-    className="text-gray-400 hover:text-white"
-  >
-    {children}
-  </Button>
-);
+// Removed DotButtonProps, DotButton, ArrowButtonProps, ArrowButton components
 
 export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0()
@@ -61,39 +31,7 @@ export default function HomePage() {
   const { data: topCategoriesData, loading: topCategoriesLoading, error: topCategoriesError } = useGetTopCategoriesQuery();
   const topCategories = topCategoriesData?.topCategories || [];
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi, setSelectedIndex]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on("select", onSelect);
-    emblaApi.on("reInit", onSelect);
-    return () => {
-      emblaApi.off("select", onSelect);
-      emblaApi.off("reInit", onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
-  const scrollTo = useCallback((index: number) => {
-    if (!emblaApi) return;
-    emblaApi.scrollTo(index);
-  }, [emblaApi]);
-
-  const scrollPrev = useCallback(() => {
-    if (!emblaApi) return;
-    emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (!emblaApi) return;
-    emblaApi.scrollNext();
-  }, [emblaApi]);
+  // Removed emblaRef, emblaApi, selectedIndex, onSelect, scrollTo, scrollPrev, scrollNext states and callbacks
 
   if (authLoading || topStreamsLoading || topCategoriesLoading) {
     return (
@@ -111,17 +49,27 @@ export default function HomePage() {
     )
   }
 
-  const featuredStream = topStreams[selectedIndex];
-  const streamerName = featuredStream?.streamer?.userName || "Unknown Streamer";
-  const streamerAvatar = featuredStream?.streamer?.avatar || "/placeholder-user.jpg";
-  const currentViewers = featuredStream?.currentViewers || 0;
+  const featuredStream = topStreams[0]; // Always display the first stream
+
+  // Only proceed if there's a featured stream to display
+  if (!featuredStream) {
+    return (
+      <div className="px-4 py-8 text-center">
+        <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
+        <p className="text-gray-400">No live streams currently available. Check back later!</p>
+      </div>
+    );
+  }
+
+  const streamerName = featuredStream.streamer?.userName || "Unknown Streamer";
+  const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
+  const currentViewers = featuredStream.currentViewers || 0;
 
   return (
-    <div className="flex-1 bg-gray-900 text-white overflow-x-hidden"> {/* Added overflow-x-hidden */}
-      {topStreams.length > 0 ? (
-        <div className="w-full h-[50vh] flex">
-          <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20"> {/* Changed flex-1 to w-1/2 */}
-            
+    <div className="flex-1 bg-gray-900 text-white overflow-x-hidden">
+      <div className="flex-1 h-[50vh] flex">
+        <div className="w-1/2 flex flex-col bg-gray-900 z-20">
+          <div className="pt-8 px-8 flex-1 flex flex-col">
             <div>
               <div className="flex items-center space-x-3 mb-2">
                 <Avatar className="w-10 h-10 border-2 border-green-500">
@@ -161,90 +109,35 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-
-            {/* This is the area for the carousel selection mechanism */}
-            <div className="flex-grow flex flex-col justify-end pb-4">
-              <div className="flex gap-2 overflow-x-auto custom-scrollbar">
-                {topStreams.map((stream, index) => (
-                  <div
-                    key={stream.id}
-                    className={cn(
-                      "relative rounded-md overflow-hidden cursor-pointer border-2",
-                      "flex-shrink-0 basis-[calc((100%-1rem)/3)] aspect-video",
-                      selectedIndex === index ? "border-green-500" : "border-transparent hover:border-gray-500"
-                    )}
-                    onClick={() => scrollTo(index)}
-                  >
-                    <NextImage
-                      src={getMinioUrl(stream.preview || "/placeholder.jpg")}
-                      alt={stream.title || "Stream preview"}
-                      fill
-                      sizes="128px"
-                      style={{ objectFit: "cover" }}
-                    />
-                    {selectedIndex === index && (
-                      <div className="absolute inset-0 bg-green-500/30" />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-center space-x-2">
-                <ArrowButton onClick={scrollPrev}>
-                  <ChevronLeft className="h-5 w-5" />
-                </ArrowButton>
-                <div className="flex space-x-2">
-                  {topStreams.map((_, index) => (
-                    <DotButton
-                      key={index}
-                      selected={index === selectedIndex}
-                      onClick={() => scrollTo(index)}
-                    />
-                  ))}
-                </div>
-                <ArrowButton onClick={scrollNext}>
-                  <ChevronRight className="h-5 w-5" />
-                </ArrowButton>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-1/2 h-full"> {/* Changed flex-1 to w-1/2 */}
-            <div className="embla w-full h-full" ref={emblaRef}>
-              <div className="embla__container flex w-full h-full">
-                {topStreams.map((stream) => (
-                  <div className="embla__slide w-full aspect-video relative bg-gray-800 flex-none" key={stream.id}>
-                    {stream.sources && stream.sources.length > 0 ? (
-                      <StreamPlayer
-                        sources={stream.sources}
-                        playing={true}
-                        controls={false}
-                        isPlayerMaximized={false}
-                        onTogglePlayerMaximize={() => {}}
-                        showPlayerControls={false}
-                      />
-                    ) : (
-                      <NextImage
-                        src={getMinioUrl(stream.preview || "/placeholder.jpg")}
-                        alt={stream.title || "Stream preview"}
-                        fill
-                        sizes="50vw"
-                        style={{ objectFit: "cover" }}
-                        priority
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Removed carousel selection mechanism */}
           </div>
         </div>
-      ) : (
-        <div className="px-4 py-8 text-center">
-          <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
-          <p className="text-gray-400">No live streams currently available. Check back later!</p>
+
+        <div className="w-1/2 h-full">
+          {/* Directly render the StreamPlayer for the featuredStream */}
+          <div className="w-full h-full relative bg-gray-800 flex-none">
+            {featuredStream.sources && featuredStream.sources.length > 0 ? (
+              <StreamPlayer
+                sources={featuredStream.sources}
+                playing={true}
+                controls={false}
+                isPlayerMaximized={false}
+                onTogglePlayerMaximize={() => {}}
+                showPlayerControls={false}
+              />
+            ) : (
+              <NextImage
+                src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
+                alt={featuredStream.title || "Stream preview"}
+                fill
+                sizes="50vw"
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            )}
+          </div>
         </div>
-      )}
+      </div>
 
       <div className="px-4 py-8">
         {/* Top Categories Section */}
