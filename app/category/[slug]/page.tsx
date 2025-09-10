@@ -122,18 +122,25 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Category Header */}
-      <div className="relative w-full h-48 rounded-lg overflow-hidden mb-8">
-        <Image
-          src={imageUrl}
-          alt={category.title}
-          fill
-          style={{ objectFit: "cover" }}
-          sizes="100vw"
-          priority
-          className="absolute inset-0 w-full h-full"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-6">
-          <h1 className="text-4xl font-bold text-white">{category.title}</h1>
+      <div className="flex items-start space-x-6 mb-8">
+        {/* Image on left */}
+        <div className="relative w-48 h-64 flex-shrink-0 rounded-lg overflow-hidden shadow-lg">
+          <Image
+            src={imageUrl}
+            alt={category.title}
+            fill
+            style={{ objectFit: "cover" }}
+            sizes="192px" // w-48
+            priority
+          />
+        </div>
+        {/* Text content on right */}
+        <div className="flex flex-col justify-center flex-1 py-4"> {/* Added py-4 for vertical alignment */}
+          <h1 className="text-4xl font-bold text-white mb-2">{category.title}</h1>
+          <div className="flex items-center space-x-4 text-gray-400 text-lg">
+            <p>{category.watchers} watching</p>
+            {/* No "followers" or direct category tags as per schema and request */}
+          </div>
         </div>
       </div>
 
