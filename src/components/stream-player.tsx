@@ -5,8 +5,7 @@ import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import ReactHlsPlayer from "react-hls-player";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatLiveDuration } from "@/utils/utils"; // Импортируем новую функцию
+import { LiveStreamIndicators } from "./live-stream-indicators"; // Импортируем новый компонент
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -44,10 +43,11 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   isLive = false, // Значение по умолчанию
   startedAt, // Время начала стрима
 }: StreamPlayerProps) {
-  const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
-  const playerRef = useRef<HTMLVideoElement>(null);
+  const videoElementRef = useRef<HTMLVideoElement>(null); // Реф для самого видеоэлемента
+  const playerWrapperRef = useRef<HTMLDivElement>(null); // Реф для контейнера, который будет полноэкранным
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
 
+  const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
   const activeSource = hlsSource;
 
   // Мемоизируем hlsConfig, чтобы он был стабильной ссылкой
@@ -55,7 +55,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
 
   // Обработчик для нативного полноэкранного режима
   const handleFullscreenChange = useCallback(() => {
-    setIsNativeFullscreen(document.fullscreenElement === playerRef.current);
+    setIsNativeFullscreen(document.fullscreenElement === playerWrapperRef.current);
   }, []);
 
   useEffect(() => {
@@ -66,11 +66,11 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   }, [handleFullscreenChange]);
 
   const handleToggleFullscreen = () => {
-    if (playerRef.current) {
-      if (document.fullscreenElement === playerRef.current) {
+    if (playerWrapperRef.current) { // Теперь делаем полноэкранным контейнер
+      if (document.fullscreenElement === playerWrapperRef.current) {
         document.exitFullscreen();
       } else {
-        playerRef.current.requestFullscreen().catch((err) => {
+        playerWrapperRef.current.requestFullscreen().catch((err) => {
           console.error(`Error attempting to enable fullscreen: ${err.message}`);
         });
       }
@@ -88,10 +88,10 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   }
 
   return (
-    <div className="absolute inset-0 bg-black">
+    <div ref={playerWrapperRef} className="absolute inset-0 bg-black"> {/* Этот div теперь становится полноэкранным */}
       <HlsPlayerComponent
         src={activeSource.url}
-        playerRef={playerRef}
+        playerRef={videoElementRef} // Передаем реф видеоэлементу
         hlsConfig={hlsConfig} // Используем мемоизированный hlsConfig
       />
       
