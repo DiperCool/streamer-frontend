@@ -213,7 +213,7 @@ export default function HomePage() {
             <div className="embla w-full h-full" ref={emblaRef}>
               <div className="embla__container w-full h-full">
                 {topStreams.map((stream) => (
-                  <div className="embla__slide w-full aspect-video relative bg-gray-800" key={stream.id}>
+                  <div className="embla__slide w-full aspect-video relative bg-gray-800 flex-none" key={stream.id}> {/* Added flex-none here */}
                     {stream.sources && stream.sources.length > 0 ? (
                       <StreamPlayer
                         sources={stream.sources}
