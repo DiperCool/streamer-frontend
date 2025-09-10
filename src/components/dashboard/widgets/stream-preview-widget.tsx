@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react"; // Import useCallback
+import React, { useCallback } from "react";
 import Image from "next/image";
 import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -114,11 +114,11 @@ export const StreamPreviewWidget: React.FC = () => {
       {isLive ? (
         <StreamPlayer
           sources={currentStream!.sources}
-          playing={true}
-          controls={true}
-          isPlayerMaximized={false}
-          onTogglePlayerMaximize={() => {}}
-          showPlayerControls={false}
+          isPlayerMaximized={false} // В виджете предпросмотра всегда false
+          onTogglePlayerMaximize={() => {}} // Dummy function
+          showPlayerControls={false} // В виджете предпросмотра не показываем контролы
+          isLive={isLive}
+          startedAt={currentStream?.started}
         />
       ) : (
         <>

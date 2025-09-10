@@ -1,10 +1,12 @@
 "use client"
 
-import React from "react"
+import React, { useRef, useState, useEffect, useCallback } from "react"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import ReactHlsPlayer from "react-hls-player";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { formatLiveDuration } from "@/utils/utils"; // Импортируем новую функцию
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -14,12 +16,66 @@ interface StreamPlayerProps {
   isPlayerMaximized: boolean;
   onTogglePlayerMaximize: () => void;
   showPlayerControls?: boolean;
+  isLive?: boolean; // Новый пропс для статуса LIVE
+  startedAt?: string | null; // Новый пропс для времени начала стрима
 }
 
-export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximize, showPlayerControls = true }: StreamPlayerProps) {
+export function StreamPlayer({ 
+  sources, 
+  isPlayerMaximized, 
+  onTogglePlayerMaximize, 
+  showPlayerControls = true,
+  isLive = false, // Значение по умолчанию
+  startedAt, // Время начала стрима
+}: StreamPlayerProps) {
   const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
+  const playerRef = useRef<HTMLVideoElement>(null);
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
+  const [liveDuration, setLiveDuration] = useState("00:00:00");
 
   const activeSource = hlsSource;
+
+  // Обновление продолжительности стрима
+  useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
+    if (isLive && startedAt) {
+      interval = setInterval(() => {
+        setLiveDuration(formatLiveDuration(startedAt));
+      }, 1000);
+    } else {
+      setLiveDuration("00:00:00"); // Сброс, если не в эфире
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLive, startedAt]);
+
+  // Обработчик для нативного полноэкранного режима
+  const handleFullscreenChange = useCallback(() => {
+    setIsNativeFullscreen(document.fullscreenElement === playerRef.current);
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [handleFullscreenChange]);
+
+  const handleToggleFullscreen = () => {
+    if (playerRef.current) {
+      if (document.fullscreenElement === playerRef.current) {
+        document.exitFullscreen();
+      } else {
+        playerRef.current.requestFullscreen().catch((err) => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+      }
+    }
+    // Также вызываем пропс для управления размером плеера в рамках макета
+    onTogglePlayerMaximize();
+  };
 
   if (!activeSource) {
     return (
@@ -32,6 +88,7 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
   return (
     <div className="absolute inset-0 bg-black">
       <ReactHlsPlayer
+        playerRef={playerRef}
         src={activeSource.url}
         autoPlay={true}
         controls={false}
@@ -39,18 +96,28 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
         height="100%"
         muted={false}
         hlsConfig={{
-          lowLatencyMode: true, // Включаем режим низкой задержки
+          lowLatencyMode: true,
         }}
       />
+      {isLive && (
+        <Badge className="absolute top-4 left-4 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+          LIVE
+        </Badge>
+      )}
+      {isLive && (
+        <Badge className="absolute top-4 left-20 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+          {liveDuration}
+        </Badge>
+      )}
       {showPlayerControls && (
         <Button
           variant="ghost"
           size="icon"
-          onClick={onTogglePlayerMaximize}
+          onClick={handleToggleFullscreen}
           className="absolute bottom-4 right-4 z-10 text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
-          title={isPlayerMaximized ? "Minimize Player" : "Maximize Player"}
+          title={isNativeFullscreen ? "Minimize Player" : "Maximize Player"}
         >
-          {isPlayerMaximized ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+          {isNativeFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
         </Button>
       )}
     </div>

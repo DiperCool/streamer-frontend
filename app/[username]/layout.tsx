@@ -176,6 +176,8 @@ export default function StreamerProfileLayout({
               isPlayerMaximized={isPlayerMaximized}
               onTogglePlayerMaximize={handleTogglePlayerMaximize}
               showPlayerControls={true}
+              isLive={isLive}
+              startedAt={currentStream?.started}
             />
           ) : (
             <Image

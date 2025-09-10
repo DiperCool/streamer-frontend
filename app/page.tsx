@@ -190,8 +190,10 @@ export default function HomePage() {
                   key={featuredStream.id}
                   sources={featuredStream.sources} // Передаем все источники, StreamPlayer сам выберет HLS
                   isPlayerMaximized={false}
-                  onTogglePlayerMaximize={() => {}}
+                  onTogglePlayerMaximize={() => {}} // Dummy function for layout maximize
                   showPlayerControls={false}
+                  isLive={featuredStream.active}
+                  startedAt={featuredStream.started}
                 />
               ) : (
                 <NextImage
