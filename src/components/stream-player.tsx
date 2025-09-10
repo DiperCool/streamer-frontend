@@ -2,9 +2,9 @@
 
 import React from "react"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
-import ReactPlayer from "react-player"; // Возвращаем импорт ReactPlayer
-import { Button } from "@/components/ui/button"; // Возвращаем импорт Button
-import { Maximize, Minimize } from "lucide-react"; // Возвращаем импорт иконок
+import ReactPlayer from "react-player";
+import { Button } from "@/components/ui/button";
+import { Maximize, Minimize } from "lucide-react";
 
 interface StreamPlayerProps {
   sources: Array<{
@@ -36,7 +36,7 @@ export function StreamPlayer({ sources, isPlayerMaximized, onTogglePlayerMaximiz
       <ReactPlayer
         url={activeSource.url}
         playing={true}
-        controls={false} {/* Установлено в false для скрытия встроенных контролов */}
+        controls={false}
         width="100%"
         height="100%"
         muted={false} // Можно сделать это пропсом, если нужно
