@@ -120,7 +120,7 @@ export default function HomePage() {
     <div className="flex-1 bg-gray-900 text-white overflow-x-hidden"> {/* Added overflow-x-hidden */}
       {topStreams.length > 0 ? (
         <div className="w-full h-[50vh] flex">
-          <div className="flex-1 pt-8 px-8 flex flex-col bg-gray-900 z-20"> {/* Changed w-1/2 to flex-1 */}
+          <div className="w-1/2 pt-8 px-8 flex flex-col bg-gray-900 z-20"> {/* Changed flex-1 to w-1/2 */}
             
             <div>
               <div className="flex items-center space-x-3 mb-2">
@@ -209,11 +209,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex-1 h-full"> {/* Changed w-1/2 to flex-1 */}
+          <div className="w-1/2 h-full"> {/* Changed flex-1 to w-1/2 */}
             <div className="embla w-full h-full" ref={emblaRef}>
-              <div className="embla__container flex w-full h-full"> {/* Added 'flex' here */}
+              <div className="embla__container flex w-full h-full">
                 {topStreams.map((stream) => (
-                  <div className="embla__slide w-full aspect-video relative bg-gray-800 flex-none" key={stream.id}> {/* Added flex-none here */}
+                  <div className="embla__slide w-full aspect-video relative bg-gray-800 flex-none" key={stream.id}>
                     {stream.sources && stream.sources.length > 0 ? (
                       <StreamPlayer
                         sources={stream.sources}
@@ -233,7 +233,6 @@ export default function HomePage() {
                         priority
                       />
                     )}
-                    {/* Removed the darkening overlay div */}
                   </div>
                 ))}
               </div>
