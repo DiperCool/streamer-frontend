@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 
 export const BrowseStreamsTab: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const streamsPerPage = 12; // Number of streams to load per page
+  const streamsPerPage = 15; // Number of streams to load per page, updated to 15
 
   const {
     data: streamsData,
