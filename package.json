@@ -1,14 +1,4 @@
 {
-  "name": "streamer-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "next build",
-    "codegen": "NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config codegen.ts",
-    "dev": "next dev",
-    "lint": "next lint",
-    "start": "next start"
-  },
   "dependencies": {
     "@apollo/client": "latest",
     "@apollo/link-context": "2.0.0-beta.3",
@@ -53,7 +43,6 @@
     "clsx": "^2.1.1",
     "cmdk": "latest",
     "date-fns": "latest",
-    "embla-carousel-react": "latest",
     "graphql": "^16.11.0",
     "graphql-ws": "latest",
     "input-otp": "latest",
