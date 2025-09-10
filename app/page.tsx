@@ -92,7 +92,7 @@ export default function HomePage() {
             <div className="container mx-auto px-4 py-8">
               <div className="flex w-full aspect-video">
                 {/* Left section: Main Stream Player with Overlay */}
-                <div className="flex-[3] relative bg-gray-800 rounded-lg overflow-hidden"> {/* Increased flex to 3 */}
+                <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden"> {/* Increased flex to 4 */}
                   {hasStreamSources ? (
                     <StreamPlayer
                       key={featuredStream.id}
@@ -110,7 +110,7 @@ export default function HomePage() {
                       alt={featuredStream.title || "Stream preview"}
                       fill
                       style={{ objectFit: "cover" }}
-                      sizes="(max-width: 768px) 100vw, 75vw"
+                      sizes="(max-width: 768px) 100vw, 80vw" // Adjusted sizes for larger main player
                       priority
                       className="absolute inset-0 w-full h-full"
                     />
@@ -147,7 +147,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right section: Vertical list of other top streams */}
-                <div className="flex-1 flex flex-col space-y-4 pl-4">
+                <div className="flex-1 flex flex-col space-y-4 pl-4 max-w-[250px]"> {/* Adjusted flex to 1 and added max-w */}
                   {topStreams.slice(1, 4).map((stream, index) => (
                     <VerticalStreamCard
                       key={stream.id}
