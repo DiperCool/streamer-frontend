@@ -12,7 +12,8 @@ import {
   useStreamUpdatedSubscription,
   GetStreamerDocument,
   GetCurrentStreamDocument,
-  useGetStreamInfoQuery
+  useGetStreamInfoQuery,
+  StreamSourceType // Import StreamSourceType
 } from "@/graphql/__generated__/graphql"
 import { getMinioUrl } from "@/utils/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -144,6 +145,9 @@ export default function StreamerProfileLayout({
   };
   const activeTab = getActiveTab();
 
+  // Filter sources to only include HLS
+  const hlsSources = currentStream?.sources ? currentStream.sources.filter(s => s.sourceType === StreamSourceType.Hls) : [];
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse">
 
@@ -166,9 +170,9 @@ export default function StreamerProfileLayout({
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
           isPlayerMaximized ? "flex-grow h-screen-minus-navbar" : "h-[35vh]"
         )}>
-          {isLive && currentStream?.sources && currentStream.sources.length > 0 ? (
+          {isLive && hlsSources.length > 0 ? (
             <StreamPlayer
-              sources={currentStream.sources}
+              sources={hlsSources}
               playing={true}
               controls={true}
               isPlayerMaximized={isPlayerMaximized}

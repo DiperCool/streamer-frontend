@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useState, useEffect } from "react"
+import React, { useCallback, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
   useGetTopStreamsQuery,
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { StreamPlayer } from "@/src/components/stream-player"
 import { CategoryCard } from "@/src/components/category-card"
 import { StreamsByCategorySection } from "@/src/components/streams-by-category-section"
+import { StreamSourceType } from "@/graphql/__generated__/graphql"; // Import StreamSourceType
 
 interface DotButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   selected: boolean;
@@ -61,7 +62,6 @@ export default function HomePage() {
   const topCategories = topCategoriesData?.topCategories || [];
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [showPlayer, setShowPlayer] = useState(true);
 
   const scrollTo = useCallback((index: number) => {
     if (topStreams.length === 0) return;
@@ -76,19 +76,6 @@ export default function HomePage() {
   const scrollNext = useCallback(() => {
     scrollTo(selectedIndex + 1);
   }, [selectedIndex, scrollTo]);
-
-  // Effect to control player visibility with a delay
-  useEffect(() => {
-    // When selectedIndex changes, hide the player immediately
-    setShowPlayer(false);
-    // Then, after a short delay, show the player again.
-    // This forces a remount of StreamPlayer, giving the old instance time to clean up.
-    const timer = setTimeout(() => {
-      setShowPlayer(true);
-    }, 100); // 100ms delay
-
-    return () => clearTimeout(timer); // Cleanup the timer if component unmounts or dependency changes
-  }, [selectedIndex]); // Re-run this effect when selectedIndex changes
 
   if (authLoading || topStreamsLoading || topCategoriesLoading) {
     return (
@@ -120,6 +107,9 @@ export default function HomePage() {
   const streamerName = featuredStream.streamer?.userName || "Unknown Streamer";
   const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
   const currentViewers = featuredStream.currentViewers || 0;
+
+  // Filter sources to only include HLS
+  const hlsSources = featuredStream.sources.filter(s => s.sourceType === StreamSourceType.Hls);
 
   return (
     <div className="flex-1 bg-gray-900 text-white overflow-x-hidden">
@@ -195,10 +185,10 @@ export default function HomePage() {
           <div className="w-1/2 h-full">
             {/* Main Stream Player */}
             <div className="w-full h-full relative bg-gray-800 flex-none">
-              {showPlayer && featuredStream.sources && featuredStream.sources.length > 0 ? (
+              {hlsSources.length > 0 ? (
                 <StreamPlayer
                   key={featuredStream.id}
-                  sources={featuredStream.sources}
+                  sources={hlsSources}
                   playing={true}
                   controls={false}
                   isPlayerMaximized={false}
