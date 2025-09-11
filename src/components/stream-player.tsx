@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react"
 import { StreamSourceType } from "@/graphql/__generated__/graphql";
 import ReactHlsPlayer from "react-hls-player";
 import { Button } from "@/components/ui/button";
-import { Maximize, Minimize } from "lucide-react";
+import { Maximize, Minimize, VolumeX, Volume2 } from "lucide-react"; // Import Volume icons
 import { LiveStreamIndicators } from "./live-stream-indicators";
 
 interface StreamPlayerProps {
@@ -20,7 +20,15 @@ interface StreamPlayerProps {
   showOverlays?: boolean;
 }
 
-const HlsPlayerComponent = React.memo(function HlsPlayerComponent({ src, playerRef, hlsConfig }: { src: string; playerRef: React.RefObject<HTMLVideoElement>; hlsConfig: any }) {
+interface HlsPlayerComponentProps {
+  src: string;
+  playerRef: React.RefObject<HTMLVideoElement | null>; // Исправлено: теперь может быть null
+  hlsConfig: any;
+  isMuted: boolean;
+}
+
+const HlsPlayerComponent = React.memo(function HlsPlayerComponent({ src, playerRef, hlsConfig, isMuted }: HlsPlayerComponentProps) {
+  console.log("HlsPlayerComponent rendered. Source:", src, "Muted:", isMuted);
   return (
     <ReactHlsPlayer
       playerRef={playerRef}
@@ -29,7 +37,7 @@ const HlsPlayerComponent = React.memo(function HlsPlayerComponent({ src, playerR
       controls={false}
       width="100%"
       height="100%"
-      muted={false}
+      muted={isMuted}
       hlsConfig={hlsConfig}
     />
   );
@@ -44,9 +52,11 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   startedAt,
   showOverlays = false,
 }: StreamPlayerProps) {
-  const videoElementRef = useRef<HTMLVideoElement>(null);
+  console.log("StreamPlayer rendered. Is Live:", isLive, "Sources:", sources);
+  const videoElementRef = useRef<HTMLVideoElement | null>(null); // Убедимся, что useRef также может быть null
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
   const activeSource = hlsSource;
@@ -77,7 +87,15 @@ export const StreamPlayer = React.memo(function StreamPlayer({
     onTogglePlayerMaximize();
   };
 
+  const toggleMute = () => {
+    if (videoElementRef.current) {
+      videoElementRef.current.muted = !videoElementRef.current.muted;
+      setIsMuted(videoElementRef.current.muted);
+    }
+  };
+
   if (!activeSource) {
+    console.log("StreamPlayer: No active source available.");
     return (
       <div className="absolute inset-0 bg-black flex items-center justify-center text-white text-lg">
         No stream source available.
@@ -91,6 +109,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
         src={activeSource.url}
         playerRef={videoElementRef}
         hlsConfig={hlsConfig}
+        isMuted={isMuted}
       />
       
       {showOverlays && (
@@ -104,15 +123,26 @@ export const StreamPlayer = React.memo(function StreamPlayer({
       <LiveStreamIndicators isLive={isLive} startedAt={startedAt} />
 
       {showPlayerControls && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleToggleFullscreen}
-          className="absolute bottom-4 right-4 z-20 text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
-          title={isNativeFullscreen ? "Minimize Player" : "Maximize Player"}
-        >
-          {isNativeFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-        </Button>
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMute}
+            className="absolute bottom-4 right-20 z-20 text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
+            title={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleToggleFullscreen}
+            className="absolute bottom-4 right-4 z-20 text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/70 rounded-full p-2"
+            title={isNativeFullscreen ? "Minimize Player" : "Maximize Player"}
+          >
+            {isNativeFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+          </Button>
+        </>
       )}
     </div>
   );
