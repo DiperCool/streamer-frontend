@@ -22,7 +22,7 @@ interface StreamPlayerProps {
 
 interface HlsPlayerComponentProps {
   src: string;
-  playerRef: React.RefObject<HTMLVideoElement | null>; // Исправлено: теперь может быть null
+  playerRef: React.RefObject<HTMLVideoElement>; // Изменено: теперь ожидает RefObject<HTMLVideoElement>
   hlsConfig: any;
   isMuted: boolean;
 }
@@ -53,7 +53,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   showOverlays = false,
 }: StreamPlayerProps) {
   console.log("StreamPlayer rendered. Is Live:", isLive, "Sources:", sources);
-  const videoElementRef = useRef<HTMLVideoElement | null>(null); // Убедимся, что useRef также может быть null
+  const videoElementRef = useRef<HTMLVideoElement | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -107,7 +107,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
     <div ref={playerWrapperRef} className="absolute inset-0 bg-black">
       <HlsPlayerComponent
         src={activeSource.url}
-        playerRef={videoElementRef}
+        playerRef={videoElementRef as React.RefObject<HTMLVideoElement>} {/* Применено утверждение типа */}
         hlsConfig={hlsConfig}
         isMuted={isMuted}
       />
