@@ -174,15 +174,8 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
 
             <div className="flex-1 flex justify-center">
               {!isMobile && !isDashboard && (
-                <StreamerSearchPopover>
-                  <Button
-                    variant="outline"
-                    className="w-96 bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white justify-start pl-3 pr-2"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    <span>Search streamers and categories...</span>
-                  </Button>
-                </StreamerSearchPopover>
+                // Прямое встраивание StreamerSearchPopover
+                <StreamerSearchPopover />
               )}
             </div>
 
