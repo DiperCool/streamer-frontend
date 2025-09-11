@@ -99,6 +99,25 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
               {timeAgo}
             </p>
           </div>
+          <div className="flex flex-wrap gap-1.5 mt-2"> {/* Added category, language, and tags */}
+            {vod.category?.title && (
+              <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold">
+                {vod.category.title}
+              </Badge>
+            )}
+            {vod.language && (
+              <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                {vod.language}
+              </Badge>
+            )}
+            {vod.tags && vod.tags.length > 0 && (
+              vod.tags.map((tag) => (
+                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                  {tag.title}
+                </Badge>
+              ))
+            )}
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -109,6 +109,11 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
               </div>
             )}
             <div className="flex flex-wrap gap-2 mt-2">
+              {vod.category?.title && ( // Display category first
+                <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
+                  {vod.category.title}
+                </Badge>
+              )}
               {vod.language && (
                 <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
                   {vod.language}
