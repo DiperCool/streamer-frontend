@@ -1601,14 +1601,14 @@ export type GetMyRoleQueryVariables = Exact<{
 }>;
 
 
-export type GetMyRoleQuery = { __typename?: 'Query', myRole: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+export type GetMyRoleQuery = { __typename?: 'Query', myRole: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 export type GetRoleByIdQueryVariables = Exact<{
   roleId: Scalars['UUID']['input'];
 }>;
 
 
-export type GetRoleByIdQuery = { __typename?: 'Query', role: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+export type GetRoleByIdQuery = { __typename?: 'Query', role: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 export type SearchQueryVariables = Exact<{
   search: Scalars['String']['input'];
@@ -3203,6 +3203,7 @@ export const GetMyRoleDocument = gql`
       isNone
       isRoles
       isStream
+      isVod
     }
     streamer {
       id
@@ -3263,6 +3264,7 @@ export const GetRoleByIdDocument = gql`
       isNone
       isRoles
       isStream
+      isVod
     }
     streamer {
       id

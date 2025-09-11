@@ -104,6 +104,7 @@ export const GET_MY_ROLE = gql`
                 isNone
                 isRoles
                 isStream
+                isVod
             }
             streamer {
                 id
@@ -132,6 +133,7 @@ export const GET_ROLE_BY_ID = gql`
                 isNone
                 isRoles
                 isStream
+                isVod
             }
             streamer {
                 id
