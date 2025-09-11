@@ -28,7 +28,6 @@ export const StreamerSearchPopover: React.FC = () => {
   const results = data?.search || [];
 
   // Этот эффект контролирует, когда поповер *должен* быть открыт на основе наличия поискового запроса.
-  // Он должен работать в сочетании с внутренней обработкой фокуса/блюра Popover.
   useEffect(() => {
     if (searchTerm.trim().length > 0) {
       setOpen(true);
@@ -36,6 +35,14 @@ export const StreamerSearchPopover: React.FC = () => {
       setOpen(false);
     }
   }, [searchTerm]);
+
+  // Эффект для явной установки фокуса на Input, когда поповер открыт и есть поисковый запрос.
+  // Это помогает в случаях, когда фокус может быть потерян из-за перерисовок или открытия поповера.
+  useEffect(() => {
+    if (open && searchTerm.trim().length > 0 && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [open, searchTerm]); // Зависим от 'open' и 'searchTerm'
 
   const handleResultClick = (result: { slug: string; resultType: SearchResultType }) => {
     setOpen(false); // Закрываем поповер
@@ -58,7 +65,7 @@ export const StreamerSearchPopover: React.FC = () => {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}> {/* Позволяем Popover управлять своим состоянием открытия */}
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className="relative w-96">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -69,7 +76,8 @@ export const StreamerSearchPopover: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleInputKeyDown}
-            // Удалены обработчики onFocus и onBlur из Input
+            // Удалены обработчики onFocus и onBlur из Input.
+            // Popover's onOpenChange будет обрабатывать закрытие, когда фокус покидает весь поповер.
           />
         </div>
       </PopoverTrigger>
