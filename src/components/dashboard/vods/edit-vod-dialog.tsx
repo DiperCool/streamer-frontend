@@ -57,7 +57,7 @@ const editVodSchema = z.object({
     .max(25, "Tag must be at most 25 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Tags can only contain letters, numbers, and underscores")
   ).max(10, "You can add up to 10 tags").optional(), // Actual tags array
-  preview: z.string().optional(), // For preview image upload
+  // Removed: preview: z.string().optional(),
 });
 
 type EditVodFormValues = z.infer<typeof editVodSchema>;
@@ -99,7 +99,7 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
       },
     ],
   });
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  // Removed: const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const {
     register,
@@ -122,7 +122,7 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
       type: VodType.Public,
       tagsInput: "",
       tags: [],
-      preview: "",
+      // Removed: preview: "",
     },
   });
 
@@ -146,14 +146,14 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
         categoryId: vod.category?.id || null,
         type: vod.type,
         tags: vod.tags?.map(tag => tag.title) || [],
-        preview: vod.preview || "",
+        // Removed: preview: vod.preview || "",
         tagsInput: "",
       });
-      setPreviewImageUrl(vod.preview ? getMinioUrl(vod.preview) : null);
+      // Removed: setPreviewImageUrl(vod.preview ? getMinioUrl(vod.preview) : null);
     } else if (!isOpen) {
       reset();
       clearErrors();
-      setPreviewImageUrl(null);
+      // Removed: setPreviewImageUrl(null);
     }
   }, [isOpen, reset, vodData, clearErrors]);
 
@@ -213,10 +213,10 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
     clearErrors("tags");
   };
 
-  const handlePreviewUpload = (fileName: string) => {
-    setValue("preview", fileName, { shouldDirty: true, shouldValidate: true });
-    setPreviewImageUrl(getMinioUrl(fileName));
-  };
+  // Removed: const handlePreviewUpload = (fileName: string) => {
+  //   setValue("preview", fileName, { shouldDirty: true, shouldValidate: true });
+  //   setPreviewImageUrl(getMinioUrl(fileName));
+  // };
 
   const onSubmit = async (values: EditVodFormValues) => {
     try {
@@ -230,7 +230,7 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
             categoryId: values.categoryId,
             type: values.type,
             tags: values.tags || [],
-            preview: values.preview || "",
+            // Removed: preview: values.preview || "",
           },
         },
       });
@@ -384,30 +384,7 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="preview" className="text-white">Preview Image</Label>
-              {previewImageUrl && (
-                <div className="relative w-48 h-27 rounded-md overflow-hidden mb-2">
-                  <Image
-                    src={previewImageUrl}
-                    alt="Preview Image"
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="192px"
-                  />
-                </div>
-              )}
-              <FileUploadButton onUpload={handlePreviewUpload}>
-                <ImageIcon className="w-4 h-4 mr-2" />
-                Upload Preview Image
-              </FileUploadButton>
-              {errors.preview && (
-                <p className="text-red-500 text-sm mt-1">{errors.preview.message}</p>
-              )}
-              <p className="text-sm text-gray-400">
-                Recommended aspect ratio: 16:9. Max file size: 4MB.
-              </p>
-            </div>
+            {/* Removed Preview Image section */}
 
             <DialogFooter>
               <Button
