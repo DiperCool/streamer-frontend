@@ -70,7 +70,7 @@ export const StreamerSearchPopover: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleInputKeyDown}
             onFocus={() => searchTerm.trim().length > 0 && setOpen(true)} // Открываем, если есть текст при фокусе
-            onBlur={() => setTimeout(() => setOpen(false), 100)} // Задержка закрытия, чтобы позволить кликнуть по результатам
+            onBlur={() => setTimeout(() => setOpen(false), 200)} // Увеличена задержка до 200ms
           />
         </div>
       </PopoverTrigger>
