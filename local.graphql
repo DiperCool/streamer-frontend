@@ -320,6 +320,7 @@ type Query {
         roleType: RoleType!,
         where: RoleDtoFilterInput
     ): RolesConnection
+    search(search: String!): [SearchResult!]!
     streamInfo(streamerId: String!): StreamInfoDto!
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerDto!
@@ -416,6 +417,13 @@ type RolesEdge {
     cursor: String!
     "The item at the end of the edge."
     node: RoleDto!
+}
+
+type SearchResult {
+    image: String
+    resultType: SearchResultType!
+    slug: String!
+    title: String!
 }
 
 type StreamDto {
@@ -662,6 +670,11 @@ enum ChatMessageType {
 enum RoleType {
     ADMINISTRATOR
     BROADCASTER
+}
+
+enum SearchResultType {
+    CATEGORY
+    STREAMER
 }
 
 enum SortEnumType {
