@@ -643,6 +643,7 @@ type VodDto {
     streamerId: String!
     tags: [TagDto!]!
     title: String
+    type: VodType!
     views: Long!
 }
 
@@ -1075,6 +1076,7 @@ input VodDtoFilterInput {
     source: StringOperationFilterInput
     streamerId: StringOperationFilterInput
     title: StringOperationFilterInput
+    type: VodTypeOperationFilterInput
     views: LongOperationFilterInput
 }
 
@@ -1089,5 +1091,13 @@ input VodDtoSortInput {
     source: SortEnumType
     streamerId: SortEnumType
     title: SortEnumType
+    type: SortEnumType
     views: SortEnumType
+}
+
+input VodTypeOperationFilterInput {
+    eq: VodType
+    in: [VodType!]
+    neq: VodType
+    nin: [VodType!]
 }

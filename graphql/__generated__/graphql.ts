@@ -297,6 +297,7 @@ export type Mutation = {
   pinMessage: PinMessageResponse;
   removeCategory: RemoveCategoryResponse;
   removeRole: RemoveRoleResponse;
+  removeVod: RemoveVodResponse;
   unfollow: UnfollowResponse;
   unpinMessage: UnpinMessageResponse;
   updateAvatar: UpdateAvatarResponse;
@@ -308,6 +309,7 @@ export type Mutation = {
   updateProfile: UpdateProfileResponse;
   updateStreamInfo: UpdateStreamInfoResponse;
   updateStreamSettings: UpdateStreamSettingsResponse;
+  updateVod: UpdateVodResponse;
   upload: UploadFileResponse;
 };
 
@@ -362,6 +364,11 @@ export type MutationRemoveRoleArgs = {
 };
 
 
+export type MutationRemoveVodArgs = {
+  request: RemoveVodInput;
+};
+
+
 export type MutationUnfollowArgs = {
   unfollow: UnfollowInput;
 };
@@ -409,6 +416,11 @@ export type MutationUpdateProfileArgs = {
 
 export type MutationUpdateStreamInfoArgs = {
   streamInfo: UpdateStreamInfoInput;
+};
+
+
+export type MutationUpdateVodArgs = {
+  request: UpdateVodInput;
 };
 
 
@@ -476,6 +488,7 @@ export type PermissionsFlags = {
   isNone: Scalars['Boolean']['output'];
   isRoles: Scalars['Boolean']['output'];
   isStream: Scalars['Boolean']['output'];
+  isVod: Scalars['Boolean']['output'];
 };
 
 export type PermissionsFlagsInput = {
@@ -484,6 +497,7 @@ export type PermissionsFlagsInput = {
   isNone?: InputMaybe<Scalars['Boolean']['input']>;
   isRoles?: InputMaybe<Scalars['Boolean']['input']>;
   isStream?: InputMaybe<Scalars['Boolean']['input']>;
+  isVod?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type PermissionsOperationFilterInput = {
@@ -741,6 +755,15 @@ export type RemoveRoleInput = {
 
 export type RemoveRoleResponse = {
   __typename?: 'RemoveRoleResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type RemoveVodInput = {
+  id: Scalars['UUID']['input'];
+};
+
+export type RemoveVodResponse = {
+  __typename?: 'RemoveVodResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -1218,6 +1241,21 @@ export type UpdateStreamSettingsResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type UpdateVodInput = {
+  categoryId?: InputMaybe<Scalars['UUID']['input']>;
+  description: Scalars['String']['input'];
+  id: Scalars['UUID']['input'];
+  language: Scalars['String']['input'];
+  tags: Array<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+  type: VodType;
+};
+
+export type UpdateVodResponse = {
+  __typename?: 'UpdateVodResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type UploadFileInput = {
   file: Scalars['Upload']['input'];
 };
@@ -1257,6 +1295,7 @@ export type VodDto = {
   streamerId: Scalars['String']['output'];
   tags: Array<TagDto>;
   title?: Maybe<Scalars['String']['output']>;
+  type: VodType;
   views: Scalars['Long']['output'];
 };
 
@@ -1273,6 +1312,7 @@ export type VodDtoFilterInput = {
   source?: InputMaybe<StringOperationFilterInput>;
   streamerId?: InputMaybe<StringOperationFilterInput>;
   title?: InputMaybe<StringOperationFilterInput>;
+  type?: InputMaybe<VodTypeOperationFilterInput>;
   views?: InputMaybe<LongOperationFilterInput>;
 };
 
@@ -1287,7 +1327,20 @@ export type VodDtoSortInput = {
   source?: InputMaybe<SortEnumType>;
   streamerId?: InputMaybe<SortEnumType>;
   title?: InputMaybe<SortEnumType>;
+  type?: InputMaybe<SortEnumType>;
   views?: InputMaybe<SortEnumType>;
+};
+
+export enum VodType {
+  Private = 'PRIVATE',
+  Public = 'PUBLIC'
+}
+
+export type VodTypeOperationFilterInput = {
+  eq?: InputMaybe<VodType>;
+  in?: InputMaybe<Array<VodType>>;
+  neq?: InputMaybe<VodType>;
+  nin?: InputMaybe<Array<VodType>>;
 };
 
 /** A connection to a list of items. */
@@ -1737,6 +1790,20 @@ export type GetTagsQueryVariables = Exact<{
 
 export type GetTagsQuery = { __typename?: 'Query', tags?: { __typename?: 'TagsConnection', nodes?: Array<{ __typename?: 'TagDto', id: string, title: string }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
+export type RemoveVodMutationVariables = Exact<{
+  request: RemoveVodInput;
+}>;
+
+
+export type RemoveVodMutation = { __typename?: 'Mutation', removeVod: { __typename?: 'RemoveVodResponse', id: string } };
+
+export type UpdateVodMutationVariables = Exact<{
+  request: UpdateVodInput;
+}>;
+
+
+export type UpdateVodMutation = { __typename?: 'Mutation', updateVod: { __typename?: 'UpdateVodResponse', id: string } };
+
 export type GetVodsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1748,14 +1815,14 @@ export type GetVodsQueryVariables = Exact<{
 }>;
 
 
-export type GetVodsQuery = { __typename?: 'Query', vods?: { __typename?: 'VodsConnection', nodes?: Array<{ __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetVodsQuery = { __typename?: 'Query', vods?: { __typename?: 'VodsConnection', nodes?: Array<{ __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, type: VodType, duration: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetVodQueryVariables = Exact<{
   vodId: Scalars['UUID']['input'];
 }>;
 
 
-export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
+export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, type: VodType, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 
 export const CreateCategoryDocument = gql`
@@ -4354,6 +4421,72 @@ export type GetTagsQueryHookResult = ReturnType<typeof useGetTagsQuery>;
 export type GetTagsLazyQueryHookResult = ReturnType<typeof useGetTagsLazyQuery>;
 export type GetTagsSuspenseQueryHookResult = ReturnType<typeof useGetTagsSuspenseQuery>;
 export type GetTagsQueryResult = Apollo.QueryResult<GetTagsQuery, GetTagsQueryVariables>;
+export const RemoveVodDocument = gql`
+    mutation RemoveVod($request: RemoveVodInput!) {
+  removeVod(request: $request) {
+    id
+  }
+}
+    `;
+export type RemoveVodMutationFn = Apollo.MutationFunction<RemoveVodMutation, RemoveVodMutationVariables>;
+
+/**
+ * __useRemoveVodMutation__
+ *
+ * To run a mutation, you first call `useRemoveVodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveVodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeVodMutation, { data, loading, error }] = useRemoveVodMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useRemoveVodMutation(baseOptions?: Apollo.MutationHookOptions<RemoveVodMutation, RemoveVodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveVodMutation, RemoveVodMutationVariables>(RemoveVodDocument, options);
+      }
+export type RemoveVodMutationHookResult = ReturnType<typeof useRemoveVodMutation>;
+export type RemoveVodMutationResult = Apollo.MutationResult<RemoveVodMutation>;
+export type RemoveVodMutationOptions = Apollo.BaseMutationOptions<RemoveVodMutation, RemoveVodMutationVariables>;
+export const UpdateVodDocument = gql`
+    mutation UpdateVod($request: UpdateVodInput!) {
+  updateVod(request: $request) {
+    id
+  }
+}
+    `;
+export type UpdateVodMutationFn = Apollo.MutationFunction<UpdateVodMutation, UpdateVodMutationVariables>;
+
+/**
+ * __useUpdateVodMutation__
+ *
+ * To run a mutation, you first call `useUpdateVodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateVodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateVodMutation, { data, loading, error }] = useUpdateVodMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useUpdateVodMutation(baseOptions?: Apollo.MutationHookOptions<UpdateVodMutation, UpdateVodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateVodMutation, UpdateVodMutationVariables>(UpdateVodDocument, options);
+      }
+export type UpdateVodMutationHookResult = ReturnType<typeof useUpdateVodMutation>;
+export type UpdateVodMutationResult = Apollo.MutationResult<UpdateVodMutation>;
+export type UpdateVodMutationOptions = Apollo.BaseMutationOptions<UpdateVodMutation, UpdateVodMutationVariables>;
 export const GetVodsDocument = gql`
     query GetVods($after: String, $before: String, $first: Int, $last: Int, $order: [VodDtoSortInput!], $streamerId: String!, $where: VodDtoFilterInput) {
   vods(
@@ -4373,6 +4506,7 @@ export const GetVodsDocument = gql`
       source
       views
       createdAt
+      type
       duration
       language
       streamer {
@@ -4448,6 +4582,7 @@ export const GetVodDocument = gql`
     views
     createdAt
     duration
+    type
     language
     streamer {
       id

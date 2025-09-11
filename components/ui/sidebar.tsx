@@ -27,6 +27,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
     const dashboardBaseUrl = activeStreamer ? `/dashboard/${activeStreamer.userName}` : "/dashboard";
 
     const isChannelActive = pathname.startsWith(`${dashboardBaseUrl}/channel`);
+    const isContentActive = pathname.startsWith(`${dashboardBaseUrl}/content`); // New active check for Content
 
     return (
       <div
@@ -80,11 +81,16 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                     </Link>
                   </CollapsibleSidebarNav>
 
-                  <Link href={`${dashboardBaseUrl}/content`} passHref>
-                    <SidebarNavItem icon={<Video />} active={pathname === `${dashboardBaseUrl}/content`}>
-                      Content
-                    </SidebarNavItem>
-                  </Link>
+                  {/* New CollapsibleSidebarNav for Content */}
+                  <CollapsibleSidebarNav title="Content" icon={<Video />} active={isContentActive}>
+                    <Link href={`${dashboardBaseUrl}/content/vods`} passHref>
+                      <SidebarNavItem icon={<Video />} active={pathname === `${dashboardBaseUrl}/content/vods`}>
+                        VODs
+                      </SidebarNavItem>
+                    </Link>
+                    {/* Add other content sub-items here if needed */}
+                  </CollapsibleSidebarNav>
+
                   <Link href={`${dashboardBaseUrl}/settings`} passHref>
                     <SidebarNavItem icon={<Settings />} active={pathname === `${dashboardBaseUrl}/settings`}>
                       Dashboard Settings

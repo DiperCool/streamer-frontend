@@ -27,6 +27,7 @@ export const GET_VODS = gql`
                 source
                 views
                 createdAt
+                type
                 duration
                 language
                 streamer {
@@ -64,6 +65,7 @@ export const GET_VOD = gql`
             views
             createdAt
             duration
+            type
             language
             streamer {
                 id

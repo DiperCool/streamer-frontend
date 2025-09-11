@@ -1,13 +1,5 @@
-"use client"
+import { redirect } from 'next/navigation';
 
-import React from "react"
-
-export default function ContentPage() {
-  return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-white">Content</h1>
-      <p className="text-gray-400">Manage your videos, clips, and other content.</p>
-      {/* Add content management here */}
-    </div>
-  )
+export default function ContentRootPage({ params }: { params: { username: string } }) {
+  redirect(`/dashboard/${params.username}/content/vods`);
 }
