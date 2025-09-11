@@ -16,7 +16,7 @@ export const SearchStreamersTab: React.FC<SearchStreamersTabProps> = ({ searchQu
   const { data, loading, error } = useGetStreamersQuery({
     variables: {
       search: searchQuery,
-      first: 20, // Limit to 20 results for search page
+      first: 15, // Changed from 20 to 15
       order: [{ userName: SortEnumType.Asc }],
     },
     skip: !searchQuery,

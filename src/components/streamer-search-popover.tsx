@@ -5,13 +5,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
-import { useSearchQuery, SearchResultType } from "@/graphql/__generated__/graphql"; // Import useSearchQuery and SearchResultType
+import { useSearchQuery, SearchResultType } from "@/graphql/__generated__/graphql";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getMinioUrl } from "@/utils/utils";
-import Link from "next/link";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 
 interface StreamerSearchPopoverProps {
   children: React.ReactNode;
@@ -27,7 +26,7 @@ export const StreamerSearchPopover: React.FC<StreamerSearchPopoverProps> = ({ ch
     variables: {
       search: debouncedSearchTerm,
     },
-    skip: !debouncedSearchTerm, // Only fetch if there's a debounced search term
+    skip: !debouncedSearchTerm,
   });
 
   const results = data?.search || [];
@@ -39,6 +38,15 @@ export const StreamerSearchPopover: React.FC<StreamerSearchPopoverProps> = ({ ch
       router.push(`/${result.slug}`);
     } else if (result.resultType === SearchResultType.Category) {
       router.push(`/category/${result.slug}`);
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchTerm.trim()) {
+      e.preventDefault(); // Prevent default form submission if any
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      setOpen(false); // Close popover
+      setSearchTerm(""); // Clear search term
     }
   };
 
@@ -56,6 +64,7 @@ export const StreamerSearchPopover: React.FC<StreamerSearchPopoverProps> = ({ ch
               className="w-full bg-gray-700 border-gray-600 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleInputKeyDown} // Add keydown handler
             />
           </div>
         </div>

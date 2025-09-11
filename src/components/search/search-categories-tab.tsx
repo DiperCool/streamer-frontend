@@ -13,7 +13,7 @@ export const SearchCategoriesTab: React.FC<SearchCategoriesTabProps> = ({ search
   const { data, loading, error } = useGetCategoriesQuery({
     variables: {
       search: searchQuery,
-      first: 20, // Limit to 20 results for search page
+      first: 15, // Changed from 20 to 15
       order: [{ title: SortEnumType.Asc }],
     },
     skip: !searchQuery,
