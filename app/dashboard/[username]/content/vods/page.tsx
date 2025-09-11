@@ -49,8 +49,8 @@ export default function DashboardVodsPage() {
   const { activeStreamer, activeStreamerPermissions } = useDashboard();
   const streamerId = activeStreamer?.id ?? "";
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  // Removed: const [searchTerm, setSearchTerm] = useState("");
+  // Removed: const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [editVodId, setEditVodId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -65,7 +65,7 @@ export default function DashboardVodsPage() {
     variables: {
       streamerId: streamerId,
       first: 10,
-      search: debouncedSearchTerm,
+      // Removed: search: debouncedSearchTerm,
       order: [{ createdAt: SortEnumType.Desc }],
     },
     skip: !streamerId,
@@ -100,7 +100,7 @@ export default function DashboardVodsPage() {
         variables: {
           after: vodsData.vods.pageInfo.endCursor,
           first: 10,
-          search: debouncedSearchTerm,
+          // Removed: search: debouncedSearchTerm,
           order: [{ createdAt: SortEnumType.Desc }],
           streamerId: streamerId,
         },
@@ -177,6 +177,8 @@ export default function DashboardVodsPage() {
           <CardTitle className="text-white">All VODs</CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Removed Search Input */}
+          {/*
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
@@ -186,6 +188,7 @@ export default function DashboardVodsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          */}
 
           {vods.length === 0 && !vodsLoading ? (
             <p className="text-gray-400">No VODs found.</p>
