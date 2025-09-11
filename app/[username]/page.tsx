@@ -48,9 +48,6 @@ export default function StreamerRootProfilePage({ params }: { params: { username
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-semibold text-white mb-4">Home Content for {streamer?.userName || username}</h2>
-      <p className="text-gray-400 mb-8">This is the main home section for the streamer.</p>
-      
       {/* Latest Videos Section */}
       {vods.length > 0 && (
         <div className="mb-8">
