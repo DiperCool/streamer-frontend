@@ -61,7 +61,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
   const hlsSource = sources.find(s => s.sourceType === StreamSourceType.Hls);
   const activeSource = hlsSource;
 
-  const hlsConfig = React.useMemo(() => ({ lowLatencyMode: true }), []);
+  const hlsConfig = React.useMemo(() => ({ lowLatencyMode: false }), []);
 
   const handleFullscreenChange = useCallback(() => {
     setIsNativeFullscreen(document.fullscreenElement === playerWrapperRef.current);
