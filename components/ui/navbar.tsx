@@ -46,6 +46,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
       });
       const router = useRouter();
       const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading, currentAuthUserStreamer } = useDashboard();
+      const [searchTerm, setSearchTerm] = React.useState(""); // State for search input
 
       const userName = meData?.me?.userName;
       const userAvatar = meData?.me?.avatar;
@@ -56,6 +57,14 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
             returnTo: typeof window !== "undefined" ? window.location.origin : "/",
           },
         });
+      };
+
+      const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchTerm.trim()) {
+          router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+          setSearchTerm(""); // Clear search term after navigation
+        }
       };
 
       if (isAdmin) {
@@ -173,15 +182,22 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
 
             <div className="flex-1 flex justify-center">
               {!isMobile && !isDashboard && (
-                <StreamerSearchPopover>
-                  <Button
-                    variant="outline"
-                    className="w-96 bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white justify-start"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    <span>Search streamers...</span>
-                  </Button>
-                </StreamerSearchPopover>
+                <form onSubmit={handleSearchSubmit} className="w-96">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Input
+                      placeholder="Search streamers and categories..."
+                      className="w-full bg-gray-800 border-gray-700 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSearchSubmit(e);
+                        }
+                      }}
+                    />
+                  </div>
+                </form>
               )}
             </div>
 

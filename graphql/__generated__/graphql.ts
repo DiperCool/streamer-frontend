@@ -543,6 +543,7 @@ export type Query = {
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
+  search: Array<SearchResult>;
   streamInfo: StreamInfoDto;
   streamSettings: StreamSettingsDto;
   streamer: StreamerDto;
@@ -653,6 +654,11 @@ export type QueryRolesArgs = {
   order?: InputMaybe<Array<RoleDtoSortInput>>;
   roleType: RoleType;
   where?: InputMaybe<RoleDtoFilterInput>;
+};
+
+
+export type QuerySearchArgs = {
+  search: Scalars['String']['input'];
 };
 
 
@@ -798,6 +804,19 @@ export type RolesEdge = {
   /** The item at the end of the edge. */
   node: RoleDto;
 };
+
+export type SearchResult = {
+  __typename?: 'SearchResult';
+  image?: Maybe<Scalars['String']['output']>;
+  resultType: SearchResultType;
+  slug: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
+export enum SearchResultType {
+  Category = 'CATEGORY',
+  Streamer = 'STREAMER'
+}
 
 export enum SortEnumType {
   Asc = 'ASC',
@@ -1537,6 +1556,13 @@ export type GetRoleByIdQueryVariables = Exact<{
 
 
 export type GetRoleByIdQuery = { __typename?: 'Query', role: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+
+export type SearchQueryVariables = Exact<{
+  search: Scalars['String']['input'];
+}>;
+
+
+export type SearchQuery = { __typename?: 'Query', search: Array<{ __typename?: 'SearchResult', title: string, slug: string, image?: string | null, resultType: SearchResultType }> };
 
 export type UpdateAvatarMutationVariables = Exact<{
   input: UpdateAvatarInput;
@@ -3217,6 +3243,49 @@ export type GetRoleByIdQueryHookResult = ReturnType<typeof useGetRoleByIdQuery>;
 export type GetRoleByIdLazyQueryHookResult = ReturnType<typeof useGetRoleByIdLazyQuery>;
 export type GetRoleByIdSuspenseQueryHookResult = ReturnType<typeof useGetRoleByIdSuspenseQuery>;
 export type GetRoleByIdQueryResult = Apollo.QueryResult<GetRoleByIdQuery, GetRoleByIdQueryVariables>;
+export const SearchDocument = gql`
+    query Search($search: String!) {
+  search(search: $search) {
+    title
+    slug
+    image
+    resultType
+  }
+}
+    `;
+
+/**
+ * __useSearchQuery__
+ *
+ * To run a query within a React component, call `useSearchQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchQuery({
+ *   variables: {
+ *      search: // value for 'search'
+ *   },
+ * });
+ */
+export function useSearchQuery(baseOptions: Apollo.QueryHookOptions<SearchQuery, SearchQueryVariables> & ({ variables: SearchQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchQuery, SearchQueryVariables>(SearchDocument, options);
+      }
+export function useSearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchQuery, SearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchQuery, SearchQueryVariables>(SearchDocument, options);
+        }
+export function useSearchSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchQuery, SearchQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchQuery, SearchQueryVariables>(SearchDocument, options);
+        }
+export type SearchQueryHookResult = ReturnType<typeof useSearchQuery>;
+export type SearchLazyQueryHookResult = ReturnType<typeof useSearchLazyQuery>;
+export type SearchSuspenseQueryHookResult = ReturnType<typeof useSearchSuspenseQuery>;
+export type SearchQueryResult = Apollo.QueryResult<SearchQuery, SearchQueryVariables>;
 export const UpdateAvatarDocument = gql`
     mutation UpdateAvatar($input: UpdateAvatarInput!) {
   updateAvatar(input: $input) {
