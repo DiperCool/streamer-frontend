@@ -4,7 +4,7 @@ import React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { MoreVertical } from "lucide-react"
-import { VodDto } from "@/graphql/__generated__/graphql"
+import { VodDto, VodType } from "@/graphql/__generated__/graphql" // Import VodType
 import { getMinioUrl } from "@/utils/utils"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNowStrict } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" // Import Avatar components
+import { cn } from "@/lib/utils" // Import cn for conditional classNames
 
 interface VodCardProps {
   vod: VodDto
@@ -28,7 +29,7 @@ const formatDuration = (milliseconds: number): string => {
   if (isNaN(milliseconds) || milliseconds < 0) return "00:00";
   
   const totalSeconds = Math.floor(milliseconds / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
+  const hours = Math.floor((totalSeconds % 3600) / 60); // Corrected calculation for minutes
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const remainingSeconds = totalSeconds % 60;
 
@@ -47,6 +48,8 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
   const streamerName = vod.streamer?.userName || "Unknown Streamer";
   const streamerAvatar = vod.streamer?.avatar;
 
+  const isPrivate = vod.type === VodType.Private;
+
   return (
     <div className="group relative w-full cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
       <Link href={`/vod/${vod.id}`} className="block">
@@ -57,8 +60,16 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             style={{ objectFit: "cover" }}
-            className="transition-transform duration-200 group-hover:scale-105"
+            className={cn(
+              "transition-transform duration-200 group-hover:scale-105",
+              isPrivate && "filter brightness-50" // Darken if private
+            )}
           />
+          {isPrivate && (
+            <div className="absolute inset-0 flex items-center justify-center z-20">
+              <span className="text-white text-xl font-bold bg-black/50 px-4 py-2 rounded-md">PRIVATE</span>
+            </div>
+          )}
           {isCurrentStream && (
             <Badge className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
               Current Stream
