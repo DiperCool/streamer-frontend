@@ -11,11 +11,10 @@ import { getMinioUrl } from "@/utils/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
 
-// Компонент больше не принимает children как проп для триггера
 export const StreamerSearchPopover: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const [open, setOpen] = useState(false); // Контролируем состояние открытия поповера
+  const [open, setOpen] = useState(false); // Controlled state for Popover
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -23,12 +22,13 @@ export const StreamerSearchPopover: React.FC = () => {
     variables: {
       search: debouncedSearchTerm,
     },
-    skip: !debouncedSearchTerm, // Запрашиваем только если есть дебаунснутый поисковый запрос
+    skip: !debouncedSearchTerm,
   });
 
   const results = data?.search || [];
 
-  // Эффект для управления видимостью поповера на основе поискового запроса
+  // Этот эффект контролирует, когда поповер *должен* быть открыт на основе наличия поискового запроса.
+  // Он должен работать в сочетании с внутренней обработкой фокуса/блюра Popover.
   useEffect(() => {
     if (searchTerm.trim().length > 0) {
       setOpen(true);
@@ -49,18 +49,18 @@ export const StreamerSearchPopover: React.FC = () => {
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchTerm.trim()) {
-      e.preventDefault(); // Предотвращаем стандартную отправку формы, если таковая есть
+      e.preventDefault();
       router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
-      setOpen(false); // Закрываем поповер
-      setSearchTerm(""); // Очищаем поисковый запрос
-      inputRef.current?.blur(); // Убираем фокус с инпута
+      setOpen(false);
+      setSearchTerm("");
+      inputRef.current?.blur();
     }
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen}> {/* Позволяем Popover управлять своим состоянием открытия */}
       <PopoverTrigger asChild>
-        <div className="relative w-96"> {/* Обертка для инпута и иконки поиска */}
+        <div className="relative w-96">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <Input
             ref={inputRef}
@@ -69,8 +69,7 @@ export const StreamerSearchPopover: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleInputKeyDown}
-            onFocus={() => searchTerm.trim().length > 0 && setOpen(true)} // Открываем, если есть текст при фокусе
-            onBlur={() => setTimeout(() => setOpen(false), 200)} // Увеличена задержка до 200ms
+            // Удалены обработчики onFocus и onBlur из Input
           />
         </div>
       </PopoverTrigger>
