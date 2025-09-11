@@ -147,6 +147,7 @@ type Mutation {
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
     removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
+    removeVod(request: RemoveVodInput!): RemoveVodResponse!
     unfollow(unfollow: UnfollowInput!): UnfollowResponse!
     unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
@@ -158,6 +159,7 @@ type Mutation {
     updateProfile(input: UpdateProfileInput!): UpdateProfileResponse!
     updateStreamInfo(streamInfo: UpdateStreamInfoInput!): UpdateStreamInfoResponse!
     updateStreamSettings: UpdateStreamSettingsResponse!
+    updateVod(request: UpdateVodInput!): UpdateVodResponse!
     upload(input: UploadFileInput!): UploadFileResponse!
 }
 
@@ -215,6 +217,7 @@ type PermissionsFlags {
     isNone: Boolean!
     isRoles: Boolean!
     isStream: Boolean!
+    isVod: Boolean!
 }
 
 type PinMessageResponse {
@@ -388,6 +391,10 @@ type RemoveCategoryResponse {
 }
 
 type RemoveRoleResponse {
+    id: UUID!
+}
+
+type RemoveVodResponse {
     id: UUID!
 }
 
@@ -614,6 +621,10 @@ type UpdateStreamSettingsResponse {
     id: UUID!
 }
 
+type UpdateVodResponse {
+    id: UUID!
+}
+
 type UploadFileResponse {
     fileName: String!
 }
@@ -689,6 +700,11 @@ enum StreamSourceType {
 
 enum SystemRoleType {
     ADMINISTRATOR
+}
+
+enum VodType {
+    PRIVATE
+    PUBLIC
 }
 
 "The `DateTime` scalar represents an ISO-8601 compliant date time type."
@@ -831,6 +847,7 @@ input PermissionsFlagsInput {
     isNone: Boolean
     isRoles: Boolean
     isStream: Boolean
+    isVod: Boolean
 }
 
 input PermissionsOperationFilterInput {
@@ -850,6 +867,10 @@ input RemoveCategoryInput {
 
 input RemoveRoleInput {
     roleId: UUID!
+}
+
+input RemoveVodInput {
+    id: UUID!
 }
 
 input RoleDtoFilterInput {
@@ -1010,6 +1031,16 @@ input UpdateStreamInfoInput {
     streamerId: String!
     tags: [String!]!
     title: String!
+}
+
+input UpdateVodInput {
+    categoryId: UUID
+    description: String!
+    id: UUID!
+    language: String!
+    tags: [String!]!
+    title: String!
+    type: VodType!
 }
 
 input UploadFileInput {

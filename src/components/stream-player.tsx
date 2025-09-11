@@ -107,7 +107,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
     <div ref={playerWrapperRef} className="absolute inset-0 bg-black">
       <HlsPlayerComponent
         src={activeSource.url}
-        playerRef={videoElementRef as React.RefObject<HTMLVideoElement>} {/* Применено утверждение типа */}
+        playerRef={videoElementRef as React.RefObject<HTMLVideoElement>}
         hlsConfig={hlsConfig}
         isMuted={isMuted}
       />
