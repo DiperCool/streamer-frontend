@@ -47,3 +47,11 @@ export const BAN_USER = gql`
         }
     }
 `
+
+export const UNBAN_USER = gql`
+    mutation UnbanUser($request: UnbanUserInput!) {
+        unbanUser(request: $request) {
+            id
+        }
+    }
+`

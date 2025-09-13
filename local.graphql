@@ -182,6 +182,7 @@ type Mutation {
     removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
     removeVod(request: RemoveVodInput!): RemoveVodResponse!
+    unbanUser(request: UnbanUserInput!): UnbanUserResponse!
     unfollow(unfollow: UnfollowInput!): UnfollowResponse!
     unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
@@ -544,7 +545,7 @@ type StreamerInteractionDto {
     bannedUntil: DateTime
     followed: Boolean!
     followedAt: DateTime
-    lastTimeMessage: DateTime # Добавлено новое поле
+    lastTimeMessage: DateTime
     permissions: PermissionsFlags!
 }
 
@@ -600,8 +601,8 @@ type Subscription {
     streamUpdated(streamId: UUID!): StreamDto!
     streamerUpdated(streamerId: String!): StreamerDto!
     subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
-    userBanned(broadcasterId: String!, userId: String!): BannedUserDto! # Добавлено новое поле
-    userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto! # Добавлено новое поле
+    userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
+    userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
     watchStream(streamId: UUID!): StreamWatcher!
 }
 
@@ -632,6 +633,10 @@ type TagsEdge {
     cursor: String!
     "The item at the end of the edge."
     node: TagDto!
+}
+
+type UnbanUserResponse {
+    id: UUID!
 }
 
 type UnfollowResponse {
@@ -1066,6 +1071,11 @@ input TagDtoFilterInput {
 input TagDtoSortInput {
     id: SortEnumType
     title: SortEnumType
+}
+
+input UnbanUserInput {
+    broadcasterId: String!
+    userId: String!
 }
 
 input UnfollowInput {
