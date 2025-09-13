@@ -22,7 +22,7 @@ import {
     useChatMessageDeletedSubscription,
     useUserBannedSubscription,
     useUserUnbannedSubscription,
-    useStreamerInteractionLazyQuery, // Импортируем useStreamerInteractionLazyQuery
+    useStreamerInteractionLazyQuery,
     SortEnumType,
     ChatMessageDto,
     GetChatMessagesQuery,
@@ -38,7 +38,7 @@ import { toast } from "sonner"
 interface ChatSectionProps {
   onCloseChat?: () => void
   streamerId: string
-  onScrollToBottom: () => void;
+  // onScrollToBottom: () => void; // Удалено
   hideCardWrapper?: boolean;
 }
 
@@ -65,7 +65,7 @@ interface RowData {
   onMouseLeave: () => void;
   chatId: string;
   pinnedMessageId: string | null;
-  refetchStreamerInteraction: () => Promise<any>; // Добавлено
+  refetchStreamerInteraction: () => Promise<any>;
 }
 
 const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
@@ -88,20 +88,18 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         chatId={chatId}
-        refetchStreamerInteraction={refetchStreamerInteraction} // Передаем вниз
+        refetchStreamerInteraction={refetchStreamerInteraction}
       />
     </div>
   );
 });
 
-export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCardWrapper = false }: ChatSectionProps) {
+export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }: ChatSectionProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
   const { isAuthenticated, user } = useAuth0();
-  // Удаляем использование useDashboard для streamerInteractionData
-  // const { refetchStreamerInteraction, streamerInteractionData, streamerInteractionLoading } = useDashboard();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -122,13 +120,11 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const pinnedMessageId = chatData?.chat.pinnedMessageId;
   const chatSettings = chatData?.chat.settings;
 
-  // Используем useStreamerInteractionLazyQuery напрямую
   const [getStreamerInteraction, { data: streamerInteractionData, loading: streamerInteractionLoading, refetch: refetchStreamerInteractionQuery }] = useStreamerInteractionLazyQuery({
     variables: { streamerId: streamerId },
     skip: !isAuthenticated || !streamerId || !user?.sub,
   });
 
-  // Мемоизируем функцию refetch для использования в подписках и onSubmit
   const refetchStreamerInteraction = useCallback(async () => {
     if (isAuthenticated && streamerId && user?.sub) {
       return await refetchStreamerInteractionQuery();
@@ -136,7 +132,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     return null;
   }, [isAuthenticated, streamerId, user?.sub, refetchStreamerInteractionQuery]);
 
-  // Загружаем данные о взаимодействии при монтировании или изменении зависимостей
   useEffect(() => {
     if (isAuthenticated && streamerId && user?.sub) {
       getStreamerInteraction();
@@ -182,8 +177,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     variables: { chatId: chatId! },
     skip: !chatId,
     onData: ({ data }) => {
-      refetchChat(); // Refetch chat data to get updated pinned message and settings
-      refetchStreamerInteraction(); // Refetch interaction for current user
+      refetchChat();
+      refetchStreamerInteraction();
     },
   });
 
@@ -351,11 +346,11 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   useUserBannedSubscription({
     variables: {
       broadcasterId: streamerId,
-      userId: user?.sub || "", // Corrected userId
+      userId: user?.sub || "",
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
-      refetchStreamerInteraction(); // Refetch interaction for the current user
+      refetchStreamerInteraction();
       toast.error("You have been banned from this chat!");
     },
   });
@@ -363,11 +358,11 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   useUserUnbannedSubscription({
     variables: {
       broadcasterId: streamerId,
-      userId: user?.sub || "", // Corrected userId
+      userId: user?.sub || "",
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
-      refetchStreamerInteraction(); // Refetch interaction for the current user
+      refetchStreamerInteraction();
       toast.success("You have been unbanned from this chat!");
     },
   });
@@ -477,7 +472,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       return;
     }
 
-    // Эти проверки теперь выполняются до рендера поля ввода, но остаются здесь как дополнительная защита
     if (streamerInteractionData?.streamerInteraction?.banned) {
       const banExpires = streamerInteractionData.streamerInteraction.bannedUntil ? new Date(streamerInteractionData.streamerInteraction.bannedUntil) : null;
       const isPermanent = banExpires && banExpires.getFullYear() > new Date().getFullYear() + 50;
@@ -501,8 +495,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       return;
     }
 
-    // TODO: Add subscribersOnly check when subscription status is available
-
     try {
       await createMessage({
         variables: {
@@ -515,7 +507,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       })
       reset({ message: "" })
       setReplyToMessage(null)
-      refetchStreamerInteraction(); // Обновляем lastTimeMessage для slow mode
+      refetchStreamerInteraction();
     } catch (error) {
       console.error("Error sending message:", error)
       toast.error("Failed to send message.");
@@ -642,7 +634,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     onMouseLeave: () => setHoveredMessageId(null),
     chatId: chatId!,
     pinnedMessageId: pinnedMessageId,
-    refetchStreamerInteraction: refetchStreamerInteraction, // Передаем функцию refetch
+    refetchStreamerInteraction: refetchStreamerInteraction,
   }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId, refetchStreamerInteraction]);
 
   // Determine if chat input should be disabled and what message to show
@@ -677,7 +669,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     chatInputRestrictionMessage = `Slow mode active. Please wait ${slowModeCooldown}s.`;
     isChatInputDisabled = true;
   }
-  // TODO: Add subscribersOnly check here when subscription status is available
 
   const chatContent = (
     <>
@@ -751,7 +742,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
           </div>
         )}
 
-        {isChatInputDisabled ? ( // Conditionally render restriction message or input
+        {isChatInputDisabled ? (
           <div className="flex items-center justify-center h-10 rounded-md bg-gray-700 text-gray-400 text-sm px-3">
             {chatInputRestrictionMessage}
           </div>
@@ -766,7 +757,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
                   handleSubmit(onSubmit)()
                 }
               }}
-              disabled={sendingMessage} // Only disable for sending state, not for general restrictions
+              disabled={sendingMessage}
             />
             <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <Smile className="h-5 w-5" />
@@ -779,7 +770,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
               size="icon"
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={handleSubmit(onSubmit)}
-              disabled={sendingMessage} // Only disable for sending state
+              disabled={sendingMessage}
             >
               <Send className="h-5 w-5" />
             </Button>

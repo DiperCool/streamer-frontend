@@ -97,13 +97,7 @@ export default function StreamerProfileLayout({
     },
   });
 
-  const chatPanelRef = useRef<HTMLDivElement>(null);
-
-  const scrollChatPanelToBottom = useCallback(() => {
-    if (chatPanelRef.current) {
-      chatPanelRef.current.scrollTop = chatPanelRef.current.scrollHeight;
-    }
-  }, []);
+  // Удален chatPanelRef и scrollChatPanelToBottom
 
   if (streamerLoading || profileLoading || currentStreamLoading || streamInfoLoading) {
     return (
@@ -145,24 +139,28 @@ export default function StreamerProfileLayout({
   const activeTab = getActiveTab();
 
   const hasStreamSources = currentStream?.sources && currentStream.sources.length > 0;
+  const isDashboardRoute = pathname.startsWith(`/dashboard/${username}`);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse">
 
-      <div
-        ref={chatPanelRef}
-        className={cn(
-          "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
-          isChatVisible ? "translate-x-0" : "translate-x-full",
-          "hidden lg:flex"
-        )}
-      >
-        <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
-      </div>
+      {/* Единый контейнер для ChatSection */}
+      {!isDashboardRoute && (
+        <div
+          className={cn(
+            "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
+            isChatVisible ? "translate-x-0" : "translate-x-full",
+            "lg:flex", // Всегда flex на больших экранах
+            !isChatVisible && "hidden" // Скрываем, если чат не виден
+          )}
+        >
+          <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
+        </div>
+      )}
 
       <div className={cn(
           "flex-1 flex flex-col transition-all duration-300 ease-in-out",
-          isChatVisible ? "lg:mr-80" : "",
+          isChatVisible && !isDashboardRoute ? "lg:mr-80" : "", // Применяем отступ только если чат виден и это не дашборд
       )}>
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
@@ -241,12 +239,12 @@ export default function StreamerProfileLayout({
           {children}
         </div>
 
-        {isChatVisible && (
+        {/* Мобильный чат - теперь отдельный контейнер */}
+        {isChatVisible && !isDashboardRoute && (
           <div
-            ref={chatPanelRef}
             className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh] overflow-y-auto"
           >
-            <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} onScrollToBottom={scrollChatPanelToBottom} />
+            <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
           </div>
         )}
       </div>

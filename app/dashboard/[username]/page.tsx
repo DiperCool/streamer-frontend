@@ -8,16 +8,15 @@ import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
 import { DashboardControlsSidebar } from "@/src/components/dashboard/dashboard-controls-sidebar"
 import useLocalStorage from "use-local-storage";
-import { ChatSection } from "@/src/components/chat-section"; // Import ChatSection
-import { useDashboard } from "@/src/contexts/DashboardContext"; // Import useDashboard
-import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget"; // Import StreamPreviewWidget
-import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget"; // Import StreamInfoWidget
-import { SessionInfoWidget } from "@/src/components/dashboard/widgets/session-info-widget"; // Import SessionInfoWidget
+import { ChatSection } from "@/src/components/chat-section";
+import { useDashboard } from "@/src/contexts/DashboardContext";
+import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget";
+import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget";
+import { SessionInfoWidget } from "@/src/components/dashboard/widgets/session-info-widget";
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
 
-// Define an enum for widget types
 export enum DashboardWidgetType {
   SessionInfo = "SessionInfo",
   StreamPreview = "StreamPreview",
@@ -27,7 +26,6 @@ export enum DashboardWidgetType {
   ModActions = "ModActions",
 }
 
-// Default active widgets
 const DEFAULT_ACTIVE_WIDGETS: DashboardWidgetType[] = [
   DashboardWidgetType.SessionInfo,
   DashboardWidgetType.StreamPreview,
@@ -44,9 +42,8 @@ export default function DashboardHomePage({ params }: { params: { username: stri
     LOCAL_STORAGE_KEY_PREFIX + username + ACTIVE_WIDGETS_KEY_SUFFIX,
     DEFAULT_ACTIVE_WIDGETS
   );
-  const { activeStreamer } = useDashboard(); // Get activeStreamer from context
+  const { activeStreamer } = useDashboard();
 
-  // Helper to render widget content
   const renderWidgetContent = (widgetType: DashboardWidgetType) => {
     switch (widgetType) {
       case DashboardWidgetType.SessionInfo:
@@ -90,7 +87,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
               <div className="flex-1 h-full flex flex-col"> 
                 <ChatSection
                   streamerId={activeStreamer?.id ?? ""}
-                  onScrollToBottom={() => { /* No-op for dashboard widget */ }}
+                  // onScrollToBottom={() => { /* No-op for dashboard widget */ }} // Удалено
                   hideCardWrapper={true}
                 />
               </div>
@@ -124,7 +121,6 @@ export default function DashboardHomePage({ params }: { params: { username: stri
     }
   };
 
-  // Define widget groups for dynamic rendering
   const leftColumnWidgetsOrder = [
     DashboardWidgetType.SessionInfo,
     DashboardWidgetType.StreamPreview,
@@ -134,9 +130,8 @@ export default function DashboardHomePage({ params }: { params: { username: stri
     DashboardWidgetType.Chat,
     DashboardWidgetType.StreamInfo,
   ];
-  const bottomRightSectionWidget = DashboardWidgetType.ModActions; // Single widget for this section
+  const bottomRightSectionWidget = DashboardWidgetType.ModActions;
 
-  // Helper to render dynamic panels within a PanelGroup
   const renderDynamicPanels = (
     widgetsInGroup: DashboardWidgetType[],
     direction: "horizontal" | "vertical",
@@ -147,7 +142,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
     );
 
     if (visibleWidgetsInGroup.length === 0) {
-      return null; // Render nothing if no widgets are active in this group
+      return null;
     }
 
     return (
@@ -173,24 +168,22 @@ export default function DashboardHomePage({ params }: { params: { username: stri
     );
   };
 
-  // Function to reset layout to default by clearing localStorage for all panel groups and active widgets
   const resetLayout = useCallback(() => {
     if (window.confirm("Are you sure you want to reset the layout to default?")) {
       localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + username + "-main-horizontal");
       localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + username + "-left-vertical");
       localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + username + "-right-vertical");
       localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + username + "-top-right-horizontal");
-      localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + username + ACTIVE_WIDGETS_KEY_SUFFIX); // Reset active widgets
+      localStorage.removeItem(LOCAL_STORAGE_KEY_PREFIX + username + ACTIVE_WIDGETS_KEY_SUFFIX);
       toast.success("Layout reset to default.");
-      setIsEditing(false); // Exit edit mode after reset
-      window.location.reload(); // Force a refresh to re-render with default sizes and widgets
+      setIsEditing(false);
+      window.location.reload();
     }
   }, [username]);
 
-  // Save layout is now handled automatically by autoSaveId, this just shows a toast
   const saveLayout = useCallback(() => {
     toast.success("Layout saved successfully!");
-    setIsEditing(false); // Exit edit mode after saving
+    setIsEditing(false);
   }, []);
 
   const handleUpdateWidgets = useCallback((newActiveWidgets: DashboardWidgetType[]) => {
@@ -198,13 +191,9 @@ export default function DashboardHomePage({ params }: { params: { username: stri
     toast.success("Widgets updated successfully!");
   }, [setActiveWidgets]);
 
-  // Determine if left column should be rendered
   const shouldRenderLeftColumn = leftColumnWidgetsOrder.some(widget => activeWidgets.includes(widget));
-  // Determine if top-right section should be rendered
   const shouldRenderTopRightSection = topRightSectionWidgetsOrder.some(widget => activeWidgets.includes(widget));
-  // Determine if bottom-right section (ModActions) should be rendered
   const shouldRenderBottomRightSection = activeWidgets.includes(bottomRightSectionWidget);
-  // Determine if right column should be rendered at all
   const shouldRenderRightColumn = shouldRenderTopRightSection || shouldRenderBottomRightSection;
 
   return (
@@ -257,7 +246,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
         saveLayout={saveLayout}
         resetLayout={resetLayout}
         activeWidgets={activeWidgets}
-        onUpdateWidgets={handleUpdateWidgets}
+        onUpdateWidgets={onUpdateWidgets}
       />
     </div>
   );
