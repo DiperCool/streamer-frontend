@@ -102,3 +102,49 @@ export const CHAT_UPDATED_SUBSCRIPTION = gql`
         }
     }
 `
+
+export const USER_BANNED_SUBSCRIPTION = gql`
+    subscription UserBanned($broadcasterId: String!, $userId: String!) {
+        userBanned(broadcasterId: $broadcasterId, userId: $userId) {
+            id
+            userId
+            bannedById
+            reason
+            bannedAt
+            bannedUntil
+            user {
+                id
+                userName
+                avatar
+            }
+            bannedBy {
+                id
+                userName
+                avatar
+            }
+        }
+    }
+`
+
+export const USER_UNBANNED_SUBSCRIPTION = gql`
+    subscription UserUnbanned($broadcasterId: String!, $userId: String!) {
+        userUnbanned(broadcasterId: $broadcasterId, userId: $userId) {
+            id
+            userId
+            bannedById
+            reason
+            bannedAt
+            bannedUntil
+            user {
+                id
+                userName
+                avatar
+            }
+            bannedBy {
+                id
+                userName
+                avatar
+            }
+        }
+    }
+`

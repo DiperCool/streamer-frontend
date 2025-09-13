@@ -544,7 +544,7 @@ type StreamerInteractionDto {
     bannedUntil: DateTime
     followed: Boolean!
     followedAt: DateTime
-    lastTimeMessage: DateTime
+    lastTimeMessage: DateTime # Добавлено новое поле
     permissions: PermissionsFlags!
 }
 
@@ -600,8 +600,8 @@ type Subscription {
     streamUpdated(streamId: UUID!): StreamDto!
     streamerUpdated(streamerId: String!): StreamerDto!
     subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
-    userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
-    userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
+    userBanned(broadcasterId: String!, userId: String!): BannedUserDto! # Добавлено новое поле
+    userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto! # Добавлено новое поле
     watchStream(streamId: UUID!): StreamWatcher!
 }
 

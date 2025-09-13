@@ -146,3 +146,50 @@ export const GET_CHAT_MESSAGES_HISTORY = gql`
         }
     }
 `
+
+export const GET_BANNED_USERS = gql`
+    query GetBannedUsers(
+        $after: String
+        $before: String
+        $first: Int
+        $last: Int
+        $order: [BannedUserDtoSortInput!]
+        $streamerId: String!
+        $where: BannedUserDtoFilterInput
+    ) {
+        bannedUsers(
+            after: $after
+            before: $before
+            first: $first
+            last: $last
+            order: $order
+            streamerId: $streamerId
+            where: $where
+        ) {
+            nodes {
+                id
+                userId
+                bannedById
+                reason
+                bannedAt
+                bannedUntil
+                user {
+                    id
+                    userName
+                    avatar
+                }
+                bannedBy {
+                    id
+                    userName
+                    avatar
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                hasPreviousPage
+                startCursor
+            }
+        }
+    }
+`

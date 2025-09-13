@@ -38,6 +38,7 @@ export const GET_STREAMER_INTERACTION = gql`
             followedAt
             banned # Добавлено новое поле
             bannedUntil # Добавлено новое поле
+            lastTimeMessage # Добавлено новое поле
         }
     }
 `
