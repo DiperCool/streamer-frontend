@@ -25,6 +25,7 @@ from "@/components/ui/dropdown-menu"
 import { ChatMessageDto } from "@/graphql/__generated__/graphql"
 import { useDashboard } from "@/src/contexts/DashboardContext"
 import { BanUserDialog } from "@/src/components/dashboard/chat/BanUserDialog"
+import { useStreamerInteractionLazyQuery } from "@/graphql/__generated__/graphql" // Импортируем useStreamerInteractionLazyQuery
 
 interface MessageItemProps {
   message: ChatMessageDto
@@ -53,7 +54,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   chatId,
   refetchStreamerInteraction,
 }) => {
-  const { activeStreamerPermissions, currentAuthUserStreamer } = useDashboard();
+  const { currentAuthUserStreamer, activeStreamer } = useDashboard();
   const messageDate = new Date(message.createdAt)
   const formattedTime = isToday(messageDate)
     ? format(messageDate, "HH:mm")
@@ -61,12 +62,26 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
   const isMessageDeleted = message.isDeleted
   const isHovered = currentHoveredMessageId === message.id
-  const canManageChat = activeStreamerPermissions?.isAll || activeStreamerPermissions?.isChat;
   const isOwnMessage = message.senderId === currentAuthUserStreamer?.id;
 
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
   const [userToBanId, setUserToBanId] = useState<string | null>(null);
   const [userToBanName, setUserToBanName] = useState<string | null>(null);
+
+  // Используем useStreamerInteractionLazyQuery для получения разрешений текущего пользователя
+  const [getStreamerInteraction, { data: streamerInteractionData }] = useStreamerInteractionLazyQuery({
+    variables: { streamerId: activeStreamer?.id ?? "" },
+    skip: !activeStreamer?.id || !currentAuthUserStreamer?.id,
+  });
+
+  // Загружаем разрешения при монтировании компонента или изменении активного стримера
+  React.useEffect(() => {
+    if (activeStreamer?.id && currentAuthUserStreamer?.id) {
+      getStreamerInteraction();
+    }
+  }, [activeStreamer?.id, currentAuthUserStreamer?.id, getStreamerInteraction]);
+
+  const canManageChat = streamerInteractionData?.streamerInteraction?.permissions?.isAll || streamerInteractionData?.streamerInteraction?.permissions?.isChat;
 
   const handleBanClick = (userId: string, userName: string) => {
     setUserToBanId(userId);
