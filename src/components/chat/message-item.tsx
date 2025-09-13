@@ -159,7 +159,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     <DropdownMenuItem
                       onClick={() => handleBanClick(message.sender!.id, message.sender!.userName!)}
                       className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                      disabled={isMessageDeleted}
+                      disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
                     >
                       <UserX className="h-4 w-4 mr-2" /> Ban User
                     </DropdownMenuItem>
@@ -171,7 +171,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     <DropdownMenuItem
                       onClick={() => onDelete(message.id)}
                       className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                      disabled={isMessageDeleted}
+                      disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
                     >
                       <X className="h-4 w-4 mr-2" /> Delete
                     </DropdownMenuItem>
@@ -225,7 +225,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               <ContextMenuItem
                 onClick={() => handleBanClick(message.sender!.id, message.sender!.userName!)}
                 className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                disabled={isMessageDeleted}
+                disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
               >
                 <UserX className="h-4 w-4 mr-2" /> Ban User
               </ContextMenuItem>
@@ -237,7 +237,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               <ContextMenuItem
                 onClick={() => onDelete(message.id)}
                 className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                disabled={isMessageDeleted}
+                disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
               >
                 <X className="h-4 w-4 mr-2" /> Delete
               </ContextMenuItem>
