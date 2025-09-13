@@ -23,6 +23,7 @@ import {
     useUserBannedSubscription,
     useUserUnbannedSubscription,
     useStreamerInteractionLazyQuery,
+    useGetMyRoleQuery, // Импортируем useGetMyRoleQuery
     SortEnumType,
     ChatMessageDto,
     GetChatMessagesQuery,
@@ -34,12 +35,11 @@ import { MessageItem } from "@/src/components/chat/message-item"
 import { getMinioUrl } from "@/utils/utils"
 import { useAuth0 } from "@auth0/auth0-react"
 import { toast } from "sonner"
-import { useDashboard } from "@/src/contexts/DashboardContext" // Импортируем useDashboard
+import { useDashboard } from "@/src/contexts/DashboardContext"
 
 interface ChatSectionProps {
   onCloseChat?: () => void
   streamerId: string
-  // onScrollToBottom: () => void; // Удалено
   hideCardWrapper?: boolean;
 }
 
@@ -66,12 +66,13 @@ interface RowData {
   onMouseLeave: () => void;
   chatId: string;
   pinnedMessageId: string | null;
-  canManageChat: boolean; // Добавлено
-  refetchCurrentStreamerInteraction: () => Promise<any>; // Добавлено
+  canManageChat: boolean;
+  broadcasterId: string; // Добавлено
+  refetchCurrentStreamerInteraction: () => Promise<any>;
 }
 
 const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
-  const { messages, onReply, onDelete, onPin, onUnpin, currentHoveredMessageId, onMouseEnter, onMouseLeave, chatId, pinnedMessageId, canManageChat, refetchCurrentStreamerInteraction } = data;
+  const { messages, onReply, onDelete, onPin, onUnpin, currentHoveredMessageId, onMouseEnter, onMouseLeave, chatId, pinnedMessageId, canManageChat, broadcasterId, refetchCurrentStreamerInteraction } = data;
   const message = messages[index];
   if (!message) return null;
 
@@ -90,8 +91,9 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         chatId={chatId}
-        canManageChat={canManageChat} // Передаем canManageChat
-        refetchCurrentStreamerInteraction={refetchCurrentStreamerInteraction} // Передаем refetchCurrentStreamerInteraction
+        canManageChat={canManageChat}
+        broadcasterId={broadcasterId} // Передаем broadcasterId
+        refetchCurrentStreamerInteraction={refetchCurrentStreamerInteraction}
       />
     </div>
   );
@@ -103,7 +105,8 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
   const { isAuthenticated, user } = useAuth0();
-  const { activeStreamerPermissions } = useDashboard(); // Получаем разрешения из DashboardContext
+  // Удаляем activeStreamerPermissions из useDashboard, так как будем получать его локально
+  // const { activeStreamerPermissions } = useDashboard(); 
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -123,6 +126,14 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   const pinnedMessage = chatData?.chat.pinnedMessage;
   const pinnedMessageId = chatData?.chat.pinnedMessageId;
   const chatSettings = chatData?.chat.settings;
+
+  // Получаем разрешения текущего пользователя для канала, который сейчас просматривается
+  const { data: myRoleData, loading: myRoleLoading, refetch: refetchMyRole } = useGetMyRoleQuery({
+    variables: { broadcasterId: streamerId },
+    skip: !isAuthenticated || !streamerId,
+  });
+  const canManageChat = myRoleData?.myRole?.permissions?.isAll || myRoleData?.myRole?.permissions?.isChat || false;
+
 
   const [getStreamerInteraction, { data: streamerInteractionData, loading: streamerInteractionLoading, refetch: refetchStreamerInteractionQuery }] = useStreamerInteractionLazyQuery({
     variables: { streamerId: streamerId },
@@ -183,6 +194,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     onData: ({ data }) => {
       refetchChat();
       refetchCurrentStreamerInteraction();
+      refetchMyRole(); // Обновляем роль при обновлении чата
     },
   });
 
@@ -627,9 +639,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     }
   }, []);
 
-  // Определяем canManageChat на основе activeStreamerPermissions из DashboardContext
-  const canManageChat = activeStreamerPermissions?.isAll || activeStreamerPermissions?.isChat;
-
   const itemData = React.useMemo(() => ({
     messages: reversedMessages,
     onReply: setReplyToMessage,
@@ -641,9 +650,10 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     onMouseLeave: () => setHoveredMessageId(null),
     chatId: chatId!,
     pinnedMessageId: pinnedMessageId,
-    canManageChat: canManageChat, // Передаем canManageChat
-    refetchCurrentStreamerInteraction: refetchCurrentStreamerInteraction, // Передаем refetchCurrentStreamerInteraction
-  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId, canManageChat, refetchCurrentStreamerInteraction]);
+    canManageChat: canManageChat,
+    broadcasterId: streamerId, // Передаем streamerId как broadcasterId
+    refetchCurrentStreamerInteraction: refetchCurrentStreamerInteraction,
+  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId, canManageChat, streamerId, refetchCurrentStreamerInteraction]);
 
   // Determine if chat input should be disabled and what message to show
   let chatInputRestrictionMessage: React.ReactNode | null = null;
@@ -652,7 +662,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   if (!isAuthenticated) {
     chatInputRestrictionMessage = "Log in to send messages.";
     isChatInputDisabled = true;
-  } else if (streamerInteractionLoading) {
+  } else if (streamerInteractionLoading || myRoleLoading) { // Добавлено myRoleLoading
     chatInputRestrictionMessage = (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading chat permissions...

@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { useBanUserMutation } from "@/graphql/__generated__/graphql";
-import { useDashboard } from "@/src/contexts/DashboardContext";
 import { toast } from "sonner";
 import { DateTime } from "luxon";
 
@@ -30,7 +29,8 @@ interface BanUserDialogProps {
   onOpenChange: (open: boolean) => void;
   userIdToBan: string;
   userNameToBan: string;
-  refetchStreamerInteraction: () => Promise<any>; // Добавлено
+  broadcasterId: string; // Добавлено
+  refetchStreamerInteraction: () => Promise<any>;
 }
 
 export const BanUserDialog: React.FC<BanUserDialogProps> = ({
@@ -38,10 +38,12 @@ export const BanUserDialog: React.FC<BanUserDialogProps> = ({
   onOpenChange,
   userIdToBan,
   userNameToBan,
-  refetchStreamerInteraction, // Деструктурируем
+  broadcasterId, // Используем broadcasterId
+  refetchStreamerInteraction,
 }) => {
-  const { activeStreamer } = useDashboard();
-  const streamerId = activeStreamer?.id ?? "";
+  // Удаляем useDashboard, так как broadcasterId теперь передается через пропсы
+  // const { activeStreamer } = useDashboard();
+  // const streamerId = activeStreamer?.id ?? "";
 
   const [reason, setReason] = useState("");
   const [duration, setDuration] = useState("1h"); // Default to 1 hour
@@ -55,7 +57,7 @@ export const BanUserDialog: React.FC<BanUserDialogProps> = ({
   }, [isOpen]);
 
   const handleBan = async () => {
-    if (!streamerId || !userIdToBan) {
+    if (!broadcasterId || !userIdToBan) { // Используем broadcasterId
       toast.error("Missing streamer or user ID for banning.");
       return;
     }
@@ -90,14 +92,14 @@ export const BanUserDialog: React.FC<BanUserDialogProps> = ({
         variables: {
           request: {
             userId: userIdToBan,
-            broadcasterId: streamerId,
+            broadcasterId: broadcasterId, // Используем broadcasterId
             reason: reason.trim(),
             banUntil: banUntil.toISO()!,
           },
         },
       });
       toast.success(`${userNameToBan} has been banned.`);
-      await refetchStreamerInteraction(); // Используем переданную функцию refetch
+      await refetchStreamerInteraction();
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error banning user:", error);
