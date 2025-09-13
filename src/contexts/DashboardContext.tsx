@@ -10,8 +10,6 @@ import {
   SortEnumType,
   useGetMyRoleQuery,
   PermissionsFlags,
-  // useStreamerInteractionQuery, // Удаляем импорт useStreamerInteractionQuery
-  // StreamerInteractionQueryHookResult, // Удаляем импорт типа
 } from "@/graphql/__generated__/graphql";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -30,15 +28,14 @@ interface DashboardContextType {
   currentAuthUserStreamer: ActiveStreamer | null;
   activeStreamerPermissions: PermissionsFlags | null;
   activeStreamerPermissionsLoading: boolean;
-  // streamerInteractionData: StreamerInteractionQueryHookResult['data'] | undefined; // Удаляем streamerInteractionData
-  // refetchStreamerInteraction: (userId: string) => Promise<any>; // Удаляем refetchStreamerInteraction
-  // streamerInteractionLoading: boolean; // Удаляем streamerInteractionLoading
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth0();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const { data: meData, loading: meLoading } = useGetMeQuery({
     skip: !isAuthenticated,
@@ -61,9 +58,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       order: [{ id: SortEnumType.Asc }],
     },
   });
+  const myRoles = myRolesData?.myRoles?.nodes || [];
+
   const [activeStreamer, setActiveStreamerState] = useState<ActiveStreamer | null>(null);
-  const router = useRouter();
-  const pathname = usePathname();
 
   const usernameFromUrl = useMemo(() => {
     const pathSegments = pathname.split('/').filter(Boolean);
@@ -74,17 +71,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     return null;
   }, [pathname]);
 
-  const myRoles = myRolesData?.myRoles?.nodes || [];
-
   const { data: urlStreamerData, loading: urlStreamerLoading, error: urlStreamerError } = useGetStreamerQuery({
     variables: { userName: usernameFromUrl! },
-    skip:
-      !usernameFromUrl ||
-      !isAuthenticated ||
-      meLoading ||
-      !currentAuthUserStreamer ||
-      usernameFromUrl === currentAuthUserStreamer.userName ||
-      myRoles.some(role => role.broadcaster?.userName === usernameFromUrl),
+    skip: !usernameFromUrl || !isAuthenticated || meLoading || !currentAuthUserStreamer,
   });
 
   const { data: myRoleData, loading: myRoleLoading, error: myRoleError } = useGetMyRoleQuery({
@@ -94,32 +83,13 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const activeStreamerPermissions = myRoleData?.myRole?.permissions || null;
 
-  // Streamer Interaction Query for the *current authenticated user* with the *active streamer*
-  // Удаляем использование useStreamerInteractionQuery здесь
-  // const {
-  //   data: streamerInteractionData,
-  //   loading: streamerInteractionLoading,
-  //   error: streamerInteractionError,
-  //   refetch: refetchStreamerInteractionQuery,
-  // } = useStreamerInteractionQuery({
-  //   variables: { streamerId: activeStreamer?.id ?? "" },
-  //   skip: !isAuthenticated || !activeStreamer?.id || !user?.sub,
-  // });
-
-  // Удаляем мемоизированную функцию refetch
-  // const refetchStreamerInteraction = useCallback(async (userId: string) => {
-  //   if (user?.sub === userId) {
-  //     return await refetchStreamerInteractionQuery();
-  //   }
-  //   return null;
-  // }, [refetchStreamerInteractionQuery, user?.sub]);
-
-
   useEffect(() => {
+    // 1. Handle loading states
     if (authLoading || meLoading || myRolesLoading || urlStreamerLoading) {
       return;
     }
 
+    // 2. Handle unauthenticated users trying to access dashboard
     if (!isAuthenticated) {
       if (pathname.startsWith("/dashboard")) {
         router.replace("/");
@@ -127,13 +97,16 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       return;
     }
 
+    // 3. If authenticated, determine the active streamer
     if (currentAuthUserStreamer && !activeStreamer) {
       let resolvedStreamer: ActiveStreamer | null = null;
 
       if (usernameFromUrl) {
+        // Check if URL username is current user's own channel
         if (currentAuthUserStreamer.userName === usernameFromUrl) {
           resolvedStreamer = currentAuthUserStreamer;
         } else {
+          // Check if URL username is a channel where current user has a role
           const roleForUrlStreamer = myRoles.find(
             (role) => role.broadcaster?.userName === usernameFromUrl
           );
@@ -144,6 +117,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
               avatar: roleForUrlStreamer.broadcaster.avatar,
             };
           } else if (urlStreamerData?.streamer && urlStreamerData.streamer.userName === usernameFromUrl) {
+            // If it's a public streamer profile (not necessarily a role)
             resolvedStreamer = {
               id: urlStreamerData.streamer.id,
               userName: urlStreamerData.streamer.userName,
@@ -153,14 +127,17 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         }
       }
 
+      // If no streamer resolved from URL, default to current user's channel
       if (!resolvedStreamer) {
         resolvedStreamer = currentAuthUserStreamer;
       }
 
+      // 4. Set active streamer and redirect if necessary
       if (resolvedStreamer) {
         setActiveStreamerState(resolvedStreamer);
         const expectedBaseDashboardPath = `/dashboard/${resolvedStreamer.userName}`;
 
+        // Redirect if on generic /dashboard or on a dashboard path that doesn't match the resolved streamer
         if (pathname === "/dashboard" || (usernameFromUrl && !pathname.startsWith(expectedBaseDashboardPath))) {
           router.replace(expectedBaseDashboardPath);
         }
@@ -169,12 +146,12 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         router.replace("/");
       }
     } else if (currentAuthUserStreamer && pathname === "/dashboard") {
+        // If on generic /dashboard and activeStreamer is already set (or should be current user)
         router.replace(`/dashboard/${currentAuthUserStreamer.userName}`);
     }
   }, [
     isAuthenticated,
     authLoading,
-    meData,
     meLoading,
     myRoles,
     myRolesLoading,
@@ -193,7 +170,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     router.push(`/dashboard/${streamer.userName}`);
   };
 
-  // Удаляем streamerInteractionLoading из условия загрузки
   if (authLoading || meLoading || myRolesLoading || urlStreamerLoading || myRoleLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -202,7 +178,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     );
   }
 
-  // Удаляем streamerInteractionError из условия ошибки
   if (myRolesError || urlStreamerError || myRoleError) {
     console.error("Error loading roles or streamer data:", myRolesError || urlStreamerError || myRoleError);
     return (
@@ -221,9 +196,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       currentAuthUserStreamer,
       activeStreamerPermissions,
       activeStreamerPermissionsLoading: myRoleLoading,
-      // streamerInteractionData: streamerInteractionData, // Удаляем
-      // refetchStreamerInteraction: refetchStreamerInteraction, // Удаляем
-      // streamerInteractionLoading: streamerInteractionLoading, // Удаляем
     }}>
       {children}
     </DashboardContext.Provider>
