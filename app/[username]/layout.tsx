@@ -10,7 +10,12 @@ import {
   useStreamerUpdatedSubscription,
   useWatchStreamSubscription,
   useStreamUpdatedSubscription,
-  GetStreamerDocument,
+  GetStream<think>**Resolving Syntax Conflict**
+
+I've meticulously removed all comments from the JSX structure, suspecting they might be the root cause. I've also refactored the `cn` class assignments related to the chat visibility to resolve any potential conflicts and ensure correct conditional rendering. I'm hopeful this resolves the unexpected token error.
+
+
+</think>erDocument,
   GetCurrentStreamDocument,
   useGetStreamInfoQuery,
 } from "@/graphql/__generated__/graphql"
@@ -24,7 +29,7 @@ import { useApolloClient } from "@apollo/client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { MessageSquare } from "lucide-react"
-import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function StreamerProfileLayout({
   children,
@@ -36,7 +41,7 @@ export default function StreamerProfileLayout({
   const { username } = params
   const pathname = usePathname()
   const client = useApolloClient();
-  const isMobile = useIsMobile(); // Get mobile status
+  const isMobile = useIsMobile();
 
   const [isChatVisible, setIsChatVisible] = useState(true); 
   const [isPlayerMaximized, setIsPlayerMaximized] = useState(false);
@@ -144,10 +149,21 @@ export default function StreamerProfileLayout({
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse">
 
-      {/* Main content area */}
+      {!isDashboardRoute && (
+        <div
+          className={cn(
+            "flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
+            "bg-gray-800 border-gray-700",
+            isMobile && (isChatVisible ? "flex w-full rounded-lg mt-6 h-[50vh] translate-x-0" : "hidden translate-x-full"),
+            !isMobile && (isChatVisible ? "lg:flex lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:bg-gray-800 lg:border-l lg:border-gray-700 lg:mt-0 lg:rounded-none lg:translate-x-0" : "lg:hidden lg:translate-x-full")
+          )}
+        >
+          <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
+        </div>
+      )}
+
       <div className={cn(
           "flex-1 flex flex-col transition-all duration-300 ease-in-out",
-          // Apply desktop margin only if chat is visible and it's desktop
           isChatVisible && !isDashboardRoute && !isMobile ? "lg:mr-80" : "",
       )}>
         <div className={cn(
@@ -176,7 +192,7 @@ export default function StreamerProfileLayout({
             />
           )}
 
-          {!isChatVisible && !isDashboardRoute && ( // Кнопка "Show Chat" только если чат скрыт и это не дашборд
+          {!isChatVisible && !isDashboardRoute && (
             <Button
               variant="outline"
               className="absolute top-16 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700"
@@ -219,32 +235,12 @@ export default function StreamerProfileLayout({
                   <TabsTrigger value="videos">Videos</TabsTrigger>
                 </Link>
                 <Link href={`/${username}/clips`} passHref>
-                  <TabsTrigger value="clips">Clips</TabsGigger>
+                  <TabsTrigger value="clips">Clips</TabsTrigger>
                 </Link>
               </TabsList>
             </Tabs>
           </div>
           {children}
-
-          {/* Single ChatSection, conditionally rendered and styled based on isMobile */}
-          {!isDashboardRoute && (
-            <div
-              className={cn(
-                "flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
-                "bg-gray-800 border-gray-700", // Common background/border
-                // Default (mobile-first) state: hidden and off-screen
-                "hidden translate-x-full", 
-                // Mobile-specific styles when chat IS visible
-                isMobile && isChatVisible && "flex w-full rounded-lg mt-6 h-[50vh] translate-x-0",
-                // Desktop-specific styles when chat IS visible
-                !isMobile && isChatVisible && "lg:flex lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:mt-0 lg:rounded-none lg:border-l lg:translate-x-0",
-                // Desktop-specific styles when chat is NOT visible (to ensure it's hidden on desktop too)
-                !isMobile && !isChatVisible && "lg:hidden lg:translate-x-full"
-              )}
-            >
-              <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
-            </div>
-          )}
         </div>
       </div>
     </div>
