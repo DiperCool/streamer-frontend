@@ -36,6 +36,7 @@ interface MessageItemProps {
   onMouseEnter: (messageId: string) => void
   onMouseLeave: () => void
   chatId: string
+  refetchStreamerInteraction: () => Promise<any>; // Добавлено
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -49,6 +50,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   onMouseEnter,
   onMouseLeave,
   chatId,
+  refetchStreamerInteraction, // Деструктурируем
 }) => {
   const { activeStreamer, activeStreamerPermissions, currentAuthUserStreamer } = useDashboard();
   const messageDate = new Date(message.createdAt)
@@ -258,6 +260,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           onOpenChange={setIsBanDialogOpen}
           userIdToBan={userToBanId}
           userNameToBan={userToBanName}
+          refetchStreamerInteraction={refetchStreamerInteraction} // Передаем функцию refetch
         />
       )}
     </>

@@ -65,10 +65,11 @@ interface RowData {
   onMouseLeave: () => void;
   chatId: string;
   pinnedMessageId: string | null;
+  refetchStreamerInteraction: () => Promise<any>; // Добавлено
 }
 
 const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
-  const { messages, onReply, onDelete, onPin, onUnpin, currentHoveredMessageId, onMouseEnter, onMouseLeave, chatId, pinnedMessageId } = data;
+  const { messages, onReply, onDelete, onPin, onUnpin, currentHoveredMessageId, onMouseEnter, onMouseLeave, chatId, pinnedMessageId, refetchStreamerInteraction } = data;
   const message = messages[index];
   if (!message) return null;
 
@@ -87,6 +88,7 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         chatId={chatId}
+        refetchStreamerInteraction={refetchStreamerInteraction} // Передаем вниз
       />
     </div>
   );
@@ -640,7 +642,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     onMouseLeave: () => setHoveredMessageId(null),
     chatId: chatId!,
     pinnedMessageId: pinnedMessageId,
-  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId]);
+    refetchStreamerInteraction: refetchStreamerInteraction, // Передаем функцию refetch
+  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId, refetchStreamerInteraction]);
 
   // Determine if chat input should be disabled and what message to show
   let chatInputRestrictionMessage: React.ReactNode | null = null;

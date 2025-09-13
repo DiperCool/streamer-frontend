@@ -30,6 +30,7 @@ interface BanUserDialogProps {
   onOpenChange: (open: boolean) => void;
   userIdToBan: string;
   userNameToBan: string;
+  refetchStreamerInteraction: () => Promise<any>; // Добавлено
 }
 
 export const BanUserDialog: React.FC<BanUserDialogProps> = ({
@@ -37,8 +38,9 @@ export const BanUserDialog: React.FC<BanUserDialogProps> = ({
   onOpenChange,
   userIdToBan,
   userNameToBan,
+  refetchStreamerInteraction, // Деструктурируем
 }) => {
-  const { activeStreamer, refetchStreamerInteraction } = useDashboard();
+  const { activeStreamer } = useDashboard();
   const streamerId = activeStreamer?.id ?? "";
 
   const [reason, setReason] = useState("");
@@ -95,7 +97,7 @@ export const BanUserDialog: React.FC<BanUserDialogProps> = ({
         },
       });
       toast.success(`${userNameToBan} has been banned.`);
-      refetchStreamerInteraction(userIdToBan); // Refetch interaction for the banned user
+      await refetchStreamerInteraction(); // Используем переданную функцию refetch
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error banning user:", error);
