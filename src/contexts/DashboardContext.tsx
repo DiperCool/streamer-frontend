@@ -10,8 +10,8 @@ import {
   SortEnumType,
   useGetMyRoleQuery,
   PermissionsFlags,
-  useStreamerInteractionQuery, // Import useStreamerInteractionQuery
-  StreamerInteractionQueryHookResult, // Import the type
+  // useStreamerInteractionQuery, // Удаляем импорт useStreamerInteractionQuery
+  // StreamerInteractionQueryHookResult, // Удаляем импорт типа
 } from "@/graphql/__generated__/graphql";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -30,9 +30,9 @@ interface DashboardContextType {
   currentAuthUserStreamer: ActiveStreamer | null;
   activeStreamerPermissions: PermissionsFlags | null;
   activeStreamerPermissionsLoading: boolean;
-  streamerInteractionData: StreamerInteractionQueryHookResult['data'] | undefined; // Add streamerInteractionData
-  refetchStreamerInteraction: (userId: string) => Promise<any>; // Add refetchStreamerInteraction
-  streamerInteractionLoading: boolean; // Added streamerInteractionLoading
+  // streamerInteractionData: StreamerInteractionQueryHookResult['data'] | undefined; // Удаляем streamerInteractionData
+  // refetchStreamerInteraction: (userId: string) => Promise<any>; // Удаляем refetchStreamerInteraction
+  // streamerInteractionLoading: boolean; // Удаляем streamerInteractionLoading
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -95,25 +95,24 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const activeStreamerPermissions = myRoleData?.myRole?.permissions || null;
 
   // Streamer Interaction Query for the *current authenticated user* with the *active streamer*
-  const {
-    data: streamerInteractionData,
-    loading: streamerInteractionLoading,
-    error: streamerInteractionError,
-    refetch: refetchStreamerInteractionQuery,
-  } = useStreamerInteractionQuery({
-    variables: { streamerId: activeStreamer?.id ?? "" },
-    skip: !isAuthenticated || !activeStreamer?.id || !user?.sub, // Skip if not authenticated or no active streamer/user
-  });
+  // Удаляем использование useStreamerInteractionQuery здесь
+  // const {
+  //   data: streamerInteractionData,
+  //   loading: streamerInteractionLoading,
+  //   error: streamerInteractionError,
+  //   refetch: refetchStreamerInteractionQuery,
+  // } = useStreamerInteractionQuery({
+  //   variables: { streamerId: activeStreamer?.id ?? "" },
+  //   skip: !isAuthenticated || !activeStreamer?.id || !user?.sub,
+  // });
 
-  // Memoized refetch function for streamer interaction
-  const refetchStreamerInteraction = useCallback(async (userId: string) => {
-    // Only refetch if the userId matches the current authenticated user's ID
-    // This prevents unnecessary refetches for other users' interactions
-    if (user?.sub === userId) {
-      return await refetchStreamerInteractionQuery();
-    }
-    return null;
-  }, [refetchStreamerInteractionQuery, user?.sub]);
+  // Удаляем мемоизированную функцию refetch
+  // const refetchStreamerInteraction = useCallback(async (userId: string) => {
+  //   if (user?.sub === userId) {
+  //     return await refetchStreamerInteractionQuery();
+  //   }
+  //   return null;
+  // }, [refetchStreamerInteractionQuery, user?.sub]);
 
 
   useEffect(() => {
@@ -194,7 +193,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     router.push(`/dashboard/${streamer.userName}`);
   };
 
-  if (authLoading || meLoading || myRolesLoading || urlStreamerLoading || myRoleLoading || streamerInteractionLoading) {
+  // Удаляем streamerInteractionLoading из условия загрузки
+  if (authLoading || meLoading || myRolesLoading || urlStreamerLoading || myRoleLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <Loader2 className="h-12 w-12 animate-spin text-green-500" />
@@ -202,8 +202,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     );
   }
 
-  if (myRolesError || urlStreamerError || myRoleError || streamerInteractionError) {
-    console.error("Error loading roles or streamer data:", myRolesError || urlStreamerError || myRoleError || streamerInteractionError);
+  // Удаляем streamerInteractionError из условия ошибки
+  if (myRolesError || urlStreamerError || myRoleError) {
+    console.error("Error loading roles or streamer data:", myRolesError || urlStreamerError || myRoleError);
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
         <p className="text-red-500 text-lg">Access Denied: You do not have permission to view this dashboard.</p>
@@ -220,9 +221,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       currentAuthUserStreamer,
       activeStreamerPermissions,
       activeStreamerPermissionsLoading: myRoleLoading,
-      streamerInteractionData: streamerInteractionData,
-      refetchStreamerInteraction: refetchStreamerInteraction,
-      streamerInteractionLoading: streamerInteractionLoading, // Provide the loading state
+      // streamerInteractionData: streamerInteractionData, // Удаляем
+      // refetchStreamerInteraction: refetchStreamerInteraction, // Удаляем
+      // streamerInteractionLoading: streamerInteractionLoading, // Удаляем
     }}>
       {children}
     </DashboardContext.Provider>

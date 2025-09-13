@@ -22,6 +22,7 @@ import {
     useChatMessageDeletedSubscription,
     useUserBannedSubscription,
     useUserUnbannedSubscription,
+    useStreamerInteractionLazyQuery, // Импортируем useStreamerInteractionLazyQuery
     SortEnumType,
     ChatMessageDto,
     GetChatMessagesQuery,
@@ -31,7 +32,6 @@ import {
 import { useApolloClient } from "@apollo/client"
 import { MessageItem } from "@/src/components/chat/message-item"
 import { getMinioUrl } from "@/utils/utils"
-import { useDashboard } from "@/src/contexts/DashboardContext"
 import { useAuth0 } from "@auth0/auth0-react"
 import { toast } from "sonner"
 
@@ -98,7 +98,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
   const { isAuthenticated, user } = useAuth0();
-  const { refetchStreamerInteraction, streamerInteractionData, streamerInteractionLoading } = useDashboard();
+  // Удаляем использование useDashboard для streamerInteractionData
+  // const { refetchStreamerInteraction, streamerInteractionData, streamerInteractionLoading } = useDashboard();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -118,6 +119,28 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const pinnedMessage = chatData?.chat.pinnedMessage;
   const pinnedMessageId = chatData?.chat.pinnedMessageId;
   const chatSettings = chatData?.chat.settings;
+
+  // Используем useStreamerInteractionLazyQuery напрямую
+  const [getStreamerInteraction, { data: streamerInteractionData, loading: streamerInteractionLoading, refetch: refetchStreamerInteractionQuery }] = useStreamerInteractionLazyQuery({
+    variables: { streamerId: streamerId },
+    skip: !isAuthenticated || !streamerId || !user?.sub,
+  });
+
+  // Мемоизируем функцию refetch для использования в подписках и onSubmit
+  const refetchStreamerInteraction = useCallback(async () => {
+    if (isAuthenticated && streamerId && user?.sub) {
+      return await refetchStreamerInteractionQuery();
+    }
+    return null;
+  }, [isAuthenticated, streamerId, user?.sub, refetchStreamerInteractionQuery]);
+
+  // Загружаем данные о взаимодействии при монтировании или изменении зависимостей
+  useEffect(() => {
+    if (isAuthenticated && streamerId && user?.sub) {
+      getStreamerInteraction();
+    }
+  }, [isAuthenticated, streamerId, user?.sub, getStreamerInteraction]);
+
 
   const {
     data: messagesData,
@@ -158,7 +181,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     skip: !chatId,
     onData: ({ data }) => {
       refetchChat(); // Refetch chat data to get updated pinned message and settings
-      refetchStreamerInteraction(user?.sub || ""); // Refetch streamer interaction for current user
+      refetchStreamerInteraction(); // Refetch interaction for current user
     },
   });
 
@@ -330,7 +353,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
-      refetchStreamerInteraction(user?.sub || "");
+      refetchStreamerInteraction(); // Refetch interaction for the current user
       toast.error("You have been banned from this chat!");
     },
   });
@@ -342,7 +365,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
-      refetchStreamerInteraction(user?.sub || "");
+      refetchStreamerInteraction(); // Refetch interaction for the current user
       toast.success("You have been unbanned from this chat!");
     },
   });
@@ -452,6 +475,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       return;
     }
 
+    // Эти проверки теперь выполняются до рендера поля ввода, но остаются здесь как дополнительная защита
     if (streamerInteractionData?.streamerInteraction?.banned) {
       const banExpires = streamerInteractionData.streamerInteraction.bannedUntil ? new Date(streamerInteractionData.streamerInteraction.bannedUntil) : null;
       const isPermanent = banExpires && banExpires.getFullYear() > new Date().getFullYear() + 50;
@@ -460,8 +484,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       } else if (banExpires && !isPast(banExpires)) {
         toast.error(`You are banned from this chat until ${format(banExpires, "MMM dd, yyyy HH:mm")}.`);
       } else {
-        // Ban has expired, but interaction data might not be updated yet.
-        // This case should ideally be handled by refetchStreamerInteraction on ban/unban.
         toast.error("You are banned from this chat.");
       }
       return;
@@ -491,7 +513,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       })
       reset({ message: "" })
       setReplyToMessage(null)
-      refetchStreamerInteraction(user?.sub || ""); // Update lastTimeMessage for slow mode
+      refetchStreamerInteraction(); // Обновляем lastTimeMessage для slow mode
     } catch (error) {
       console.error("Error sending message:", error)
       toast.error("Failed to send message.");
