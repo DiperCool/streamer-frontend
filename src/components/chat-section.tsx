@@ -23,7 +23,7 @@ import {
     useUserBannedSubscription,
     useUserUnbannedSubscription,
     useStreamerInteractionLazyQuery,
-    useGetMyRoleQuery, // Импортируем useGetMyRoleQuery
+    useGetMyRoleQuery,
     SortEnumType,
     ChatMessageDto,
     GetChatMessagesQuery,
@@ -67,7 +67,7 @@ interface RowData {
   chatId: string;
   pinnedMessageId: string | null;
   canManageChat: boolean;
-  broadcasterId: string; // Добавлено
+  broadcasterId: string;
   refetchCurrentStreamerInteraction: () => Promise<any>;
 }
 
@@ -92,7 +92,7 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
         onMouseLeave={onMouseLeave}
         chatId={chatId}
         canManageChat={canManageChat}
-        broadcasterId={broadcasterId} // Передаем broadcasterId
+        broadcasterId={broadcasterId}
         refetchCurrentStreamerInteraction={refetchCurrentStreamerInteraction}
       />
     </div>
@@ -105,8 +105,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
   const { isAuthenticated, user } = useAuth0();
-  // Удаляем activeStreamerPermissions из useDashboard, так как будем получать его локально
-  // const { activeStreamerPermissions } = useDashboard(); 
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -127,7 +125,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   const pinnedMessageId = chatData?.chat.pinnedMessageId;
   const chatSettings = chatData?.chat.settings;
 
-  // Получаем разрешения текущего пользователя для канала, который сейчас просматривается
   const { data: myRoleData, loading: myRoleLoading, refetch: refetchMyRole } = useGetMyRoleQuery({
     variables: { broadcasterId: streamerId },
     skip: !isAuthenticated || !streamerId,
@@ -187,14 +184,13 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     },
   })
 
-  // Subscriptions
   useChatUpdatedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
     onData: ({ data }) => {
       refetchChat();
       refetchCurrentStreamerInteraction();
-      refetchMyRole(); // Обновляем роль при обновлении чата
+      refetchMyRole();
     },
   });
 
@@ -383,7 +379,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     },
   });
 
-  // Slow mode cooldown logic
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
     if (chatSettings?.slowMode && streamerInteractionData?.streamerInteraction?.lastTimeMessage) {
@@ -416,7 +411,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   }, [chatSettings?.slowMode, streamerInteractionData?.streamerInteraction?.lastTimeMessage]);
 
 
-  // ResizeObserver to get dynamic height/width for VariableSizeList
   useEffect(() => {
     const currentRef = chatContainerRef.current;
     if (!currentRef) return;
@@ -437,12 +431,10 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     };
   }, []);
 
-  // Memoize reversed messages for VariableSizeList
   const reversedMessages = React.useMemo(() => {
     return messagesData?.chatMessages?.nodes ? [...messagesData.chatMessages.nodes].reverse() : [];
   }, [messagesData]);
 
-  // Function to get item size for VariableSizeList
   const getItemSize = useCallback((index: number) => {
     const message = reversedMessages[index];
     if (!message) return MESSAGE_ITEM_BASE_HEIGHT;
@@ -461,7 +453,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     return height;
   }, [reversedMessages]);
 
-  // Effect to handle initial message loading and scroll to bottom
   useEffect(() => {
     if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
       const timer = setTimeout(() => {
@@ -474,7 +465,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     }
   }, [reversedMessages, initialMessagesLoaded]);
 
-  // Effect to refetch on chat open and reset initialMessagesLoaded
   useEffect(() => {
     if (chatId) {
       refetch();
@@ -651,18 +641,17 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     chatId: chatId!,
     pinnedMessageId: pinnedMessageId,
     canManageChat: canManageChat,
-    broadcasterId: streamerId, // Передаем streamerId как broadcasterId
+    broadcasterId: streamerId,
     refetchCurrentStreamerInteraction: refetchCurrentStreamerInteraction,
   }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId, canManageChat, streamerId, refetchCurrentStreamerInteraction]);
 
-  // Determine if chat input should be disabled and what message to show
   let chatInputRestrictionMessage: React.ReactNode | null = null;
   let isChatInputDisabled = false;
 
   if (!isAuthenticated) {
     chatInputRestrictionMessage = "Log in to send messages.";
     isChatInputDisabled = true;
-  } else if (streamerInteractionLoading || myRoleLoading) { // Добавлено myRoleLoading
+  } else if (streamerInteractionLoading || myRoleLoading) {
     chatInputRestrictionMessage = (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading chat permissions...
@@ -690,7 +679,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
 
   const chatContent = (
     <>
-      {/* Pinned Message Display */}
       {pinnedMessage && (
         <div className="bg-blue-900/30 border-b border-blue-800 p-3 flex items-center justify-between text-sm text-blue-200">
           <div className="flex items-center space-x-2">
@@ -703,18 +691,19 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
                 : format(new Date(pinnedMessage.createdAt), "MMM dd, yyyy")}
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 text-blue-300 hover:text-white hover:bg-blue-800/50"
-            onClick={() => handleUnpinMessage(chatId!)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {canManageChat && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-blue-300 hover:text-white hover:bg-blue-800/50"
+              onClick={() => handleUnpinMessage(chatId!)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )}
 
-      {/* Messages List Container - This is the new flex-1 div */}
       <div className="flex-1 overflow-hidden" ref={chatContainerRef}>
         {chatLoading || messagesLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -740,7 +729,6 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
         )}
       </div>
 
-      {/* Input Area or Restriction Message */}
       <div className="p-4 border-t border-gray-700 flex flex-col space-y-2">
         {replyToMessage && (
           <div className="flex items-center justify-between bg-gray-700 p-2 rounded-md text-sm text-gray-300">
