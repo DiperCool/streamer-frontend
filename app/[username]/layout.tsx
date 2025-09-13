@@ -10,12 +10,7 @@ import {
   useStreamerUpdatedSubscription,
   useWatchStreamSubscription,
   useStreamUpdatedSubscription,
-  GetStream<think>**Resolving Syntax Conflict**
-
-I've meticulously removed all comments from the JSX structure, suspecting they might be the root cause. I've also refactored the `cn` class assignments related to the chat visibility to resolve any potential conflicts and ensure correct conditional rendering. I'm hopeful this resolves the unexpected token error.
-
-
-</think>erDocument,
+  GetStreamerDocument,
   GetCurrentStreamDocument,
   useGetStreamInfoQuery,
 } from "@/graphql/__generated__/graphql"
