@@ -24,6 +24,7 @@ import { useApolloClient } from "@apollo/client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { MessageSquare } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
 
 export default function StreamerProfileLayout({
   children,
@@ -35,6 +36,7 @@ export default function StreamerProfileLayout({
   const { username } = params
   const pathname = usePathname()
   const client = useApolloClient();
+  const isMobile = useIsMobile(); // Get mobile status
 
   const [isChatVisible, setIsChatVisible] = useState(true); 
   const [isPlayerMaximized, setIsPlayerMaximized] = useState(false);
@@ -142,31 +144,11 @@ export default function StreamerProfileLayout({
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse">
 
-      {/* Единый контейнер для ChatSection, рендерится только если это не маршрут дашборда */}
-      {!isDashboardRoute && (
-        <div
-          className={cn(
-            "flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
-            // Мобильные стили (по умолчанию)
-            "w-full bg-gray-800 rounded-lg mt-6 h-[50vh]",
-            // Десктопные стили (переопределяют мобильные на lg экранах)
-            "lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:bg-gray-800 lg:border-l lg:border-gray-700 lg:mt-0 lg:rounded-none",
-            // Управление видимостью и анимацией
-            // На мобильных (по умолчанию), если чат виден, показываем его как flex. Если нет, скрываем.
-            isChatVisible ? "flex" : "hidden",
-            // На больших экранах (lg), переопределяем мобильную видимость.
-            // Если чат виден, показываем его как flex и сдвигаем.
-            // Если чат не виден, скрываем его и сдвигаем за пределы экрана.
-            isChatVisible ? "lg:flex lg:translate-x-0" : "lg:hidden lg:translate-x-full"
-          )}
-        >
-          <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
-        </div>
-      )}
-
+      {/* Main content area */}
       <div className={cn(
           "flex-1 flex flex-col transition-all duration-300 ease-in-out",
-          isChatVisible && !isDashboardRoute ? "lg:mr-80" : "", // Применяем отступ только если чат виден и это не дашборд
+          // Apply desktop margin only if chat is visible and it's desktop
+          isChatVisible && !isDashboardRoute && !isMobile ? "lg:mr-80" : "",
       )}>
         <div className={cn(
           "relative w-full bg-black rounded-lg overflow-hidden transition-all duration-300 ease-in-out",
@@ -243,6 +225,25 @@ export default function StreamerProfileLayout({
             </Tabs>
           </div>
           {children}
+
+          {/* Single ChatSection, conditionally rendered and styled based on isMobile */}
+          {!isDashboardRoute && isChatVisible && (
+            <div
+              className={cn(
+                "flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
+                // Mobile styles: in-flow, at the bottom of the content
+                isMobile ? "w-full bg-gray-800 rounded-lg mt-6 h-[50vh] flex" : "hidden",
+                // Desktop styles: fixed sidebar
+                !isMobile ? "lg:flex lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:bg-gray-800 lg:border-l lg:border-gray-700 lg:mt-0 lg:rounded-none" : "hidden",
+                // Desktop visibility control (only applies if !isMobile)
+                !isMobile && (isChatVisible ? "lg:translate-x-0" : "lg:translate-x-full"),
+                // Mobile visibility control (only applies if isMobile)
+                isMobile && (isChatVisible ? "translate-x-0" : "translate-x-full") // On mobile, if not visible, it should still be hidden by the "hidden" class from the mobile styles, but translate-x-full ensures it slides out.
+              )}
+            >
+              <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
+            </div>
+          )}
         </div>
       </div>
     </div>
