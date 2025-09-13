@@ -148,8 +148,9 @@ export default function StreamerProfileLayout({
         <div
           className={cn(
             "z-40 overflow-y-auto transition-transform duration-300 ease-in-out bg-gray-800 border-gray-700 flex flex-col",
-            isMobile && (isChatVisible ? "fixed bottom-0 left-0 w-full h-[50vh] rounded-t-lg translate-y-0" : "fixed bottom-0 left-0 w-full h-[50vh] translate-y-full"),
-            !isMobile && (isChatVisible ? "lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:border-l lg:rounded-none lg:translate-x-0" : "lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:translate-x-full")
+            isMobile ? 
+              (isChatVisible ? "fixed bottom-0 left-0 w-full h-[50vh] rounded-t-lg translate-y-0" : "fixed bottom-0 left-0 w-full h-[50vh] translate-y-full") :
+              (isChatVisible ? "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 border-l rounded-none translate-x-0" : "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 translate-x-full")
           )}
         >
           <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
