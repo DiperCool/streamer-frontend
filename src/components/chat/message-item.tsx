@@ -38,7 +38,7 @@ interface MessageItemProps {
   onMouseLeave: () => void
   chatId: string
   canManageChat: boolean;
-  broadcasterId: string; // Добавлено
+  broadcasterId: string;
   refetchCurrentStreamerInteraction: () => Promise<any>;
 }
 
@@ -54,7 +54,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   onMouseLeave,
   chatId,
   canManageChat,
-  broadcasterId, // Используем broadcasterId
+  broadcasterId,
   refetchCurrentStreamerInteraction,
 }) => {
   const { currentAuthUserStreamer } = useDashboard();
@@ -266,7 +266,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           onOpenChange={setIsBanDialogOpen}
           userIdToBan={userToBanId}
           userNameToBan={userToBanName}
-          broadcasterId={broadcasterId} {/* Передаем broadcasterId */}
+          broadcasterId={broadcasterId}
           refetchStreamerInteraction={refetchCurrentStreamerInteraction}
         />
       )}
