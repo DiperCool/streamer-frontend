@@ -98,7 +98,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
   const { isAuthenticated, user } = useAuth0();
-  const { refetchStreamerInteraction, streamerInteractionData, streamerInteractionLoading } = useDashboard(); // Get streamerInteractionLoading
+  const { refetchStreamerInteraction, streamerInteractionData, streamerInteractionLoading } = useDashboard();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -326,7 +326,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   useUserBannedSubscription({
     variables: {
       broadcasterId: streamerId,
-      userId: user?.sub || "",
+      userId: user?.sub || "", // Corrected userId
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
@@ -338,7 +338,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   useUserUnbannedSubscription({
     variables: {
       broadcasterId: streamerId,
-      userId: user?.sub || "",
+      userId: user?.sub || "", // Corrected userId
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
@@ -350,8 +350,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   // Slow mode cooldown logic
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
-    if (chatSettings?.slowMode && streamerInteractionData?.lastTimeMessage) {
-      const lastMessageTime = new Date(streamerInteractionData.lastTimeMessage);
+    if (chatSettings?.slowMode && streamerInteractionData?.streamerInteraction?.lastTimeMessage) {
+      const lastMessageTime = new Date(streamerInteractionData.streamerInteraction.lastTimeMessage);
       const now = new Date();
       const secondsSinceLastMessage = differenceInSeconds(now, lastMessageTime);
       const remainingCooldown = chatSettings.slowMode - secondsSinceLastMessage;
@@ -377,7 +377,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [chatSettings?.slowMode, streamerInteractionData?.lastTimeMessage]);
+  }, [chatSettings?.slowMode, streamerInteractionData?.streamerInteraction?.lastTimeMessage]);
 
 
   // ResizeObserver to get dynamic height/width for VariableSizeList
@@ -452,8 +452,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       return;
     }
 
-    if (streamerInteractionData?.banned) {
-      const banExpires = streamerInteractionData.bannedUntil ? new Date(streamerInteractionData.bannedUntil) : null;
+    if (streamerInteractionData?.streamerInteraction?.banned) {
+      const banExpires = streamerInteractionData.streamerInteraction.bannedUntil ? new Date(streamerInteractionData.streamerInteraction.bannedUntil) : null;
       const isPermanent = banExpires && banExpires.getFullYear() > new Date().getFullYear() + 50;
       if (isPermanent) {
         toast.error("You are permanently banned from this chat.");
@@ -467,7 +467,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       return;
     }
 
-    if (chatSettings?.followersOnly && !streamerInteractionData?.followed) {
+    if (chatSettings?.followersOnly && !streamerInteractionData?.streamerInteraction?.followed) {
       toast.error("This chat is for followers only.");
       return;
     }
@@ -634,8 +634,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       </div>
     );
     isChatInputDisabled = true;
-  } else if (streamerInteractionData?.banned) {
-    const banExpires = streamerInteractionData.bannedUntil ? new Date(streamerInteractionData.bannedUntil) : null;
+  } else if (streamerInteractionData?.streamerInteraction?.banned) {
+    const banExpires = streamerInteractionData.streamerInteraction.bannedUntil ? new Date(streamerInteractionData.streamerInteraction.bannedUntil) : null;
     const isPermanent = banExpires && banExpires.getFullYear() > new Date().getFullYear() + 50;
     if (isPermanent) {
       chatInputRestrictionMessage = "You are permanently banned from this chat.";
@@ -645,7 +645,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       chatInputRestrictionMessage = "You are banned from this chat.";
     }
     isChatInputDisabled = true;
-  } else if (chatSettings?.followersOnly && !streamerInteractionData?.followed) {
+  } else if (chatSettings?.followersOnly && !streamerInteractionData?.streamerInteraction?.followed) {
     chatInputRestrictionMessage = "This chat is for followers only.";
     isChatInputDisabled = true;
   } else if (chatSettings?.slowMode && slowModeCooldown > 0) {
