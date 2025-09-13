@@ -620,6 +620,32 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     pinnedMessageId: pinnedMessageId,
   }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId]);
 
+  // Determine if chat input should be disabled and what message to show
+  let chatInputRestrictionMessage: string | null = null;
+  let isChatInputDisabled = false;
+
+  if (!isAuthenticated) {
+    chatInputRestrictionMessage = "Log in to send messages.";
+    isChatInputDisabled = true;
+  } else if (streamerInteractionData?.banned) {
+    const banExpires = streamerInteractionData.bannedUntil ? new Date(streamerInteractionData.bannedUntil) : null;
+    const isPermanent = banExpires && banExpires.getFullYear() > new Date().getFullYear() + 50;
+    if (isPermanent) {
+      chatInputRestrictionMessage = "You are permanently banned from this chat.";
+    } else if (banExpires && !isPast(banExpires)) {
+      chatInputRestrictionMessage = `You are banned until ${format(banExpires, "MMM dd, yyyy HH:mm")}.`;
+    } else {
+      chatInputRestrictionMessage = "You are banned from this chat.";
+    }
+    isChatInputDisabled = true;
+  } else if (chatSettings?.followersOnly && !streamerInteractionData?.followed) {
+    chatInputRestrictionMessage = "This chat is for followers only.";
+    isChatInputDisabled = true;
+  } else if (chatSettings?.slowMode && slowModeCooldown > 0) {
+    chatInputRestrictionMessage = `Slow mode active. Please wait ${slowModeCooldown}s.`;
+    isChatInputDisabled = true;
+  }
+  // TODO: Add subscribersOnly check here when subscription status is available
 
   const chatContent = (
     <>
@@ -647,32 +673,6 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
         </div>
       )}
 
-      {/* User Banned / Slow Mode / Followers Only Status */}
-      {streamerInteractionData?.banned && (
-        <div className="bg-red-900/30 border-b border-red-800 p-2 text-sm text-red-200 flex items-center justify-center">
-          <Ban className="h-4 w-4 mr-2" />
-          You are banned from this chat.
-          {streamerInteractionData.bannedUntil && !isPast(new Date(streamerInteractionData.bannedUntil)) && (
-            <span className="ml-1">
-              Until {format(new Date(streamerInteractionData.bannedUntil), "MMM dd, yyyy HH:mm")}
-            </span>
-          )}
-        </div>
-      )}
-      {chatSettings?.followersOnly && !streamerInteractionData?.followed && (
-        <div className="bg-yellow-900/30 border-b border-yellow-800 p-2 text-sm text-yellow-200 flex items-center justify-center">
-          <UserX className="h-4 w-4 mr-2" />
-          This chat is for followers only.
-        </div>
-      )}
-      {chatSettings?.slowMode && slowModeCooldown > 0 && (
-        <div className="bg-orange-900/30 border-b border-orange-800 p-2 text-sm text-orange-200 flex items-center justify-center">
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Slow mode active. Please wait {slowModeCooldown}s.
-        </div>
-      )}
-
-
       {/* Messages List Container - This is the new flex-1 div */}
       <div className="flex-1 overflow-hidden" ref={chatContainerRef}>
         {chatLoading || messagesLoading ? (
@@ -699,7 +699,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
         )}
       </div>
 
-      {/* Input Area */}
+      {/* Input Area or Restriction Message */}
       <div className="p-4 border-t border-gray-700 flex flex-col space-y-2">
         {replyToMessage && (
           <div className="flex items-center justify-between bg-gray-700 p-2 rounded-md text-sm text-gray-300">
@@ -718,38 +718,45 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
             </Button>
           </div>
         )}
-        <div className="flex items-center space-x-2">
-          <Input
-            {...register("message")}
-            placeholder="Send a message"
-            className="flex-1 bg-gray-700 border-gray-600 text-white focus:border-green-500"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSubmit(onSubmit)()
-              }
-            }}
-            disabled={sendingMessage || slowModeCooldown > 0 || streamerInteractionData?.banned || (chatSettings?.followersOnly && !streamerInteractionData?.followed)}
-          />
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Smile className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-            <Gift className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="default"
-            size="icon"
-            className="bg-green-600 hover:bg-green-700 text-white"
-            onClick={handleSubmit(onSubmit)}
-            disabled={sendingMessage || slowModeCooldown > 0 || streamerInteractionData?.banned || (chatSettings?.followersOnly && !streamerInteractionData?.followed)}
-          >
-            <Send className="h-5 w-5" />
-          </Button>
-        </div>
+
+        {chatInputRestrictionMessage ? (
+          <div className="flex items-center justify-center h-10 rounded-md bg-gray-700 text-gray-400 text-sm px-3">
+            {chatInputRestrictionMessage}
+          </div>
+        ) : (
+          <div className="flex items-center space-x-2">
+            <Input
+              {...register("message")}
+              placeholder="Send a message"
+              className="flex-1 bg-gray-700 border-gray-600 text-white focus:border-green-500"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit(onSubmit)()
+                }
+              }}
+              disabled={sendingMessage}
+            />
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Smile className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Gift className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="default"
+              size="icon"
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={handleSubmit(onSubmit)}
+              disabled={sendingMessage}
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
+        {errors.message && (
+          <p className="text-red-500 text-sm px-4 pb-2">{errors.message.message}</p>
+        )}
       </div>
-      {errors.message && (
-        <p className="text-red-500 text-sm px-4 pb-2">{errors.message.message}</p>
-      )}
     </>
   );
 
