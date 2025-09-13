@@ -167,7 +167,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     </DropdownMenuItem>
                   </>
                 )}
-                {canManageChat && !isOwnMessage && (
+                {canManageChat && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -176,18 +176,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                       disabled={isMessageDeleted || !canManageChat}
                     >
                       <X className="h-4 w-4 mr-2" /> Delete
-                    </DropdownMenuItem>
-                  </>
-                )}
-                {isOwnMessage && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete(message.id)}
-                      className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                      disabled={isMessageDeleted}
-                    >
-                      <X className="h-4 w-4 mr-2" /> Delete My Message
                     </DropdownMenuItem>
                   </>
                 )}
@@ -233,7 +221,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               </ContextMenuItem>
             </>
           )}
-          {canManageChat && !isOwnMessage && (
+          {canManageChat && (
             <>
               <ContextMenuSeparator />
               <ContextMenuItem
@@ -242,18 +230,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 disabled={isMessageDeleted || !canManageChat}
               >
                 <X className="h-4 w-4 mr-2" /> Delete
-              </ContextMenuItem>
-            </>
-          )}
-          {isOwnMessage && (
-            <>
-              <ContextMenuSeparator />
-              <ContextMenuItem
-                onClick={() => onDelete(message.id)}
-                className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                disabled={isMessageDeleted}
-              >
-                <X className="h-4 w-4 mr-2" /> Delete My Message
               </ContextMenuItem>
             </>
           )}
