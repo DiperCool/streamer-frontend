@@ -87,7 +87,6 @@ export default function DashboardHomePage({ params }: { params: { username: stri
               <div className="flex-1 h-full flex flex-col"> 
                 <ChatSection
                   streamerId={activeStreamer?.id ?? ""}
-                  // onScrollToBottom={() => { /* No-op for dashboard widget */ }} // Удалено
                   hideCardWrapper={true}
                 />
               </div>
@@ -246,7 +245,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
         saveLayout={saveLayout}
         resetLayout={resetLayout}
         activeWidgets={activeWidgets}
-        onUpdateWidgets={onUpdateWidgets}
+        onUpdateWidgets={handleUpdateWidgets} {/* Исправлено: передаем handleUpdateWidgets */}
       />
     </div>
   );
