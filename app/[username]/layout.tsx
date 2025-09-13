@@ -219,7 +219,7 @@ export default function StreamerProfileLayout({
                   <TabsTrigger value="videos">Videos</TabsTrigger>
                 </Link>
                 <Link href={`/${username}/clips`} passHref>
-                  <TabsTrigger value="clips">Clips</TabsTrigger>
+                  <TabsTrigger value="clips">Clips</TabsGigger>
                 </Link>
               </TabsList>
             </Tabs>
@@ -227,18 +227,19 @@ export default function StreamerProfileLayout({
           {children}
 
           {/* Single ChatSection, conditionally rendered and styled based on isMobile */}
-          {!isDashboardRoute && isChatVisible && (
+          {!isDashboardRoute && (
             <div
               className={cn(
                 "flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
-                // Mobile styles: in-flow, at the bottom of the content
-                isMobile ? "w-full bg-gray-800 rounded-lg mt-6 h-[50vh] flex" : "hidden",
-                // Desktop styles: fixed sidebar
-                !isMobile ? "lg:flex lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:bg-gray-800 lg:border-l lg:border-gray-700 lg:mt-0 lg:rounded-none" : "hidden",
-                // Desktop visibility control (only applies if !isMobile)
-                !isMobile && (isChatVisible ? "lg:translate-x-0" : "lg:translate-x-full"),
-                // Mobile visibility control (only applies if isMobile)
-                isMobile && (isChatVisible ? "translate-x-0" : "translate-x-full") // On mobile, if not visible, it should still be hidden by the "hidden" class from the mobile styles, but translate-x-full ensures it slides out.
+                "bg-gray-800 border-gray-700", // Common background/border
+                // Default (mobile-first) state: hidden and off-screen
+                "hidden translate-x-full", 
+                // Mobile-specific styles when chat IS visible
+                isMobile && isChatVisible && "flex w-full rounded-lg mt-6 h-[50vh] translate-x-0",
+                // Desktop-specific styles when chat IS visible
+                !isMobile && isChatVisible && "lg:flex lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:mt-0 lg:rounded-none lg:border-l lg:translate-x-0",
+                // Desktop-specific styles when chat is NOT visible (to ensure it's hidden on desktop too)
+                !isMobile && !isChatVisible && "lg:hidden lg:translate-x-full"
               )}
             >
               <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
