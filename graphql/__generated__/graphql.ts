@@ -31,6 +31,70 @@ export enum ApplyPolicy {
   Validation = 'VALIDATION'
 }
 
+export type BanUserInput = {
+  banUntil: Scalars['DateTime']['input'];
+  broadcasterId: Scalars['String']['input'];
+  reason: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+export type BanUserResponse = {
+  __typename?: 'BanUserResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type BannedUserDto = {
+  __typename?: 'BannedUserDto';
+  bannedAt: Scalars['DateTime']['output'];
+  bannedBy?: Maybe<StreamerDto>;
+  bannedById: Scalars['String']['output'];
+  bannedUntil: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  reason: Scalars['String']['output'];
+  user?: Maybe<StreamerDto>;
+  userId: Scalars['String']['output'];
+};
+
+export type BannedUserDtoFilterInput = {
+  and?: InputMaybe<Array<BannedUserDtoFilterInput>>;
+  bannedAt?: InputMaybe<DateTimeOperationFilterInput>;
+  bannedById?: InputMaybe<StringOperationFilterInput>;
+  bannedUntil?: InputMaybe<DateTimeOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<BannedUserDtoFilterInput>>;
+  reason?: InputMaybe<StringOperationFilterInput>;
+  userId?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type BannedUserDtoSortInput = {
+  bannedAt?: InputMaybe<SortEnumType>;
+  bannedById?: InputMaybe<SortEnumType>;
+  bannedUntil?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  reason?: InputMaybe<SortEnumType>;
+  userId?: InputMaybe<SortEnumType>;
+};
+
+/** A connection to a list of items. */
+export type BannedUsersConnection = {
+  __typename?: 'BannedUsersConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<BannedUsersEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<BannedUserDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type BannedUsersEdge = {
+  __typename?: 'BannedUsersEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: BannedUserDto;
+};
+
 export type BooleanOperationFilterInput = {
   eq?: InputMaybe<Scalars['Boolean']['input']>;
   neq?: InputMaybe<Scalars['Boolean']['input']>;
@@ -287,6 +351,7 @@ export type LongOperationFilterInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  banUser: BanUserResponse;
   createCategory: CreateCategoryResponse;
   createMessage: CreateMessageResponse;
   createRole: CreateRoleResponse;
@@ -311,6 +376,11 @@ export type Mutation = {
   updateStreamSettings: UpdateStreamSettingsResponse;
   updateVod: UpdateVodResponse;
   upload: UploadFileResponse;
+};
+
+
+export type MutationBanUserArgs = {
+  request: BanUserInput;
 };
 
 
@@ -540,6 +610,7 @@ export type ProfileDto = {
 
 export type Query = {
   __typename?: 'Query';
+  bannedUsers?: Maybe<BannedUsersConnection>;
   categories?: Maybe<CategoriesConnection>;
   category: CategoryDto;
   categoryBySlug: CategoryDto;
@@ -569,6 +640,17 @@ export type Query = {
   topStreams: Array<StreamDto>;
   vod: VodDto;
   vods?: Maybe<VodsConnection>;
+};
+
+
+export type QueryBannedUsersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<BannedUserDtoSortInput>>;
+  streamerId: Scalars['String']['input'];
+  where?: InputMaybe<BannedUserDtoFilterInput>;
 };
 
 
@@ -981,8 +1063,12 @@ export type StreamerFollowerDtoSortInput = {
 
 export type StreamerInteractionDto = {
   __typename?: 'StreamerInteractionDto';
+  banned: Scalars['Boolean']['output'];
+  bannedUntil?: Maybe<Scalars['DateTime']['output']>;
   followed: Scalars['Boolean']['output'];
   followedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastTimeMessage?: Maybe<Scalars['DateTime']['output']>;
+  permissions: PermissionsFlags;
 };
 
 export type StreamerMeDto = {
@@ -1058,6 +1144,8 @@ export type Subscription = {
   streamUpdated: StreamDto;
   streamerUpdated: StreamerDto;
   subscribeWatchStream: Array<StreamWatcher>;
+  userBanned: BannedUserDto;
+  userUnbanned: BannedUserDto;
   watchStream: StreamWatcher;
 };
 
@@ -1089,6 +1177,18 @@ export type SubscriptionStreamerUpdatedArgs = {
 
 export type SubscriptionSubscribeWatchStreamArgs = {
   streamId: Scalars['UUID']['input'];
+};
+
+
+export type SubscriptionUserBannedArgs = {
+  broadcasterId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+
+export type SubscriptionUserUnbannedArgs = {
+  broadcasterId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
 };
 
 
@@ -1451,6 +1551,13 @@ export type UpdateChatSettingsMutationVariables = Exact<{
 
 export type UpdateChatSettingsMutation = { __typename?: 'Mutation', updateChatSettings: { __typename?: 'UpdateChatSettingsResponse', id: string } };
 
+export type BanUserMutationVariables = Exact<{
+  request: BanUserInput;
+}>;
+
+
+export type BanUserMutation = { __typename?: 'Mutation', banUser: { __typename?: 'BanUserResponse', id: string } };
+
 export type GetChatQueryVariables = Exact<{
   streamerId: Scalars['String']['input'];
 }>;
@@ -1486,6 +1593,19 @@ export type GetChatMessagesHistoryQueryVariables = Exact<{
 
 export type GetChatMessagesHistoryQuery = { __typename?: 'Query', chatMessagesHistory: Array<{ __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null }> };
 
+export type GetBannedUsersQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<BannedUserDtoSortInput> | BannedUserDtoSortInput>;
+  streamerId: Scalars['String']['input'];
+  where?: InputMaybe<BannedUserDtoFilterInput>;
+}>;
+
+
+export type GetBannedUsersQuery = { __typename?: 'Query', bannedUsers?: { __typename?: 'BannedUsersConnection', nodes?: Array<{ __typename?: 'BannedUserDto', id: string, userId: string, bannedById: string, reason: string, bannedAt: string, bannedUntil: string, user?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, bannedBy?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
 export type ChatMessageCreatedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
 }>;
@@ -1506,6 +1626,22 @@ export type ChatUpdatedSubscriptionVariables = Exact<{
 
 
 export type ChatUpdatedSubscription = { __typename?: 'Subscription', chatUpdated: { __typename?: 'ChatDto', pinnedMessageId?: string | null, settingsId: string, streamerId: string, pinnedMessage?: { __typename?: 'PinnedChatMessageDto', id: string, createdAt: string, messageId: string, pinnedById: string, message?: { __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } | null } | null, settings?: { __typename?: 'ChatSettingsDto', id: string, bannedWords: Array<string>, followersOnly: boolean, slowMode?: number | null, subscribersOnly: boolean } | null } };
+
+export type UserBannedSubscriptionVariables = Exact<{
+  broadcasterId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+}>;
+
+
+export type UserBannedSubscription = { __typename?: 'Subscription', userBanned: { __typename?: 'BannedUserDto', id: string, userId: string, bannedById: string, reason: string, bannedAt: string, bannedUntil: string, user?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, bannedBy?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+
+export type UserUnbannedSubscriptionVariables = Exact<{
+  broadcasterId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+}>;
+
+
+export type UserUnbannedSubscription = { __typename?: 'Subscription', userUnbanned: { __typename?: 'BannedUserDto', id: string, userId: string, bannedById: string, reason: string, bannedAt: string, bannedUntil: string, user?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, bannedBy?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 export type UploadFileMutationVariables = Exact<{
   input: UploadFileInput;
@@ -1667,7 +1803,7 @@ export type StreamerInteractionQueryVariables = Exact<{
 }>;
 
 
-export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null } };
+export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null, banned: boolean, bannedUntil?: string | null, lastTimeMessage?: string | null } };
 
 export type StreamerUpdatedSubscriptionVariables = Exact<{
   streamerId: Scalars['String']['input'];
@@ -2284,6 +2420,39 @@ export function useUpdateChatSettingsMutation(baseOptions?: Apollo.MutationHookO
 export type UpdateChatSettingsMutationHookResult = ReturnType<typeof useUpdateChatSettingsMutation>;
 export type UpdateChatSettingsMutationResult = Apollo.MutationResult<UpdateChatSettingsMutation>;
 export type UpdateChatSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateChatSettingsMutation, UpdateChatSettingsMutationVariables>;
+export const BanUserDocument = gql`
+    mutation BanUser($request: BanUserInput!) {
+  banUser(request: $request) {
+    id
+  }
+}
+    `;
+export type BanUserMutationFn = Apollo.MutationFunction<BanUserMutation, BanUserMutationVariables>;
+
+/**
+ * __useBanUserMutation__
+ *
+ * To run a mutation, you first call `useBanUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useBanUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [banUserMutation, { data, loading, error }] = useBanUserMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useBanUserMutation(baseOptions?: Apollo.MutationHookOptions<BanUserMutation, BanUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<BanUserMutation, BanUserMutationVariables>(BanUserDocument, options);
+      }
+export type BanUserMutationHookResult = ReturnType<typeof useBanUserMutation>;
+export type BanUserMutationResult = Apollo.MutationResult<BanUserMutation>;
+export type BanUserMutationOptions = Apollo.BaseMutationOptions<BanUserMutation, BanUserMutationVariables>;
 export const GetChatDocument = gql`
     query GetChat($streamerId: String!) {
   chat(streamerId: $streamerId) {
@@ -2554,6 +2723,83 @@ export type GetChatMessagesHistoryQueryHookResult = ReturnType<typeof useGetChat
 export type GetChatMessagesHistoryLazyQueryHookResult = ReturnType<typeof useGetChatMessagesHistoryLazyQuery>;
 export type GetChatMessagesHistorySuspenseQueryHookResult = ReturnType<typeof useGetChatMessagesHistorySuspenseQuery>;
 export type GetChatMessagesHistoryQueryResult = Apollo.QueryResult<GetChatMessagesHistoryQuery, GetChatMessagesHistoryQueryVariables>;
+export const GetBannedUsersDocument = gql`
+    query GetBannedUsers($after: String, $before: String, $first: Int, $last: Int, $order: [BannedUserDtoSortInput!], $streamerId: String!, $where: BannedUserDtoFilterInput) {
+  bannedUsers(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    streamerId: $streamerId
+    where: $where
+  ) {
+    nodes {
+      id
+      userId
+      bannedById
+      reason
+      bannedAt
+      bannedUntil
+      user {
+        id
+        userName
+        avatar
+      }
+      bannedBy {
+        id
+        userName
+        avatar
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetBannedUsersQuery__
+ *
+ * To run a query within a React component, call `useGetBannedUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBannedUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBannedUsersQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      streamerId: // value for 'streamerId'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetBannedUsersQuery(baseOptions: Apollo.QueryHookOptions<GetBannedUsersQuery, GetBannedUsersQueryVariables> & ({ variables: GetBannedUsersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBannedUsersQuery, GetBannedUsersQueryVariables>(GetBannedUsersDocument, options);
+      }
+export function useGetBannedUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBannedUsersQuery, GetBannedUsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBannedUsersQuery, GetBannedUsersQueryVariables>(GetBannedUsersDocument, options);
+        }
+export function useGetBannedUsersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBannedUsersQuery, GetBannedUsersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBannedUsersQuery, GetBannedUsersQueryVariables>(GetBannedUsersDocument, options);
+        }
+export type GetBannedUsersQueryHookResult = ReturnType<typeof useGetBannedUsersQuery>;
+export type GetBannedUsersLazyQueryHookResult = ReturnType<typeof useGetBannedUsersLazyQuery>;
+export type GetBannedUsersSuspenseQueryHookResult = ReturnType<typeof useGetBannedUsersSuspenseQuery>;
+export type GetBannedUsersQueryResult = Apollo.QueryResult<GetBannedUsersQuery, GetBannedUsersQueryVariables>;
 export const ChatMessageCreatedDocument = gql`
     subscription ChatMessageCreated($chatId: UUID!) {
   chatMessageCreated(chatId: $chatId) {
@@ -2723,6 +2969,98 @@ export function useChatUpdatedSubscription(baseOptions: Apollo.SubscriptionHookO
       }
 export type ChatUpdatedSubscriptionHookResult = ReturnType<typeof useChatUpdatedSubscription>;
 export type ChatUpdatedSubscriptionResult = Apollo.SubscriptionResult<ChatUpdatedSubscription>;
+export const UserBannedDocument = gql`
+    subscription UserBanned($broadcasterId: String!, $userId: String!) {
+  userBanned(broadcasterId: $broadcasterId, userId: $userId) {
+    id
+    userId
+    bannedById
+    reason
+    bannedAt
+    bannedUntil
+    user {
+      id
+      userName
+      avatar
+    }
+    bannedBy {
+      id
+      userName
+      avatar
+    }
+  }
+}
+    `;
+
+/**
+ * __useUserBannedSubscription__
+ *
+ * To run a query within a React component, call `useUserBannedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useUserBannedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserBannedSubscription({
+ *   variables: {
+ *      broadcasterId: // value for 'broadcasterId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useUserBannedSubscription(baseOptions: Apollo.SubscriptionHookOptions<UserBannedSubscription, UserBannedSubscriptionVariables> & ({ variables: UserBannedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<UserBannedSubscription, UserBannedSubscriptionVariables>(UserBannedDocument, options);
+      }
+export type UserBannedSubscriptionHookResult = ReturnType<typeof useUserBannedSubscription>;
+export type UserBannedSubscriptionResult = Apollo.SubscriptionResult<UserBannedSubscription>;
+export const UserUnbannedDocument = gql`
+    subscription UserUnbanned($broadcasterId: String!, $userId: String!) {
+  userUnbanned(broadcasterId: $broadcasterId, userId: $userId) {
+    id
+    userId
+    bannedById
+    reason
+    bannedAt
+    bannedUntil
+    user {
+      id
+      userName
+      avatar
+    }
+    bannedBy {
+      id
+      userName
+      avatar
+    }
+  }
+}
+    `;
+
+/**
+ * __useUserUnbannedSubscription__
+ *
+ * To run a query within a React component, call `useUserUnbannedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useUserUnbannedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserUnbannedSubscription({
+ *   variables: {
+ *      broadcasterId: // value for 'broadcasterId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useUserUnbannedSubscription(baseOptions: Apollo.SubscriptionHookOptions<UserUnbannedSubscription, UserUnbannedSubscriptionVariables> & ({ variables: UserUnbannedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<UserUnbannedSubscription, UserUnbannedSubscriptionVariables>(UserUnbannedDocument, options);
+      }
+export type UserUnbannedSubscriptionHookResult = ReturnType<typeof useUserUnbannedSubscription>;
+export type UserUnbannedSubscriptionResult = Apollo.SubscriptionResult<UserUnbannedSubscription>;
 export const UploadFileDocument = gql`
     mutation UploadFile($input: UploadFileInput!) {
   upload(input: $input) {
@@ -3619,6 +3957,9 @@ export const StreamerInteractionDocument = gql`
   streamerInteraction(streamerId: $streamerId) {
     followed
     followedAt
+    banned
+    bannedUntil
+    lastTimeMessage
   }
 }
     `;

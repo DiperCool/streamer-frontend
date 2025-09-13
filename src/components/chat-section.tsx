@@ -1,11 +1,11 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
-import { format, isToday } from "date-fns"
-import { Card, CardHeader, CardTitle } from "@/components/ui/card" // Удален CardContent
+import { format, isToday, differenceInSeconds } from "date-fns"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin } from "lucide-react"
+import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin, Ban } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -18,23 +18,28 @@ import {
     usePinMessageMutation,
     useUnpinMessageMutation,
     useChatUpdatedSubscription,
+    useChatMessageCreatedSubscription,
+    useChatMessageDeletedSubscription,
+    useUserBannedSubscription,
+    useUserUnbannedSubscription,
     SortEnumType,
     ChatMessageDto,
     GetChatMessagesQuery,
     GetChatMessagesDocument,
     ChatMessagesEdge,
-    useChatMessageCreatedSubscription,
-    useChatMessageDeletedSubscription,
 } from "@/graphql/__generated__/graphql"
 import { useApolloClient } from "@apollo/client"
 import { MessageItem } from "@/src/components/chat/message-item"
 import { getMinioUrl } from "@/utils/utils"
+import { useDashboard } from "@/src/contexts/DashboardContext"
+import { useAuth0 } from "@auth0/auth0-react"
+import { toast } from "sonner"
 
 interface ChatSectionProps {
-  onCloseChat?: () => void // Made optional
+  onCloseChat?: () => void
   streamerId: string
   onScrollToBottom: () => void;
-  hideCardWrapper?: boolean; // New prop
+  hideCardWrapper?: boolean;
 }
 
 const messageSchema = z.object({
@@ -92,6 +97,8 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const listRef = useRef<VariableSizeList>(null);
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
+  const { isAuthenticated, user } = useAuth0();
+  const { refetchStreamerInteraction, streamerInteractionData } = useDashboard();
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -100,6 +107,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
+  const [slowModeCooldown, setSlowModeCooldown] = useState(0);
 
   const { data: chatData, loading: chatLoading, refetch: refetchChat } = useGetChatQuery({
     variables: { streamerId },
@@ -109,6 +117,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const chatId = chatData?.chat.id
   const pinnedMessage = chatData?.chat.pinnedMessage;
   const pinnedMessageId = chatData?.chat.pinnedMessageId;
+  const chatSettings = chatData?.chat.settings;
 
   const {
     data: messagesData,
@@ -143,83 +152,16 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     },
   })
 
-  // Подписка на обновление чата (для закрепленных сообщений)
+  // Subscriptions
   useChatUpdatedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
     onData: ({ data }) => {
-      // Просто перезапрашиваем данные чата, чтобы получить обновленное закрепленное сообщение
-      refetchChat();
+      refetchChat(); // Refetch chat data to get updated pinned message and settings
+      refetchStreamerInteraction(user?.sub || ""); // Refetch streamer interaction for current user
     },
   });
 
-  // ResizeObserver to get dynamic height/width for VariableSizeList
-  useEffect(() => {
-    const currentRef = chatContainerRef.current;
-    if (!currentRef) return;
-
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        if (entry.target === currentRef) {
-          setListHeight(entry.contentRect.height);
-          setListWidth(entry.contentRect.width);
-        }
-      }
-    });
-
-    resizeObserver.observe(currentRef);
-
-    return () => {
-      resizeObserver.unobserve(currentRef);
-    };
-  }, []);
-
-  // Memoize reversed messages for VariableSizeList
-  const reversedMessages = React.useMemo(() => {
-    return messagesData?.chatMessages?.nodes ? [...messagesData.chatMessages.nodes].reverse() : [];
-  }, [messagesData]);
-
-  // Function to get item size for VariableSizeList
-  const getItemSize = useCallback((index: number) => {
-    const message = reversedMessages[index];
-    if (!message) return MESSAGE_ITEM_BASE_HEIGHT;
-
-    let height = MESSAGE_ITEM_BASE_HEIGHT;
-
-    if (message.reply) {
-      height += REPLY_HEIGHT_ADDITION;
-    }
-
-    if (message.message.length > LONG_MESSAGE_TEXT_THRESHOLD) {
-      const extraLines = Math.ceil((message.message.length - LONG_MESSAGE_TEXT_THRESHOLD) / 30); 
-      height += extraLines * LONG_MESSAGE_HEIGHT_PER_LINE;
-    }
-
-    return height;
-  }, [reversedMessages]);
-
-  // Effect to handle initial message loading and scroll to bottom
-  useEffect(() => {
-    if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
-      const timer = setTimeout(() => {
-        listRef.current?.scrollToItem(reversedMessages.length - 1, "end");
-        setIsScrolledToTop(false);
-        setIsUserAtBottom(true);
-        setInitialMessagesLoaded(true);
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [reversedMessages, initialMessagesLoaded]);
-
-  // Effect to refetch on chat open and reset initialMessagesLoaded
-  useEffect(() => {
-    if (chatId) {
-      refetch();
-      setInitialMessagesLoaded(false);
-    }
-  }, [chatId, refetch]);
-
-  // Subscription for new messages
   useChatMessageCreatedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
@@ -295,13 +237,12 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
         );
 
         if (isUserAtBottom && listRef.current) {
-          listRef.current.scrollToItem(reversedMessages.length, "end"); 
+          listRef.current.scrollToItem(reversedMessages.length, "end");
         }
       }
     },
   });
 
-  // Subscription for deleted messages
   useChatMessageDeletedSubscription({
     variables: { chatId: chatId! },
     skip: !chatId,
@@ -382,8 +323,162 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
     },
   });
 
+  useUserBannedSubscription({
+    variables: {
+      broadcasterId: streamerId,
+      userId: user?.sub || "",
+    },
+    skip: !streamerId || !user?.sub,
+    onData: () => {
+      refetchStreamerInteraction(user?.sub || "");
+      toast.error("You have been banned from this chat!");
+    },
+  });
+
+  useUserUnbannedSubscription({
+    variables: {
+      broadcasterId: streamerId,
+      userId: user?.sub || "",
+    },
+    skip: !streamerId || !user?.sub,
+    onData: () => {
+      refetchStreamerInteraction(user?.sub || "");
+      toast.success("You have been unbanned from this chat!");
+    },
+  });
+
+  // Slow mode cooldown logic
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (chatSettings?.slowMode && streamerInteractionData?.lastTimeMessage) {
+      const lastMessageTime = new Date(streamerInteractionData.lastTimeMessage);
+      const now = new Date();
+      const secondsSinceLastMessage = differenceInSeconds(now, lastMessageTime);
+      const remainingCooldown = chatSettings.slowMode - secondsSinceLastMessage;
+
+      if (remainingCooldown > 0) {
+        setSlowModeCooldown(remainingCooldown);
+        timer = setInterval(() => {
+          setSlowModeCooldown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        setSlowModeCooldown(0);
+      }
+    } else {
+      setSlowModeCooldown(0);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [chatSettings?.slowMode, streamerInteractionData?.lastTimeMessage]);
+
+
+  // ResizeObserver to get dynamic height/width for VariableSizeList
+  useEffect(() => {
+    const currentRef = chatContainerRef.current;
+    if (!currentRef) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        if (entry.target === currentRef) {
+          setListHeight(entry.contentRect.height);
+          setListWidth(entry.contentRect.width);
+        }
+      }
+    });
+
+    resizeObserver.observe(currentRef);
+
+    return () => {
+      resizeObserver.unobserve(currentRef);
+    };
+  }, []);
+
+  // Memoize reversed messages for VariableSizeList
+  const reversedMessages = React.useMemo(() => {
+    return messagesData?.chatMessages?.nodes ? [...messagesData.chatMessages.nodes].reverse() : [];
+  }, [messagesData]);
+
+  // Function to get item size for VariableSizeList
+  const getItemSize = useCallback((index: number) => {
+    const message = reversedMessages[index];
+    if (!message) return MESSAGE_ITEM_BASE_HEIGHT;
+
+    let height = MESSAGE_ITEM_BASE_HEIGHT;
+
+    if (message.reply) {
+      height += REPLY_HEIGHT_ADDITION;
+    }
+
+    if (message.message.length > LONG_MESSAGE_TEXT_THRESHOLD) {
+      const extraLines = Math.ceil((message.message.length - LONG_MESSAGE_TEXT_THRESHOLD) / 30);
+      height += extraLines * LONG_MESSAGE_HEIGHT_PER_LINE;
+    }
+
+    return height;
+  }, [reversedMessages]);
+
+  // Effect to handle initial message loading and scroll to bottom
+  useEffect(() => {
+    if (reversedMessages.length > 0 && listRef.current && !initialMessagesLoaded) {
+      const timer = setTimeout(() => {
+        listRef.current?.scrollToItem(reversedMessages.length - 1, "end");
+        setIsScrolledToTop(false);
+        setIsUserAtBottom(true);
+        setInitialMessagesLoaded(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [reversedMessages, initialMessagesLoaded]);
+
+  // Effect to refetch on chat open and reset initialMessagesLoaded
+  useEffect(() => {
+    if (chatId) {
+      refetch();
+      setInitialMessagesLoaded(false);
+    }
+  }, [chatId, refetch]);
+
   const onSubmit = async (values: MessageForm) => {
-    if (!chatId) return
+    if (!chatId || !isAuthenticated) {
+      toast.error("You must be logged in to send messages.");
+      return;
+    }
+
+    if (streamerInteractionData?.banned) {
+      const banExpires = streamerInteractionData.bannedUntil ? new Date(streamerInteractionData.bannedUntil) : null;
+      const isPermanent = banExpires && banExpires.getFullYear() > new Date().getFullYear() + 50;
+      if (isPermanent) {
+        toast.error("You are permanently banned from this chat.");
+      } else if (banExpires && !isPast(banExpires)) {
+        toast.error(`You are banned from this chat until ${format(banExpires, "MMM dd, yyyy HH:mm")}.`);
+      } else {
+        // Ban has expired, but interaction data might not be updated yet.
+        // This case should ideally be handled by refetchStreamerInteraction on ban/unban.
+        toast.error("You are banned from this chat.");
+      }
+      return;
+    }
+
+    if (chatSettings?.followersOnly && !streamerInteractionData?.followed) {
+      toast.error("This chat is for followers only.");
+      return;
+    }
+
+    if (chatSettings?.slowMode && slowModeCooldown > 0) {
+      toast.error(`Slow mode is active. Please wait ${slowModeCooldown} seconds.`);
+      return;
+    }
+
+    // TODO: Add subscribersOnly check when subscription status is available
+
     try {
       await createMessage({
         variables: {
@@ -396,8 +491,10 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       })
       reset({ message: "" })
       setReplyToMessage(null)
+      refetchStreamerInteraction(user?.sub || ""); // Update lastTimeMessage for slow mode
     } catch (error) {
       console.error("Error sending message:", error)
+      toast.error("Failed to send message.");
     }
   }
 
@@ -410,8 +507,10 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
           },
         },
       });
+      toast.success("Message deleted.");
     } catch (error) {
       console.error("Error deleting message:", error);
+      toast.error("Failed to delete message.");
     }
   };
 
@@ -425,9 +524,10 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
           },
         },
       });
-      // UI will be updated via the useChatUpdatedSubscription, which now calls refetchChat
+      toast.success("Message pinned.");
     } catch (error) {
       console.error("Error pinning message:", error);
+      toast.error("Failed to pin message.");
     }
   };
 
@@ -440,9 +540,10 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
           },
         },
       });
-      // UI will be updated via the useChatUpdatedSubscription, which now calls refetchChat
+      toast.success("Message unpinned.");
     } catch (error) {
       console.error("Error unpinning message:", error);
+      toast.error("Failed to unpin message.");
     }
   };
 
@@ -465,13 +566,13 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
 
           const newNodes = fetchMoreResult.chatMessages.nodes;
           const updatedNodes = [...(prev.chatMessages?.nodes ?? []), ...newNodes];
-          
+
           let newItemsHeight = 0;
           for (let i = 0; i < newNodes.length; i++) {
             newItemsHeight += getItemSize(prev.chatMessages?.nodes?.length ?? 0 + i);
           }
           const newScrollOffset = currentScrollOffset + newItemsHeight;
-          
+
           setTimeout(() => {
             outerListRef.current?.scrollTo(0, newScrollOffset);
           }, 0);
@@ -504,7 +605,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
       setIsScrolledToTop(scrollTop < 10);
       setIsUserAtBottom((scrollHeight - scrollTop - clientHeight) < MESSAGE_ITEM_BASE_HEIGHT);
     }
-  }, [messagesData, isLoadingMore, initialMessagesLoaded]);
+  }, []);
 
   const itemData = React.useMemo(() => ({
     messages: reversedMessages,
@@ -545,6 +646,32 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
           </Button>
         </div>
       )}
+
+      {/* User Banned / Slow Mode / Followers Only Status */}
+      {streamerInteractionData?.banned && (
+        <div className="bg-red-900/30 border-b border-red-800 p-2 text-sm text-red-200 flex items-center justify-center">
+          <Ban className="h-4 w-4 mr-2" />
+          You are banned from this chat.
+          {streamerInteractionData.bannedUntil && !isPast(new Date(streamerInteractionData.bannedUntil)) && (
+            <span className="ml-1">
+              Until {format(new Date(streamerInteractionData.bannedUntil), "MMM dd, yyyy HH:mm")}
+            </span>
+          )}
+        </div>
+      )}
+      {chatSettings?.followersOnly && !streamerInteractionData?.followed && (
+        <div className="bg-yellow-900/30 border-b border-yellow-800 p-2 text-sm text-yellow-200 flex items-center justify-center">
+          <UserX className="h-4 w-4 mr-2" />
+          This chat is for followers only.
+        </div>
+      )}
+      {chatSettings?.slowMode && slowModeCooldown > 0 && (
+        <div className="bg-orange-900/30 border-b border-orange-800 p-2 text-sm text-orange-200 flex items-center justify-center">
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          Slow mode active. Please wait {slowModeCooldown}s.
+        </div>
+      )}
+
 
       {/* Messages List Container - This is the new flex-1 div */}
       <div className="flex-1 overflow-hidden" ref={chatContainerRef}>
@@ -601,6 +728,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
                 handleSubmit(onSubmit)()
               }
             }}
+            disabled={sendingMessage || slowModeCooldown > 0 || streamerInteractionData?.banned || (chatSettings?.followersOnly && !streamerInteractionData?.followed)}
           />
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Smile className="h-5 w-5" />
@@ -613,7 +741,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
             size="icon"
             className="bg-green-600 hover:bg-green-700 text-white"
             onClick={handleSubmit(onSubmit)}
-            disabled={sendingMessage}
+            disabled={sendingMessage || slowModeCooldown > 0 || streamerInteractionData?.banned || (chatSettings?.followersOnly && !streamerInteractionData?.followed)}
           >
             <Send className="h-5 w-5" />
           </Button>
@@ -650,7 +778,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
             </Button>
           )}
         </div>
-        {onCloseChat && ( // Conditionally render close button
+        {onCloseChat && (
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={onCloseChat}>
             <X className="h-5 w-5" />
           </Button>
