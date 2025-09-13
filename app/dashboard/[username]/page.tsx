@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useCallback } from "react"
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
@@ -245,7 +245,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
         saveLayout={saveLayout}
         resetLayout={resetLayout}
         activeWidgets={activeWidgets}
-        onUpdateWidgets={handleUpdateWidgets} {/* Исправлено: передаем handleUpdateWidgets */}
+        onUpdateWidgets={handleUpdateWidgets}
       />
     </div>
   );
