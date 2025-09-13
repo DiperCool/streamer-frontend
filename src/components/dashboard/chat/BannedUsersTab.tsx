@@ -7,6 +7,7 @@ import {
   BannedUserDto,
   useUserUnbannedSubscription,
   useUserBannedSubscription,
+  useUnbanUserMutation, // Импортируем useUnbanUserMutation
 } from "@/graphql/__generated__/graphql";
 import { useDashboard } from "@/src/contexts/DashboardContext";
 import { Loader2, UserX, Ban, CheckCircle } from "lucide-react";
@@ -40,7 +41,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useBanUserMutation } from "@/graphql/__generated__/graphql"; // For unbanning (re-banning with past date)
+// Удаляем импорт useBanUserMutation, так как он больше не нужен для разбана
 
 export const BannedUsersTab: React.FC = () => {
   const { activeStreamer, activeStreamerPermissions } = useDashboard();
@@ -59,7 +60,7 @@ export const BannedUsersTab: React.FC = () => {
     skip: !streamerId,
   });
 
-  const [banUserMutation] = useBanUserMutation(); // Using banUser for unban functionality
+  const [unbanUserMutation, { loading: unbanLoading }] = useUnbanUserMutation(); // Используем правильную мутацию
 
   // Subscription for user banned events
   useUserBannedSubscription({
@@ -89,15 +90,11 @@ export const BannedUsersTab: React.FC = () => {
 
   const handleUnbanUser = async (userIdToUnban: string) => {
     try {
-      // To unban, we can send a ban request with a banUntil date in the past.
-      // This effectively removes the ban.
-      await banUserMutation({
+      await unbanUserMutation({
         variables: {
           request: {
             userId: userIdToUnban,
             broadcasterId: streamerId,
-            reason: "Unbanned by moderator",
-            banUntil: new Date(0).toISOString(), // Set banUntil to a past date
           },
         },
       });
@@ -197,7 +194,7 @@ export const BannedUsersTab: React.FC = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
-                          {!hasExpired && !isPermanent && ( // Only show unban if not expired and not permanent
+                          {!hasExpired && ( // Show unban if not expired (even if permanent, as permanent bans can still be manually lifted)
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
@@ -205,6 +202,7 @@ export const BannedUsersTab: React.FC = () => {
                                   size="icon"
                                   className="text-gray-400 hover:text-green-500"
                                   title="Unban User"
+                                  disabled={unbanLoading}
                                 >
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
@@ -228,8 +226,9 @@ export const BannedUsersTab: React.FC = () => {
                                   <AlertDialogAction
                                     onClick={() => handleUnbanUser(bannedUser.userId)}
                                     className="bg-green-600 hover:bg-green-700 text-white"
+                                    disabled={unbanLoading}
                                   >
-                                    Unban
+                                    {unbanLoading ? "Unbanning..." : "Unban"}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>

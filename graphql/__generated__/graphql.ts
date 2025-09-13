@@ -363,6 +363,7 @@ export type Mutation = {
   removeCategory: RemoveCategoryResponse;
   removeRole: RemoveRoleResponse;
   removeVod: RemoveVodResponse;
+  unbanUser: UnbanUserResponse;
   unfollow: UnfollowResponse;
   unpinMessage: UnpinMessageResponse;
   updateAvatar: UpdateAvatarResponse;
@@ -436,6 +437,11 @@ export type MutationRemoveRoleArgs = {
 
 export type MutationRemoveVodArgs = {
   request: RemoveVodInput;
+};
+
+
+export type MutationUnbanUserArgs = {
+  request: UnbanUserInput;
 };
 
 
@@ -1245,6 +1251,16 @@ export type TagsEdge = {
   node: TagDto;
 };
 
+export type UnbanUserInput = {
+  broadcasterId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+export type UnbanUserResponse = {
+  __typename?: 'UnbanUserResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type UnfollowInput = {
   streamerId: Scalars['String']['input'];
 };
@@ -1557,6 +1573,13 @@ export type BanUserMutationVariables = Exact<{
 
 
 export type BanUserMutation = { __typename?: 'Mutation', banUser: { __typename?: 'BanUserResponse', id: string } };
+
+export type UnbanUserMutationVariables = Exact<{
+  request: UnbanUserInput;
+}>;
+
+
+export type UnbanUserMutation = { __typename?: 'Mutation', unbanUser: { __typename?: 'UnbanUserResponse', id: string } };
 
 export type GetChatQueryVariables = Exact<{
   streamerId: Scalars['String']['input'];
@@ -2453,6 +2476,39 @@ export function useBanUserMutation(baseOptions?: Apollo.MutationHookOptions<BanU
 export type BanUserMutationHookResult = ReturnType<typeof useBanUserMutation>;
 export type BanUserMutationResult = Apollo.MutationResult<BanUserMutation>;
 export type BanUserMutationOptions = Apollo.BaseMutationOptions<BanUserMutation, BanUserMutationVariables>;
+export const UnbanUserDocument = gql`
+    mutation UnbanUser($request: UnbanUserInput!) {
+  unbanUser(request: $request) {
+    id
+  }
+}
+    `;
+export type UnbanUserMutationFn = Apollo.MutationFunction<UnbanUserMutation, UnbanUserMutationVariables>;
+
+/**
+ * __useUnbanUserMutation__
+ *
+ * To run a mutation, you first call `useUnbanUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnbanUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unbanUserMutation, { data, loading, error }] = useUnbanUserMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useUnbanUserMutation(baseOptions?: Apollo.MutationHookOptions<UnbanUserMutation, UnbanUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UnbanUserMutation, UnbanUserMutationVariables>(UnbanUserDocument, options);
+      }
+export type UnbanUserMutationHookResult = ReturnType<typeof useUnbanUserMutation>;
+export type UnbanUserMutationResult = Apollo.MutationResult<UnbanUserMutation>;
+export type UnbanUserMutationOptions = Apollo.BaseMutationOptions<UnbanUserMutation, UnbanUserMutationVariables>;
 export const GetChatDocument = gql`
     query GetChat($streamerId: String!) {
   chat(streamerId: $streamerId) {
