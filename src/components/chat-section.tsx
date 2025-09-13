@@ -621,13 +621,13 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId]);
 
   // Determine if chat input should be disabled and what message to show
-  let chatInputRestrictionMessage: React.ReactNode | null = null; // Changed type to React.ReactNode
+  let chatInputRestrictionMessage: React.ReactNode | null = null;
   let isChatInputDisabled = false;
 
   if (!isAuthenticated) {
     chatInputRestrictionMessage = "Log in to send messages.";
     isChatInputDisabled = true;
-  } else if (streamerInteractionLoading) { // Added loading state for interaction data
+  } else if (streamerInteractionLoading) {
     chatInputRestrictionMessage = (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading chat permissions...
@@ -726,7 +726,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
           </div>
         )}
 
-        {chatInputRestrictionMessage ? (
+        {isChatInputDisabled ? ( // Conditionally render restriction message or input
           <div className="flex items-center justify-center h-10 rounded-md bg-gray-700 text-gray-400 text-sm px-3">
             {chatInputRestrictionMessage}
           </div>
@@ -741,12 +741,12 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
                   handleSubmit(onSubmit)()
                 }
               }}
-              disabled={sendingMessage || isChatInputDisabled}
+              disabled={sendingMessage} // Only disable for sending state, not for general restrictions
             />
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" disabled={isChatInputDisabled}>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <Smile className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" disabled={isChatInputDisabled}>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <Gift className="h-5 w-5" />
             </Button>
             <Button
@@ -754,7 +754,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
               size="icon"
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={handleSubmit(onSubmit)}
-              disabled={sendingMessage || isChatInputDisabled}
+              disabled={sendingMessage} // Only disable for sending state
             >
               <Send className="h-5 w-5" />
             </Button>
