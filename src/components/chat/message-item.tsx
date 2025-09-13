@@ -25,7 +25,6 @@ from "@/components/ui/dropdown-menu"
 import { ChatMessageDto } from "@/graphql/__generated__/graphql"
 import { useDashboard } from "@/src/contexts/DashboardContext"
 import { BanUserDialog } from "@/src/components/dashboard/chat/BanUserDialog"
-import { useStreamerInteractionLazyQuery } from "@/graphql/__generated__/graphql" // Импортируем useStreamerInteractionLazyQuery
 
 interface MessageItemProps {
   message: ChatMessageDto
@@ -38,7 +37,8 @@ interface MessageItemProps {
   onMouseEnter: (messageId: string) => void
   onMouseLeave: () => void
   chatId: string
-  refetchStreamerInteraction: () => Promise<any>;
+  canManageChat: boolean; // Новый пропс
+  refetchCurrentStreamerInteraction: () => Promise<any>; // Новый пропс для refetch
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -52,9 +52,10 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   onMouseEnter,
   onMouseLeave,
   chatId,
-  refetchStreamerInteraction,
+  canManageChat, // Используем новый пропс
+  refetchCurrentStreamerInteraction, // Используем новый пропс
 }) => {
-  const { currentAuthUserStreamer, activeStreamer } = useDashboard();
+  const { currentAuthUserStreamer } = useDashboard();
   const messageDate = new Date(message.createdAt)
   const formattedTime = isToday(messageDate)
     ? format(messageDate, "HH:mm")
@@ -67,21 +68,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
   const [userToBanId, setUserToBanId] = useState<string | null>(null);
   const [userToBanName, setUserToBanName] = useState<string | null>(null);
-
-  // Используем useStreamerInteractionLazyQuery для получения разрешений текущего пользователя
-  const [getStreamerInteraction, { data: streamerInteractionData }] = useStreamerInteractionLazyQuery({
-    variables: { streamerId: activeStreamer?.id ?? "" },
-    skip: !activeStreamer?.id || !currentAuthUserStreamer?.id,
-  });
-
-  // Загружаем разрешения при монтировании компонента или изменении активного стримера
-  React.useEffect(() => {
-    if (activeStreamer?.id && currentAuthUserStreamer?.id) {
-      getStreamerInteraction();
-    }
-  }, [activeStreamer?.id, currentAuthUserStreamer?.id, getStreamerInteraction]);
-
-  const canManageChat = streamerInteractionData?.streamerInteraction?.permissions?.isAll || streamerInteractionData?.streamerInteraction?.permissions?.isChat;
 
   const handleBanClick = (userId: string, userName: string) => {
     setUserToBanId(userId);
@@ -278,7 +264,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           onOpenChange={setIsBanDialogOpen}
           userIdToBan={userToBanId}
           userNameToBan={userToBanName}
-          refetchStreamerInteraction={refetchStreamerInteraction}
+          refetchStreamerInteraction={refetchCurrentStreamerInteraction}
         />
       )}
     </>

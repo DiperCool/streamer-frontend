@@ -34,6 +34,7 @@ import { MessageItem } from "@/src/components/chat/message-item"
 import { getMinioUrl } from "@/utils/utils"
 import { useAuth0 } from "@auth0/auth0-react"
 import { toast } from "sonner"
+import { useDashboard } from "@/src/contexts/DashboardContext" // Импортируем useDashboard
 
 interface ChatSectionProps {
   onCloseChat?: () => void
@@ -65,11 +66,12 @@ interface RowData {
   onMouseLeave: () => void;
   chatId: string;
   pinnedMessageId: string | null;
-  refetchStreamerInteraction: () => Promise<any>;
+  canManageChat: boolean; // Добавлено
+  refetchCurrentStreamerInteraction: () => Promise<any>; // Добавлено
 }
 
 const Row = React.memo(({ index, style, data }: { index: number; style: React.CSSProperties; data: RowData }) => {
-  const { messages, onReply, onDelete, onPin, onUnpin, currentHoveredMessageId, onMouseEnter, onMouseLeave, chatId, pinnedMessageId, refetchStreamerInteraction } = data;
+  const { messages, onReply, onDelete, onPin, onUnpin, currentHoveredMessageId, onMouseEnter, onMouseLeave, chatId, pinnedMessageId, canManageChat, refetchCurrentStreamerInteraction } = data;
   const message = messages[index];
   if (!message) return null;
 
@@ -88,7 +90,8 @@ const Row = React.memo(({ index, style, data }: { index: number; style: React.CS
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         chatId={chatId}
-        refetchStreamerInteraction={refetchStreamerInteraction}
+        canManageChat={canManageChat} // Передаем canManageChat
+        refetchCurrentStreamerInteraction={refetchCurrentStreamerInteraction} // Передаем refetchCurrentStreamerInteraction
       />
     </div>
   );
@@ -100,6 +103,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
   const { isAuthenticated, user } = useAuth0();
+  const { activeStreamerPermissions } = useDashboard(); // Получаем разрешения из DashboardContext
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -125,7 +129,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     skip: !isAuthenticated || !streamerId || !user?.sub,
   });
 
-  const refetchStreamerInteraction = useCallback(async () => {
+  const refetchCurrentStreamerInteraction = useCallback(async () => {
     if (isAuthenticated && streamerId && user?.sub) {
       return await refetchStreamerInteractionQuery();
     }
@@ -178,7 +182,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     skip: !chatId,
     onData: ({ data }) => {
       refetchChat();
-      refetchStreamerInteraction();
+      refetchCurrentStreamerInteraction();
     },
   });
 
@@ -350,7 +354,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
-      refetchStreamerInteraction();
+      refetchCurrentStreamerInteraction();
       toast.error("You have been banned from this chat!");
     },
   });
@@ -362,7 +366,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     },
     skip: !streamerId || !user?.sub,
     onData: () => {
-      refetchStreamerInteraction();
+      refetchCurrentStreamerInteraction();
       toast.success("You have been unbanned from this chat!");
     },
   });
@@ -507,7 +511,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
       })
       reset({ message: "" })
       setReplyToMessage(null)
-      refetchStreamerInteraction();
+      refetchCurrentStreamerInteraction();
     } catch (error) {
       console.error("Error sending message:", error)
       toast.error("Failed to send message.");
@@ -623,6 +627,9 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     }
   }, []);
 
+  // Определяем canManageChat на основе activeStreamerPermissions из DashboardContext
+  const canManageChat = activeStreamerPermissions?.isAll || activeStreamerPermissions?.isChat;
+
   const itemData = React.useMemo(() => ({
     messages: reversedMessages,
     onReply: setReplyToMessage,
@@ -634,8 +641,9 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     onMouseLeave: () => setHoveredMessageId(null),
     chatId: chatId!,
     pinnedMessageId: pinnedMessageId,
-    refetchStreamerInteraction: refetchStreamerInteraction,
-  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId, refetchStreamerInteraction]);
+    canManageChat: canManageChat, // Передаем canManageChat
+    refetchCurrentStreamerInteraction: refetchCurrentStreamerInteraction, // Передаем refetchCurrentStreamerInteraction
+  }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId, canManageChat, refetchCurrentStreamerInteraction]);
 
   // Determine if chat input should be disabled and what message to show
   let chatInputRestrictionMessage: React.ReactNode | null = null;
