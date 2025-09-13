@@ -37,8 +37,8 @@ interface MessageItemProps {
   onMouseEnter: (messageId: string) => void
   onMouseLeave: () => void
   chatId: string
-  canManageChat: boolean; // Новый пропс
-  refetchCurrentStreamerInteraction: () => Promise<any>; // Новый пропс для refetch
+  canManageChat: boolean;
+  refetchCurrentStreamerInteraction: () => Promise<any>;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -52,8 +52,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   onMouseEnter,
   onMouseLeave,
   chatId,
-  canManageChat, // Используем новый пропс
-  refetchCurrentStreamerInteraction, // Используем новый пропс
+  canManageChat,
+  refetchCurrentStreamerInteraction,
 }) => {
   const { currentAuthUserStreamer } = useDashboard();
   const messageDate = new Date(message.createdAt)
@@ -159,7 +159,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     <DropdownMenuItem
                       onClick={() => handleBanClick(message.sender!.id, message.sender!.userName!)}
                       className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                      disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
+                      disabled={isMessageDeleted || !canManageChat}
                     >
                       <UserX className="h-4 w-4 mr-2" /> Ban User
                     </DropdownMenuItem>
@@ -171,7 +171,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     <DropdownMenuItem
                       onClick={() => onDelete(message.id)}
                       className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                      disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
+                      disabled={isMessageDeleted || !canManageChat}
                     >
                       <X className="h-4 w-4 mr-2" /> Delete
                     </DropdownMenuItem>
@@ -225,7 +225,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               <ContextMenuItem
                 onClick={() => handleBanClick(message.sender!.id, message.sender!.userName!)}
                 className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
+                disabled={isMessageDeleted || !canManageChat}
               >
                 <UserX className="h-4 w-4 mr-2" /> Ban User
               </ContextMenuItem>
@@ -237,7 +237,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               <ContextMenuItem
                 onClick={() => onDelete(message.id)}
                 className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400"
-                disabled={isMessageDeleted || !canManageChat} {/* Добавлено !canManageChat */}
+                disabled={isMessageDeleted || !canManageChat}
               >
                 <X className="h-4 w-4 mr-2" /> Delete
               </ContextMenuItem>
