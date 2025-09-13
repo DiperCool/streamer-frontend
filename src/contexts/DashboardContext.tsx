@@ -32,6 +32,7 @@ interface DashboardContextType {
   activeStreamerPermissionsLoading: boolean;
   streamerInteractionData: StreamerInteractionQueryHookResult['data'] | undefined; // Add streamerInteractionData
   refetchStreamerInteraction: (userId: string) => Promise<any>; // Add refetchStreamerInteraction
+  streamerInteractionLoading: boolean; // Added streamerInteractionLoading
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -221,6 +222,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       activeStreamerPermissionsLoading: myRoleLoading,
       streamerInteractionData: streamerInteractionData,
       refetchStreamerInteraction: refetchStreamerInteraction,
+      streamerInteractionLoading: streamerInteractionLoading, // Provide the loading state
     }}>
       {children}
     </DashboardContext.Provider>

@@ -1576,7 +1576,7 @@ export type GetChatMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', nodes?: Array<{ __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName?: string | null } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', nodes?: Array<{ __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, senderId: string, replyId?: string | null, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName?: string | null } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetChatSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2549,6 +2549,8 @@ export const GetChatMessagesDocument = gql`
       isDeleted
       message
       type
+      senderId
+      replyId
       sender {
         id
         userName
