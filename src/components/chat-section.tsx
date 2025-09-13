@@ -621,7 +621,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   }), [reversedMessages, setReplyToMessage, handleDeleteMessage, handlePinMessage, handleUnpinMessage, hoveredMessageId, setHoveredMessageId, chatId, pinnedMessageId]);
 
   // Determine if chat input should be disabled and what message to show
-  let chatInputRestrictionMessage: string | null = null;
+  let chatInputRestrictionMessage: React.ReactNode | null = null; // Changed type to React.ReactNode
   let isChatInputDisabled = false;
 
   if (!isAuthenticated) {
