@@ -1,11 +1,11 @@
 "use client"
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
-import { format, isToday, differenceInSeconds } from "date-fns"
+import { format, isToday, differenceInSeconds, isPast } from "date-fns"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin, Ban } from "lucide-react"
+import { Send, Smile, Gift, X, Loader2, ChevronUp, MessageSquareReply, Pin, Ban, UserX } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
