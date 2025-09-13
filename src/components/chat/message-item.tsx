@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { format, isToday } from "date-fns"
-import { MessageSquareReply, MoreHorizontal, X, Pin, UserX } from "lucide-react" // Добавлен Pin и UserX
+import { MessageSquareReply, MoreHorizontal, X, Pin, UserX } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -20,10 +20,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+}
+from "@/components/ui/dropdown-menu"
 import { ChatMessageDto } from "@/graphql/__generated__/graphql"
 import { useDashboard } from "@/src/contexts/DashboardContext"
-import { BanUserDialog } from "@/src/components/dashboard/chat/BanUserDialog" // Импортируем диалог бана
+import { BanUserDialog } from "@/src/components/dashboard/chat/BanUserDialog"
 
 interface MessageItemProps {
   message: ChatMessageDto
@@ -36,7 +37,7 @@ interface MessageItemProps {
   onMouseEnter: (messageId: string) => void
   onMouseLeave: () => void
   chatId: string
-  refetchStreamerInteraction: () => Promise<any>; // Добавлено
+  refetchStreamerInteraction: () => Promise<any>;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -50,9 +51,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   onMouseEnter,
   onMouseLeave,
   chatId,
-  refetchStreamerInteraction, // Деструктурируем
+  refetchStreamerInteraction,
 }) => {
-  const { activeStreamer, activeStreamerPermissions, currentAuthUserStreamer } = useDashboard();
+  const { activeStreamerPermissions, currentAuthUserStreamer } = useDashboard();
   const messageDate = new Date(message.createdAt)
   const formattedTime = isToday(messageDate)
     ? format(messageDate, "HH:mm")
@@ -138,7 +139,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                   <DropdownMenuItem
                     onClick={() => onPin(message.id)}
                     className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
-                    disabled={isMessageDeleted}
+                    disabled={isMessageDeleted || !canManageChat}
                   >
                     <Pin className="h-4 w-4 mr-2" /> Pin Message
                   </DropdownMenuItem>
@@ -146,6 +147,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                   <DropdownMenuItem
                     onClick={() => onUnpin(chatId)}
                     className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
+                    disabled={!canManageChat}
                   >
                     <Pin className="h-4 w-4 mr-2" /> Unpin Message
                   </DropdownMenuItem>
@@ -162,7 +164,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     </DropdownMenuItem>
                   </>
                 )}
-                {canManageChat && !isOwnMessage && ( // Allow deleting other users' messages
+                {canManageChat && !isOwnMessage && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -174,7 +176,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                     </DropdownMenuItem>
                   </>
                 )}
-                {isOwnMessage && ( // Allow deleting own messages
+                {isOwnMessage && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -203,7 +205,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             <ContextMenuItem
               onClick={() => onPin(message.id)}
               className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
-              disabled={isMessageDeleted}
+              disabled={isMessageDeleted || !canManageChat}
             >
               <Pin className="h-4 w-4 mr-2" /> Pin Message
             </ContextMenuItem>
@@ -211,6 +213,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             <ContextMenuItem
               onClick={() => onUnpin(chatId)}
               className="hover:bg-blue-600 hover:text-white cursor-pointer text-blue-400"
+              disabled={!canManageChat}
             >
               <Pin className="h-4 w-4 mr-2" /> Unpin Message
             </ContextMenuItem>
@@ -260,7 +263,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           onOpenChange={setIsBanDialogOpen}
           userIdToBan={userToBanId}
           userNameToBan={userToBanName}
-          refetchStreamerInteraction={refetchStreamerInteraction} // Передаем функцию refetch
+          refetchStreamerInteraction={refetchStreamerInteraction}
         />
       )}
     </>
