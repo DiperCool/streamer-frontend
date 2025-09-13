@@ -39,3 +39,11 @@ export const UPDATE_CHAT_SETTINGS = gql`
         }
     }
 `
+
+export const BAN_USER = gql`
+    mutation BanUser($request: BanUserInput!) {
+        banUser(request: $request) {
+            id
+        }
+    }
+`

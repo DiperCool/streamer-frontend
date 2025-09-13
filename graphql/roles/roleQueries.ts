@@ -105,6 +105,7 @@ export const GET_MY_ROLE = gql`
                 isRoles
                 isStream
                 isVod
+                isBan # Добавлено новое поле
             }
             streamer {
                 id
@@ -134,6 +135,7 @@ export const GET_ROLE_BY_ID = gql`
                 isRoles
                 isStream
                 isVod
+                isBan # Добавлено новое поле
             }
             streamer {
                 id

@@ -36,6 +36,8 @@ export const GET_STREAMER_INTERACTION = gql`
         streamerInteraction(streamerId: $streamerId) {
             followed
             followedAt
+            banned # Добавлено новое поле
+            bannedUntil # Добавлено новое поле
         }
     }
 `

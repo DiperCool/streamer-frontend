@@ -26,6 +26,39 @@ directive @listSize(
     slicingArguments: [String!]
 ) on FIELD_DEFINITION
 
+type BanUserResponse {
+    id: UUID!
+}
+
+type BannedUserDto {
+    bannedAt: DateTime!
+    bannedBy: StreamerDto
+    bannedById: String!
+    bannedUntil: DateTime!
+    id: UUID!
+    reason: String!
+    user: StreamerDto
+    userId: String!
+}
+
+"A connection to a list of items."
+type BannedUsersConnection {
+    "A list of edges."
+    edges: [BannedUsersEdge!]
+    "A flattened list of the nodes."
+    nodes: [BannedUserDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type BannedUsersEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: BannedUserDto!
+}
+
 "A connection to a list of items."
 type CategoriesConnection {
     "A list of edges."
@@ -137,6 +170,7 @@ type GetEmailResponse {
 }
 
 type Mutation {
+    banUser(request: BanUserInput!): BanUserResponse!
     createCategory(input: CreateCategoryInput!): CreateCategoryResponse!
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
@@ -245,6 +279,19 @@ type ProfileDto {
 }
 
 type Query {
+    bannedUsers(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [BannedUserDtoSortInput!],
+        streamerId: String!,
+        where: BannedUserDtoFilterInput
+    ): BannedUsersConnection
     categories(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -493,8 +540,12 @@ type StreamerFollowerDto {
 }
 
 type StreamerInteractionDto {
+    banned: Boolean!
+    bannedUntil: DateTime
     followed: Boolean!
     followedAt: DateTime
+    lastTimeMessage: DateTime
+    permissions: PermissionsFlags!
 }
 
 type StreamerMeDto {
@@ -549,6 +600,8 @@ type Subscription {
     streamUpdated(streamId: UUID!): StreamDto!
     streamerUpdated(streamerId: String!): StreamerDto!
     subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
+    userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
+    userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
     watchStream(streamId: UUID!): StreamWatcher!
 }
 
@@ -718,6 +771,33 @@ scalar UUID
 
 "The `Upload` scalar type represents a file upload."
 scalar Upload
+
+input BanUserInput {
+    banUntil: DateTime!
+    broadcasterId: String!
+    reason: String!
+    userId: String!
+}
+
+input BannedUserDtoFilterInput {
+    and: [BannedUserDtoFilterInput!]
+    bannedAt: DateTimeOperationFilterInput
+    bannedById: StringOperationFilterInput
+    bannedUntil: DateTimeOperationFilterInput
+    id: UuidOperationFilterInput
+    or: [BannedUserDtoFilterInput!]
+    reason: StringOperationFilterInput
+    userId: StringOperationFilterInput
+}
+
+input BannedUserDtoSortInput {
+    bannedAt: SortEnumType
+    bannedById: SortEnumType
+    bannedUntil: SortEnumType
+    id: SortEnumType
+    reason: SortEnumType
+    userId: SortEnumType
+}
 
 input BooleanOperationFilterInput {
     eq: Boolean
