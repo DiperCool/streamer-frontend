@@ -97,8 +97,6 @@ export default function StreamerProfileLayout({
     },
   });
 
-  // Удален chatPanelRef и scrollChatPanelToBottom
-
   if (streamerLoading || profileLoading || currentStreamLoading || streamInfoLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -144,14 +142,16 @@ export default function StreamerProfileLayout({
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col lg:flex-row-reverse">
 
-      {/* Единый контейнер для ChatSection */}
+      {/* Единый контейнер для ChatSection, рендерится только если это не маршрут дашборда */}
       {!isDashboardRoute && (
         <div
           className={cn(
-            "fixed top-16 right-0 h-[calc(100vh-4rem)] w-80 bg-gray-800 border-l border-gray-700 flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
-            isChatVisible ? "translate-x-0" : "translate-x-full",
-            "lg:flex", // Всегда flex на больших экранах
-            !isChatVisible && "hidden" // Скрываем, если чат не виден
+            "flex-col z-40 overflow-y-auto transition-transform duration-300 ease-in-out",
+            // Desktop positioning
+            "lg:fixed lg:top-16 lg:right-0 lg:h-[calc(100vh-4rem)] lg:w-80 lg:bg-gray-800 lg:border-l lg:border-gray-700",
+            // Mobile positioning
+            "w-full bg-gray-800 rounded-lg mt-6 h-[50vh] lg:hidden", // Mobile chat is part of the main content flow
+            isChatVisible ? "translate-x-0 flex" : "translate-x-full hidden" // Control visibility for both
           )}
         >
           <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
@@ -188,7 +188,7 @@ export default function StreamerProfileLayout({
             />
           )}
 
-          {!isChatVisible && (
+          {!isChatVisible && !isDashboardRoute && ( // Кнопка "Show Chat" только если чат скрыт и это не дашборд
             <Button
               variant="outline"
               className="absolute top-16 right-4 z-50 bg-gray-800/70 text-gray-300 hover:bg-gray-700"
@@ -238,15 +238,6 @@ export default function StreamerProfileLayout({
           </div>
           {children}
         </div>
-
-        {/* Мобильный чат - теперь отдельный контейнер */}
-        {isChatVisible && !isDashboardRoute && (
-          <div
-            className="lg:hidden w-full bg-gray-800 rounded-lg mt-6 flex flex-col h-[50vh] overflow-y-auto"
-          >
-            <ChatSection onCloseChat={() => setIsChatVisible(false)} streamerId={streamer.id} />
-          </div>
-        )}
       </div>
     </div>
   )
