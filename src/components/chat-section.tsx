@@ -98,7 +98,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   const outerListRef = useRef<HTMLDivElement>(null);
   const client = useApolloClient();
   const { isAuthenticated, user } = useAuth0();
-  const { refetchStreamerInteraction, streamerInteractionData } = useDashboard();
+  const { refetchStreamerInteraction, streamerInteractionData, streamerInteractionLoading } = useDashboard(); // Get streamerInteractionLoading
 
   const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false)
   const [replyToMessage, setReplyToMessage] = useState<ChatMessageDto | null>(null)
@@ -627,6 +627,13 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
   if (!isAuthenticated) {
     chatInputRestrictionMessage = "Log in to send messages.";
     isChatInputDisabled = true;
+  } else if (streamerInteractionLoading) { // Added loading state for interaction data
+    chatInputRestrictionMessage = (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading chat permissions...
+      </div>
+    );
+    isChatInputDisabled = true;
   } else if (streamerInteractionData?.banned) {
     const banExpires = streamerInteractionData.bannedUntil ? new Date(streamerInteractionData.bannedUntil) : null;
     const isPermanent = banExpires && banExpires.getFullYear() > new Date().getFullYear() + 50;
@@ -734,12 +741,12 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
                   handleSubmit(onSubmit)()
                 }
               }}
-              disabled={sendingMessage}
+              disabled={sendingMessage || isChatInputDisabled}
             />
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" disabled={isChatInputDisabled}>
               <Smile className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" disabled={isChatInputDisabled}>
               <Gift className="h-5 w-5" />
             </Button>
             <Button
@@ -747,7 +754,7 @@ export function ChatSection({ onCloseChat, streamerId, onScrollToBottom, hideCar
               size="icon"
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={handleSubmit(onSubmit)}
-              disabled={sendingMessage}
+              disabled={sendingMessage || isChatInputDisabled}
             >
               <Send className="h-5 w-5" />
             </Button>
