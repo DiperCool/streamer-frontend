@@ -10,11 +10,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getMinioUrl } from "@/utils/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export const StreamerSearchPopover: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const [open, setOpen] = useState(false); // Controlled state for Popover
+  const [open, setOpen] = useState(false);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,16 +33,19 @@ export const StreamerSearchPopover: React.FC = () => {
     if (searchTerm.trim().length > 0) {
       setOpen(true);
     } else {
-      setOpen(false);
+      // Закрываем, только если нет поискового запроса И поповер открыт
+      if (open) {
+        setOpen(false);
+      }
     }
-  }, [searchTerm]);
+  }, [searchTerm, open]);
 
-  // Эффект для явной установки фокуса на Input, когда поповер открыт и есть поисковый запрос.
+  // Эффект для явной установки фокуса на Input, когда поповер открыт.
   useEffect(() => {
-    if (open && searchTerm.trim().length > 0 && inputRef.current) {
+    if (open && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [open, searchTerm]);
+  }, [open]);
 
   const handleResultClick = (result: { slug: string; resultType: SearchResultType }) => {
     setOpen(false); // Закрываем поповер
@@ -63,19 +67,39 @@ export const StreamerSearchPopover: React.FC = () => {
     }
   };
 
+  const handleSearchIconClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // Предотвращаем закрытие поповера, если он уже открыт
+    if (searchTerm.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      setOpen(false);
+      setSearchTerm("");
+      inputRef.current?.blur();
+    }
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
+        {/* Поле ввода теперь является триггером для Popover */}
         <div className="relative w-96">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <Input
             ref={inputRef}
             placeholder="Search streamers and categories..."
-            className="w-full bg-gray-800 border-gray-700 pl-10 text-white placeholder:text-gray-400 focus:border-green-500"
+            className="w-full bg-gray-800 border-gray-700 pl-3 pr-10 text-white placeholder:text-gray-400 focus:border-green-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleInputKeyDown}
           />
+          {/* Иконка поиска внутри поля ввода, справа */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+            onClick={handleSearchIconClick}
+            title="Search"
+          >
+            <Search className="h-5 w-5" />
+          </Button>
         </div>
       </PopoverTrigger>
       <PopoverContent
