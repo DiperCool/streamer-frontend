@@ -8,15 +8,18 @@ import { BannerDto, useGetBannersQuery } from "@/graphql/__generated__/graphql";
 import { CreateBannerDialog } from "./create-banner-dialog";
 import { BannerCard } from "./banner-card";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils"; // Импортируем cn
 
 interface StreamerBannersSectionProps {
   streamerId: string;
   canManageBanners: boolean;
+  className?: string; // Добавлен className prop
 }
 
 export const StreamerBannersSection: React.FC<StreamerBannersSectionProps> = ({
   streamerId,
   canManageBanners,
+  className, // Деструктурируем className
 }) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
@@ -40,7 +43,7 @@ export const StreamerBannersSection: React.FC<StreamerBannersSectionProps> = ({
   }
 
   return (
-    <Card className="bg-gray-800 border-gray-700 mb-8">
+    <Card className={cn("bg-gray-800 border-gray-700 mb-8", className)}> {/* Применяем className здесь */}
       <CardHeader>
         <CardTitle className="text-white">Channel Banners</CardTitle>
       </CardHeader>

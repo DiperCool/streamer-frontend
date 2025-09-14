@@ -61,8 +61,8 @@ export const BannerCard: React.FC<BannerCardProps> = ({
     }
   };
 
-  // Визуальное содержимое баннера, без обертки для навигации
-  const visualContent = (
+  // Основное визуальное содержимое баннера (изображение + текстовый оверлей)
+  const coreBannerVisuals = (
     <>
       <Image
         src={getMinioUrl(banner.image!)}
@@ -72,15 +72,11 @@ export const BannerCard: React.FC<BannerCardProps> = ({
         sizes="(max-width: 768px) 100vw, 50vw"
         className="transition-transform duration-200 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+      {/* Текстовый оверлей внизу */}
+      <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end">
         <h3 className="text-xl font-semibold text-white">{banner.title}</h3>
         {banner.description && <p className="text-gray-300 text-sm mt-1">{banner.description}</p>}
-        {banner.url && (
-          <div className="flex items-center text-green-400 text-sm mt-2">
-            <ExternalLink className="h-4 w-4 mr-1" />
-            <span>Visit Link</span>
-          </div>
-        )}
+        {/* Убрана кнопка/текст 'Visit Link' */}
       </div>
     </>
   );
@@ -91,25 +87,25 @@ export const BannerCard: React.FC<BannerCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Условное отображение Link вокруг визуального содержимого */}
-      {banner.url && !canManageBanners ? (
+      {/* Условная обертка Link для всего визуального содержимого */}
+      {banner.url ? (
         <Link href={banner.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
-          {visualContent}
+          {coreBannerVisuals}
         </Link>
       ) : (
-        <div className="absolute inset-0 z-0"> {/* Если нет URL или есть права на управление, просто div */}
-          {visualContent}
+        <div className="absolute inset-0 z-0">
+          {coreBannerVisuals}
         </div>
       )}
 
       {canManageBanners && isHovered && (
-        <div className="absolute top-2 right-2 flex space-x-2 z-10"> {/* Кнопки всегда поверх */}
+        <div className="absolute top-2 right-2 flex space-x-2 z-10">
           <Button
             variant="secondary"
             size="icon"
             className="bg-gray-900/70 hover:bg-gray-700/90 text-white"
             onClick={(e) => {
-              e.stopPropagation(); // Предотвращаем всплытие клика
+              e.stopPropagation();
               setIsEditDialogOpen(true);
             }}
             title="Edit Banner"
@@ -121,7 +117,7 @@ export const BannerCard: React.FC<BannerCardProps> = ({
             size="icon"
             className="bg-red-600/70 hover:bg-red-700/90 text-white"
             onClick={(e) => {
-              e.stopPropagation(); // Предотвращаем всплытие клика
+              e.stopPropagation();
               setIsDeleteDialogOpen(true);
             }}
             title="Delete Banner"

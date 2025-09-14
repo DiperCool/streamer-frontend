@@ -52,8 +52,8 @@ export default function StreamerAboutPage({ params }: { params: { username: stri
     <div className="container mx-auto px-4 py-8">
       <StreamerAboutSection streamer={streamer} profile={streamerProfile} />
       
-      {/* New Banners Section */}
-      <StreamerBannersSection streamerId={streamer.id} canManageBanners={canManageBanners ?? false} />
+      {/* New Banners Section с отступом mt-8 */}
+      <StreamerBannersSection streamerId={streamer.id} canManageBanners={canManageBanners ?? false} className="mt-8" />
     </div>
   )
 }
