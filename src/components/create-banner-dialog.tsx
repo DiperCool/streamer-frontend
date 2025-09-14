@@ -24,7 +24,7 @@ import Image from "next/image";
 import { getMinioUrl } from "@/utils/utils";
 
 const createBannerSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title must be at most 100 characters"),
+  title: z.string().max(100, "Title must be at most 100 characters").optional(), // Сделано необязательным
   description: z.string().max(500, "Description must be at most 500 characters").optional(),
   image: z.string().min(1, "Image is required"),
   url: z.string().url("Invalid URL format").optional().or(z.literal("")),
@@ -82,8 +82,8 @@ export const CreateBannerDialog: React.FC<CreateBannerDialogProps> = ({
         variables: {
           banner: {
             streamerId,
-            title: values.title,
-            description: values.description || null,
+            title: values.title || null, // Отправляем null, если пустая строка
+            description: values.description || null, // Отправляем null, если пустая строка
             image: values.image,
             url: values.url || null,
           },
@@ -110,7 +110,7 @@ export const CreateBannerDialog: React.FC<CreateBannerDialogProps> = ({
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-white">Title*</Label>
+            <Label htmlFor="title" className="text-white">Title (Optional)</Label> {/* Обновлен текст лейбла */}
             <Input
               id="title"
               type="text"
@@ -124,7 +124,7 @@ export const CreateBannerDialog: React.FC<CreateBannerDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-white">Description</Label>
+            <Label htmlFor="description" className="text-white">Description (Optional)</Label> {/* Обновлен текст лейбла */}
             <Textarea
               id="description"
               {...register("description")}

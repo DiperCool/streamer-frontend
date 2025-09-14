@@ -25,7 +25,7 @@ import { getMinioUrl } from "@/utils/utils";
 
 const editBannerSchema = z.object({
   id: z.string().uuid("Invalid banner ID"),
-  title: z.string().min(1, "Title is required").max(100, "Title must be at most 100 characters"),
+  title: z.string().max(100, "Title must be at most 100 characters").optional(), // Сделано необязательным
   description: z.string().max(500, "Description must be at most 500 characters").optional(),
   image: z.string().min(1, "Image is required"),
   url: z.string().url("Invalid URL format").optional().or(z.literal("")),
@@ -95,8 +95,8 @@ export const EditBannerDialog: React.FC<EditBannerDialogProps> = ({
           banner: {
             bannerId: values.id,
             streamerId,
-            title: values.title,
-            description: values.description || null,
+            title: values.title || null, // Отправляем null, если пустая строка
+            description: values.description || null, // Отправляем null, если пустая строка
             image: values.image,
             url: values.url || null,
           },
@@ -116,14 +116,14 @@ export const EditBannerDialog: React.FC<EditBannerDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
-          <DialogTitle className="text-white">Edit Banner: {banner.title}</DialogTitle>
+          <DialogTitle className="text-white">Edit Banner: {banner.title || "Untitled Banner"}</DialogTitle> {/* Обновлен заголовок */}
           <DialogDescription className="text-gray-400">
             Update the details for this banner.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="editTitle" className="text-white">Title*</Label>
+            <Label htmlFor="editTitle" className="text-white">Title (Optional)</Label> {/* Обновлен текст лейбла */}
             <Input
               id="editTitle"
               type="text"
@@ -137,7 +137,7 @@ export const EditBannerDialog: React.FC<EditBannerDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="editDescription" className="text-white">Description</Label>
+            <Label htmlFor="editDescription" className="text-white">Description (Optional)</Label> {/* Обновлен текст лейбла */}
             <Textarea
               id="editDescription"
               {...register("description")}
