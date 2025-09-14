@@ -92,7 +92,10 @@ export const BannerCard: React.FC<BannerCardProps> = ({
             variant="secondary"
             size="icon"
             className="bg-gray-900/70 hover:bg-gray-700/90 text-white"
-            onClick={() => setIsEditDialogOpen(true)}
+            onClick={(e) => { // Добавлено e.stopPropagation()
+              e.stopPropagation();
+              setIsEditDialogOpen(true);
+            }}
             title="Edit Banner"
           >
             <Edit className="h-4 w-4" />
@@ -101,7 +104,10 @@ export const BannerCard: React.FC<BannerCardProps> = ({
             variant="destructive"
             size="icon"
             className="bg-red-600/70 hover:bg-red-700/90 text-white"
-            onClick={() => setIsDeleteDialogOpen(true)}
+            onClick={(e) => { // Добавлено e.stopPropagation()
+              e.stopPropagation();
+              setIsDeleteDialogOpen(true);
+            }}
             title="Delete Banner"
           >
             <Trash2 className="h-4 w-4" />
