@@ -59,6 +59,14 @@ type BannedUsersEdge {
     node: BannedUserDto!
 }
 
+type BannerDto {
+    description: String
+    id: UUID!
+    image: String
+    title: String
+    url: String
+}
+
 "A connection to a list of items."
 type CategoriesConnection {
     "A list of edges."
@@ -133,6 +141,10 @@ type ChatSettingsDto {
     subscribersOnly: Boolean!
 }
 
+type CreateBannerResponse {
+    id: UUID!
+}
+
 type CreateCategoryResponse {
     id: UUID!
 }
@@ -171,6 +183,7 @@ type GetEmailResponse {
 
 type Mutation {
     banUser(request: BanUserInput!): BanUserResponse!
+    createBanner(banner: CreateBannerInput!): CreateBannerResponse!
     createCategory(input: CreateCategoryInput!): CreateCategoryResponse!
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
@@ -179,6 +192,7 @@ type Mutation {
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
+    removeBanner(banner: RemoveBannerInput!): RemoveBannerResponse!
     removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
     removeVod(request: RemoveVodInput!): RemoveVodResponse!
@@ -186,6 +200,7 @@ type Mutation {
     unfollow(unfollow: UnfollowInput!): UnfollowResponse!
     unpinMessage(request: UnpinMessageInput!): UnpinMessageResponse!
     updateAvatar(input: UpdateAvatarInput!): UpdateAvatarResponse!
+    updateBanner(banner: UpdateBannerInput!): UpdateBannerResponse!
     updateBio(input: UpdateBioInput!): UpdateBioResponse!
     updateCategory(input: EditCategoryInput!): EditCategoryResponse!
     updateChannelBanner(input: UpdateChannelBannerInput!): UpdateChannelBannerResponse!
@@ -248,6 +263,7 @@ type PageInfo {
 
 type PermissionsFlags {
     isAll: Boolean!
+    isBanners: Boolean!
     isChat: Boolean!
     isNone: Boolean!
     isRoles: Boolean!
@@ -293,6 +309,7 @@ type Query {
         streamerId: String!,
         where: BannedUserDtoFilterInput
     ): BannedUsersConnection
+    banners(streamerId: String!): [BannerDto!]!
     categories(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -432,6 +449,10 @@ type Query {
         streamerId: String!,
         where: VodDtoFilterInput
     ): VodsConnection
+}
+
+type RemoveBannerResponse {
+    id: UUID!
 }
 
 type RemoveCategoryResponse {
@@ -651,6 +672,10 @@ type UpdateAvatarResponse {
     file: String!
 }
 
+type UpdateBannerResponse {
+    id: UUID!
+}
+
 type UpdateBioResponse {
     id: UUID!
 }
@@ -856,6 +881,14 @@ input ChatMessageTypeOperationFilterInput {
     nin: [ChatMessageType!]
 }
 
+input CreateBannerInput {
+    description: String
+    image: String
+    streamerId: String!
+    title: String
+    url: String
+}
+
 input CreateCategoryInput {
     image: String!
     title: String!
@@ -929,6 +962,7 @@ input LongOperationFilterInput {
 
 input PermissionsFlagsInput {
     isAll: Boolean
+    isBanners: Boolean
     isChat: Boolean
     isNone: Boolean
     isRoles: Boolean
@@ -945,6 +979,11 @@ input PermissionsOperationFilterInput {
 
 input PinMessageInput {
     messageId: UUID!
+}
+
+input RemoveBannerInput {
+    bannerId: UUID!
+    streamerId: String!
 }
 
 input RemoveCategoryInput {
@@ -1088,6 +1127,15 @@ input UnpinMessageInput {
 
 input UpdateAvatarInput {
     file: String!
+}
+
+input UpdateBannerInput {
+    bannerId: UUID!
+    description: String
+    image: String
+    streamerId: String!
+    title: String
+    url: String
 }
 
 input UpdateBioInput {
