@@ -95,6 +95,15 @@ export type BannedUsersEdge = {
   node: BannedUserDto;
 };
 
+export type BannerDto = {
+  __typename?: 'BannerDto';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['UUID']['output'];
+  image?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type BooleanOperationFilterInput = {
   eq?: InputMaybe<Scalars['Boolean']['input']>;
   neq?: InputMaybe<Scalars['Boolean']['input']>;
@@ -233,6 +242,19 @@ export type ChatSettingsDto = {
   subscribersOnly: Scalars['Boolean']['output'];
 };
 
+export type CreateBannerInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  image?: InputMaybe<Scalars['String']['input']>;
+  streamerId: Scalars['String']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreateBannerResponse = {
+  __typename?: 'CreateBannerResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type CreateCategoryInput = {
   image: Scalars['String']['input'];
   title: Scalars['String']['input'];
@@ -352,6 +374,7 @@ export type LongOperationFilterInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   banUser: BanUserResponse;
+  createBanner: CreateBannerResponse;
   createCategory: CreateCategoryResponse;
   createMessage: CreateMessageResponse;
   createRole: CreateRoleResponse;
@@ -360,6 +383,7 @@ export type Mutation = {
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
+  removeBanner: RemoveBannerResponse;
   removeCategory: RemoveCategoryResponse;
   removeRole: RemoveRoleResponse;
   removeVod: RemoveVodResponse;
@@ -367,6 +391,7 @@ export type Mutation = {
   unfollow: UnfollowResponse;
   unpinMessage: UnpinMessageResponse;
   updateAvatar: UpdateAvatarResponse;
+  updateBanner: UpdateBannerResponse;
   updateBio: UpdateBioResponse;
   updateCategory: EditCategoryResponse;
   updateChannelBanner: UpdateChannelBannerResponse;
@@ -382,6 +407,11 @@ export type Mutation = {
 
 export type MutationBanUserArgs = {
   request: BanUserInput;
+};
+
+
+export type MutationCreateBannerArgs = {
+  banner: CreateBannerInput;
 };
 
 
@@ -425,6 +455,11 @@ export type MutationPinMessageArgs = {
 };
 
 
+export type MutationRemoveBannerArgs = {
+  banner: RemoveBannerInput;
+};
+
+
 export type MutationRemoveCategoryArgs = {
   input: RemoveCategoryInput;
 };
@@ -457,6 +492,11 @@ export type MutationUnpinMessageArgs = {
 
 export type MutationUpdateAvatarArgs = {
   input: UpdateAvatarInput;
+};
+
+
+export type MutationUpdateBannerArgs = {
+  banner: UpdateBannerInput;
 };
 
 
@@ -560,6 +600,7 @@ export type PageInfo = {
 export type PermissionsFlags = {
   __typename?: 'PermissionsFlags';
   isAll: Scalars['Boolean']['output'];
+  isBanners: Scalars['Boolean']['output'];
   isChat: Scalars['Boolean']['output'];
   isNone: Scalars['Boolean']['output'];
   isRoles: Scalars['Boolean']['output'];
@@ -569,6 +610,7 @@ export type PermissionsFlags = {
 
 export type PermissionsFlagsInput = {
   isAll?: InputMaybe<Scalars['Boolean']['input']>;
+  isBanners?: InputMaybe<Scalars['Boolean']['input']>;
   isChat?: InputMaybe<Scalars['Boolean']['input']>;
   isNone?: InputMaybe<Scalars['Boolean']['input']>;
   isRoles?: InputMaybe<Scalars['Boolean']['input']>;
@@ -617,6 +659,7 @@ export type ProfileDto = {
 export type Query = {
   __typename?: 'Query';
   bannedUsers?: Maybe<BannedUsersConnection>;
+  banners: Array<BannerDto>;
   categories?: Maybe<CategoriesConnection>;
   category: CategoryDto;
   categoryBySlug: CategoryDto;
@@ -657,6 +700,11 @@ export type QueryBannedUsersArgs = {
   order?: InputMaybe<Array<BannedUserDtoSortInput>>;
   streamerId: Scalars['String']['input'];
   where?: InputMaybe<BannedUserDtoFilterInput>;
+};
+
+
+export type QueryBannersArgs = {
+  streamerId: Scalars['String']['input'];
 };
 
 
@@ -826,6 +874,16 @@ export type QueryVodsArgs = {
   order?: InputMaybe<Array<VodDtoSortInput>>;
   streamerId: Scalars['String']['input'];
   where?: InputMaybe<VodDtoFilterInput>;
+};
+
+export type RemoveBannerInput = {
+  bannerId: Scalars['UUID']['input'];
+  streamerId: Scalars['String']['input'];
+};
+
+export type RemoveBannerResponse = {
+  __typename?: 'RemoveBannerResponse';
+  id: Scalars['UUID']['output'];
 };
 
 export type RemoveCategoryInput = {
@@ -1288,6 +1346,20 @@ export type UpdateAvatarResponse = {
   file: Scalars['String']['output'];
 };
 
+export type UpdateBannerInput = {
+  bannerId: Scalars['UUID']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  image?: InputMaybe<Scalars['String']['input']>;
+  streamerId: Scalars['String']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateBannerResponse = {
+  __typename?: 'UpdateBannerResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type UpdateBioInput = {
   bio: Scalars['String']['input'];
 };
@@ -1478,6 +1550,34 @@ export type VodsEdge = {
   /** The item at the end of the edge. */
   node: VodDto;
 };
+
+export type CreateBannerMutationVariables = Exact<{
+  banner: CreateBannerInput;
+}>;
+
+
+export type CreateBannerMutation = { __typename?: 'Mutation', createBanner: { __typename?: 'CreateBannerResponse', id: string } };
+
+export type UpdateBannerMutationVariables = Exact<{
+  banner: UpdateBannerInput;
+}>;
+
+
+export type UpdateBannerMutation = { __typename?: 'Mutation', updateBanner: { __typename?: 'UpdateBannerResponse', id: string } };
+
+export type RemoveBannerMutationVariables = Exact<{
+  banner: RemoveBannerInput;
+}>;
+
+
+export type RemoveBannerMutation = { __typename?: 'Mutation', removeBanner: { __typename?: 'RemoveBannerResponse', id: string } };
+
+export type GetBannersQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type GetBannersQuery = { __typename?: 'Query', banners: Array<{ __typename?: 'BannerDto', id: string, title?: string | null, description?: string | null, image?: string | null, url?: string | null }> };
 
 export type CreateCategoryMutationVariables = Exact<{
   input: CreateCategoryInput;
@@ -1984,6 +2084,149 @@ export type GetVodQueryVariables = Exact<{
 export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, type: VodType, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
 
 
+export const CreateBannerDocument = gql`
+    mutation CreateBanner($banner: CreateBannerInput!) {
+  createBanner(banner: $banner) {
+    id
+  }
+}
+    `;
+export type CreateBannerMutationFn = Apollo.MutationFunction<CreateBannerMutation, CreateBannerMutationVariables>;
+
+/**
+ * __useCreateBannerMutation__
+ *
+ * To run a mutation, you first call `useCreateBannerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateBannerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createBannerMutation, { data, loading, error }] = useCreateBannerMutation({
+ *   variables: {
+ *      banner: // value for 'banner'
+ *   },
+ * });
+ */
+export function useCreateBannerMutation(baseOptions?: Apollo.MutationHookOptions<CreateBannerMutation, CreateBannerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateBannerMutation, CreateBannerMutationVariables>(CreateBannerDocument, options);
+      }
+export type CreateBannerMutationHookResult = ReturnType<typeof useCreateBannerMutation>;
+export type CreateBannerMutationResult = Apollo.MutationResult<CreateBannerMutation>;
+export type CreateBannerMutationOptions = Apollo.BaseMutationOptions<CreateBannerMutation, CreateBannerMutationVariables>;
+export const UpdateBannerDocument = gql`
+    mutation UpdateBanner($banner: UpdateBannerInput!) {
+  updateBanner(banner: $banner) {
+    id
+  }
+}
+    `;
+export type UpdateBannerMutationFn = Apollo.MutationFunction<UpdateBannerMutation, UpdateBannerMutationVariables>;
+
+/**
+ * __useUpdateBannerMutation__
+ *
+ * To run a mutation, you first call `useUpdateBannerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBannerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBannerMutation, { data, loading, error }] = useUpdateBannerMutation({
+ *   variables: {
+ *      banner: // value for 'banner'
+ *   },
+ * });
+ */
+export function useUpdateBannerMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBannerMutation, UpdateBannerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBannerMutation, UpdateBannerMutationVariables>(UpdateBannerDocument, options);
+      }
+export type UpdateBannerMutationHookResult = ReturnType<typeof useUpdateBannerMutation>;
+export type UpdateBannerMutationResult = Apollo.MutationResult<UpdateBannerMutation>;
+export type UpdateBannerMutationOptions = Apollo.BaseMutationOptions<UpdateBannerMutation, UpdateBannerMutationVariables>;
+export const RemoveBannerDocument = gql`
+    mutation RemoveBanner($banner: RemoveBannerInput!) {
+  removeBanner(banner: $banner) {
+    id
+  }
+}
+    `;
+export type RemoveBannerMutationFn = Apollo.MutationFunction<RemoveBannerMutation, RemoveBannerMutationVariables>;
+
+/**
+ * __useRemoveBannerMutation__
+ *
+ * To run a mutation, you first call `useRemoveBannerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveBannerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeBannerMutation, { data, loading, error }] = useRemoveBannerMutation({
+ *   variables: {
+ *      banner: // value for 'banner'
+ *   },
+ * });
+ */
+export function useRemoveBannerMutation(baseOptions?: Apollo.MutationHookOptions<RemoveBannerMutation, RemoveBannerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveBannerMutation, RemoveBannerMutationVariables>(RemoveBannerDocument, options);
+      }
+export type RemoveBannerMutationHookResult = ReturnType<typeof useRemoveBannerMutation>;
+export type RemoveBannerMutationResult = Apollo.MutationResult<RemoveBannerMutation>;
+export type RemoveBannerMutationOptions = Apollo.BaseMutationOptions<RemoveBannerMutation, RemoveBannerMutationVariables>;
+export const GetBannersDocument = gql`
+    query GetBanners($streamerId: String!) {
+  banners(streamerId: $streamerId) {
+    id
+    title
+    description
+    image
+    url
+  }
+}
+    `;
+
+/**
+ * __useGetBannersQuery__
+ *
+ * To run a query within a React component, call `useGetBannersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBannersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBannersQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useGetBannersQuery(baseOptions: Apollo.QueryHookOptions<GetBannersQuery, GetBannersQueryVariables> & ({ variables: GetBannersQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBannersQuery, GetBannersQueryVariables>(GetBannersDocument, options);
+      }
+export function useGetBannersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBannersQuery, GetBannersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBannersQuery, GetBannersQueryVariables>(GetBannersDocument, options);
+        }
+export function useGetBannersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBannersQuery, GetBannersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBannersQuery, GetBannersQueryVariables>(GetBannersDocument, options);
+        }
+export type GetBannersQueryHookResult = ReturnType<typeof useGetBannersQuery>;
+export type GetBannersLazyQueryHookResult = ReturnType<typeof useGetBannersLazyQuery>;
+export type GetBannersSuspenseQueryHookResult = ReturnType<typeof useGetBannersSuspenseQuery>;
+export type GetBannersQueryResult = Apollo.QueryResult<GetBannersQuery, GetBannersQueryVariables>;
 export const CreateCategoryDocument = gql`
     mutation CreateCategory($input: CreateCategoryInput!) {
   createCategory(input: $input) {
