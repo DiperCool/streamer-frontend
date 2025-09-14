@@ -61,12 +61,9 @@ export const BannerCard: React.FC<BannerCardProps> = ({
     }
   };
 
-  const bannerContent = (
-    <div
-      className="relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg aspect-video"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+  // Визуальное содержимое баннера, без обертки для навигации
+  const visualContent = (
+    <>
       <Image
         src={getMinioUrl(banner.image!)}
         alt={banner.title || "Banner image"}
@@ -79,21 +76,40 @@ export const BannerCard: React.FC<BannerCardProps> = ({
         <h3 className="text-xl font-semibold text-white">{banner.title}</h3>
         {banner.description && <p className="text-gray-300 text-sm mt-1">{banner.description}</p>}
         {banner.url && (
-          <div className="flex items-center text-green-400 hover:text-green-500 text-sm mt-2">
+          <div className="flex items-center text-green-400 text-sm mt-2">
             <ExternalLink className="h-4 w-4 mr-1" />
             <span>Visit Link</span>
           </div>
         )}
       </div>
+    </>
+  );
+
+  return (
+    <div
+      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg aspect-video"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Условное отображение Link вокруг визуального содержимого */}
+      {banner.url && !canManageBanners ? (
+        <Link href={banner.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
+          {visualContent}
+        </Link>
+      ) : (
+        <div className="absolute inset-0 z-0"> {/* Если нет URL или есть права на управление, просто div */}
+          {visualContent}
+        </div>
+      )}
 
       {canManageBanners && isHovered && (
-        <div className="absolute top-2 right-2 flex space-x-2 z-10">
+        <div className="absolute top-2 right-2 flex space-x-2 z-10"> {/* Кнопки всегда поверх */}
           <Button
             variant="secondary"
             size="icon"
             className="bg-gray-900/70 hover:bg-gray-700/90 text-white"
-            onClick={(e) => { // Добавлено e.stopPropagation()
-              e.stopPropagation();
+            onClick={(e) => {
+              e.stopPropagation(); // Предотвращаем всплытие клика
               setIsEditDialogOpen(true);
             }}
             title="Edit Banner"
@@ -104,8 +120,8 @@ export const BannerCard: React.FC<BannerCardProps> = ({
             variant="destructive"
             size="icon"
             className="bg-red-600/70 hover:bg-red-700/90 text-white"
-            onClick={(e) => { // Добавлено e.stopPropagation()
-              e.stopPropagation();
+            onClick={(e) => {
+              e.stopPropagation(); // Предотвращаем всплытие клика
               setIsDeleteDialogOpen(true);
             }}
             title="Delete Banner"
@@ -113,18 +129,6 @@ export const BannerCard: React.FC<BannerCardProps> = ({
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
-      )}
-    </div>
-  );
-
-  return (
-    <>
-      {banner.url ? (
-        <Link href={banner.url} target="_blank" rel="noopener noreferrer" className="block">
-          {bannerContent}
-        </Link>
-      ) : (
-        bannerContent
       )}
 
       {canManageBanners && (
@@ -164,6 +168,6 @@ export const BannerCard: React.FC<BannerCardProps> = ({
           </AlertDialog>
         </>
       )}
-    </>
+    </div>
   );
 };
