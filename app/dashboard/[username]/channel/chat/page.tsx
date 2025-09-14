@@ -11,6 +11,7 @@ import {
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useDashboard } from "@/src/contexts/DashboardContext"
+import { BannedUsersTab } from "@/src/components/dashboard/chat/BannedUsersTab" // Импортируем BannedUsersTab
 
 export default function ChatSettingsPage() {
   const pathname = usePathname();
@@ -41,7 +42,9 @@ export default function ChatSettingsPage() {
         <TabsContent value="settings">
           <ChatSettingsForm />
         </TabsContent>
-        {/* The BannedUsersTab content is now rendered by its own page.tsx */}
+        <TabsContent value="banned-users"> {/* Добавлено содержимое для вкладки Banned Users */}
+          <BannedUsersTab />
+        </TabsContent>
       </Tabs>
     </div>
   )

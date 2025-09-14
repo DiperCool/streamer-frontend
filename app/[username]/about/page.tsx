@@ -3,7 +3,7 @@
 import React from "react"
 import { StreamerAboutSection } from "@/src/components/streamer-about-section"
 import { useGetProfileQuery, useGetStreamerQuery, useStreamerInteractionQuery } from "@/graphql/__generated__/graphql"
-import { StreamerBannersSection } from "@/src/components/streamer-banners-section" // Import the new component
+import { StreamerBannersSection } from "@/src/components/streamer-banners-section"
 import { Loader2 } from "lucide-react"
 import { useAuth0 } from "@auth0/auth0-react"
 
@@ -52,7 +52,7 @@ export default function StreamerAboutPage({ params }: { params: { username: stri
     <div className="container mx-auto px-4 py-8">
       <StreamerAboutSection streamer={streamer} profile={streamerProfile} />
       
-      {/* New Banners Section с отступом mt-8 */}
+      {/* Добавлен отступ mt-8 */}
       <StreamerBannersSection streamerId={streamer.id} canManageBanners={canManageBanners ?? false} className="mt-8" />
     </div>
   )

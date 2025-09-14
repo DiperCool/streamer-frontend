@@ -61,42 +61,44 @@ export const BannerCard: React.FC<BannerCardProps> = ({
     }
   };
 
-  // Основное визуальное содержимое баннера (изображение + текстовый оверлей)
-  const coreBannerVisuals = (
-    <>
-      <Image
-        src={getMinioUrl(banner.image!)}
-        alt={banner.title || "Banner image"}
-        fill
-        style={{ objectFit: "cover" }}
-        sizes="(max-width: 768px) 100vw, 50vw"
-        className="transition-transform duration-200 group-hover:scale-105"
-      />
-      {/* Текстовый оверлей внизу */}
-      <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end">
-        <h3 className="text-xl font-semibold text-white">{banner.title}</h3>
-        {banner.description && <p className="text-gray-300 text-sm mt-1">{banner.description}</p>}
-        {/* Убрана кнопка/текст 'Visit Link' */}
-      </div>
-    </>
-  );
-
   return (
     <div
-      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg aspect-video"
+      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg" // Removed aspect-video here
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Условная обертка Link для всего визуального содержимого */}
+      {/* Image container (with optional Link) */}
       {banner.url ? (
-        <Link href={banner.url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
-          {coreBannerVisuals}
+        <Link href={banner.url} target="_blank" rel="noopener noreferrer" className="block relative w-full aspect-video">
+          <Image
+            src={getMinioUrl(banner.image!)}
+            alt={banner.title || "Banner image"}
+            fill
+            style={{ objectFit: "cover" }}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="transition-transform duration-200 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" /> {/* Only gradient overlay */}
         </Link>
       ) : (
-        <div className="absolute inset-0 z-0">
-          {coreBannerVisuals}
+        <div className="relative w-full aspect-video">
+          <Image
+            src={getMinioUrl(banner.image!)}
+            alt={banner.title || "Banner image"}
+            fill
+            style={{ objectFit: "cover" }}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="transition-transform duration-200 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" /> {/* Only gradient overlay */}
         </div>
       )}
+
+      {/* Title and Description below the image */}
+      <div className="p-4">
+        <h3 className="text-xl font-semibold text-white">{banner.title}</h3>
+        {banner.description && <p className="text-gray-300 text-sm mt-1">{banner.description}</p>}
+      </div>
 
       {canManageBanners && isHovered && (
         <div className="absolute top-2 right-2 flex space-x-2 z-10">
