@@ -356,7 +356,7 @@ export type GetEmailResponse = {
   email: Scalars['String']['output'];
 };
 
-export type LiveStartedNotificationDto = NotificationDto & {
+export type LiveStartedNotificationDto = Notification & {
   __typename?: 'LiveStartedNotificationDto';
   createdAt: Scalars['DateTime']['output'];
   discriminator: Scalars['String']['output'];
@@ -595,30 +595,11 @@ export type MyRolesEdge = {
   node: RoleDto;
 };
 
-export type NotificationDto = {
+export type Notification = {
   createdAt: Scalars['DateTime']['output'];
   discriminator: Scalars['String']['output'];
   id: Scalars['UUID']['output'];
   seen: Scalars['Boolean']['output'];
-  streamerId: Scalars['String']['output'];
-};
-
-export type NotificationDtoFilterInput = {
-  and?: InputMaybe<Array<NotificationDtoFilterInput>>;
-  createdAt?: InputMaybe<DateTimeOperationFilterInput>;
-  discriminator?: InputMaybe<StringOperationFilterInput>;
-  id?: InputMaybe<UuidOperationFilterInput>;
-  or?: InputMaybe<Array<NotificationDtoFilterInput>>;
-  seen?: InputMaybe<BooleanOperationFilterInput>;
-  streamerId?: InputMaybe<StringOperationFilterInput>;
-};
-
-export type NotificationDtoSortInput = {
-  createdAt?: InputMaybe<SortEnumType>;
-  discriminator?: InputMaybe<SortEnumType>;
-  id?: InputMaybe<SortEnumType>;
-  seen?: InputMaybe<SortEnumType>;
-  streamerId?: InputMaybe<SortEnumType>;
 };
 
 /** A connection to a list of items. */
@@ -627,7 +608,7 @@ export type NotificationsConnection = {
   /** A list of edges. */
   edges?: Maybe<Array<NotificationsEdge>>;
   /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<NotificationDto>>;
+  nodes?: Maybe<Array<Notification>>;
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
 };
@@ -638,7 +619,7 @@ export type NotificationsEdge = {
   /** A cursor for use in pagination. */
   cursor: Scalars['String']['output'];
   /** The item at the end of the edge. */
-  node: NotificationDto;
+  node: Notification;
 };
 
 /** Information about pagination in a connection. */
@@ -848,8 +829,6 @@ export type QueryNotificationsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
-  order?: InputMaybe<Array<NotificationDtoSortInput>>;
-  where?: InputMaybe<NotificationDtoFilterInput>;
 };
 
 
@@ -1854,7 +1833,7 @@ export type ReadNotificationsMutation = { __typename?: 'Mutation', readNotificat
 export type GetNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'LiveStartedNotificationDto', streamerId: string, id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -3519,7 +3498,6 @@ export const GetNotificationsDocument = gql`
       seen
       discriminator
       ... on LiveStartedNotificationDto {
-        streamerId
         streamer {
           id
           userName

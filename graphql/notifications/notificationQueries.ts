@@ -2,14 +2,13 @@ import { gql } from "@apollo/client"
 
 export const GET_NOTIFICATIONS = gql`
     query GetNotifications {
-        notifications(order: [{ createdAt: DESC }]) { # Добавлена сортировка
+        notifications {
             nodes {
                 id
                 createdAt
                 seen
                 discriminator
                 ... on LiveStartedNotificationDto {
-                    streamerId
                     streamer {
                         id
                         userName

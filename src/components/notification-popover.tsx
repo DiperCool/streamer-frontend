@@ -21,7 +21,7 @@ export const NotificationPopover: React.FC = () => {
     onCompleted: () => refetch(), // Refetch notifications after marking as read
   });
 
-  const notifications = data?.notifications?.nodes || []; // Изменено: доступ к nodes
+  const notifications = data?.notifications?.nodes || [];
   const unreadCount = notifications.filter(n => !n.seen).length;
 
   useEffect(() => {
@@ -58,8 +58,8 @@ export const NotificationPopover: React.FC = () => {
           ) : (
             <div className="flex flex-col">
               {notifications.map((notification) => {
-                // Currently only handling LiveStartedNotificationDto
-                if (notification.discriminator === "LiveStartedNotificationDto") {
+                // Используем __typename вместо discriminator
+                if (notification.__typename === "LiveStartedNotificationDto") {
                   const liveNotification = notification as LiveStartedNotificationDto;
                   const streamer = liveNotification.streamer;
                   const timeAgo = formatDistanceToNowStrict(new Date(notification.createdAt), { addSuffix: true });
