@@ -1805,7 +1805,7 @@ export type ReadNotificationsMutation = { __typename?: 'Mutation', readNotificat
 export type GetNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'LiveStartedNotificationDto', streamerId: string, id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> };
+export type GetNotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -3469,7 +3469,6 @@ export const GetNotificationsDocument = gql`
     seen
     discriminator
     ... on LiveStartedNotificationDto {
-      streamerId
       streamer {
         id
         userName

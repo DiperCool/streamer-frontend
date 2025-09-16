@@ -31,6 +31,7 @@ interface NotificationDto {
     discriminator: String!
     id: UUID!
     seen: Boolean!
+    streamerId: String!
 }
 
 type BanUserResponse {
@@ -266,6 +267,24 @@ type MyRolesEdge {
     node: RoleDto!
 }
 
+"A connection to a list of items."
+type NotificationsConnection {
+    "A list of edges."
+    edges: [NotificationsEdge!]
+    "A flattened list of the nodes."
+    nodes: [NotificationDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type NotificationsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: NotificationDto!
+}
+
 "Information about pagination in a connection."
 type PageInfo {
     "When paginating forwards, the cursor to continue."
@@ -389,7 +408,18 @@ type Query {
         where: RoleDtoFilterInput
     ): MyRolesConnection
     mySystemRole: SystemRoleDto!
-    notifications: [NotificationDto!]!
+    notifications(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [NotificationDtoSortInput!],
+        where: NotificationDtoFilterInput
+    ): NotificationsConnection
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
     roles(
@@ -980,6 +1010,24 @@ input LongOperationFilterInput {
     nin: [Long]
     nlt: Long
     nlte: Long
+}
+
+input NotificationDtoFilterInput {
+    and: [NotificationDtoFilterInput!]
+    createdAt: DateTimeOperationFilterInput
+    discriminator: StringOperationFilterInput
+    id: UuidOperationFilterInput
+    or: [NotificationDtoFilterInput!]
+    seen: BooleanOperationFilterInput
+    streamerId: StringOperationFilterInput
+}
+
+input NotificationDtoSortInput {
+    createdAt: SortEnumType
+    discriminator: SortEnumType
+    id: SortEnumType
+    seen: SortEnumType
+    streamerId: SortEnumType
 }
 
 input PermissionsFlagsInput {

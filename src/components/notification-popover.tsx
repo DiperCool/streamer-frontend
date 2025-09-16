@@ -21,7 +21,7 @@ export const NotificationPopover: React.FC = () => {
     onCompleted: () => refetch(), // Refetch notifications after marking as read
   });
 
-  const notifications = data?.notifications || [];
+  const notifications = data?.notifications?.nodes || []; // Изменено: доступ к nodes
   const unreadCount = notifications.filter(n => !n.seen).length;
 
   useEffect(() => {
