@@ -600,6 +600,45 @@ export type NotificationDto = {
   discriminator: Scalars['String']['output'];
   id: Scalars['UUID']['output'];
   seen: Scalars['Boolean']['output'];
+  streamerId: Scalars['String']['output'];
+};
+
+export type NotificationDtoFilterInput = {
+  and?: InputMaybe<Array<NotificationDtoFilterInput>>;
+  createdAt?: InputMaybe<DateTimeOperationFilterInput>;
+  discriminator?: InputMaybe<StringOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<NotificationDtoFilterInput>>;
+  seen?: InputMaybe<BooleanOperationFilterInput>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type NotificationDtoSortInput = {
+  createdAt?: InputMaybe<SortEnumType>;
+  discriminator?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  seen?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+};
+
+/** A connection to a list of items. */
+export type NotificationsConnection = {
+  __typename?: 'NotificationsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<NotificationsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<NotificationDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type NotificationsEdge = {
+  __typename?: 'NotificationsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: NotificationDto;
 };
 
 /** Information about pagination in a connection. */
@@ -692,7 +731,7 @@ export type Query = {
   myRole: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
   mySystemRole: SystemRoleDto;
-  notifications: Array<NotificationDto>;
+  notifications?: Maybe<NotificationsConnection>;
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
@@ -801,6 +840,16 @@ export type QueryMyRolesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<Array<RoleDtoSortInput>>;
   where?: InputMaybe<RoleDtoFilterInput>;
+};
+
+
+export type QueryNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<NotificationDtoSortInput>>;
+  where?: InputMaybe<NotificationDtoFilterInput>;
 };
 
 
@@ -1805,7 +1854,7 @@ export type ReadNotificationsMutation = { __typename?: 'Mutation', readNotificat
 export type GetNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> };
+export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'LiveStartedNotificationDto', streamerId: string, id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -3464,16 +3513,25 @@ export type ReadNotificationsMutationOptions = Apollo.BaseMutationOptions<ReadNo
 export const GetNotificationsDocument = gql`
     query GetNotifications {
   notifications {
-    id
-    createdAt
-    seen
-    discriminator
-    ... on LiveStartedNotificationDto {
-      streamer {
-        id
-        userName
-        avatar
+    nodes {
+      id
+      createdAt
+      seen
+      discriminator
+      ... on LiveStartedNotificationDto {
+        streamerId
+        streamer {
+          id
+          userName
+          avatar
+        }
       }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
     }
   }
 }

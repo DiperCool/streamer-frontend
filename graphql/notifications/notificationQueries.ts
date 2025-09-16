@@ -2,7 +2,7 @@ import { gql } from "@apollo/client"
 
 export const GET_NOTIFICATIONS = gql`
     query GetNotifications {
-        notifications {
+        notifications(order: [{ createdAt: DESC }]) { # Добавлена сортировка
             nodes {
                 id
                 createdAt
