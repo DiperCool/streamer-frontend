@@ -26,6 +26,13 @@ directive @listSize(
     slicingArguments: [String!]
 ) on FIELD_DEFINITION
 
+interface NotificationDto {
+    createdAt: DateTime!
+    discriminator: String!
+    id: UUID!
+    seen: Boolean!
+}
+
 type BanUserResponse {
     id: UUID!
 }
@@ -181,6 +188,15 @@ type GetEmailResponse {
     email: String!
 }
 
+type LiveStartedNotificationDto implements NotificationDto {
+    createdAt: DateTime!
+    discriminator: String!
+    id: UUID!
+    seen: Boolean!
+    streamer: StreamerDto
+    streamerId: String!
+}
+
 type Mutation {
     banUser(request: BanUserInput!): BanUserResponse!
     createBanner(banner: CreateBannerInput!): CreateBannerResponse!
@@ -192,6 +208,7 @@ type Mutation {
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
+    readNotifications: ReadNotificationsResponse!
     removeBanner(banner: RemoveBannerInput!): RemoveBannerResponse!
     removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
@@ -372,6 +389,7 @@ type Query {
         where: RoleDtoFilterInput
     ): MyRolesConnection
     mySystemRole: SystemRoleDto!
+    notifications: [NotificationDto!]!
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
     roles(
@@ -449,6 +467,10 @@ type Query {
         streamerId: String!,
         where: VodDtoFilterInput
     ): VodsConnection
+}
+
+type ReadNotificationsResponse {
+    response: Boolean!
 }
 
 type RemoveBannerResponse {
