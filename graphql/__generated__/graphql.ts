@@ -356,6 +356,16 @@ export type GetEmailResponse = {
   email: Scalars['String']['output'];
 };
 
+export type LiveStartedNotificationDto = NotificationDto & {
+  __typename?: 'LiveStartedNotificationDto';
+  createdAt: Scalars['DateTime']['output'];
+  discriminator: Scalars['String']['output'];
+  id: Scalars['UUID']['output'];
+  seen: Scalars['Boolean']['output'];
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+};
+
 export type LongOperationFilterInput = {
   eq?: InputMaybe<Scalars['Long']['input']>;
   gt?: InputMaybe<Scalars['Long']['input']>;
@@ -383,6 +393,7 @@ export type Mutation = {
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
+  readNotifications: ReadNotificationsResponse;
   removeBanner: RemoveBannerResponse;
   removeCategory: RemoveCategoryResponse;
   removeRole: RemoveRoleResponse;
@@ -584,6 +595,13 @@ export type MyRolesEdge = {
   node: RoleDto;
 };
 
+export type NotificationDto = {
+  createdAt: Scalars['DateTime']['output'];
+  discriminator: Scalars['String']['output'];
+  id: Scalars['UUID']['output'];
+  seen: Scalars['Boolean']['output'];
+};
+
 /** Information about pagination in a connection. */
 export type PageInfo = {
   __typename?: 'PageInfo';
@@ -674,6 +692,7 @@ export type Query = {
   myRole: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
   mySystemRole: SystemRoleDto;
+  notifications: Array<NotificationDto>;
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
@@ -874,6 +893,11 @@ export type QueryVodsArgs = {
   order?: InputMaybe<Array<VodDtoSortInput>>;
   streamerId: Scalars['String']['input'];
   where?: InputMaybe<VodDtoFilterInput>;
+};
+
+export type ReadNotificationsResponse = {
+  __typename?: 'ReadNotificationsResponse';
+  response: Scalars['Boolean']['output'];
 };
 
 export type RemoveBannerInput = {
@@ -1772,6 +1796,16 @@ export type UploadFileMutationVariables = Exact<{
 
 
 export type UploadFileMutation = { __typename?: 'Mutation', upload: { __typename?: 'UploadFileResponse', fileName: string } };
+
+export type ReadNotificationsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ReadNotificationsMutation = { __typename?: 'Mutation', readNotifications: { __typename?: 'ReadNotificationsResponse', response: boolean } };
+
+export type GetNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetNotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'LiveStartedNotificationDto', streamerId: string, id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -3395,6 +3429,88 @@ export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
 export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
 export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
+export const ReadNotificationsDocument = gql`
+    mutation ReadNotifications {
+  readNotifications {
+    response
+  }
+}
+    `;
+export type ReadNotificationsMutationFn = Apollo.MutationFunction<ReadNotificationsMutation, ReadNotificationsMutationVariables>;
+
+/**
+ * __useReadNotificationsMutation__
+ *
+ * To run a mutation, you first call `useReadNotificationsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReadNotificationsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [readNotificationsMutation, { data, loading, error }] = useReadNotificationsMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useReadNotificationsMutation(baseOptions?: Apollo.MutationHookOptions<ReadNotificationsMutation, ReadNotificationsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ReadNotificationsMutation, ReadNotificationsMutationVariables>(ReadNotificationsDocument, options);
+      }
+export type ReadNotificationsMutationHookResult = ReturnType<typeof useReadNotificationsMutation>;
+export type ReadNotificationsMutationResult = Apollo.MutationResult<ReadNotificationsMutation>;
+export type ReadNotificationsMutationOptions = Apollo.BaseMutationOptions<ReadNotificationsMutation, ReadNotificationsMutationVariables>;
+export const GetNotificationsDocument = gql`
+    query GetNotifications {
+  notifications {
+    id
+    createdAt
+    seen
+    discriminator
+    ... on LiveStartedNotificationDto {
+      streamerId
+      streamer {
+        id
+        userName
+        avatar
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetNotificationsQuery__
+ *
+ * To run a query within a React component, call `useGetNotificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNotificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNotificationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetNotificationsQuery(baseOptions?: Apollo.QueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+      }
+export function useGetNotificationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+        }
+export function useGetNotificationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNotificationsQuery, GetNotificationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetNotificationsQuery, GetNotificationsQueryVariables>(GetNotificationsDocument, options);
+        }
+export type GetNotificationsQueryHookResult = ReturnType<typeof useGetNotificationsQuery>;
+export type GetNotificationsLazyQueryHookResult = ReturnType<typeof useGetNotificationsLazyQuery>;
+export type GetNotificationsSuspenseQueryHookResult = ReturnType<typeof useGetNotificationsSuspenseQuery>;
+export type GetNotificationsQueryResult = Apollo.QueryResult<GetNotificationsQuery, GetNotificationsQueryVariables>;
 export const UpdateProfileDocument = gql`
     mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {

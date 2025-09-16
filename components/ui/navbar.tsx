@@ -29,6 +29,7 @@ import {
 import { useDashboard } from "@/src/contexts/DashboardContext"
 import { BroadcasterSwitcher } from "@/src/components/broadcaster-switcher"
 import { StreamerSearchPopover } from "@/src/components/streamer-search-popover";
+import { NotificationPopover } from "@/src/components/notification-popover"; // Import NotificationPopover
 
 interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
   onMenuClick?: () => void;
@@ -91,46 +92,49 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                   {meLoading ? (
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500"></div>
                   ) : (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
-                            <AvatarFallback className="bg-green-600 text-white text-sm">
-                              {userName?.charAt(0).toUpperCase() || "U"}
-                            </AvatarFallback>
-                          </Avatar>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        className={cn(
-                          "bg-gray-800 border-gray-700 text-white p-1",
-                          "w-56"
-                        )}
-                      >
-                        {userName && (
-                          <>
-                            <DropdownMenuLabel className="flex items-center space-x-2 px-2 py-1.5 text-base font-semibold text-white">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
-                                <AvatarFallback className="bg-green-600 text-white text-sm">
-                                  {userName.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>{userName}</span>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-gray-700 my-1" />
-                          </>
-                        )}
-                        <DropdownMenuItem onClick={() => router.push(`/settings/profile`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
-                          <Settings className="h-4 w-4 mr-2" /> Settings
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-gray-700 my-1" />
-                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer flex items-center text-red-400 hover:bg-red-600 hover:text-white">
-                          <LogOut className="h-4 w-4 mr-2" /> Log Out
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <>
+                      <NotificationPopover /> {/* Add NotificationPopover here */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
+                              <AvatarFallback className="bg-green-600 text-white text-sm">
+                                {userName?.charAt(0).toUpperCase() || "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          className={cn(
+                            "bg-gray-800 border-gray-700 text-white p-1",
+                            "w-56"
+                          )}
+                        >
+                          {userName && (
+                            <>
+                              <DropdownMenuLabel className="flex items-center space-x-2 px-2 py-1.5 text-base font-semibold text-white">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
+                                  <AvatarFallback className="bg-green-600 text-white text-sm">
+                                    {userName.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>{userName}</span>
+                              </DropdownMenuLabel>
+                              <DropdownMenuSeparator className="bg-gray-700 my-1" />
+                            </>
+                          )}
+                          <DropdownMenuItem onClick={() => router.push(`/settings/profile`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                            <Settings className="h-4 w-4 mr-2" /> Settings
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-gray-700 my-1" />
+                          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer flex items-center text-red-400 hover:bg-red-600 hover:text-white">
+                            <LogOut className="h-4 w-4 mr-2" /> Log Out
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
                   )}
                 </>
               )}
@@ -208,55 +212,58 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                     {meLoading ? (
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500"></div>
                     ) : (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
-                                <AvatarFallback className="bg-green-600 text-white text-sm">
-                                  {userName?.charAt(0).toUpperCase() || "U"}
-                                </AvatarFallback>
-                              </Avatar>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            className={cn(
-                              "bg-gray-800 border-gray-700 text-white p-1",
-                              "w-56"
-                            )}
-                          >
-                            {userName && (
-                              <>
-                                <DropdownMenuLabel className="flex items-center space-x-2 px-2 py-1.5 text-base font-semibold text-white">
-                                  <Avatar className="w-8 h-8">
-                                    <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
-                                    <AvatarFallback className="bg-green-600 text-white text-sm">
-                                      {userName.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span>{userName}</span>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator className="bg-gray-700 my-1" />
-                              </>
-                            )}
-                            <DropdownMenuItem onClick={() => router.push(`/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
-                              <Store className="h-4 w-4 mr-2" /> Channel
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/${currentAuthUserStreamer?.userName || userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
-                              <LayoutDashboard className="h-4 w-4 mr-2" /> Creator Dashboard
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
-                              <Sparkles className="h-4 w-4 mr-2" /> Subscriptions
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/settings/profile`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
-                              <Settings className="h-4 w-4 mr-2" /> Settings
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-gray-700 my-1" />
-                            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer flex items-center text-red-400 hover:bg-red-600 hover:text-white">
-                              <LogOut className="h-4 w-4 mr-2" /> Log Out
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <>
+                          <NotificationPopover /> {/* Add NotificationPopover here */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
+                                  <AvatarFallback className="bg-green-600 text-white text-sm">
+                                    {userName?.charAt(0).toUpperCase() || "U"}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              className={cn(
+                                "bg-gray-800 border-gray-700 text-white p-1",
+                                "w-56"
+                              )}
+                            >
+                              {userName && (
+                                <>
+                                  <DropdownMenuLabel className="flex items-center space-x-2 px-2 py-1.5 text-base font-semibold text-white">
+                                    <Avatar className="w-8 h-8">
+                                      <AvatarImage src={getMinioUrl(userAvatar!)} alt="User Avatar" />
+                                      <AvatarFallback className="bg-green-600 text-white text-sm">
+                                        {userName.charAt(0).toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span>{userName}</span>
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuSeparator className="bg-gray-700 my-1" />
+                                </>
+                              )}
+                              <DropdownMenuItem onClick={() => router.push(`/${userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                                <Store className="h-4 w-4 mr-2" /> Channel
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/${currentAuthUserStreamer?.userName || userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                                <LayoutDashboard className="h-4 w-4 mr-2" /> Creator Dashboard
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                                <Sparkles className="h-4 w-4 mr-2" /> Subscriptions
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/settings/profile`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                                <Settings className="h-4 w-4 mr-2" /> Settings
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="bg-gray-700 my-1" />
+                              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer flex items-center text-red-400 hover:bg-red-600 hover:text-white">
+                                <LogOut className="h-4 w-4 mr-2" /> Log Out
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </>
                     )}
                   </>
               )}
