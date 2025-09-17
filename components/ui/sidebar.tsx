@@ -65,7 +65,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                       </SidebarNavItem>
                     </Link>
                     <Link href={`${dashboardBaseUrl}/channel/chat`} passHref>
-                      <SidebarNavItem icon={<MessageSquare />} active={pathname === `${dashboardBaseUrl}/channel/chat`}>
+                      <SidebarNavItem icon={<MessageSquare />} active={pathname.startsWith(`${dashboardBaseUrl}/channel/chat`)}> {/* Обновлено */}
                         Chat
                       </SidebarNavItem>
                     </Link>
@@ -79,20 +79,15 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                         Community
                       </SidebarNavItem>
                     </Link>
-                    {/* Удален пункт Notifications из дашборда */}
                   </CollapsibleSidebarNav>
 
-                  {/* New CollapsibleSidebarNav for Content */}
                   <CollapsibleSidebarNav title="Content" icon={<Video />} active={isContentActive}>
                     <Link href={`${dashboardBaseUrl}/content/vods`} passHref>
-                      <SidebarNavItem icon={<Video />} active={pathname === `${dashboardBaseUrl}/content/vods`}>
+                      <SidebarNavItem icon={<Video />} active={pathname.startsWith(`${dashboardBaseUrl}/content/vods`)}> {/* Обновлено */}
                         VODs
                       </SidebarNavItem>
                     </Link>
-                    {/* Удален пункт VOD Settings */}
                   </CollapsibleSidebarNav>
-
-                  {/* Удален пункт "Dashboard Settings" */}
                 </>
               ) : (
                 <>
@@ -107,10 +102,8 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                     </SidebarNavItem>
                   </Link>
                   
-                  {/* Separator with increased vertical margin */}
                   <div className="my-6 border-b border-gray-700 mx-3" /> 
 
-                  {/* Following Streamers List */}
                   <FollowingStreamersSidebar />
                 </>
               )}
