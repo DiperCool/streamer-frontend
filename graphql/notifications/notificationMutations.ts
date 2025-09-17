@@ -9,8 +9,8 @@ export const READ_NOTIFICATION = gql`
 `
 
 export const EDIT_NOTIFICATION_SETTINGS = gql`
-    mutation EditNotificationSettings($readNotification: EditNotificationSettingsInput!) {
-        editNotificationSettings(readNotification: $readNotification) {
+    mutation EditNotificationSettings($id: UUID!, $input: EditNotificationSettingsInput!) {
+        editNotificationSettings(id: $id, input: $input) {
             id
         }
     }

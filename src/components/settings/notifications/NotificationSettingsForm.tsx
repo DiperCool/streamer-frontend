@@ -55,8 +55,8 @@ export function NotificationSettingsForm() {
     try {
       await editNotificationSettings({
         variables: {
-          readNotification: { // Используем 'readNotification' как имя переменной для мутации
-            id: data.notificationSettings.id,
+          id: data.notificationSettings.id, // ID теперь передается отдельно
+          input: { // Остальные поля передаются в объекте 'input'
             streamerLive: values.streamerLive,
             userFollowed: values.userFollowed,
           },
