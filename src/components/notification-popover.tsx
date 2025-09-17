@@ -19,6 +19,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useApolloClient } from "@apollo/client"; // Импортируем useApolloClient
 
 interface NotificationPopoverProps {
   // refetchMe больше не нужен, так как мы будем обновлять состояние напрямую
@@ -26,6 +27,7 @@ interface NotificationPopoverProps {
 
 export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
   const [open, setOpen] = useState(false);
+  const client = useApolloClient(); // Инициализируем Apollo Client
 
   const { data: meData, refetch: refetchMe } = useGetMeQuery(); // Получаем hasUnreadNotifications из GET_ME
   const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false;
