@@ -9,9 +9,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   useGetNotificationsQuery,
-  useReadNotificationMutation, // Используем мутацию в единственном числе
-  useNotificationCreatedSubscription, // Импортируем подписку
-  LiveStartedNotificationDto
+  useReadNotificationMutation,
+  useNotificationCreatedSubscription,
+  LiveStartedNotificationDto,
+  useGetMeQuery, // Импортируем useGetMeQuery для доступа к hasUnreadNotifications
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -20,18 +21,20 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 interface NotificationPopoverProps {
-  refetchMe: () => Promise<any>; // Добавляем пропс для обновления GET_ME
+  // refetchMe больше не нужен, так как мы будем обновлять состояние напрямую
 }
 
-export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ refetchMe }) => {
+export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
   const [open, setOpen] = useState(false);
+
+  const { data: meData, refetch: refetchMe } = useGetMeQuery(); // Получаем hasUnreadNotifications из GET_ME
+  const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false;
 
   const { data, loading, error, refetch } = useGetNotificationsQuery();
   const [readNotificationMutation, { loading: markingAsRead }] = useReadNotificationMutation();
 
   const notifications = data?.notifications?.nodes || [];
   const unreadNotifications = notifications.filter(n => !n.seen);
-  const unreadCount = unreadNotifications.length;
 
   // Подписка на новые уведомления
   useNotificationCreatedSubscription({
@@ -45,7 +48,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ refetc
   });
 
   useEffect(() => {
-    if (open && unreadCount > 0 && !markingAsRead) {
+    if (open && unreadNotifications.length > 0 && !markingAsRead) {
       // Отправляем мутацию для каждого непрочитанного уведомления
       const readPromises = unreadNotifications.map(notification =>
         readNotificationMutation({
@@ -58,26 +61,36 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ refetc
       );
 
       Promise.all(readPromises)
-        .then(() => {
+        .then((results) => {
+          // Обновляем кэш Apollo, чтобы отразить изменения hasUnreadNotifications
+          // Используем результат последней мутации, так как он должен быть актуальным
+          const lastResult = results[results.length - 1];
+          if (lastResult?.data?.readNotification) {
+            client.cache.modify({
+              id: client.cache.identify(meData?.me!), // Идентифицируем объект 'me'
+              fields: {
+                hasUnreadNotifications() {
+                  return lastResult.data.readNotification.hasUnreadNotifications;
+                },
+              },
+            });
+          }
           refetch(); // Обновляем список уведомлений после прочтения
-          refetchMe(); // Обновляем статус hasUnreadNotifications в навбаре
         })
         .catch(err => {
           console.error("Error marking notifications as read:", err);
           toast.error("Failed to mark notifications as read.");
         });
     }
-  }, [open, unreadCount, markingAsRead, unreadNotifications, readNotificationMutation, refetch, refetchMe]);
+  }, [open, unreadNotifications, markingAsRead, readNotificationMutation, refetch, meData, client]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative text-gray-300 hover:text-white">
           <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 rounded-full bg-red-500 text-white text-xs">
-              {unreadCount}
-            </Badge>
+          {hasUnreadNotifications && ( // Используем hasUnreadNotifications для индикатора
+            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-gray-900" />
           )}
         </Button>
       </PopoverTrigger>

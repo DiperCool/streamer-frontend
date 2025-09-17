@@ -1891,7 +1891,7 @@ export type ReadNotificationMutationVariables = Exact<{
 export type ReadNotificationMutation = { __typename?: 'Mutation', readNotification: { __typename?: 'ReadNotificationResponse', hasUnreadNotifications: boolean } };
 
 export type EditNotificationSettingsMutationVariables = Exact<{
-  readNotification: EditNotificationSettingsInput;
+  input: EditNotificationSettingsInput;
 }>;
 
 
@@ -3585,8 +3585,8 @@ export type ReadNotificationMutationHookResult = ReturnType<typeof useReadNotifi
 export type ReadNotificationMutationResult = Apollo.MutationResult<ReadNotificationMutation>;
 export type ReadNotificationMutationOptions = Apollo.BaseMutationOptions<ReadNotificationMutation, ReadNotificationMutationVariables>;
 export const EditNotificationSettingsDocument = gql`
-    mutation EditNotificationSettings($readNotification: EditNotificationSettingsInput!) {
-  editNotificationSettings(readNotification: $readNotification) {
+    mutation EditNotificationSettings($input: EditNotificationSettingsInput!) {
+  editNotificationSettings(readNotification: $input) {
     id
   }
 }
@@ -3606,7 +3606,7 @@ export type EditNotificationSettingsMutationFn = Apollo.MutationFunction<EditNot
  * @example
  * const [editNotificationSettingsMutation, { data, loading, error }] = useEditNotificationSettingsMutation({
  *   variables: {
- *      readNotification: // value for 'readNotification'
+ *      input: // value for 'input'
  *   },
  * });
  */
