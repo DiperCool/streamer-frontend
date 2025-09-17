@@ -83,3 +83,12 @@ export const GET_VOD = gql`
         }
     }
 `
+
+export const GET_VOD_SETTINGS = gql`
+    query GetVodSettings {
+        vodSettings {
+            id
+            vodEnabled
+        }
+    }
+`

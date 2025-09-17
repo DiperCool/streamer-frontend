@@ -20,6 +20,7 @@ export const GET_ME = gql`
             followers
             isLive
             finishedAuth
+            hasUnreadNotifications # Добавлено новое поле
         }
     }
 `

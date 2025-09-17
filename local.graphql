@@ -172,7 +172,15 @@ type EditCategoryResponse {
     id: UUID!
 }
 
+type EditNotificationSettingsResponse {
+    id: UUID!
+}
+
 type EditRoleResponse {
+    id: UUID!
+}
+
+type EditVodSettingsResponse {
     id: UUID!
 }
 
@@ -204,11 +212,13 @@ type Mutation {
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
+    editNotificationSettings(readNotification: EditNotificationSettingsInput!): EditNotificationSettingsResponse!
     editRole(input: EditRoleInput!): EditRoleResponse!
+    editVodSettings(request: EditVodSettingsInput!): EditVodSettingsResponse!
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
-    readNotifications: ReadNotificationsResponse!
+    readNotification(readNotification: ReadNotificationInput!): ReadNotificationResponse!
     removeBanner(banner: RemoveBannerInput!): RemoveBannerResponse!
     removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
@@ -264,6 +274,12 @@ type MyRolesEdge {
     cursor: String!
     "The item at the end of the edge."
     node: RoleDto!
+}
+
+type NotificationSettingsDto {
+    id: UUID!
+    streamerLive: Boolean!
+    userFollowed: Boolean!
 }
 
 "A connection to a list of items."
@@ -407,6 +423,7 @@ type Query {
         where: RoleDtoFilterInput
     ): MyRolesConnection
     mySystemRole: SystemRoleDto!
+    notificationSettings: NotificationSettingsDto!
     notifications(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -481,6 +498,7 @@ type Query {
     topCategories: [CategoryDto!]!
     topStreams: [StreamDto!]!
     vod(vodId: UUID!): VodDto!
+    vodSettings: VodSettingsDto!
     vods(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -496,8 +514,8 @@ type Query {
     ): VodsConnection
 }
 
-type ReadNotificationsResponse {
-    response: Boolean!
+type ReadNotificationResponse {
+    hasUnreadNotifications: Boolean!
 }
 
 type RemoveBannerResponse {
@@ -623,6 +641,7 @@ type StreamerMeDto {
     avatar: String
     finishedAuth: Boolean!
     followers: Long!
+    hasUnreadNotifications: Boolean!
     id: String!
     isLive: Boolean!
     userName: String
@@ -668,8 +687,10 @@ type Subscription {
     chatMessageCreated(chatId: UUID!): ChatMessageDto!
     chatMessageDeleted(chatId: UUID!): ChatMessageDto!
     chatUpdated(chatId: UUID!): ChatDto!
+    notificationCreated: Notification!
     streamUpdated(streamId: UUID!): StreamDto!
     streamerUpdated(streamerId: String!): StreamerDto!
+    subscribeNotificationCreated: [Notification!]!
     subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
     userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
     userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
@@ -777,6 +798,11 @@ type VodDto {
     title: String
     type: VodType!
     views: Long!
+}
+
+type VodSettingsDto {
+    id: UUID!
+    vodEnabled: Boolean!
 }
 
 "A connection to a list of items."
@@ -981,9 +1007,18 @@ input EditCategoryInput {
     title: String!
 }
 
+input EditNotificationSettingsInput {
+    streamerLive: Boolean!
+    userFollowed: Boolean!
+}
+
 input EditRoleInput {
     permissions: PermissionsFlagsInput!
     roleId: UUID!
+}
+
+input EditVodSettingsInput {
+    vodEnabled: Boolean!
 }
 
 input FinishAuthInput {
@@ -1028,6 +1063,10 @@ input PermissionsOperationFilterInput {
 
 input PinMessageInput {
     messageId: UUID!
+}
+
+input ReadNotificationInput {
+    id: UUID!
 }
 
 input RemoveBannerInput {

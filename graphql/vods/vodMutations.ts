@@ -15,3 +15,11 @@ export const UPDATE_VOD = gql`
         }
     }
 `
+
+export const EDIT_VOD_SETTINGS = gql`
+    mutation EditVodSettings($request: EditVodSettingsInput!) {
+        editVodSettings(request: $request) {
+            id
+        }
+    }
+`

@@ -25,3 +25,13 @@ export const GET_NOTIFICATIONS = gql`
         }
     }
 `
+
+export const GET_NOTIFICATION_SETTINGS = gql`
+    query GetNotificationSettings {
+        notificationSettings {
+            id
+            streamerLive
+            userFollowed
+        }
+    }
+`
