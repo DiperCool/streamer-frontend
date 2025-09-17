@@ -1,14 +1,23 @@
 import { intervalToDuration, formatDuration } from "date-fns";
 
-export const getMinioUrl = (fileName: string) => {
+export const getMinioUrl = (fileName: string | null | undefined): string => {
+  if (!fileName || typeof fileName !== 'string') {
+    // Возвращаем путь к изображению-заглушке, если fileName null, undefined или не строка
+    return "/placeholder.jpg"; 
+  }
+  
+  // Если это уже локальный статический путь, возвращаем его напрямую
   if (fileName.startsWith('/')) {
-    return fileName; // It's a local static asset
+    return fileName;
   }
-  // Ensure NEXT_PUBLIC_MINIO_URL is defined before using it
+  
+  // Убедимся, что NEXT_PUBLIC_MINIO_URL определен
   if (!process.env.NEXT_PUBLIC_MINIO_URL) {
-    console.error("NEXT_PUBLIC_MINIO_URL is not defined. Minio URLs might be broken.");
-    return fileName; // Fallback to just the filename if URL is missing
+    console.error("NEXT_PUBLIC_MINIO_URL is not defined. Minio URLs might be broken. Falling back to provided filename.");
+    return fileName; // Если URL отсутствует, возвращаем само имя файла (которое здесь является строкой)
   }
+  
+  // Формируем полный URL Minio
   return `${process.env.NEXT_PUBLIC_MINIO_URL}/${fileName}`;
 };
 
