@@ -50,13 +50,12 @@ export function NotificationSettingsForm() {
   }, [data, reset]);
 
   const onSubmit = async (values: NotificationSettingsFormValues) => {
-    if (!data?.notificationSettings.id) return;
+    if (!data?.notificationSettings.id) return; // ID все еще нужен для refetch, но не для самой мутации
 
     try {
       await editNotificationSettings({
         variables: {
-          id: data.notificationSettings.id, // ID теперь передается отдельно
-          input: { // Остальные поля передаются в объекте 'input'
+          input: { // Этот объект 'input' будет сопоставлен с аргументом 'readNotification' в вашей схеме
             streamerLive: values.streamerLive,
             userFollowed: values.userFollowed,
           },
