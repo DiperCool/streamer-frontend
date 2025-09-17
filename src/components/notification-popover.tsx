@@ -7,28 +7,67 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useGetNotificationsQuery, useReadNotificationsMutation, LiveStartedNotificationDto } from "@/graphql/__generated__/graphql";
+import {
+  useGetNotificationsQuery,
+  useReadNotificationMutation, // Используем мутацию в единственном числе
+  useNotificationCreatedSubscription, // Импортируем подписку
+  LiveStartedNotificationDto
+} from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { formatDistanceToNowStrict } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { toast } from "sonner";
 
-export const NotificationPopover: React.FC = () => {
+interface NotificationPopoverProps {
+  refetchMe: () => Promise<any>; // Добавляем пропс для обновления GET_ME
+}
+
+export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ refetchMe }) => {
   const [open, setOpen] = useState(false);
 
   const { data, loading, error, refetch } = useGetNotificationsQuery();
-  const [readNotificationsMutation, { loading: markingAsRead }] = useReadNotificationsMutation({
-    onCompleted: () => refetch(), // Refetch notifications after marking as read
-  });
+  const [readNotificationMutation, { loading: markingAsRead }] = useReadNotificationMutation();
 
   const notifications = data?.notifications?.nodes || [];
-  const unreadCount = notifications.filter(n => !n.seen).length;
+  const unreadNotifications = notifications.filter(n => !n.seen);
+  const unreadCount = unreadNotifications.length;
+
+  // Подписка на новые уведомления
+  useNotificationCreatedSubscription({
+    onData: ({ data: subscriptionData }) => {
+      if (subscriptionData.data?.notificationCreated) {
+        refetch(); // Обновляем список уведомлений в поповере
+        refetchMe(); // Обновляем статус hasUnreadNotifications в навбаре
+        toast.info("You have a new notification!");
+      }
+    },
+  });
 
   useEffect(() => {
     if (open && unreadCount > 0 && !markingAsRead) {
-      readNotificationsMutation();
+      // Отправляем мутацию для каждого непрочитанного уведомления
+      const readPromises = unreadNotifications.map(notification =>
+        readNotificationMutation({
+          variables: {
+            readNotification: {
+              id: notification.id,
+            },
+          },
+        })
+      );
+
+      Promise.all(readPromises)
+        .then(() => {
+          refetch(); // Обновляем список уведомлений после прочтения
+          refetchMe(); // Обновляем статус hasUnreadNotifications в навбаре
+        })
+        .catch(err => {
+          console.error("Error marking notifications as read:", err);
+          toast.error("Failed to mark notifications as read.");
+        });
     }
-  }, [open, unreadCount, markingAsRead, readNotificationsMutation]);
+  }, [open, unreadCount, markingAsRead, unreadNotifications, readNotificationMutation, refetch, refetchMe]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -58,7 +97,6 @@ export const NotificationPopover: React.FC = () => {
           ) : (
             <div className="flex flex-col">
               {notifications.map((notification) => {
-                // Используем __typename вместо discriminator
                 if (notification.__typename === "LiveStartedNotificationDto") {
                   const liveNotification = notification as LiveStartedNotificationDto;
                   const streamer = liveNotification.streamer;
@@ -71,7 +109,7 @@ export const NotificationPopover: React.FC = () => {
                           "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
                           !notification.seen && "bg-blue-900/20"
                         )}
-                        onClick={() => setOpen(false)} // Close popover on click
+                        onClick={() => setOpen(false)}
                       >
                         <Avatar className="w-9 h-9">
                           <AvatarImage src={getMinioUrl(streamer?.avatar!)} alt={streamer?.userName || "Streamer"} />
@@ -89,7 +127,6 @@ export const NotificationPopover: React.FC = () => {
                     </Link>
                   );
                 }
-                // Fallback for other notification types if needed
                 return (
                   <div key={notification.id} className={cn("p-3 border-b border-gray-700 text-sm text-gray-400", !notification.seen && "bg-blue-900/20")}>
                     Unknown notification type.

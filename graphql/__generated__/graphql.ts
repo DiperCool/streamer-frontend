@@ -323,6 +323,16 @@ export type EditCategoryResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type EditNotificationSettingsInput = {
+  streamerLive: Scalars['Boolean']['input'];
+  userFollowed: Scalars['Boolean']['input'];
+};
+
+export type EditNotificationSettingsResponse = {
+  __typename?: 'EditNotificationSettingsResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type EditRoleInput = {
   permissions: PermissionsFlagsInput;
   roleId: Scalars['UUID']['input'];
@@ -330,6 +340,15 @@ export type EditRoleInput = {
 
 export type EditRoleResponse = {
   __typename?: 'EditRoleResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type EditVodSettingsInput = {
+  vodEnabled: Scalars['Boolean']['input'];
+};
+
+export type EditVodSettingsResponse = {
+  __typename?: 'EditVodSettingsResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -389,11 +408,13 @@ export type Mutation = {
   createMessage: CreateMessageResponse;
   createRole: CreateRoleResponse;
   deleteMessage: DeleteMessageResponse;
+  editNotificationSettings: EditNotificationSettingsResponse;
   editRole: EditRoleResponse;
+  editVodSettings: EditVodSettingsResponse;
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
-  readNotifications: ReadNotificationsResponse;
+  readNotification: ReadNotificationResponse;
   removeBanner: RemoveBannerResponse;
   removeCategory: RemoveCategoryResponse;
   removeRole: RemoveRoleResponse;
@@ -446,8 +467,18 @@ export type MutationDeleteMessageArgs = {
 };
 
 
+export type MutationEditNotificationSettingsArgs = {
+  readNotification: EditNotificationSettingsInput;
+};
+
+
 export type MutationEditRoleArgs = {
   input: EditRoleInput;
+};
+
+
+export type MutationEditVodSettingsArgs = {
+  request: EditVodSettingsInput;
 };
 
 
@@ -463,6 +494,11 @@ export type MutationFollowArgs = {
 
 export type MutationPinMessageArgs = {
   pinMessage: PinMessageInput;
+};
+
+
+export type MutationReadNotificationArgs = {
+  readNotification: ReadNotificationInput;
 };
 
 
@@ -602,6 +638,13 @@ export type Notification = {
   seen: Scalars['Boolean']['output'];
 };
 
+export type NotificationSettingsDto = {
+  __typename?: 'NotificationSettingsDto';
+  id: Scalars['UUID']['output'];
+  streamerLive: Scalars['Boolean']['output'];
+  userFollowed: Scalars['Boolean']['output'];
+};
+
 /** A connection to a list of items. */
 export type NotificationsConnection = {
   __typename?: 'NotificationsConnection';
@@ -712,6 +755,7 @@ export type Query = {
   myRole: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
   mySystemRole: SystemRoleDto;
+  notificationSettings: NotificationSettingsDto;
   notifications?: Maybe<NotificationsConnection>;
   profile: ProfileDto;
   role: RoleDto;
@@ -727,6 +771,7 @@ export type Query = {
   topCategories: Array<CategoryDto>;
   topStreams: Array<StreamDto>;
   vod: VodDto;
+  vodSettings: VodSettingsDto;
   vods?: Maybe<VodsConnection>;
 };
 
@@ -923,9 +968,13 @@ export type QueryVodsArgs = {
   where?: InputMaybe<VodDtoFilterInput>;
 };
 
-export type ReadNotificationsResponse = {
-  __typename?: 'ReadNotificationsResponse';
-  response: Scalars['Boolean']['output'];
+export type ReadNotificationInput = {
+  id: Scalars['UUID']['input'];
+};
+
+export type ReadNotificationResponse = {
+  __typename?: 'ReadNotificationResponse';
+  hasUnreadNotifications: Scalars['Boolean']['output'];
 };
 
 export type RemoveBannerInput = {
@@ -1192,6 +1241,7 @@ export type StreamerMeDto = {
   avatar?: Maybe<Scalars['String']['output']>;
   finishedAuth: Scalars['Boolean']['output'];
   followers: Scalars['Long']['output'];
+  hasUnreadNotifications: Scalars['Boolean']['output'];
   id: Scalars['String']['output'];
   isLive: Scalars['Boolean']['output'];
   userName?: Maybe<Scalars['String']['output']>;
@@ -1257,8 +1307,10 @@ export type Subscription = {
   chatMessageCreated: ChatMessageDto;
   chatMessageDeleted: ChatMessageDto;
   chatUpdated: ChatDto;
+  notificationCreated: Notification;
   streamUpdated: StreamDto;
   streamerUpdated: StreamerDto;
+  subscribeNotificationCreated: Array<Notification>;
   subscribeWatchStream: Array<StreamWatcher>;
   userBanned: BannedUserDto;
   userUnbanned: BannedUserDto;
@@ -1571,6 +1623,12 @@ export type VodDtoSortInput = {
   views?: InputMaybe<SortEnumType>;
 };
 
+export type VodSettingsDto = {
+  __typename?: 'VodSettingsDto';
+  id: Scalars['UUID']['output'];
+  vodEnabled: Scalars['Boolean']['output'];
+};
+
 export enum VodType {
   Private = 'PRIVATE',
   Public = 'PUBLIC'
@@ -1825,15 +1883,39 @@ export type UploadFileMutationVariables = Exact<{
 
 export type UploadFileMutation = { __typename?: 'Mutation', upload: { __typename?: 'UploadFileResponse', fileName: string } };
 
-export type ReadNotificationsMutationVariables = Exact<{ [key: string]: never; }>;
+export type ReadNotificationMutationVariables = Exact<{
+  readNotification: ReadNotificationInput;
+}>;
 
 
-export type ReadNotificationsMutation = { __typename?: 'Mutation', readNotifications: { __typename?: 'ReadNotificationsResponse', response: boolean } };
+export type ReadNotificationMutation = { __typename?: 'Mutation', readNotification: { __typename?: 'ReadNotificationResponse', hasUnreadNotifications: boolean } };
+
+export type EditNotificationSettingsMutationVariables = Exact<{
+  readNotification: EditNotificationSettingsInput;
+}>;
+
+
+export type EditNotificationSettingsMutation = { __typename?: 'Mutation', editNotificationSettings: { __typename?: 'EditNotificationSettingsResponse', id: string } };
 
 export type GetNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetNotificationSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetNotificationSettingsQuery = { __typename?: 'Query', notificationSettings: { __typename?: 'NotificationSettingsDto', id: string, streamerLive: boolean, userFollowed: boolean } };
+
+export type NotificationCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NotificationCreatedSubscription = { __typename?: 'Subscription', notificationCreated: { __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+
+export type SubscribeNotificationCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeNotificationCreatedSubscription = { __typename?: 'Subscription', subscribeNotificationCreated: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -1976,7 +2058,7 @@ export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerMeDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean, finishedAuth: boolean } };
+export type GetMeQuery = { __typename?: 'Query', me: { __typename?: 'StreamerMeDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean, finishedAuth: boolean, hasUnreadNotifications: boolean } };
 
 export type GetMyEmailQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2125,6 +2207,13 @@ export type UpdateVodMutationVariables = Exact<{
 
 export type UpdateVodMutation = { __typename?: 'Mutation', updateVod: { __typename?: 'UpdateVodResponse', id: string } };
 
+export type EditVodSettingsMutationVariables = Exact<{
+  request: EditVodSettingsInput;
+}>;
+
+
+export type EditVodSettingsMutation = { __typename?: 'Mutation', editVodSettings: { __typename?: 'EditVodSettingsResponse', id: string } };
+
 export type GetVodsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2144,6 +2233,11 @@ export type GetVodQueryVariables = Exact<{
 
 
 export type GetVodQuery = { __typename?: 'Query', vod: { __typename?: 'VodDto', id: string, title?: string | null, description?: string | null, preview?: string | null, source?: string | null, views: number, createdAt: string, duration: number, type: VodType, language: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, category?: { __typename?: 'CategoryDto', id: string, title: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> } };
+
+export type GetVodSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetVodSettingsQuery = { __typename?: 'Query', vodSettings: { __typename?: 'VodSettingsDto', id: string, vodEnabled: boolean } };
 
 
 export const CreateBannerDocument = gql`
@@ -3457,38 +3551,72 @@ export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
 export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
 export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
-export const ReadNotificationsDocument = gql`
-    mutation ReadNotifications {
-  readNotifications {
-    response
+export const ReadNotificationDocument = gql`
+    mutation ReadNotification($readNotification: ReadNotificationInput!) {
+  readNotification(readNotification: $readNotification) {
+    hasUnreadNotifications
   }
 }
     `;
-export type ReadNotificationsMutationFn = Apollo.MutationFunction<ReadNotificationsMutation, ReadNotificationsMutationVariables>;
+export type ReadNotificationMutationFn = Apollo.MutationFunction<ReadNotificationMutation, ReadNotificationMutationVariables>;
 
 /**
- * __useReadNotificationsMutation__
+ * __useReadNotificationMutation__
  *
- * To run a mutation, you first call `useReadNotificationsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useReadNotificationsMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useReadNotificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReadNotificationMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [readNotificationsMutation, { data, loading, error }] = useReadNotificationsMutation({
+ * const [readNotificationMutation, { data, loading, error }] = useReadNotificationMutation({
  *   variables: {
+ *      readNotification: // value for 'readNotification'
  *   },
  * });
  */
-export function useReadNotificationsMutation(baseOptions?: Apollo.MutationHookOptions<ReadNotificationsMutation, ReadNotificationsMutationVariables>) {
+export function useReadNotificationMutation(baseOptions?: Apollo.MutationHookOptions<ReadNotificationMutation, ReadNotificationMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ReadNotificationsMutation, ReadNotificationsMutationVariables>(ReadNotificationsDocument, options);
+        return Apollo.useMutation<ReadNotificationMutation, ReadNotificationMutationVariables>(ReadNotificationDocument, options);
       }
-export type ReadNotificationsMutationHookResult = ReturnType<typeof useReadNotificationsMutation>;
-export type ReadNotificationsMutationResult = Apollo.MutationResult<ReadNotificationsMutation>;
-export type ReadNotificationsMutationOptions = Apollo.BaseMutationOptions<ReadNotificationsMutation, ReadNotificationsMutationVariables>;
+export type ReadNotificationMutationHookResult = ReturnType<typeof useReadNotificationMutation>;
+export type ReadNotificationMutationResult = Apollo.MutationResult<ReadNotificationMutation>;
+export type ReadNotificationMutationOptions = Apollo.BaseMutationOptions<ReadNotificationMutation, ReadNotificationMutationVariables>;
+export const EditNotificationSettingsDocument = gql`
+    mutation EditNotificationSettings($readNotification: EditNotificationSettingsInput!) {
+  editNotificationSettings(readNotification: $readNotification) {
+    id
+  }
+}
+    `;
+export type EditNotificationSettingsMutationFn = Apollo.MutationFunction<EditNotificationSettingsMutation, EditNotificationSettingsMutationVariables>;
+
+/**
+ * __useEditNotificationSettingsMutation__
+ *
+ * To run a mutation, you first call `useEditNotificationSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditNotificationSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editNotificationSettingsMutation, { data, loading, error }] = useEditNotificationSettingsMutation({
+ *   variables: {
+ *      readNotification: // value for 'readNotification'
+ *   },
+ * });
+ */
+export function useEditNotificationSettingsMutation(baseOptions?: Apollo.MutationHookOptions<EditNotificationSettingsMutation, EditNotificationSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditNotificationSettingsMutation, EditNotificationSettingsMutationVariables>(EditNotificationSettingsDocument, options);
+      }
+export type EditNotificationSettingsMutationHookResult = ReturnType<typeof useEditNotificationSettingsMutation>;
+export type EditNotificationSettingsMutationResult = Apollo.MutationResult<EditNotificationSettingsMutation>;
+export type EditNotificationSettingsMutationOptions = Apollo.BaseMutationOptions<EditNotificationSettingsMutation, EditNotificationSettingsMutationVariables>;
 export const GetNotificationsDocument = gql`
     query GetNotifications {
   notifications {
@@ -3546,6 +3674,125 @@ export type GetNotificationsQueryHookResult = ReturnType<typeof useGetNotificati
 export type GetNotificationsLazyQueryHookResult = ReturnType<typeof useGetNotificationsLazyQuery>;
 export type GetNotificationsSuspenseQueryHookResult = ReturnType<typeof useGetNotificationsSuspenseQuery>;
 export type GetNotificationsQueryResult = Apollo.QueryResult<GetNotificationsQuery, GetNotificationsQueryVariables>;
+export const GetNotificationSettingsDocument = gql`
+    query GetNotificationSettings {
+  notificationSettings {
+    id
+    streamerLive
+    userFollowed
+  }
+}
+    `;
+
+/**
+ * __useGetNotificationSettingsQuery__
+ *
+ * To run a query within a React component, call `useGetNotificationSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNotificationSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNotificationSettingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetNotificationSettingsQuery(baseOptions?: Apollo.QueryHookOptions<GetNotificationSettingsQuery, GetNotificationSettingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetNotificationSettingsQuery, GetNotificationSettingsQueryVariables>(GetNotificationSettingsDocument, options);
+      }
+export function useGetNotificationSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetNotificationSettingsQuery, GetNotificationSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetNotificationSettingsQuery, GetNotificationSettingsQueryVariables>(GetNotificationSettingsDocument, options);
+        }
+export function useGetNotificationSettingsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNotificationSettingsQuery, GetNotificationSettingsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetNotificationSettingsQuery, GetNotificationSettingsQueryVariables>(GetNotificationSettingsDocument, options);
+        }
+export type GetNotificationSettingsQueryHookResult = ReturnType<typeof useGetNotificationSettingsQuery>;
+export type GetNotificationSettingsLazyQueryHookResult = ReturnType<typeof useGetNotificationSettingsLazyQuery>;
+export type GetNotificationSettingsSuspenseQueryHookResult = ReturnType<typeof useGetNotificationSettingsSuspenseQuery>;
+export type GetNotificationSettingsQueryResult = Apollo.QueryResult<GetNotificationSettingsQuery, GetNotificationSettingsQueryVariables>;
+export const NotificationCreatedDocument = gql`
+    subscription NotificationCreated {
+  notificationCreated {
+    id
+    createdAt
+    seen
+    discriminator
+    ... on LiveStartedNotificationDto {
+      streamer {
+        id
+        userName
+        avatar
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useNotificationCreatedSubscription__
+ *
+ * To run a query within a React component, call `useNotificationCreatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useNotificationCreatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNotificationCreatedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useNotificationCreatedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<NotificationCreatedSubscription, NotificationCreatedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<NotificationCreatedSubscription, NotificationCreatedSubscriptionVariables>(NotificationCreatedDocument, options);
+      }
+export type NotificationCreatedSubscriptionHookResult = ReturnType<typeof useNotificationCreatedSubscription>;
+export type NotificationCreatedSubscriptionResult = Apollo.SubscriptionResult<NotificationCreatedSubscription>;
+export const SubscribeNotificationCreatedDocument = gql`
+    subscription SubscribeNotificationCreated {
+  subscribeNotificationCreated {
+    id
+    createdAt
+    seen
+    discriminator
+    ... on LiveStartedNotificationDto {
+      streamer {
+        id
+        userName
+        avatar
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useSubscribeNotificationCreatedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeNotificationCreatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeNotificationCreatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeNotificationCreatedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeNotificationCreatedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeNotificationCreatedSubscription, SubscribeNotificationCreatedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeNotificationCreatedSubscription, SubscribeNotificationCreatedSubscriptionVariables>(SubscribeNotificationCreatedDocument, options);
+      }
+export type SubscribeNotificationCreatedSubscriptionHookResult = ReturnType<typeof useSubscribeNotificationCreatedSubscription>;
+export type SubscribeNotificationCreatedSubscriptionResult = Apollo.SubscriptionResult<SubscribeNotificationCreatedSubscription>;
 export const UpdateProfileDocument = gql`
     mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {
@@ -4330,6 +4577,7 @@ export const GetMeDocument = gql`
     followers
     isLive
     finishedAuth
+    hasUnreadNotifications
   }
 }
     `;
@@ -5290,6 +5538,39 @@ export function useUpdateVodMutation(baseOptions?: Apollo.MutationHookOptions<Up
 export type UpdateVodMutationHookResult = ReturnType<typeof useUpdateVodMutation>;
 export type UpdateVodMutationResult = Apollo.MutationResult<UpdateVodMutation>;
 export type UpdateVodMutationOptions = Apollo.BaseMutationOptions<UpdateVodMutation, UpdateVodMutationVariables>;
+export const EditVodSettingsDocument = gql`
+    mutation EditVodSettings($request: EditVodSettingsInput!) {
+  editVodSettings(request: $request) {
+    id
+  }
+}
+    `;
+export type EditVodSettingsMutationFn = Apollo.MutationFunction<EditVodSettingsMutation, EditVodSettingsMutationVariables>;
+
+/**
+ * __useEditVodSettingsMutation__
+ *
+ * To run a mutation, you first call `useEditVodSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditVodSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editVodSettingsMutation, { data, loading, error }] = useEditVodSettingsMutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useEditVodSettingsMutation(baseOptions?: Apollo.MutationHookOptions<EditVodSettingsMutation, EditVodSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditVodSettingsMutation, EditVodSettingsMutationVariables>(EditVodSettingsDocument, options);
+      }
+export type EditVodSettingsMutationHookResult = ReturnType<typeof useEditVodSettingsMutation>;
+export type EditVodSettingsMutationResult = Apollo.MutationResult<EditVodSettingsMutation>;
+export type EditVodSettingsMutationOptions = Apollo.BaseMutationOptions<EditVodSettingsMutation, EditVodSettingsMutationVariables>;
 export const GetVodsDocument = gql`
     query GetVods($after: String, $before: String, $first: Int, $last: Int, $order: [VodDtoSortInput!], $streamerId: String!, $where: VodDtoFilterInput) {
   vods(
@@ -5436,3 +5717,43 @@ export type GetVodQueryHookResult = ReturnType<typeof useGetVodQuery>;
 export type GetVodLazyQueryHookResult = ReturnType<typeof useGetVodLazyQuery>;
 export type GetVodSuspenseQueryHookResult = ReturnType<typeof useGetVodSuspenseQuery>;
 export type GetVodQueryResult = Apollo.QueryResult<GetVodQuery, GetVodQueryVariables>;
+export const GetVodSettingsDocument = gql`
+    query GetVodSettings {
+  vodSettings {
+    id
+    vodEnabled
+  }
+}
+    `;
+
+/**
+ * __useGetVodSettingsQuery__
+ *
+ * To run a query within a React component, call `useGetVodSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVodSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVodSettingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetVodSettingsQuery(baseOptions?: Apollo.QueryHookOptions<GetVodSettingsQuery, GetVodSettingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetVodSettingsQuery, GetVodSettingsQueryVariables>(GetVodSettingsDocument, options);
+      }
+export function useGetVodSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetVodSettingsQuery, GetVodSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetVodSettingsQuery, GetVodSettingsQueryVariables>(GetVodSettingsDocument, options);
+        }
+export function useGetVodSettingsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetVodSettingsQuery, GetVodSettingsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetVodSettingsQuery, GetVodSettingsQueryVariables>(GetVodSettingsDocument, options);
+        }
+export type GetVodSettingsQueryHookResult = ReturnType<typeof useGetVodSettingsQuery>;
+export type GetVodSettingsLazyQueryHookResult = ReturnType<typeof useGetVodSettingsLazyQuery>;
+export type GetVodSettingsSuspenseQueryHookResult = ReturnType<typeof useGetVodSettingsSuspenseQuery>;
+export type GetVodSettingsQueryResult = Apollo.QueryResult<GetVodSettingsQuery, GetVodSettingsQueryVariables>;

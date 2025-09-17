@@ -42,15 +42,15 @@ interface NavbarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
     ({ className, onMenuClick, isMobile, sidebarOpen, isDashboard, isAdmin, ...props }, ref) => {
       const { loginWithRedirect, logout, isAuthenticated, isLoading } = useAuth0()
-      const { data: meData, loading: meLoading } = useGetMeQuery({
+      const { data: meData, loading: meLoading, refetch: refetchMe } = useGetMeQuery({ // Получаем refetchMe
         skip: !isAuthenticated,
       });
       const router = useRouter();
       const { activeStreamer, setActiveStreamer, myRoles, myRolesLoading, currentAuthUserStreamer } = useDashboard();
-      // Removed searchTerm state and handleSearchSubmit function as they are now handled by StreamerSearchPopover
 
       const userName = meData?.me?.userName;
       const userAvatar = meData?.me?.avatar;
+      const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false; // Получаем статус непрочитанных уведомлений
 
       const handleLogout = async () => {
         await logout({
@@ -93,7 +93,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500"></div>
                   ) : (
                     <>
-                      <NotificationPopover /> {/* Add NotificationPopover here */}
+                      <NotificationPopover refetchMe={refetchMe} /> {/* Передаем refetchMe */}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full">
@@ -178,7 +178,6 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
 
             <div className="flex-1 flex justify-center">
               {!isMobile && !isDashboard && (
-                // Прямое встраивание StreamerSearchPopover
                 <StreamerSearchPopover />
               )}
             </div>
@@ -213,7 +212,7 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500"></div>
                     ) : (
                         <>
-                          <NotificationPopover /> {/* Add NotificationPopover here */}
+                          <NotificationPopover refetchMe={refetchMe} /> {/* Передаем refetchMe */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="text-gray-300 hover:text-white cursor-pointer p-0 h-auto w-auto rounded-full">
