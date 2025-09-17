@@ -19,6 +19,9 @@ export default function SettingsLayout({
     if (pathname.includes("/settings/stream-key")) {
       return "stream-key";
     }
+    if (pathname.includes("/settings/notifications")) {
+      return "notifications"; // New tab
+    }
     return "profile"; 
   };
 
@@ -42,6 +45,11 @@ export default function SettingsLayout({
             <Link href="/settings/stream-key" passHref>
               <TabsTrigger value="stream-key">
                 Stream URL & Key
+              </TabsTrigger>
+            </Link>
+            <Link href="/settings/notifications" passHref>
+              <TabsTrigger value="notifications"> {/* New TabsTrigger */}
+                Notifications
               </TabsTrigger>
             </Link>
           </TabsList>

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog, Info } from "lucide-react"
+import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog, Info, Bell } from "lucide-react" // Добавлен импорт Bell
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav"
@@ -79,6 +79,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                         Community
                       </SidebarNavItem>
                     </Link>
+                    {/* Удален пункт Notifications из дашборда */}
                   </CollapsibleSidebarNav>
 
                   {/* New CollapsibleSidebarNav for Content */}
@@ -91,11 +92,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                     {/* Add other content sub-items here if needed */}
                   </CollapsibleSidebarNav>
 
-                  <Link href={`${dashboardBaseUrl}/settings`} passHref>
-                    <SidebarNavItem icon={<Settings />} active={pathname === `${dashboardBaseUrl}/settings`}>
-                      Dashboard Settings
-                    </SidebarNavItem>
-                  </Link>
+                  {/* Удален пункт "Dashboard Settings" */}
                 </>
               ) : (
                 <>
