@@ -1,13 +1,9 @@
 "use client"
 
 import React from "react"
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDashboard } from "@/src/contexts/DashboardContext"
 
 export default function ChannelLayout({
@@ -43,35 +39,9 @@ export default function ChannelLayout({
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold mb-2 text-white">Channel Management</h1>
-
-      <Tabs value={activeTab} className="w-full">
-        <TabsList className="bg-gray-900 mb-8" currentValue={activeTab}>
-          <Link href={`/dashboard/${streamerUsername}/channel/stream-info`} passHref>
-            <TabsTrigger value="stream-info">
-              Stream Info
-            </TabsTrigger>
-          </Link>
-          <Link href={`/dashboard/${streamerUsername}/channel/chat`} passHref>
-            <TabsTrigger value="chat-settings">
-              Chat
-            </TabsTrigger>
-          </Link>
-          <Link href={`/dashboard/${streamerUsername}/channel/roles`} passHref>
-            <TabsTrigger value="roles">
-              Roles
-            </TabsTrigger>
-          </Link>
-          <Link href={`/dashboard/${streamerUsername}/channel/community`} passHref>
-            <TabsTrigger value="community">
-              Community
-            </TabsTrigger>
-          </Link>
-          {/* Removed Notifications TabsTrigger */}
-        </TabsList>
-
-        {children}
-      </Tabs>
+      {/* Удален заголовок Channel Management */}
+      {/* Удалены Tabs и все связанные с ними компоненты */}
+      {children}
     </div>
   );
 }
