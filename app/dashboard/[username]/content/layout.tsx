@@ -18,6 +18,9 @@ export default function ContentLayout({
   const { activeStreamerPermissions } = useDashboard();
 
   const getActiveTab = () => {
+    if (pathname.includes(`/dashboard/${username}/content/vods-settings`)) {
+      return "vods-settings";
+    }
     if (pathname.includes(`/dashboard/${username}/content/vods`)) {
       return "vods";
     }
@@ -49,7 +52,11 @@ export default function ContentLayout({
               VODs
             </TabsTrigger>
           </Link>
-          {/* Add other content tabs here if needed in the future */}
+          <Link href={`/dashboard/${username}/content/vods-settings`} passHref>
+            <TabsTrigger value="vods-settings">
+              VOD Settings
+            </TabsTrigger>
+          </Link>
         </TabsList>
       </Tabs>
       {children}

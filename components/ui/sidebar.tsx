@@ -89,7 +89,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                         VODs
                       </SidebarNavItem>
                     </Link>
-                    {/* Add other content sub-items here if needed */}
+                    <Link href={`${dashboardBaseUrl}/content/vods-settings`} passHref>
+                      <SidebarNavItem icon={<Settings />} active={pathname === `${dashboardBaseUrl}/content/vods-settings`}>
+                        VOD Settings
+                      </SidebarNavItem>
+                    </Link>
                   </CollapsibleSidebarNav>
 
                   {/* Удален пункт "Dashboard Settings" */}
