@@ -12,14 +12,15 @@ import {
   useReadNotificationMutation,
   useNotificationCreatedSubscription,
   LiveStartedNotificationDto,
-  useGetMeQuery, // Импортируем useGetMeQuery для доступа к hasUnreadNotifications
+  useGetMeQuery,
+  useReadAllNotificationsMutation, // Import useReadAllNotificationsMutation
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { formatDistanceToNowStrict } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useApolloClient } from "@apollo/client"; // Импортируем useApolloClient
+import { useApolloClient } from "@apollo/client";
 
 interface NotificationPopoverProps {
   // refetchMe больше не нужен, так как мы будем обновлять состояние напрямую
@@ -27,13 +28,14 @@ interface NotificationPopoverProps {
 
 export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
   const [open, setOpen] = useState(false);
-  const client = useApolloClient(); // Инициализируем Apollo Client
+  const client = useApolloClient();
 
-  const { data: meData, refetch: refetchMe } = useGetMeQuery(); // Получаем hasUnreadNotifications из GET_ME
+  const { data: meData, refetch: refetchMe } = useGetMeQuery();
   const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false;
 
   const { data, loading, error, refetch } = useGetNotificationsQuery();
   const [readNotificationMutation, { loading: markingAsRead }] = useReadNotificationMutation();
+  const [readAllNotificationsMutation, { loading: markingAllAsRead }] = useReadAllNotificationsMutation(); // Initialize readAllNotificationsMutation
 
   const notifications = data?.notifications?.nodes || [];
   const unreadNotifications = notifications.filter(n => !n.seen);
@@ -42,16 +44,16 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
   useNotificationCreatedSubscription({
     onData: ({ data: subscriptionData }) => {
       if (subscriptionData.data?.notificationCreated) {
-        refetch(); // Обновляем список уведомлений в поповере
-        refetchMe(); // Обновляем статус hasUnreadNotifications в навбаре
+        refetch();
+        refetchMe();
         toast.info("You have a new notification!");
       }
     },
   });
 
+  // Effect to mark all unread notifications as read when the popover opens
   useEffect(() => {
     if (open && unreadNotifications.length > 0 && !markingAsRead) {
-      // Отправляем мутацию для каждого непрочитанного уведомления
       const readPromises = unreadNotifications.map(notification =>
         readNotificationMutation({
           variables: {
@@ -64,12 +66,10 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
 
       Promise.all(readPromises)
         .then((results) => {
-          // Обновляем кэш Apollo, чтобы отразить изменения hasUnreadNotifications
-          // Используем результат последней мутации, так как он должен быть актуальным
           const lastResult = results[results.length - 1];
           if (lastResult?.data?.readNotification) {
             client.cache.modify({
-              id: client.cache.identify(meData?.me!), // Идентифицируем объект 'me'
+              id: client.cache.identify(meData?.me!),
               fields: {
                 hasUnreadNotifications() {
                   return lastResult.data.readNotification.hasUnreadNotifications;
@@ -77,7 +77,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
               },
             });
           }
-          refetch(); // Обновляем список уведомлений после прочтения
+          refetch();
         })
         .catch(err => {
           console.error("Error marking notifications as read:", err);
@@ -86,19 +86,79 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
     }
   }, [open, unreadNotifications, markingAsRead, readNotificationMutation, refetch, meData, client]);
 
+  // Function to handle marking a single notification as read
+  const handleReadSingleNotification = async (notificationId: string) => {
+    try {
+      const { data: result } = await readNotificationMutation({
+        variables: {
+          readNotification: {
+            id: notificationId,
+          },
+        },
+      });
+      if (result?.readNotification) {
+        client.cache.modify({
+          id: client.cache.identify(meData?.me!),
+          fields: {
+            hasUnreadNotifications() {
+              return result.readNotification.hasUnreadNotifications;
+            },
+          },
+        });
+      }
+      refetch(); // Refetch to update the list in the popover
+    } catch (err) {
+      console.error("Error marking single notification as read:", err);
+      toast.error("Failed to mark notification as read.");
+    }
+  };
+
+  // Function to handle marking all notifications as read
+  const handleReadAllNotifications = async () => {
+    try {
+      const { data: result } = await readAllNotificationsMutation();
+      if (result?.readAllNotifications.result) {
+        client.cache.modify({
+          id: client.cache.identify(meData?.me!),
+          fields: {
+            hasUnreadNotifications() {
+              return false; // All notifications are read, so set to false
+            },
+          },
+        });
+        refetch(); // Refetch to update the list in the popover
+        toast.success("All notifications marked as read!");
+      }
+    } catch (err) {
+      console.error("Error marking all notifications as read:", err);
+      toast.error("Failed to mark all notifications as read.");
+    }
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative text-gray-300 hover:text-white">
           <Bell className="h-5 w-5" />
-          {hasUnreadNotifications && ( // Используем hasUnreadNotifications для индикатора
+          {hasUnreadNotifications && (
             <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-gray-900" />
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0 bg-gray-800 border-gray-700 text-white" align="end">
-        <div className="p-3 border-b border-gray-700">
+        <div className="p-3 border-b border-gray-700 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Notifications</h3>
+          {notifications.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReadAllNotifications}
+              disabled={markingAllAsRead || unreadNotifications.length === 0}
+              className="text-green-500 hover:text-green-400"
+            >
+              {markingAllAsRead ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Mark all as read"}
+            </Button>
+          )}
         </div>
         <ScrollArea className="h-72">
           {loading ? (
@@ -124,7 +184,12 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                           "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
                           !notification.seen && "bg-blue-900/20"
                         )}
-                        onClick={() => setOpen(false)}
+                        onClick={() => {
+                          setOpen(false);
+                          if (!notification.seen) {
+                            handleReadSingleNotification(notification.id);
+                          }
+                        }}
                       >
                         <Avatar className="w-9 h-9">
                           <AvatarImage src={getMinioUrl(streamer?.avatar!)} alt={streamer?.userName || "Streamer"} />
