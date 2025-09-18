@@ -15,6 +15,13 @@ export const GET_NOTIFICATIONS = gql`
                         avatar
                     }
                 }
+                ... on UserFollowedNotificationDto {
+                    streamer {
+                        id
+                        userName
+                        avatar
+                    }
+                }
             }
             pageInfo {
                 endCursor

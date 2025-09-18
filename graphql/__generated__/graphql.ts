@@ -1563,6 +1563,16 @@ export type UploadFileResponse = {
   fileName: Scalars['String']['output'];
 };
 
+export type UserFollowedNotificationDto = Notification & {
+  __typename?: 'UserFollowedNotificationDto';
+  createdAt: Scalars['DateTime']['output'];
+  discriminator: Scalars['String']['output'];
+  id: Scalars['UUID']['output'];
+  seen: Scalars['Boolean']['output'];
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+};
+
 export type UuidOperationFilterInput = {
   eq?: InputMaybe<Scalars['UUID']['input']>;
   gt?: InputMaybe<Scalars['UUID']['input']>;
@@ -1911,7 +1921,7 @@ export type ReadAllNotificationsMutation = { __typename?: 'Mutation', readAllNot
 export type GetNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } | { __typename?: 'UserFollowedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetNotificationSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1921,12 +1931,12 @@ export type GetNotificationSettingsQuery = { __typename?: 'Query', notificationS
 export type NotificationCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NotificationCreatedSubscription = { __typename?: 'Subscription', notificationCreated: { __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+export type NotificationCreatedSubscription = { __typename?: 'Subscription', notificationCreated: { __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } | { __typename?: 'UserFollowedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string } };
 
 export type SubscribeNotificationCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SubscribeNotificationCreatedSubscription = { __typename?: 'Subscription', subscribeNotificationCreated: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> };
+export type SubscribeNotificationCreatedSubscription = { __typename?: 'Subscription', subscribeNotificationCreated: Array<{ __typename?: 'LiveStartedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } | { __typename?: 'UserFollowedNotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string }> };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -3669,6 +3679,13 @@ export const GetNotificationsDocument = gql`
       seen
       discriminator
       ... on LiveStartedNotificationDto {
+        streamer {
+          id
+          userName
+          avatar
+        }
+      }
+      ... on UserFollowedNotificationDto {
         streamer {
           id
           userName

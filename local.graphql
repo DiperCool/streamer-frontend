@@ -787,6 +787,15 @@ type UploadFileResponse {
     fileName: String!
 }
 
+type UserFollowedNotificationDto implements Notification {
+    createdAt: DateTime!
+    discriminator: String!
+    id: UUID!
+    seen: Boolean!
+    streamer: StreamerDto
+    streamerId: String!
+}
+
 type VodDto {
     category: CategoryDto
     categoryId: UUID
