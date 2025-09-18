@@ -13,7 +13,7 @@ import {
   useNotificationCreatedSubscription,
   LiveStartedNotificationDto,
   useGetMeQuery,
-  useReadAllNotificationsMutation, // Import useReadAllNotificationsMutation
+  useReadAllNotificationsMutation,
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -35,7 +35,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
 
   const { data, loading, error, refetch } = useGetNotificationsQuery();
   const [readNotificationMutation, { loading: markingAsRead }] = useReadNotificationMutation();
-  const [readAllNotificationsMutation, { loading: markingAllAsRead }] = useReadAllNotificationsMutation(); // Initialize readAllNotificationsMutation
+  const [readAllNotificationsMutation, { loading: markingAllAsRead }] = useReadAllNotificationsMutation();
 
   const notifications = data?.notifications?.nodes || [];
   const unreadNotifications = notifications.filter(n => !n.seen);
@@ -45,46 +45,11 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
     onData: ({ data: subscriptionData }) => {
       if (subscriptionData.data?.notificationCreated) {
         refetch();
-        refetchMe();
+        refetchMe(); // Keep refetchMe here to update the bell icon immediately on new notification
         toast.info("You have a new notification!");
       }
     },
   });
-
-  // Effect to mark all unread notifications as read when the popover opens
-  useEffect(() => {
-    if (open && unreadNotifications.length > 0 && !markingAsRead) {
-      const readPromises = unreadNotifications.map(notification =>
-        readNotificationMutation({
-          variables: {
-            readNotification: {
-              id: notification.id,
-            },
-          },
-        })
-      );
-
-      Promise.all(readPromises)
-        .then((results) => {
-          const lastResult = results[results.length - 1];
-          if (lastResult?.data?.readNotification) {
-            client.cache.modify({
-              id: client.cache.identify(meData?.me!),
-              fields: {
-                hasUnreadNotifications() {
-                  return lastResult.data.readNotification.hasUnreadNotifications;
-                },
-              },
-            });
-          }
-          refetch();
-        })
-        .catch(err => {
-          console.error("Error marking notifications as read:", err);
-          toast.error("Failed to mark notifications as read.");
-        });
-    }
-  }, [open, unreadNotifications, markingAsRead, readNotificationMutation, refetch, meData, client]);
 
   // Function to handle marking a single notification as read
   const handleReadSingleNotification = async (notificationId: string) => {
