@@ -12,6 +12,7 @@ import {
   useReadNotificationMutation,
   useNotificationCreatedSubscription,
   LiveStartedNotificationDto,
+  UserFollowedNotificationDto, // Import the new notification type
   useGetMeQuery,
   useReadAllNotificationsMutation,
 } from "@/graphql/__generated__/graphql";
@@ -137,10 +138,11 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
           ) : (
             <div className="flex flex-col">
               {notifications.map((notification) => {
+                const timeAgo = formatDistanceToNowStrict(new Date(notification.createdAt), { addSuffix: true });
+
                 if (notification.__typename === "LiveStartedNotificationDto") {
                   const liveNotification = notification as LiveStartedNotificationDto;
                   const streamer = liveNotification.streamer;
-                  const timeAgo = formatDistanceToNowStrict(new Date(notification.createdAt), { addSuffix: true });
 
                   return (
                     <Link href={`/${streamer?.userName}`} key={notification.id} passHref>
@@ -165,6 +167,40 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                         <div className="flex flex-col flex-1">
                           <p className="text-sm text-white">
                             <span className="font-semibold text-green-400">{streamer?.userName}</span> started a live stream!
+                          </p>
+                          <span className="text-xs text-gray-400">{timeAgo}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                } else if (notification.__typename === "UserFollowedNotificationDto") {
+                  const followedNotification = notification as UserFollowedNotificationDto;
+                  const follower = followedNotification.follower;
+                  const followedStreamer = followedNotification.followedStreamer;
+
+                  return (
+                    <Link href={`/${follower?.userName}`} key={notification.id} passHref>
+                      <div
+                        className={cn(
+                          "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
+                          !notification.seen && "bg-blue-900/20"
+                        )}
+                        onClick={() => {
+                          setOpen(false);
+                          if (!notification.seen) {
+                            handleReadSingleNotification(notification.id);
+                          }
+                        }}
+                      >
+                        <Avatar className="w-9 h-9">
+                          <AvatarImage src={getMinioUrl(follower?.avatar!)} alt={follower?.userName || "User"} />
+                          <AvatarFallback className="bg-green-600 text-white text-sm">
+                            {follower?.userName?.charAt(0).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col flex-1">
+                          <p className="text-sm text-white">
+                            <span className="font-semibold text-green-400">{follower?.userName}</span> followed <span className="font-semibold text-green-400">{followedStreamer?.userName}</span>!
                           </p>
                           <span className="text-xs text-gray-400">{timeAgo}</span>
                         </div>
