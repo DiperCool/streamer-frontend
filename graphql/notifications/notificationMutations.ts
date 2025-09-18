@@ -15,3 +15,11 @@ export const EDIT_NOTIFICATION_SETTINGS = gql`
         }
     }
 `
+
+export const READ_ALL_NOTIFICATIONS = gql`
+    mutation ReadAllNotifications {
+        readAllNotifications {
+            result
+        }
+    }
+`

@@ -414,6 +414,7 @@ export type Mutation = {
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
   pinMessage: PinMessageResponse;
+  readAllNotifications: ReadAllNotificationsResponse;
   readNotification: ReadNotificationResponse;
   removeBanner: RemoveBannerResponse;
   removeCategory: RemoveCategoryResponse;
@@ -966,6 +967,11 @@ export type QueryVodsArgs = {
   order?: InputMaybe<Array<VodDtoSortInput>>;
   streamerId: Scalars['String']['input'];
   where?: InputMaybe<VodDtoFilterInput>;
+};
+
+export type ReadAllNotificationsResponse = {
+  __typename?: 'ReadAllNotificationsResponse';
+  result: Scalars['Boolean']['output'];
 };
 
 export type ReadNotificationInput = {
