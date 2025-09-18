@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { MoreVertical } from "lucide-react"
 import { VodDto, VodType } from "@/graphql/__generated__/graphql" // Import VodType
-import { getMinioUrl } from "@/utils/utils"
+import { getMinioUrl, formatVodDuration } from "@/utils/utils" // Импортируем formatVodDuration
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -24,22 +24,7 @@ interface VodCardProps {
   isCurrentStream?: boolean // To show "Current Stream" badge
 }
 
-// Helper to format duration from milliseconds into HH:MM:SS
-const formatDuration = (milliseconds: number): string => {
-  if (isNaN(milliseconds) || milliseconds < 0) return "00:00";
-  
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const hours = Math.floor((totalSeconds % 3600) / 60); // Corrected calculation for minutes
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const remainingSeconds = totalSeconds % 60;
-
-  const parts = [];
-  if (hours > 0) parts.push(String(hours).padStart(2, '0'));
-  parts.push(String(minutes).padStart(2, '0'));
-  parts.push(String(remainingSeconds).padStart(2, '0'));
-
-  return parts.join(':');
-};
+// Удалена локальная функция formatDuration, теперь используется formatVodDuration из utils/utils.ts
 
 export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
   const thumbnailUrl = vod.preview ? getMinioUrl(vod.preview) : "/placeholder.jpg"
@@ -76,7 +61,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
             </Badge>
           )}
           <Badge className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
-            {formatDuration(vod.duration)}
+            {formatVodDuration(vod.duration)}
           </Badge>
           <Badge className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
             {vod.views} views

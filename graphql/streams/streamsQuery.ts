@@ -137,6 +137,7 @@ export const GET_TOP_STREAMS = gql`
                 userName
                 avatar
                 isLive
+                followers
             }
             sources {
                 streamId
