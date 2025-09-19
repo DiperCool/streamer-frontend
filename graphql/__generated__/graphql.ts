@@ -632,6 +632,24 @@ export type NotificationDto = {
   streamerId?: Maybe<Scalars['String']['output']>;
 };
 
+export type NotificationDtoFilterInput = {
+  and?: InputMaybe<Array<NotificationDtoFilterInput>>;
+  createdAt?: InputMaybe<DateTimeOperationFilterInput>;
+  discriminator?: InputMaybe<StringOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<NotificationDtoFilterInput>>;
+  seen?: InputMaybe<BooleanOperationFilterInput>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type NotificationDtoSortInput = {
+  createdAt?: InputMaybe<SortEnumType>;
+  discriminator?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  seen?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+};
+
 export type NotificationSettingsDto = {
   __typename?: 'NotificationSettingsDto';
   id: Scalars['UUID']['output'];
@@ -868,6 +886,8 @@ export type QueryNotificationsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<NotificationDtoSortInput>>;
+  where?: InputMaybe<NotificationDtoFilterInput>;
 };
 
 
@@ -1901,10 +1921,16 @@ export type ReadAllNotificationsMutationVariables = Exact<{ [key: string]: never
 
 export type ReadAllNotificationsMutation = { __typename?: 'Mutation', readAllNotifications: { __typename?: 'ReadAllNotificationsResponse', result: boolean } };
 
-export type GetNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetNotificationsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<NotificationDtoSortInput> | NotificationDtoSortInput>;
+}>;
 
 
-export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'NotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetNotificationsQuery = { __typename?: 'Query', notifications?: { __typename?: 'NotificationsConnection', nodes?: Array<{ __typename?: 'NotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamerId?: string | null, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetNotificationSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1914,7 +1940,7 @@ export type GetNotificationSettingsQuery = { __typename?: 'Query', notificationS
 export type NotificationCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NotificationCreatedSubscription = { __typename?: 'Subscription', notificationCreated: { __typename?: 'NotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null } | null } };
+export type NotificationCreatedSubscription = { __typename?: 'Subscription', notificationCreated: { __typename?: 'NotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamerId?: string | null, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null } | null } };
 
 export type SubscribeNotificationCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -3654,13 +3680,20 @@ export type ReadAllNotificationsMutationHookResult = ReturnType<typeof useReadAl
 export type ReadAllNotificationsMutationResult = Apollo.MutationResult<ReadAllNotificationsMutation>;
 export type ReadAllNotificationsMutationOptions = Apollo.BaseMutationOptions<ReadAllNotificationsMutation, ReadAllNotificationsMutationVariables>;
 export const GetNotificationsDocument = gql`
-    query GetNotifications {
-  notifications {
+    query GetNotifications($after: String, $before: String, $first: Int, $last: Int, $order: [NotificationDtoSortInput!]) {
+  notifications(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+  ) {
     nodes {
       id
       createdAt
       seen
       discriminator
+      streamerId
       streamer {
         id
         userName
@@ -3689,6 +3722,11 @@ export const GetNotificationsDocument = gql`
  * @example
  * const { data, loading, error } = useGetNotificationsQuery({
  *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
  *   },
  * });
  */
@@ -3756,6 +3794,7 @@ export const NotificationCreatedDocument = gql`
     createdAt
     seen
     discriminator
+    streamerId
     streamer {
       id
       isLive

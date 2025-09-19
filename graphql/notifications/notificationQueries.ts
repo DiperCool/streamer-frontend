@@ -20,6 +20,7 @@ export const GET_NOTIFICATIONS = gql`
                 createdAt
                 seen
                 discriminator
+                streamerId
                 streamer { # Это поле доступно напрямую на NotificationDto
                     id
                     userName

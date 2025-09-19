@@ -7,6 +7,7 @@ export const NOTIFICATION_CREATED_SUBSCRIPTION = gql`
             createdAt
             seen
             discriminator
+            streamerId
             streamer { # Это поле доступно напрямую на NotificationDto
                 id
                 isLive

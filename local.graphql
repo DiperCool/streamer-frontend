@@ -426,7 +426,9 @@ type Query {
         "Returns the first _n_ elements from the list."
         first: Int,
         "Returns the last _n_ elements from the list."
-        last: Int
+        last: Int,
+        order: [NotificationDtoSortInput!],
+        where: NotificationDtoFilterInput
     ): NotificationsConnection
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
@@ -1040,6 +1042,24 @@ input LongOperationFilterInput {
     nin: [Long]
     nlt: Long
     nlte: Long
+}
+
+input NotificationDtoFilterInput {
+    and: [NotificationDtoFilterInput!]
+    createdAt: DateTimeOperationFilterInput
+    discriminator: StringOperationFilterInput
+    id: UuidOperationFilterInput
+    or: [NotificationDtoFilterInput!]
+    seen: BooleanOperationFilterInput
+    streamerId: StringOperationFilterInput
+}
+
+input NotificationDtoSortInput {
+    createdAt: SortEnumType
+    discriminator: SortEnumType
+    id: SortEnumType
+    seen: SortEnumType
+    streamerId: SortEnumType
 }
 
 input PermissionsFlagsInput {
