@@ -8,19 +8,11 @@ export const GET_NOTIFICATIONS = gql`
                 createdAt
                 seen
                 discriminator
-                ... on LiveStartedNotificationDto {
-                    streamer {
-                        id
-                        userName
-                        avatar
-                    }
-                }
-                ... on UserFollowedNotificationDto {
-                    streamer {
-                        id
-                        userName
-                        avatar
-                    }
+                streamer {
+                    id
+                    isLive
+                    userName
+                    avatar
                 }
             }
             pageInfo {

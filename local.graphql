@@ -26,13 +26,6 @@ directive @listSize(
     slicingArguments: [String!]
 ) on FIELD_DEFINITION
 
-interface Notification {
-    createdAt: DateTime!
-    discriminator: String!
-    id: UUID!
-    seen: Boolean!
-}
-
 type BanUserResponse {
     id: UUID!
 }
@@ -196,15 +189,6 @@ type GetEmailResponse {
     email: String!
 }
 
-type LiveStartedNotificationDto implements Notification {
-    createdAt: DateTime!
-    discriminator: String!
-    id: UUID!
-    seen: Boolean!
-    streamer: StreamerDto
-    streamerId: String!
-}
-
 type Mutation {
     banUser(request: BanUserInput!): BanUserResponse!
     createBanner(banner: CreateBannerInput!): CreateBannerResponse!
@@ -277,6 +261,15 @@ type MyRolesEdge {
     node: RoleDto!
 }
 
+type NotificationDto {
+    createdAt: DateTime!
+    discriminator: String!
+    id: UUID!
+    seen: Boolean!
+    streamer: StreamerDto
+    streamerId: String
+}
+
 type NotificationSettingsDto {
     id: UUID!
     streamerLive: Boolean!
@@ -288,7 +281,7 @@ type NotificationsConnection {
     "A list of edges."
     edges: [NotificationsEdge!]
     "A flattened list of the nodes."
-    nodes: [Notification!]
+    nodes: [NotificationDto!]
     "Information to aid in pagination."
     pageInfo: PageInfo!
 }
@@ -298,7 +291,7 @@ type NotificationsEdge {
     "A cursor for use in pagination."
     cursor: String!
     "The item at the end of the edge."
-    node: Notification!
+    node: NotificationDto!
 }
 
 "Information about pagination in a connection."
@@ -692,10 +685,10 @@ type Subscription {
     chatMessageCreated(chatId: UUID!): ChatMessageDto!
     chatMessageDeleted(chatId: UUID!): ChatMessageDto!
     chatUpdated(chatId: UUID!): ChatDto!
-    notificationCreated: Notification!
+    notificationCreated: NotificationDto!
     streamUpdated(streamId: UUID!): StreamDto!
     streamerUpdated(streamerId: String!): StreamerDto!
-    subscribeNotificationCreated: [Notification!]!
+    subscribeNotificationCreated: [NotificationDto!]!
     subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
     userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
     userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
@@ -785,15 +778,6 @@ type UpdateVodResponse {
 
 type UploadFileResponse {
     fileName: String!
-}
-
-type UserFollowedNotificationDto implements Notification {
-    createdAt: DateTime!
-    discriminator: String!
-    id: UUID!
-    seen: Boolean!
-    streamer: StreamerDto
-    streamerId: String!
 }
 
 type VodDto {

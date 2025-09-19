@@ -7,12 +7,11 @@ export const NOTIFICATION_CREATED_SUBSCRIPTION = gql`
             createdAt
             seen
             discriminator
-            ... on LiveStartedNotificationDto {
-                streamer {
-                    id
-                    userName
-                    avatar
-                }
+            streamer {
+                id
+                isLive
+                userName
+                avatar
             }
         }
     }
@@ -25,12 +24,11 @@ export const SUBSCRIBE_NOTIFICATION_CREATED = gql`
             createdAt
             seen
             discriminator
-            ... on LiveStartedNotificationDto {
-                streamer {
-                    id
-                    userName
-                    avatar
-                }
+            streamer {
+                id
+                isLive
+                userName
+                avatar
             }
         }
     }
