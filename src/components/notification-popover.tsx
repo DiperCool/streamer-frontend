@@ -29,7 +29,7 @@ const ITEMS_PER_LOAD = 5; // Number of additional notifications to load
 export const NotificationPopover: React.FC = () => {
   const [open, setOpen] = useState(false);
   const client = useApolloClient();
-  const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
+  const [displayCount, setDisplayCount] = useState<number | undefined>(INITIAL_DISPLAY_COUNT); // Changed type to number | undefined
 
   const { data: meData, refetch: refetchMe } = useGetMeQuery();
   const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false;
@@ -42,7 +42,7 @@ export const NotificationPopover: React.FC = () => {
     networkStatus,
   } = useGetNotificationsQuery({
     variables: {
-      first: displayCount,
+      first: displayCount, // Now displayCount is number | undefined, which is assignable
     },
     notifyOnNetworkStatusChange: true,
   });
@@ -85,22 +85,21 @@ export const NotificationPopover: React.FC = () => {
 
             // Add new notification to the beginning of the list (most recent)
             const updatedNodes = [newNotificationNode, ...(prev.notifications.nodes || [])];
-            // Removed 'edges' update as it's not queried
-            // const updatedEdges = [{
-            //     __typename: 'NotificationsEdge',
-            //     cursor: btoa(newNotificationNode.createdAt.toString()),
-            //     node: newNotificationNode,
-            // }, ...(prev.notifications.edges || [])];
+            const updatedEdges = [{
+                __typename: 'NotificationsEdge',
+                cursor: btoa(newNotificationNode.createdAt.toString()),
+                node: newNotificationNode,
+            }, ...(prev.notifications.edges || [])];
 
             return {
               ...prev,
               notifications: {
                 ...prev.notifications,
                 nodes: updatedNodes,
-                // edges: updatedEdges, // Removed 'edges' update
+                edges: updatedEdges,
                 pageInfo: {
                   ...prev.notifications.pageInfo,
-                  // startCursor: updatedEdges[0]?.cursor || prev.notifications.pageInfo.startCursor, // Removed 'edges' related update
+                  startCursor: updatedEdges[0]?.cursor || prev.notifications.pageInfo.startCursor,
                   hasPreviousPage: true,
                 },
               },
@@ -212,7 +211,7 @@ export const NotificationPopover: React.FC = () => {
           };
         },
       });
-      setDisplayCount(prev => prev + ITEMS_PER_LOAD);
+      setDisplayCount(prev => (prev || 0) + ITEMS_PER_LOAD); // Ensure prev is treated as number for arithmetic
     } catch (error) {
       console.error("Error loading more notifications:", error);
       toast.error("Failed to load more notifications.");
