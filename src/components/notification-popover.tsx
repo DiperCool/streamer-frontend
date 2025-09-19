@@ -175,42 +175,44 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                   );
                 } else if (notification.__typename === "UserFollowedNotificationDto") {
                   const followedNotification = notification as UserFollowedNotificationDto;
-                  const follower = followedNotification.follower;
-                  const followedStreamer = followedNotification.followedStreamer;
+                  // Согласно текущей схеме, у UserFollowedNotificationDto есть только поле 'streamer',
+                  // которое представляет канал, на который подписались (т.е. ваш канал).
+                  // Информация о том, кто подписался (follower), отсутствует.
+                  const followedStreamer = followedNotification.streamer; 
 
                   return (
-                    <Link href={`/${follower?.userName}`} key={notification.id} passHref>
-                      <div
-                        className={cn(
-                          "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
-                          !notification.seen && "bg-blue-900/20"
-                        )}
-                        onClick={() => {
-                          setOpen(false);
-                          if (!notification.seen) {
-                            handleReadSingleNotification(notification.id);
-                          }
-                        }}
-                      >
-                        <Avatar className="w-9 h-9">
-                          <AvatarImage src={getMinioUrl(follower?.avatar!)} alt={follower?.userName || "User"} />
-                          <AvatarFallback className="bg-green-600 text-white text-sm">
-                            {follower?.userName?.charAt(0).toUpperCase() || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col flex-1">
-                          <p className="text-sm text-white">
-                            <span className="font-semibold text-green-400">{follower?.userName}</span> followed <span className="font-semibold text-green-400">{followedStreamer?.userName}</span>!
-                          </p>
-                          <span className="text-xs text-gray-400">{timeAgo}</span>
-                        </div>
+                    <div // Нет ссылки, так как нет информации о подписчике для перехода
+                      key={notification.id}
+                      className={cn(
+                        "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
+                        !notification.seen && "bg-blue-900/20"
+                      )}
+                      onClick={() => {
+                        setOpen(false);
+                        if (!notification.seen) {
+                          handleReadSingleNotification(notification.id);
+                        }
+                      }}
+                    >
+                      <Avatar className="w-9 h-9">
+                        {/* Используем аватар канала, на который подписались, или заглушку */}
+                        <AvatarImage src={getMinioUrl(followedStreamer?.avatar!)} alt={followedStreamer?.userName || "Channel"} />
+                        <AvatarFallback className="bg-green-600 text-white text-sm">
+                          {followedStreamer?.userName?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col flex-1">
+                        <p className="text-sm text-white">
+                          Ваш канал был подписан! {/* Упрощенное сообщение из-за ограничений схемы */}
+                        </p>
+                        <span className="text-xs text-gray-400">{timeAgo}</span>
                       </div>
-                    </Link>
+                    </div>
                   );
                 }
                 return (
                   <div key={notification.id} className={cn("p-3 border-b border-gray-700 text-sm text-gray-400", !notification.seen && "bg-blue-900/20")}>
-                    Unknown notification type.
+                    Неизвестный тип уведомления.
                   </div>
                 );
               })}
