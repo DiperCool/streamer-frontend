@@ -159,10 +159,10 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                   case "UserFollowedNotification":
                     notificationMessage = (
                       <>
-                        У вас новый подписчик!
+                        <span className="font-semibold text-green-400">{streamer?.userName || "Неизвестный пользователь"}</span> подписался на вас!
                       </>
                     );
-                    notificationLink = `/${streamer?.userName}`; // Ссылка на канал, который был подписан
+                    notificationLink = `/${streamer?.userName}`; // Ссылка на канал подписчика
                     avatarSrc = getMinioUrl(streamer?.avatar!);
                     avatarFallback = streamer?.userName?.charAt(0).toUpperCase() || "U";
                     break;
