@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Bell, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import {
   useNotificationCreatedSubscription,
   useGetMeQuery,
   useReadAllNotificationsMutation,
-  NotificationDto, // Используем общий NotificationDto
+  NotificationDto,
+  GetNotificationsDocument, // Import the document for cache updates
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -22,30 +23,86 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useApolloClient } from "@apollo/client";
 
-interface NotificationPopoverProps {
-  // refetchMe больше не нужен, так как мы будем обновлять состояние напрямую
-}
+const INITIAL_DISPLAY_COUNT = 10; // Initial number of notifications to display
+const ITEMS_PER_LOAD = 5; // Number of additional notifications to load
 
-export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
+export const NotificationPopover: React.FC = () => {
   const [open, setOpen] = useState(false);
   const client = useApolloClient();
+  const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
 
   const { data: meData, refetch: refetchMe } = useGetMeQuery();
   const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false;
 
-  const { data, loading, error, refetch } = useGetNotificationsQuery();
-  const [readNotificationMutation, { loading: markingAsRead }] = useReadNotificationMutation();
-  const [readAllNotificationsMutation, { loading: markingAllAsRead }] = useReadAllNotificationsMutation();
+  const {
+    data,
+    loading,
+    error,
+    fetchMore,
+    networkStatus,
+  } = useGetNotificationsQuery({
+    variables: {
+      first: displayCount,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
 
   const notifications = data?.notifications?.nodes || [];
-  const unreadNotifications = notifications.filter(n => !n.seen);
+  const hasNextPage = data?.notifications?.pageInfo.hasNextPage;
+  const isLoadingMore = networkStatus === 3; // networkStatus 3 means fetching more
 
-  // Подписка на новые уведомления
+  // Subscription for new notifications
   useNotificationCreatedSubscription({
     onData: ({ data: subscriptionData }) => {
-      if (subscriptionData.data?.notificationCreated) {
-        refetch();
-        refetchMe(); // Keep refetchMe here to update the bell icon immediately on new notification
+      const newNotification = subscriptionData.data?.notificationCreated;
+      if (newNotification) {
+        // Update cache to add the new notification
+        client.cache.updateQuery(
+          {
+            query: GetNotificationsDocument,
+            variables: { first: displayCount, after: data?.notifications?.pageInfo.endCursor },
+          },
+          (prev) => {
+            if (!prev || !prev.notifications) {
+              return prev;
+            }
+
+            const newNotificationNode: NotificationDto = {
+              __typename: 'NotificationDto',
+              ...newNotification,
+              streamer: newNotification.streamer ? {
+                __typename: 'StreamerDto',
+                id: newNotification.streamer.id,
+                userName: newNotification.streamer.userName,
+                avatar: newNotification.streamer.avatar,
+                isLive: newNotification.streamer.isLive,
+              } : null,
+            };
+
+            // Add new notification to the beginning of the list (most recent)
+            const updatedNodes = [newNotificationNode, ...(prev.notifications.nodes || [])];
+            const updatedEdges = [{
+                __typename: 'NotificationsEdge',
+                cursor: btoa(newNotificationNode.createdAt.toString()),
+                node: newNotificationNode,
+            }, ...(prev.notifications.edges || [])];
+
+            return {
+              ...prev,
+              notifications: {
+                ...prev.notifications,
+                nodes: updatedNodes,
+                edges: updatedEdges,
+                pageInfo: {
+                  ...prev.notifications.pageInfo,
+                  startCursor: updatedEdges[0]?.cursor || prev.notifications.pageInfo.startCursor,
+                  hasPreviousPage: true,
+                },
+              },
+            };
+          }
+        );
+        refetchMe(); // Refetch 'me' query to update the bell icon immediately
         toast.info("You have a new notification!");
       }
     },
@@ -61,6 +118,18 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
           },
         },
       });
+
+      // Update cache for the specific notification
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'NotificationDto', id: notificationId }),
+        fields: {
+          seen() {
+            return true;
+          },
+        },
+      });
+
+      // Update cache for hasUnreadNotifications on the 'me' object
       if (result?.readNotification) {
         client.cache.modify({
           id: client.cache.identify(meData?.me!),
@@ -71,7 +140,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
           },
         });
       }
-      refetch(); // Refetch to update the list in the popover
+      toast.success("Notification marked as read!");
     } catch (err) {
       console.error("Error marking single notification as read:", err);
       toast.error("Failed to mark notification as read.");
@@ -83,15 +152,29 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
     try {
       const { data: result } = await readAllNotificationsMutation();
       if (result?.readAllNotifications.result) {
+        // Update cache for all notifications
+        notifications.forEach(n => {
+          if (!n.seen) {
+            client.cache.modify({
+              id: client.cache.identify(n),
+              fields: {
+                seen() {
+                  return true;
+                },
+              },
+            });
+          }
+        });
+
+        // Update cache for hasUnreadNotifications on the 'me' object
         client.cache.modify({
           id: client.cache.identify(meData?.me!),
           fields: {
             hasUnreadNotifications() {
-              return false; // All notifications are read, so set to false
+              return false;
             },
           },
         });
-        refetch(); // Refetch to update the list in the popover
         toast.success("All notifications marked as read!");
       }
     } catch (err) {
@@ -99,6 +182,38 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
       toast.error("Failed to mark all notifications as read.");
     }
   };
+
+  const handleLoadMore = async () => {
+    if (!hasNextPage || isLoadingMore) return;
+
+    try {
+      await fetchMore({
+        variables: {
+          first: ITEMS_PER_LOAD,
+          after: data?.notifications?.pageInfo.endCursor,
+        },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult || !fetchMoreResult.notifications?.nodes) {
+            return prev;
+          }
+          return {
+            ...prev,
+            notifications: {
+              ...fetchMoreResult.notifications,
+              nodes: [...(prev.notifications?.nodes ?? []), ...(fetchMoreResult.notifications.nodes)],
+              edges: [...(prev.notifications?.edges ?? []), ...(fetchMoreResult.notifications.edges)],
+            },
+          };
+        },
+      });
+      setDisplayCount(prev => prev + ITEMS_PER_LOAD);
+    } catch (error) {
+      console.error("Error loading more notifications:", error);
+      toast.error("Failed to load more notifications.");
+    }
+  };
+
+  const unreadNotificationsCount = notifications.filter(n => !n.seen).length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -118,7 +233,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
               variant="ghost"
               size="sm"
               onClick={handleReadAllNotifications}
-              disabled={markingAllAsRead || unreadNotifications.length === 0}
+              disabled={markingAllAsRead || unreadNotificationsCount === 0}
               className="text-green-500 hover:text-green-400"
             >
               {markingAllAsRead ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Mark all as read"}
@@ -126,7 +241,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
           )}
         </div>
         <ScrollArea className="h-72">
-          {loading ? (
+          {loading && networkStatus === 1 ? ( // Only show initial loading spinner
             <div className="flex items-center justify-center h-full">
               <Loader2 className="h-6 w-6 animate-spin text-green-500" />
             </div>
@@ -138,7 +253,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
             <div className="flex flex-col">
               {notifications.map((notification) => {
                 const timeAgo = formatDistanceToNowStrict(new Date(notification.createdAt), { addSuffix: true });
-                const streamer = notification.streamer; // streamer теперь доступен напрямую на NotificationDto
+                const streamer = notification.streamer;
 
                 let notificationMessage: React.ReactNode;
                 let notificationLink: string | undefined;
@@ -159,15 +274,15 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                   case "UserFollowedNotification":
                     notificationMessage = (
                       <>
-                        <span className="font-semibold text-green-400">{streamer?.userName || "Неизвестный пользователь"}</span> подписался на вас!
+                        <span className="font-semibold text-green-400">{streamer?.userName || "Unknown user"}</span> followed you!
                       </>
                     );
-                    notificationLink = `/${streamer?.userName}`; // Ссылка на канал подписчика
+                    notificationLink = `/${streamer?.userName}`;
                     avatarSrc = getMinioUrl(streamer?.avatar!);
                     avatarFallback = streamer?.userName?.charAt(0).toUpperCase() || "U";
                     break;
                   default:
-                    notificationMessage = "Неизвестный тип уведомления.";
+                    notificationMessage = "Unknown notification type.";
                     break;
                 }
 
@@ -207,6 +322,22 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                   </div>
                 );
               })}
+              {hasNextPage && (
+                <div className="flex justify-center p-3">
+                  <Button
+                    onClick={handleLoadMore}
+                    disabled={isLoadingMore}
+                    variant="ghost"
+                    className="text-green-500 hover:bg-gray-700 hover:text-green-400"
+                  >
+                    {isLoadingMore ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      "Load More"
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </ScrollArea>
