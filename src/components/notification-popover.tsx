@@ -85,21 +85,22 @@ export const NotificationPopover: React.FC = () => {
 
             // Add new notification to the beginning of the list (most recent)
             const updatedNodes = [newNotificationNode, ...(prev.notifications.nodes || [])];
-            const updatedEdges = [{
-                __typename: 'NotificationsEdge',
-                cursor: btoa(newNotificationNode.createdAt.toString()),
-                node: newNotificationNode,
-            }, ...(prev.notifications.edges || [])];
+            // Removed 'edges' update as it's not queried
+            // const updatedEdges = [{
+            //     __typename: 'NotificationsEdge',
+            //     cursor: btoa(newNotificationNode.createdAt.toString()),
+            //     node: newNotificationNode,
+            // }, ...(prev.notifications.edges || [])];
 
             return {
               ...prev,
               notifications: {
                 ...prev.notifications,
                 nodes: updatedNodes,
-                edges: updatedEdges,
+                // edges: updatedEdges, // Removed 'edges' update
                 pageInfo: {
                   ...prev.notifications.pageInfo,
-                  startCursor: updatedEdges[0]?.cursor || prev.notifications.pageInfo.startCursor,
+                  // startCursor: updatedEdges[0]?.cursor || prev.notifications.pageInfo.startCursor, // Removed 'edges' related update
                   hasPreviousPage: true,
                 },
               },
@@ -205,7 +206,8 @@ export const NotificationPopover: React.FC = () => {
             notifications: {
               ...fetchMoreResult.notifications,
               nodes: [...(prev.notifications?.nodes ?? []), ...(fetchMoreResult.notifications.nodes)],
-              edges: [...(prev.notifications?.edges ?? []), ...(fetchMoreResult.notifications.edges)],
+              // Removed 'edges' update as it's not queried
+              // edges: [...(prev.notifications?.edges ?? []), ...(fetchMoreResult.notifications.edges)],
             },
           };
         },
