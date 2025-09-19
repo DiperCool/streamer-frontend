@@ -47,6 +47,10 @@ export const NotificationPopover: React.FC = () => {
     notifyOnNetworkStatusChange: true,
   });
 
+  const [readNotificationMutation, { loading: readingSingleNotification }] = useReadNotificationMutation();
+  const [readAllNotificationsMutation, { loading: markingAllAsRead }] = useReadAllNotificationsMutation();
+
+
   const notifications = data?.notifications?.nodes || [];
   const hasNextPage = data?.notifications?.pageInfo.hasNextPage;
   const isLoadingMore = networkStatus === 3; // networkStatus 3 means fetching more
