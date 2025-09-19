@@ -6,12 +6,14 @@ export const GET_NOTIFICATIONS = gql`
         $before: String
         $first: Int
         $last: Int
+        $order: [NotificationDtoSortInput!] # Добавлен аргумент для сортировки
     ) {
         notifications(
             after: $after
             before: $before
             first: $first
             last: $last
+            order: $order # Используем аргумент сортировки
         ) {
             nodes {
                 id
