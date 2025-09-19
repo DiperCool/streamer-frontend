@@ -29,7 +29,8 @@ const ITEMS_PER_LOAD = 5; // Number of additional notifications to load
 export const NotificationPopover: React.FC = () => {
   const [open, setOpen] = useState(false);
   const client = useApolloClient();
-  const [displayCount, setDisplayCount] = useState<number | undefined>(INITIAL_DISPLAY_COUNT); // Changed type to number | undefined
+  // Removed displayCount state, now relying on fixed INITIAL_DISPLAY_COUNT for initial query
+  // and ITEMS_PER_LOAD for fetchMore.
 
   const { data: meData, refetch: refetchMe } = useGetMeQuery();
   const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false;
@@ -42,7 +43,7 @@ export const NotificationPopover: React.FC = () => {
     networkStatus,
   } = useGetNotificationsQuery({
     variables: {
-      first: displayCount, // Now displayCount is number | undefined, which is assignable
+      first: INITIAL_DISPLAY_COUNT, // Fixed initial load count
     },
     notifyOnNetworkStatusChange: true,
   });
@@ -60,11 +61,11 @@ export const NotificationPopover: React.FC = () => {
     onData: ({ data: subscriptionData }) => {
       const newNotification = subscriptionData.data?.notificationCreated;
       if (newNotification) {
-        // Update cache to add the new notification
+        // Manually update the cache for the GetNotifications query
         client.cache.updateQuery(
           {
             query: GetNotificationsDocument,
-            variables: { first: displayCount, after: data?.notifications?.pageInfo.endCursor },
+            variables: { first: INITIAL_DISPLAY_COUNT }, // Match the main query's variables
           },
           (prev) => {
             if (!prev || !prev.notifications) {
@@ -83,30 +84,32 @@ export const NotificationPopover: React.FC = () => {
               } : null,
             };
 
-            // Add new notification to the beginning of the list (most recent)
+            const existingIds = new Set(prev.notifications.nodes?.map(n => n.id));
+            if (existingIds.has(newNotificationNode.id)) {
+                return prev; // Avoid duplicates
+            }
+
+            // Prepend new notification
             const updatedNodes = [newNotificationNode, ...(prev.notifications.nodes || [])];
-            const updatedEdges = [{
-                __typename: 'NotificationsEdge',
-                cursor: btoa(newNotificationNode.createdAt.toString()),
-                node: newNotificationNode,
-            }, ...(prev.notifications.edges || [])];
+
+            // If the query has a 'first' limit, we should respect it in the cache update
+            // to prevent the cached list from growing indefinitely.
+            const nodesToKeep = INITIAL_DISPLAY_COUNT; // Keep the same number of nodes as the initial query
+            const trimmedNodes = updatedNodes.slice(0, nodesToKeep);
 
             return {
               ...prev,
               notifications: {
                 ...prev.notifications,
-                nodes: updatedNodes,
-                edges: updatedEdges,
-                pageInfo: {
-                  ...prev.notifications.pageInfo,
-                  startCursor: updatedEdges[0]?.cursor || prev.notifications.pageInfo.startCursor,
-                  hasPreviousPage: true,
-                },
+                nodes: trimmedNodes,
+                // pageInfo might need adjustment if trimming, but for simplicity,
+                // let's assume the main query's pageInfo is the source of truth for pagination.
+                // The primary goal of subscription update here is to show the new item.
               },
             };
           }
         );
-        refetchMe(); // Refetch 'me' query to update the bell icon immediately
+        refetchMe();
         toast.info("You have a new notification!");
       }
     },
@@ -193,7 +196,7 @@ export const NotificationPopover: React.FC = () => {
     try {
       await fetchMore({
         variables: {
-          first: ITEMS_PER_LOAD,
+          first: ITEMS_PER_LOAD, // Load only ITEMS_PER_LOAD more
           after: data?.notifications?.pageInfo.endCursor,
         },
         updateQuery: (prev, { fetchMoreResult }) => {
@@ -205,13 +208,13 @@ export const NotificationPopover: React.FC = () => {
             notifications: {
               ...fetchMoreResult.notifications,
               nodes: [...(prev.notifications?.nodes ?? []), ...(fetchMoreResult.notifications.nodes)],
-              // Removed 'edges' update as it's not queried
-              // edges: [...(prev.notifications?.edges ?? []), ...(fetchMoreResult.notifications.edges)],
+              pageInfo: fetchMoreResult.notifications.pageInfo, // Use the new pageInfo from fetchMoreResult
             },
           };
         },
       });
-      setDisplayCount(prev => (prev || 0) + ITEMS_PER_LOAD); // Ensure prev is treated as number for arithmetic
+      // No need to update displayCount here, as the main query's 'first' is fixed.
+      // The cache will be updated by updateQuery.
     } catch (error) {
       console.error("Error loading more notifications:", error);
       toast.error("Failed to load more notifications.");
