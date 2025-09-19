@@ -146,7 +146,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                 let avatarFallback: string | undefined;
 
                 switch (notification.discriminator) {
-                  case "LiveStartedNotification": // Исправлено: убран "Dto"
+                  case "LiveStartedNotification":
                     notificationMessage = (
                       <>
                         <span className="font-semibold text-green-400">{streamer?.userName}</span> started a live stream!
@@ -156,13 +156,10 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                     avatarSrc = getMinioUrl(streamer?.avatar!);
                     avatarFallback = streamer?.userName?.charAt(0).toUpperCase() || "U";
                     break;
-                  case "UserFollowedNotification": // Исправлено: убран "Dto"
-                    // Используем streamer как канал, на который подписались,
-                    // так как информация о подписчике (follower) не доступна в текущей схеме.
+                  case "UserFollowedNotification":
                     notificationMessage = (
                       <>
-                        Ваш канал{" "}
-                        <span className="font-semibold text-green-400">{streamer?.userName}</span> был подписан!
+                        У вас новый подписчик!
                       </>
                     );
                     notificationLink = `/${streamer?.userName}`; // Ссылка на канал, который был подписан
