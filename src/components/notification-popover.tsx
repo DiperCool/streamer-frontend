@@ -157,17 +157,15 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
                     avatarFallback = streamer?.userName?.charAt(0).toUpperCase() || "U";
                     break;
                   case "UserFollowedNotificationDto":
-                    // Поскольку у нас нет полей follower и followedStreamer,
-                    // мы используем streamer как канал, на который подписались.
+                    // Используем streamer как канал, на который подписались,
+                    // так как информация о подписчике (follower) не доступна в текущей схеме.
                     notificationMessage = (
                       <>
                         Ваш канал{" "}
                         <span className="font-semibold text-green-400">{streamer?.userName}</span> был подписан!
                       </>
                     );
-                    // Если есть ссылка на профиль подписчика, можно было бы использовать ее.
-                    // Сейчас нет такой информации, поэтому ссылка ведет на канал.
-                    notificationLink = `/${streamer?.userName}`; 
+                    notificationLink = `/${streamer?.userName}`; // Ссылка на канал, который был подписан
                     avatarSrc = getMinioUrl(streamer?.avatar!);
                     avatarFallback = streamer?.userName?.charAt(0).toUpperCase() || "U";
                     break;
