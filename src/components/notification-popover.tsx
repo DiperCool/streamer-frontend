@@ -15,6 +15,7 @@ import {
   useReadAllNotificationsMutation,
   NotificationDto,
   GetNotificationsDocument, // Import the document for cache updates
+  SortEnumType, // Import SortEnumType
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -29,8 +30,6 @@ const ITEMS_PER_LOAD = 5; // Number of additional notifications to load
 export const NotificationPopover: React.FC = () => {
   const [open, setOpen] = useState(false);
   const client = useApolloClient();
-  // Removed displayCount state, now relying on fixed INITIAL_DISPLAY_COUNT for initial query
-  // and ITEMS_PER_LOAD for fetchMore.
 
   const { data: meData, refetch: refetchMe } = useGetMeQuery();
   const hasUnreadNotifications = meData?.me?.hasUnreadNotifications ?? false;
@@ -43,7 +42,8 @@ export const NotificationPopover: React.FC = () => {
     networkStatus,
   } = useGetNotificationsQuery({
     variables: {
-      first: INITIAL_DISPLAY_COUNT, // Fixed initial load count
+      first: INITIAL_DISPLAY_COUNT,
+      order: [{ createdAt: SortEnumType.Desc }], // Added DESC sort order
     },
     notifyOnNetworkStatusChange: true,
   });
@@ -65,7 +65,10 @@ export const NotificationPopover: React.FC = () => {
         client.cache.updateQuery(
           {
             query: GetNotificationsDocument,
-            variables: { first: INITIAL_DISPLAY_COUNT }, // Match the main query's variables
+            variables: { 
+              first: INITIAL_DISPLAY_COUNT,
+              order: [{ createdAt: SortEnumType.Desc }], // Match the main query's variables
+            },
           },
           (prev) => {
             if (!prev || !prev.notifications) {
@@ -196,8 +199,9 @@ export const NotificationPopover: React.FC = () => {
     try {
       await fetchMore({
         variables: {
-          first: ITEMS_PER_LOAD, // Load only ITEMS_PER_LOAD more
+          first: ITEMS_PER_LOAD,
           after: data?.notifications?.pageInfo.endCursor,
+          order: [{ createdAt: SortEnumType.Desc }], // Added DESC sort order
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult || !fetchMoreResult.notifications?.nodes) {
@@ -208,13 +212,11 @@ export const NotificationPopover: React.FC = () => {
             notifications: {
               ...fetchMoreResult.notifications,
               nodes: [...(prev.notifications?.nodes ?? []), ...(fetchMoreResult.notifications.nodes)],
-              pageInfo: fetchMoreResult.notifications.pageInfo, // Use the new pageInfo from fetchMoreResult
+              pageInfo: fetchMoreResult.notifications.pageInfo,
             },
           };
         },
       });
-      // No need to update displayCount here, as the main query's 'first' is fixed.
-      // The cache will be updated by updateQuery.
     } catch (error) {
       console.error("Error loading more notifications:", error);
       toast.error("Failed to load more notifications.");
