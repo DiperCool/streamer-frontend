@@ -7,25 +7,11 @@ export const NOTIFICATION_CREATED_SUBSCRIPTION = gql`
             createdAt
             seen
             discriminator
-            ... on LiveStartedNotificationDto {
-                streamer {
-                    id
-                    isLive
-                    userName
-                    avatar
-                }
-            }
-            ... on UserFollowedNotificationDto {
-                follower {
-                    id
-                    userName
-                    avatar
-                }
-                followedStreamer {
-                    id
-                    userName
-                    avatar
-                }
+            streamer { # Это поле доступно напрямую на NotificationDto
+                id
+                isLive
+                userName
+                avatar
             }
         }
     }
@@ -38,25 +24,11 @@ export const SUBSCRIBE_NOTIFICATION_CREATED = gql`
             createdAt
             seen
             discriminator
-            ... on LiveStartedNotificationDto {
-                streamer {
-                    id
-                    isLive
-                    userName
-                    avatar
-                }
-            }
-            ... on UserFollowedNotificationDto {
-                follower {
-                    id
-                    userName
-                    avatar
-                }
-                followedStreamer {
-                    id
-                    userName
-                    avatar
-                }
+            streamer { # Это поле доступно напрямую на NotificationDto
+                id
+                isLive
+                userName
+                avatar
             }
         }
     }

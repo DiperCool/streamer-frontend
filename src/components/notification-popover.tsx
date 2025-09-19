@@ -11,10 +11,9 @@ import {
   useGetNotificationsQuery,
   useReadNotificationMutation,
   useNotificationCreatedSubscription,
-  LiveStartedNotificationDto,
-  UserFollowedNotificationDto, // Import the new notification type
   useGetMeQuery,
   useReadAllNotificationsMutation,
+  NotificationDto, // Используем общий NotificationDto
 } from "@/graphql/__generated__/graphql";
 import { getMinioUrl } from "@/utils/utils";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -139,80 +138,77 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = () => {
             <div className="flex flex-col">
               {notifications.map((notification) => {
                 const timeAgo = formatDistanceToNowStrict(new Date(notification.createdAt), { addSuffix: true });
+                const streamer = notification.streamer; // streamer теперь доступен напрямую на NotificationDto
 
-                if (notification.__typename === "LiveStartedNotificationDto") {
-                  const liveNotification = notification as LiveStartedNotificationDto;
-                  const streamer = liveNotification.streamer;
+                let notificationMessage: React.ReactNode;
+                let notificationLink: string | undefined;
+                let avatarSrc: string | undefined;
+                let avatarFallback: string | undefined;
 
-                  return (
-                    <Link href={`/${streamer?.userName}`} key={notification.id} passHref>
-                      <div
-                        className={cn(
-                          "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
-                          !notification.seen && "bg-blue-900/20"
-                        )}
-                        onClick={() => {
-                          setOpen(false);
-                          if (!notification.seen) {
-                            handleReadSingleNotification(notification.id);
-                          }
-                        }}
-                      >
-                        <Avatar className="w-9 h-9">
-                          <AvatarImage src={getMinioUrl(streamer?.avatar!)} alt={streamer?.userName || "Streamer"} />
-                          <AvatarFallback className="bg-green-600 text-white text-sm">
-                            {streamer?.userName?.charAt(0).toUpperCase() || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col flex-1">
-                          <p className="text-sm text-white">
-                            <span className="font-semibold text-green-400">{streamer?.userName}</span> started a live stream!
-                          </p>
-                          <span className="text-xs text-gray-400">{timeAgo}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                } else if (notification.__typename === "UserFollowedNotificationDto") {
-                  const followedNotification = notification as UserFollowedNotificationDto;
-                  // Согласно текущей схеме, у UserFollowedNotificationDto есть только поле 'streamer',
-                  // которое представляет канал, на который подписались (т.е. ваш канал).
-                  // Информация о том, кто подписался (follower), отсутствует.
-                  const followedStreamer = followedNotification.streamer; 
-
-                  return (
-                    <div // Нет ссылки, так как нет информации о подписчике для перехода
-                      key={notification.id}
-                      className={cn(
-                        "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
-                        !notification.seen && "bg-blue-900/20"
-                      )}
-                      onClick={() => {
-                        setOpen(false);
-                        if (!notification.seen) {
-                          handleReadSingleNotification(notification.id);
-                        }
-                      }}
-                    >
-                      <Avatar className="w-9 h-9">
-                        {/* Используем аватар канала, на который подписались, или заглушку */}
-                        <AvatarImage src={getMinioUrl(followedStreamer?.avatar!)} alt={followedStreamer?.userName || "Channel"} />
-                        <AvatarFallback className="bg-green-600 text-white text-sm">
-                          {followedStreamer?.userName?.charAt(0).toUpperCase() || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col flex-1">
-                        <p className="text-sm text-white">
-                          Ваш канал был подписан! {/* Упрощенное сообщение из-за ограничений схемы */}
-                        </p>
-                        <span className="text-xs text-gray-400">{timeAgo}</span>
-                      </div>
-                    </div>
-                  );
+                switch (notification.discriminator) {
+                  case "LiveStartedNotificationDto":
+                    notificationMessage = (
+                      <>
+                        <span className="font-semibold text-green-400">{streamer?.userName}</span> started a live stream!
+                      </>
+                    );
+                    notificationLink = `/${streamer?.userName}`;
+                    avatarSrc = getMinioUrl(streamer?.avatar!);
+                    avatarFallback = streamer?.userName?.charAt(0).toUpperCase() || "U";
+                    break;
+                  case "UserFollowedNotificationDto":
+                    // Поскольку у нас нет полей follower и followedStreamer,
+                    // мы используем streamer как канал, на который подписались.
+                    notificationMessage = (
+                      <>
+                        Ваш канал{" "}
+                        <span className="font-semibold text-green-400">{streamer?.userName}</span> был подписан!
+                      </>
+                    );
+                    // Если есть ссылка на профиль подписчика, можно было бы использовать ее.
+                    // Сейчас нет такой информации, поэтому ссылка ведет на канал.
+                    notificationLink = `/${streamer?.userName}`; 
+                    avatarSrc = getMinioUrl(streamer?.avatar!);
+                    avatarFallback = streamer?.userName?.charAt(0).toUpperCase() || "U";
+                    break;
+                  default:
+                    notificationMessage = "Неизвестный тип уведомления.";
+                    break;
                 }
-                return (
-                  <div key={notification.id} className={cn("p-3 border-b border-gray-700 text-sm text-gray-400", !notification.seen && "bg-blue-900/20")}>
-                    Неизвестный тип уведомления.
+
+                const notificationContent = (
+                  <div
+                    className={cn(
+                      "flex items-center space-x-3 p-3 border-b border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors",
+                      !notification.seen && "bg-blue-900/20"
+                    )}
+                    onClick={() => {
+                      setOpen(false);
+                      if (!notification.seen) {
+                        handleReadSingleNotification(notification.id);
+                      }
+                    }}
+                  >
+                    <Avatar className="w-9 h-9">
+                      <AvatarImage src={avatarSrc} alt={avatarFallback || "User"} />
+                      <AvatarFallback className="bg-green-600 text-white text-sm">
+                        {avatarFallback}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col flex-1">
+                      <p className="text-sm text-white">{notificationMessage}</p>
+                      <span className="text-xs text-gray-400">{timeAgo}</span>
+                    </div>
+                  </div>
+                );
+
+                return notificationLink ? (
+                  <Link href={notificationLink} key={notification.id} passHref>
+                    {notificationContent}
+                  </Link>
+                ) : (
+                  <div key={notification.id}>
+                    {notificationContent}
                   </div>
                 );
               })}
