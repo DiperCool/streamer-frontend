@@ -111,6 +111,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
+      // Ensure 'from' is always before or same as 'to'
       const fromDate = startOfDay(range.from);
       const toDate = endOfDay(range.to);
       setDateRange({ from: fromDate, to: toDate });
