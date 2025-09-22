@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { CardContent, CardHeader, CardTitle, Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight, CalendarIcon, ArrowUp, ArrowDown } from "lucide-react";
@@ -21,10 +21,12 @@ import {
   endOfDay,
   differenceInDays,
   addDays,
+  parseISO,
 } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAnalyticsValue } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface DateRange {
   from: Date | undefined;
@@ -72,10 +74,13 @@ const AnalyticsItemDisplay: React.FC<AnalyticsItemDisplayProps> = ({ type, value
 export const OverviewAnalyticsWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
   const streamerId = activeStreamer?.id ?? "";
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isInitialMount = useRef(true);
 
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfDay(subDays(new Date(), 29)),
-    to: endOfDay(new Date()),
+    from: undefined,
+    to: undefined,
   });
   const [selectedPreset, setSelectedPreset] = useState<string>("last30days");
 
@@ -92,14 +97,8 @@ export const OverviewAnalyticsWidget: React.FC = () => {
 
   const analyticsData = data?.overviewAnalytics;
 
-  // Effect to refetch when streamerId or dateRange changes
-  useEffect(() => {
-    if (streamerId && dateRange.from && dateRange.to) {
-      refetch();
-    }
-  }, [streamerId, dateRange, refetch]);
-
-  const applyPreset = useCallback((preset: string) => {
+  // Function to apply presets, now also updates URL
+  const applyPreset = useCallback((preset: string, updateUrl: boolean = true) => {
     const today = new Date();
     let newFrom: Date;
     let newTo: Date;
@@ -132,18 +131,55 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     setSelectedPreset(preset);
   }, []);
 
+  // Effect to initialize state from URL on first mount
   useEffect(() => {
-    // Apply default preset on mount if no custom range is set
-    if (!dateRange.from && !dateRange.to && selectedPreset === "last30days") {
-      applyPreset("last30days");
+    if (isInitialMount.current) {
+      const urlFrom = searchParams.get("from");
+      const urlTo = searchParams.get("to");
+      const urlPreset = searchParams.get("preset");
+
+      if (urlFrom && urlTo) {
+        setDateRange({ from: parseISO(urlFrom), to: parseISO(urlTo) });
+        setSelectedPreset("custom");
+      } else if (urlPreset) {
+        applyPreset(urlPreset, false); // Don't update URL again on initial load
+      } else {
+        applyPreset("last30days", false); // Default if no params
+      }
+      isInitialMount.current = false;
     }
-  }, [applyPreset, dateRange.from, dateRange.to, selectedPreset]);
+  }, [searchParams, applyPreset]);
+
+  // Effect to update URL when dateRange or selectedPreset changes
+  useEffect(() => {
+    if (isInitialMount.current) return; // Prevent running on initial mount
+
+    const currentPath = `/dashboard/${activeStreamer?.userName}/analytics`;
+    const newSearchParams = new URLSearchParams();
+
+    if (selectedPreset === "custom" && dateRange.from && dateRange.to) {
+      newSearchParams.set("from", format(dateRange.from, "yyyy-MM-dd"));
+      newSearchParams.set("to", format(dateRange.to, "yyyy-MM-dd"));
+    } else if (selectedPreset) {
+      newSearchParams.set("preset", selectedPreset);
+    }
+
+    router.replace(`${currentPath}?${newSearchParams.toString()}`, { scroll: false });
+  }, [dateRange, selectedPreset, router, activeStreamer?.userName]);
+
+
+  // Effect to refetch when streamerId or dateRange changes
+  useEffect(() => {
+    if (streamerId && dateRange.from && dateRange.to) {
+      refetch();
+    }
+  }, [streamerId, dateRange, refetch]);
 
 
   const navigatePeriod = useCallback((direction: "prev" | "next") => {
     if (!dateRange.from || !dateRange.to) return;
 
-    const currentRangeLength = differenceInDays(dateRange.to, dateRange.from); // Difference in days, not +1
+    const currentRangeLength = differenceInDays(dateRange.to, dateRange.from);
     let newFrom: Date;
     let newTo: Date;
 
@@ -154,7 +190,6 @@ export const OverviewAnalyticsWidget: React.FC = () => {
       newFrom = addDays(dateRange.to, 1);
       newTo = addDays(newFrom, currentRangeLength);
       
-      // Prevent navigating past today's date for the 'to' date
       const todayEnd = endOfDay(new Date());
       if (isAfter(newTo, todayEnd)) {
         newTo = todayEnd;
@@ -162,7 +197,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
       }
     }
     setDateRange({ from: startOfDay(newFrom), to: endOfDay(newTo) });
-    setSelectedPreset("custom"); // Custom range after navigation
+    setSelectedPreset("custom");
   }, [dateRange]);
 
   const formattedDateRange = dateRange.from && dateRange.to
