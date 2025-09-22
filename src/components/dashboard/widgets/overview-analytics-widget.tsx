@@ -22,15 +22,6 @@ import {
   differenceInDays,
   addDays,
 } from "date-fns";
-import {
-  Dialog, // Changed from Popover
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog"; // Changed from Popover
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatAnalyticsValue } from "@/lib/utils";
@@ -87,7 +78,6 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     to: endOfDay(new Date()),
   });
   const [selectedPreset, setSelectedPreset] = useState<string>("last30days");
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false); // Controls Dialog open state
 
   const { data, loading, error, refetch } = useGetOverviewAnalyticsQuery({
     variables: {
@@ -108,16 +98,6 @@ export const OverviewAnalyticsWidget: React.FC = () => {
       refetch();
     }
   }, [streamerId, dateRange, refetch]);
-
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    if (range?.from && range?.to) {
-      // Ensure 'from' is always before or same as 'to'
-      const fromDate = startOfDay(range.from);
-      const toDate = endOfDay(range.to);
-      setDateRange({ from: fromDate, to: toDate });
-      setSelectedPreset("custom");
-    }
-  };
 
   const applyPreset = useCallback((preset: string) => {
     const today = new Date();
@@ -150,7 +130,6 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     }
     setDateRange({ from: newFrom, to: newTo });
     setSelectedPreset(preset);
-    setIsCalendarOpen(false); // Close dialog after applying preset
   }, []);
 
   useEffect(() => {
@@ -185,12 +164,6 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     setDateRange({ from: startOfDay(newFrom), to: endOfDay(newTo) });
     setSelectedPreset("custom"); // Custom range after navigation
   }, [dateRange]);
-
-  const clearDateRange = () => {
-    setDateRange({ from: undefined, to: undefined });
-    setSelectedPreset("");
-    setIsCalendarOpen(false); // Close dialog
-  };
 
   const formattedDateRange = dateRange.from && dateRange.to
     ? `${format(dateRange.from, "MMM dd, yyyy")} – ${format(dateRange.to, "MMM dd, yyyy")}`
@@ -227,55 +200,19 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
         <CardTitle className="text-white text-base">Overview Analytics</CardTitle>
-        <Button
-          id="date"
-          variant={"outline"}
-          className={cn(
-            "w-[280px] justify-start text-left font-normal bg-gray-700 border-gray-600 text-white hover:bg-gray-600",
-            !dateRange.from && "text-muted-foreground"
-          )}
-          onClick={() => setIsCalendarOpen(true)} // Open Dialog
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {formattedDateRange}
-        </Button>
-        <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-          <DialogContent className="sm:max-w-[700px] p-0 bg-gray-800 border-gray-700 text-white">
-            <DialogHeader className="p-4 border-b border-gray-700">
-              <DialogTitle className="text-white">Select Date Range</DialogTitle>
-              <DialogDescription className="text-gray-400">
-                Choose a custom date range or use a preset.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex">
-              <div className="flex flex-col p-4 border-r border-gray-700">
-                <h4 className="text-sm font-semibold mb-2">Date Presets</h4>
-                <div className="space-y-2">
-                  <Button variant="ghost" className={cn("w-full justify-start", selectedPreset === "last7days" && "bg-green-600 hover:bg-green-700 text-white")} onClick={() => applyPreset("last7days")}>Last 7 Days</Button>
-                  <Button variant="ghost" className={cn("w-full justify-start", selectedPreset === "last30days" && "bg-green-600 hover:bg-green-700 text-white")} onClick={() => applyPreset("last30days")}>Last 30 Days</Button>
-                  <Button variant="ghost" className={cn("w-full justify-start", selectedPreset === "thismonth" && "bg-green-600 hover:bg-green-700 text-white")} onClick={() => applyPreset("thismonth")}>This Month</Button>
-                  <Button variant="ghost" className={cn("w-full justify-start", selectedPreset === "lastmonth" && "bg-green-600 hover:bg-green-700 text-white")} onClick={() => applyPreset("lastmonth")}>Last Month</Button>
-                  <Button variant="ghost" className={cn("w-full justify-start", selectedPreset === "thisyear" && "bg-green-600 hover:bg-green-700 text-white")} onClick={() => applyPreset("thisyear")}>This Year</Button>
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={dateRange.from}
-                  selected={dateRange}
-                  onSelect={handleDateRangeChange}
-                  numberOfMonths={2}
-                  className="p-4"
-                />
-              </div>
-            </div>
-            <DialogFooter className="p-4 border-t border-gray-700">
-              <Button variant="outline" onClick={clearDateRange} className="border-gray-600 text-gray-300 hover:bg-gray-700">Clear</Button>
-              <Button onClick={() => setIsCalendarOpen(false)} className="bg-green-600 hover:bg-green-700 text-white">Update</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Select value={selectedPreset} onValueChange={applyPreset}>
+          <SelectTrigger className="w-[280px] bg-gray-700 border-gray-600 text-white">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Select a date range" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-800 border-gray-700 text-white">
+            <SelectItem value="last7days">Last 7 Days</SelectItem>
+            <SelectItem value="last30days">Last 30 Days</SelectItem>
+            <SelectItem value="thismonth">This Month</SelectItem>
+            <SelectItem value="lastmonth">Last Month</SelectItem>
+            <SelectItem value="thisyear">This Year</SelectItem>
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent className="flex-1 p-0 flex flex-col">
         <div className="flex items-center justify-between p-3 border-b border-gray-700">
