@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { CardContent, CardHeader, CardTitle, Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight, CalendarIcon, ArrowUp, ArrowDown } from "lucide-react";
@@ -83,7 +83,6 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     from: undefined,
     to: undefined,
   });
-  const [selectedPreset, setSelectedPreset] = useState<string>("last30days");
 
   const { data, loading, error, refetch } = useGetOverviewAnalyticsQuery({
     variables: {
@@ -117,6 +116,14 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     return "custom";
   }, []);
 
+  // Derive selectedPreset directly from dateRange
+  const selectedPreset = useMemo(() => {
+    if (!dateRange.from || !dateRange.to) {
+      return "custom"; // Or some default if dates are not set
+    }
+    return getPresetFromDates(dateRange.from, dateRange.to);
+  }, [dateRange, getPresetFromDates]);
+
   // Function to apply presets
   const applyPreset = useCallback((preset: string) => {
     const today = new Date();
@@ -148,7 +155,6 @@ export const OverviewAnalyticsWidget: React.FC = () => {
         return;
     }
     setDateRange({ from: newFrom, to: newTo });
-    setSelectedPreset(preset);
   }, []);
 
   // Effect to initialize state from URL on first mount
@@ -156,23 +162,18 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     if (isInitialMount.current) {
       const urlFrom = searchParams.get("from");
       const urlTo = searchParams.get("to");
-      const urlPreset = searchParams.get("preset"); // Still check for legacy preset param
 
       if (urlFrom && urlTo) {
         const fromDate = parseISO(urlFrom);
         const toDate = parseISO(urlTo);
         setDateRange({ from: fromDate, to: toDate });
-        setSelectedPreset(getPresetFromDates(fromDate, toDate));
-      } else if (urlPreset) {
-        // Handle legacy preset param by applying it and then letting the URL sync effect update to from/to
-        applyPreset(urlPreset);
       } else {
         // Default if no params
         applyPreset("last30days");
       }
       isInitialMount.current = false;
     }
-  }, [searchParams, applyPreset, getPresetFromDates]);
+  }, [searchParams, applyPreset]); // Removed getPresetFromDates from dependencies as it's used in useMemo
 
   // Effect to update URL when dateRange changes
   useEffect(() => {
@@ -185,6 +186,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
       newSearchParams.set("from", format(dateRange.from, "yyyy-MM-dd"));
       newSearchParams.set("to", format(dateRange.to, "yyyy-MM-dd"));
     }
+    // No need to set 'preset' in URL anymore, as it's derived.
 
     router.replace(`${currentPath}?${newSearchParams.toString()}`, { scroll: false });
   }, [dateRange, router, activeStreamer?.userName]);
@@ -221,8 +223,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     const finalFrom = startOfDay(newFrom);
     const finalTo = endOfDay(newTo);
     setDateRange({ from: finalFrom, to: finalTo });
-    setSelectedPreset(getPresetFromDates(finalFrom, finalTo)); // Determine preset after navigation
-  }, [dateRange, getPresetFromDates]);
+  }, [dateRange]); // Removed getPresetFromDates from dependencies as it's used in useMemo
 
   const formattedDateRange = dateRange.from && dateRange.to
     ? `${format(dateRange.from, "MMM dd, yyyy")} – ${format(dateRange.to, "MMM dd, yyyy")}`
