@@ -290,7 +290,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
-        <div className="grid grid-cols-5 flex-1">
+        <div className="grid grid-cols-3 flex-1"> {/* Изменено с grid-cols-5 на grid-cols-3 */}
           {overviewItems.map((item, index) => (
             <AnalyticsItemDisplay
               key={index}
