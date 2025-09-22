@@ -3,6 +3,7 @@
 import React from "react"
 import { OverviewAnalyticsWidget } from "@/src/components/dashboard/widgets/overview-analytics-widget"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { AnalyticsDiagramWidget } from "@/src/components/dashboard/widgets/analytics-diagram-widget" // Импортируем новый виджет
 
 export default function AnalyticsPage() {
   return (
@@ -18,7 +19,11 @@ export default function AnalyticsPage() {
           <OverviewAnalyticsWidget />
         </CardContent>
       </Card>
-      {/* Add more analytics content here */}
+
+      {/* Новый виджет диаграммы */}
+      <div className="h-[400px]"> {/* Задаем фиксированную высоту для диаграммы */}
+        <AnalyticsDiagramWidget />
+      </div>
     </div>
   )
 }
