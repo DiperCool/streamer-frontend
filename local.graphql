@@ -26,6 +26,11 @@ directive @listSize(
     slicingArguments: [String!]
 ) on FIELD_DEFINITION
 
+type AnalyticsDiagramItem {
+    title: String!
+    value: Long!
+}
+
 type BanUserResponse {
     id: UUID!
 }
@@ -189,6 +194,11 @@ type GetEmailResponse {
     email: String!
 }
 
+type GetOverviewAnalyticsResponse {
+    days: Int!
+    items: [OverviewAnalyticsItem!]!
+}
+
 type Mutation {
     banUser(request: BanUserInput!): BanUserResponse!
     createBanner(banner: CreateBannerInput!): CreateBannerResponse!
@@ -294,6 +304,11 @@ type NotificationsEdge {
     node: NotificationDto!
 }
 
+type OverviewAnalyticsItem {
+    type: AnalyticsItemType!
+    value: Float!
+}
+
 "Information about pagination in a connection."
 type PageInfo {
     "When paginating forwards, the cursor to continue."
@@ -341,6 +356,7 @@ type ProfileDto {
 }
 
 type Query {
+    analyticsDiagram(param: GetAnalyticsDiagramInput!): [AnalyticsDiagramItem!]!
     bannedUsers(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -430,6 +446,7 @@ type Query {
         order: [NotificationDtoSortInput!],
         where: NotificationDtoFilterInput
     ): NotificationsConnection
+    overviewAnalytics(param: GetOverviewAnalyticsInput!): GetOverviewAnalyticsResponse!
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
     roles(
@@ -823,6 +840,18 @@ type VodsEdge {
     node: VodDto!
 }
 
+enum AnalyticsDiagramType {
+    DAY
+    MONTH
+    WEEK
+}
+
+enum AnalyticsItemType {
+    FOLLOWER
+    STREAM_TIME
+    STREAM_VIEWERS
+}
+
 "Defines when a policy shall be executed."
 enum ApplyPolicy {
     "After the resolver was executed."
@@ -1027,6 +1056,18 @@ input FinishAuthInput {
 
 input FollowInput {
     streamerId: String!
+}
+
+input GetAnalyticsDiagramInput {
+    analyticsDiagramType: AnalyticsDiagramType!
+    from: DateTime!
+    to: DateTime!
+    type: AnalyticsItemType!
+}
+
+input GetOverviewAnalyticsInput {
+    from: DateTime!
+    to: DateTime!
 }
 
 input LongOperationFilterInput {
