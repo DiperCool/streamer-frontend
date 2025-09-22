@@ -117,8 +117,8 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     return "custom";
   }, []);
 
-  // Function to apply presets, now also updates URL
-  const applyPreset = useCallback((preset: string, updateUrl: boolean = true) => {
+  // Function to apply presets
+  const applyPreset = useCallback((preset: string) => {
     const today = new Date();
     let newFrom: Date;
     let newTo: Date;
@@ -156,38 +156,38 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     if (isInitialMount.current) {
       const urlFrom = searchParams.get("from");
       const urlTo = searchParams.get("to");
-      const urlPreset = searchParams.get("preset");
+      const urlPreset = searchParams.get("preset"); // Still check for legacy preset param
 
       if (urlFrom && urlTo) {
         const fromDate = parseISO(urlFrom);
         const toDate = parseISO(urlTo);
         setDateRange({ from: fromDate, to: toDate });
-        setSelectedPreset(getPresetFromDates(fromDate, toDate)); // Determine preset from URL dates
+        setSelectedPreset(getPresetFromDates(fromDate, toDate));
       } else if (urlPreset) {
-        applyPreset(urlPreset, false); // Don't update URL again on initial load
+        // Handle legacy preset param by applying it and then letting the URL sync effect update to from/to
+        applyPreset(urlPreset);
       } else {
-        applyPreset("last30days", false); // Default if no params
+        // Default if no params
+        applyPreset("last30days");
       }
       isInitialMount.current = false;
     }
   }, [searchParams, applyPreset, getPresetFromDates]);
 
-  // Effect to update URL when dateRange or selectedPreset changes
+  // Effect to update URL when dateRange changes
   useEffect(() => {
     if (isInitialMount.current) return; // Prevent running on initial mount
 
     const currentPath = `/dashboard/${activeStreamer?.userName}/analytics`;
     const newSearchParams = new URLSearchParams();
 
-    if (selectedPreset === "custom" && dateRange.from && dateRange.to) {
+    if (dateRange.from && dateRange.to) {
       newSearchParams.set("from", format(dateRange.from, "yyyy-MM-dd"));
       newSearchParams.set("to", format(dateRange.to, "yyyy-MM-dd"));
-    } else if (selectedPreset) {
-      newSearchParams.set("preset", selectedPreset);
     }
 
     router.replace(`${currentPath}?${newSearchParams.toString()}`, { scroll: false });
-  }, [dateRange, selectedPreset, router, activeStreamer?.userName]);
+  }, [dateRange, router, activeStreamer?.userName]);
 
 
   // Effect to refetch when streamerId or dateRange changes
