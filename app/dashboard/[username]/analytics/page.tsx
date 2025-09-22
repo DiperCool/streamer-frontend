@@ -5,7 +5,11 @@ import { OverviewAnalyticsWidget } from "@/src/components/dashboard/widgets/over
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AnalyticsDiagramWidget } from "@/src/components/dashboard/widgets/analytics-diagram-widget" // Импортируем новый виджет
 
-export default function AnalyticsPage() {
+interface AnalyticsPageProps {
+  isSidebarTransitioning?: boolean; // Добавляем пропс
+}
+
+export default function AnalyticsPage({ isSidebarTransitioning }: AnalyticsPageProps) {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold text-white">Analytics</h1>
@@ -22,7 +26,7 @@ export default function AnalyticsPage() {
 
       {/* Новый виджет диаграммы */}
       <div className="h-[400px]"> {/* Задаем фиксированную высоту для диаграммы */}
-        <AnalyticsDiagramWidget />
+        <AnalyticsDiagramWidget isSidebarTransitioning={isSidebarTransitioning} /> {/* Передаем пропс */}
       </div>
     </div>
   )

@@ -23,8 +23,13 @@ import { useDashboard } from "@/src/contexts/DashboardContext";
 import { format, subDays, subWeeks, subMonths, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { formatAnalyticsValue } from "@/lib/utils";
 import { useSearchParams } from "next/navigation"; // Импортируем useSearchParams
+import { cn } from "@/lib/utils"; // Импортируем cn
 
-export const AnalyticsDiagramWidget: React.FC = () => {
+interface AnalyticsDiagramWidgetProps {
+  isSidebarTransitioning?: boolean; // Добавляем пропс
+}
+
+export const AnalyticsDiagramWidget: React.FC<AnalyticsDiagramWidgetProps> = ({ isSidebarTransitioning }) => {
   const { activeStreamer } = useDashboard();
   const streamerId = activeStreamer?.id ?? "";
   const searchParams = useSearchParams(); // Инициализируем useSearchParams
@@ -93,25 +98,40 @@ export const AnalyticsDiagramWidget: React.FC = () => {
 
   if (!streamerId) {
     return (
-      <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-        Select a channel to view analytics.
-      </div>
+      <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+          <CardTitle className="text-white text-base">Analytics Diagram</CardTitle>
+        </CardHeader>
+        <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+          Select a channel to view analytics.
+        </div>
+      </Card>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-      </div>
+      <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+          <CardTitle className="text-white text-base">Analytics Diagram</CardTitle>
+        </CardHeader>
+        <div className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+        </div>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
-        Error loading diagram: {error.message}
-      </div>
+      <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
+          <CardTitle className="text-white text-base">Analytics Diagram</CardTitle>
+        </CardHeader>
+        <div className="flex-1 p-3 text-red-500 text-sm flex items-center justify-center">
+          Error loading diagram: {error.message}
+        </div>
+      </Card>
     );
   }
 
@@ -142,13 +162,22 @@ export const AnalyticsDiagramWidget: React.FC = () => {
           </Select>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 p-3">
+      <CardContent className="flex-1 p-3 relative">
+        {isSidebarTransitioning && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800/70 z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+          </div>
+        )}
         {chartData.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
+          <div className={cn("flex items-center justify-center h-full text-gray-400", isSidebarTransitioning && "opacity-0 pointer-events-none")}>
             No data available for the selected period and metric.
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer 
+            width="100%" 
+            height="100%"
+            className={cn(isSidebarTransitioning && "opacity-0 pointer-events-none")} // Скрываем и отключаем события во время перехода
+          >
             <LineChart
               data={chartData}
               margin={{

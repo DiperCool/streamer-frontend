@@ -14,6 +14,7 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [isSidebarTransitioning, setIsSidebarTransitioning] = useState(false); // Новое состояние
   const pathname = usePathname()
 
   const isDashboard = pathname.startsWith("/dashboard/");
@@ -22,6 +23,21 @@ export function MainLayout({ children }: MainLayoutProps) {
   useEffect(() => {
     setSidebarOpen(!isMobile);
   }, [isMobile]);
+
+  // Отслеживание перехода сайдбара
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (sidebarOpen !== !isMobile) { // Если состояние sidebarOpen отличается от ожидаемого (т.е. идет переход)
+      setIsSidebarTransitioning(true);
+      timeoutId = setTimeout(() => {
+        setIsSidebarTransitioning(false);
+      }, 200); // Длительность перехода 200ms
+    } else {
+      setIsSidebarTransitioning(false);
+    }
+    return () => clearTimeout(timeoutId);
+  }, [sidebarOpen, isMobile]);
+
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
@@ -49,7 +65,13 @@ export function MainLayout({ children }: MainLayoutProps) {
           <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} sidebarOpen={sidebarOpen} isDashboard={isDashboard} isAdmin={isAdmin} />
           
           <div className="flex-1 pt-16 overflow-y-auto"> {/* Added overflow-y-auto here */}
-            {children}
+            {/* Передаем isSidebarTransitioning в дочерние элементы */}
+            {React.Children.map(children, child => {
+              if (React.isValidElement(child)) {
+                return React.cloneElement(child, { isSidebarTransitioning } as { isSidebarTransitioning: boolean });
+              }
+              return child;
+            })}
           </div>
       </div>
     </div>
