@@ -32,7 +32,7 @@ export const formatVodDuration = (milliseconds: number): string => {
   if (isNaN(milliseconds) || milliseconds < 0) return "00:00";
   
   const totalSeconds = Math.floor(milliseconds / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
+  const hours = Math.floor((totalSeconds % 3600) / 60);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const remainingSeconds = totalSeconds % 60;
 
@@ -71,13 +71,10 @@ export const formatAnalyticsValue = (type: string, value: number): string => {
       const minutes = totalMinutes % 60;
       return `${hours}h ${minutes}m`;
     case 'STREAM_VIEWERS':
-    case 'UNIQUE_VIEWERS':
       if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
       return value.toFixed(1); // For average viewers, keep one decimal
     case 'FOLLOWER':
       if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-      return value.toString();
-    case 'UNIQUE_CHATTERS':
       return value.toString();
     default:
       return value.toString();

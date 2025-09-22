@@ -85,9 +85,7 @@ export const AnalyticsDiagramWidget: React.FC = () => {
   const getChartItemTitle = (itemType: AnalyticsItemType) => {
     switch (itemType) {
       case AnalyticsItemType.StreamViewers: return "Average Viewers";
-      case AnalyticsItemType.UniqueChatters: return "Unique Chatters";
       case AnalyticsItemType.StreamTime: return "Time Streamed";
-      case AnalyticsItemType.UniqueViewers: return "Unique Viewers";
       case AnalyticsItemType.Follower: return "Follows";
       default: return String(itemType);
     }
@@ -140,8 +138,6 @@ export const AnalyticsDiagramWidget: React.FC = () => {
               <SelectItem value={AnalyticsItemType.StreamViewers}>Average Viewers</SelectItem>
               <SelectItem value={AnalyticsItemType.Follower}>Follows</SelectItem>
               <SelectItem value={AnalyticsItemType.StreamTime}>Time Streamed</SelectItem>
-              <SelectItem value={AnalyticsItemType.UniqueChatters}>Unique Chatters</SelectItem>
-              <SelectItem value={AnalyticsItemType.UniqueViewers}>Unique Viewers</SelectItem>
             </SelectContent>
           </Select>
         </div>
