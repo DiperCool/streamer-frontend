@@ -34,7 +34,7 @@ export const AnalyticsDiagramWidget: React.FC<AnalyticsDiagramWidgetProps> = ({ 
   const streamerId = activeStreamer?.id ?? "";
   const searchParams = useSearchParams(); // Инициализируем useSearchParams
 
-  const [diagramType, setDiagramType] = useState<AnalyticsDiagramType>(AnalyticsDiagramType.Day);
+  const [diagramType, setDiagramType] = useState<AnalyticsDiagramType>(AnalyticsDiagramType.Week); // Изменено на Week
   const [itemType, setItemType] = useState<AnalyticsItemType>(AnalyticsItemType.StreamViewers);
   
   // Инициализируем dateRange из URL или устанавливаем значение по умолчанию
