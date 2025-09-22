@@ -20,45 +20,43 @@ import {
   AnalyticsItemType,
 } from "@/graphql/__generated__/graphql";
 import { useDashboard } from "@/src/contexts/DashboardContext";
-import { format, subDays, subWeeks, subMonths, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { format, subDays, subWeeks, subMonths, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { formatAnalyticsValue } from "@/lib/utils";
+import { useSearchParams } from "next/navigation"; // Импортируем useSearchParams
 
 export const AnalyticsDiagramWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
   const streamerId = activeStreamer?.id ?? "";
+  const searchParams = useSearchParams(); // Инициализируем useSearchParams
 
   const [diagramType, setDiagramType] = useState<AnalyticsDiagramType>(AnalyticsDiagramType.Day);
   const [itemType, setItemType] = useState<AnalyticsItemType>(AnalyticsItemType.StreamViewers);
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: startOfDay(subDays(new Date(), 6)),
-    to: endOfDay(new Date()),
+  
+  // Инициализируем dateRange из URL или устанавливаем значение по умолчанию
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>(() => {
+    const urlFrom = searchParams.get("from");
+    const urlTo = searchParams.get("to");
+    if (urlFrom && urlTo) {
+      return { from: parseISO(urlFrom), to: parseISO(urlTo) };
+    }
+    // Значение по умолчанию, если в URL нет параметров
+    const today = new Date();
+    return { from: startOfDay(subDays(today, 6)), to: endOfDay(today) };
   });
 
+  // Эффект для обновления dateRange при изменении URL-параметров
   useEffect(() => {
-    const today = new Date();
-    let newFrom: Date;
-    let newTo: Date;
+    const urlFrom = searchParams.get("from");
+    const urlTo = searchParams.get("to");
 
-    switch (diagramType) {
-      case AnalyticsDiagramType.Day:
-        newFrom = startOfDay(subDays(today, 6)); // Last 7 days
-        newTo = endOfDay(today);
-        break;
-      case AnalyticsDiagramType.Week:
-        newFrom = startOfWeek(subWeeks(today, 7), { weekStartsOn: 1 }); // Last 8 weeks (to show 7 full weeks + current partial)
-        newTo = endOfWeek(today, { weekStartsOn: 1 });
-        break;
-      case AnalyticsDiagramType.Month:
-        newFrom = startOfMonth(subMonths(today, 11)); // Last 12 months
-        newTo = endOfMonth(today);
-        break;
-      default:
-        newFrom = startOfDay(subDays(today, 6));
-        newTo = endOfDay(today);
-        break;
+    if (urlFrom && urlTo) {
+      setDateRange({ from: parseISO(urlFrom), to: parseISO(urlTo) });
+    } else {
+      // Если параметры удалены из URL, возвращаемся к значению по умолчанию
+      const today = new Date();
+      setDateRange({ from: startOfDay(subDays(today, 6)), to: endOfDay(today) });
     }
-    setDateRange({ from: newFrom, to: newTo });
-  }, [diagramType]);
+  }, [searchParams]); // Зависимость от searchParams
 
   const { data, loading, error } = useGetAnalyticsDiagramQuery({
     variables: {
@@ -66,8 +64,8 @@ export const AnalyticsDiagramWidget: React.FC = () => {
         broadcasterId: streamerId,
         analyticsDiagramType: diagramType,
         type: itemType,
-        from: dateRange.from.toISOString(),
-        to: dateRange.to.toISOString(),
+        from: dateRange.from?.toISOString() || "", // Используем dateRange из состояния
+        to: dateRange.to?.toISOString() || "",     // Используем dateRange из состояния
       },
     },
     skip: !streamerId || !dateRange.from || !dateRange.to,
@@ -77,13 +75,12 @@ export const AnalyticsDiagramWidget: React.FC = () => {
     if (!data?.analyticsDiagram) return [];
 
     return data.analyticsDiagram.map((item) => {
-      // Удалена логика форматирования item.title
       return {
         name: item.title, // Используем item.title напрямую
         value: item.value,
       };
     });
-  }, [data, diagramType]); // diagramType больше не влияет на форматирование title, но остается в зависимостях, если другие части useMemo его используют.
+  }, [data]); // diagramType больше не влияет на форматирование title, поэтому удаляем его из зависимостей
 
   const getChartItemTitle = (itemType: AnalyticsItemType) => {
     switch (itemType) {
