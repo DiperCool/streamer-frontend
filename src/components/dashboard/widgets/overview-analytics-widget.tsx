@@ -16,19 +16,17 @@ import {
   endOfMonth,
   addMonths,
   subMonths,
-  isSameMonth,
-  isSameYear,
-  isBefore,
   isAfter,
   startOfDay,
   endOfDay,
-  isWithinInterval,
+  differenceInDays,
+  addDays,
 } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatAnalyticsValue } from "@/lib/utils"; // Corrected import path
+import { formatAnalyticsValue } from "@/lib/utils";
 
 interface DateRange {
   from: Date | undefined;
@@ -106,7 +104,10 @@ export const OverviewAnalyticsWidget: React.FC = () => {
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
-      setDateRange({ from: startOfDay(range.from), to: endOfDay(range.to) });
+      // Ensure 'from' is always before or same as 'to'
+      const fromDate = startOfDay(range.from);
+      const toDate = endOfDay(range.to);
+      setDateRange({ from: fromDate, to: toDate });
       setSelectedPreset("custom");
     }
   };
@@ -142,32 +143,39 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     }
     setDateRange({ from: newFrom, to: newTo });
     setSelectedPreset(preset);
-    setIsCalendarOpen(false);
+    setIsCalendarOpen(false); // Close calendar after applying preset
   }, []);
 
   useEffect(() => {
-    applyPreset(selectedPreset); // Apply default preset on mount
-  }, [applyPreset, selectedPreset]);
+    // Apply default preset on mount if no custom range is set
+    if (!dateRange.from && !dateRange.to && selectedPreset === "last30days") {
+      applyPreset("last30days");
+    }
+  }, [applyPreset, dateRange.from, dateRange.to, selectedPreset]);
+
 
   const navigatePeriod = useCallback((direction: "prev" | "next") => {
     if (!dateRange.from || !dateRange.to) return;
 
-    const diffInDays = (dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24) + 1;
+    const currentRangeLength = differenceInDays(dateRange.to, dateRange.from) + 1;
     let newFrom: Date;
     let newTo: Date;
 
     if (direction === "prev") {
       newTo = subDays(dateRange.from, 1);
-      newFrom = subDays(newTo, diffInDays - 1);
+      newFrom = subDays(newTo, currentRangeLength - 1);
     } else { // "next"
-      newFrom = addMonths(dateRange.from, 1); // For simplicity, let's assume month-based navigation for now
-      newTo = endOfMonth(newFrom);
-      if (isAfter(newFrom, new Date())) { // Don't go past today
-        newFrom = startOfDay(new Date());
-        newTo = endOfDay(new Date());
+      newFrom = addDays(dateRange.to, 1);
+      newTo = addDays(newFrom, currentRangeLength - 1);
+      
+      // Prevent navigating past today's date for the 'to' date
+      const todayEnd = endOfDay(new Date());
+      if (isAfter(newTo, todayEnd)) {
+        newTo = todayEnd;
+        newFrom = subDays(newTo, currentRangeLength - 1);
       }
     }
-    setDateRange({ from: newFrom, to: newTo });
+    setDateRange({ from: startOfDay(newFrom), to: endOfDay(newTo) });
     setSelectedPreset("custom"); // Custom range after navigation
   }, [dateRange]);
 
