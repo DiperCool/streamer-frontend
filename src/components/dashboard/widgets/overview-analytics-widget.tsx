@@ -29,11 +29,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatAnalyticsValue } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 
-interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
-}
-
 interface AnalyticsItemDisplayProps {
   type: AnalyticsItemType;
   value: number;
@@ -77,22 +72,23 @@ export const OverviewAnalyticsWidget: React.FC = () => {
   const streamerId = activeStreamer?.id ?? "";
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isInitialMount = useRef(true);
 
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: undefined,
-    to: undefined,
-  });
+  // Directly read from and to from URL search parameters
+  const urlFrom = searchParams.get("from");
+  const urlTo = searchParams.get("to");
 
-  const { data, loading, error, refetch } = useGetOverviewAnalyticsQuery({
+  const parsedFrom = urlFrom ? startOfDay(parseISO(urlFrom)) : undefined;
+  const parsedTo = urlTo ? endOfDay(parseISO(urlTo)) : undefined;
+
+  const { data, loading, error } = useGetOverviewAnalyticsQuery({
     variables: {
       param: {
         broadcasterId: streamerId,
-        from: dateRange.from?.toISOString() || "",
-        to: dateRange.to?.toISOString() || "",
+        from: parsedFrom?.toISOString() || "",
+        to: parsedTo?.toISOString() || "",
       },
     },
-    skip: !streamerId || !dateRange.from || !dateRange.to,
+    skip: !streamerId || !parsedFrom || !parsedTo,
   });
 
   const analyticsData = data?.overviewAnalytics;
@@ -116,15 +112,15 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     return "custom";
   }, []);
 
-  // Derive selectedPreset directly from dateRange
+  // Derive selectedPreset directly from URL params
   const selectedPreset = useMemo(() => {
-    if (!dateRange.from || !dateRange.to) {
-      return "custom"; // Or some default if dates are not set
+    if (!parsedFrom || !parsedTo) {
+      return "custom";
     }
-    return getPresetFromDates(dateRange.from, dateRange.to);
-  }, [dateRange, getPresetFromDates]);
+    return getPresetFromDates(parsedFrom, parsedTo);
+  }, [parsedFrom, parsedTo, getPresetFromDates]);
 
-  // Function to apply presets
+  // Function to apply presets by updating URL
   const applyPreset = useCallback((preset: string) => {
     const today = new Date();
     let newFrom: Date;
@@ -152,68 +148,34 @@ export const OverviewAnalyticsWidget: React.FC = () => {
         newTo = endOfDay(today);
         break;
       default:
-        // If preset is 'custom', we don't change dates here,
-        // as 'custom' implies dates are already set manually or derived.
-        return;
+        return; // Do nothing for 'custom' preset here
     }
-    setDateRange({ from: newFrom, to: newTo });
-  }, []);
-
-  // Effect to initialize state from URL on first mount
-  useEffect(() => {
-    if (isInitialMount.current) {
-      const urlFrom = searchParams.get("from");
-      const urlTo = searchParams.get("to");
-
-      if (urlFrom && urlTo) {
-        const fromDate = parseISO(urlFrom);
-        const toDate = parseISO(urlTo);
-        setDateRange({ from: fromDate, to: toDate });
-      } else {
-        // Default if no params
-        applyPreset("last30days");
-      }
-      isInitialMount.current = false;
-    }
-  }, [searchParams, applyPreset]);
-
-  // Effect to update URL when dateRange changes
-  useEffect(() => {
-    if (isInitialMount.current) return; // Prevent running on initial mount
-
     const currentPath = `/dashboard/${activeStreamer?.userName}/analytics`;
     const newSearchParams = new URLSearchParams();
+    newSearchParams.set("from", format(newFrom, "yyyy-MM-dd"));
+    newSearchParams.set("to", format(newTo, "yyyy-MM-dd"));
+    router.push(`${currentPath}?${newSearchParams.toString()}`, { scroll: false });
+  }, [activeStreamer?.userName, router]);
 
-    if (dateRange.from && dateRange.to) {
-      newSearchParams.set("from", format(dateRange.from, "yyyy-MM-dd"));
-      newSearchParams.set("to", format(dateRange.to, "yyyy-MM-dd"));
-    }
-    // No need to set 'preset' in URL anymore, as it's derived.
-
-    router.replace(`${currentPath}?${newSearchParams.toString()}`, { scroll: false });
-  }, [dateRange, router, activeStreamer?.userName]);
-
-
-  // Effect to refetch when streamerId or dateRange changes
+  // Effect to set default preset if no dates in URL on initial load
   useEffect(() => {
-    if (streamerId && dateRange.from && dateRange.to) {
-      refetch();
+    if (!urlFrom || !urlTo) {
+      applyPreset("last30days");
     }
-  }, [streamerId, dateRange, refetch]);
-
+  }, [urlFrom, urlTo, applyPreset]);
 
   const navigatePeriod = useCallback((direction: "prev" | "next") => {
-    if (!dateRange.from || !dateRange.to) return;
+    if (!parsedFrom || !parsedTo) return;
 
-    const currentRangeLength = differenceInDays(dateRange.to, dateRange.from);
+    const currentRangeLength = differenceInDays(parsedTo, parsedFrom);
     let newFrom: Date;
     let newTo: Date;
 
     if (direction === "prev") {
-      newTo = subDays(dateRange.from, 1);
+      newTo = subDays(parsedFrom, 1);
       newFrom = subDays(newTo, currentRangeLength);
     } else { // "next"
-      newFrom = addDays(dateRange.to, 1);
+      newFrom = addDays(parsedTo, 1);
       newTo = addDays(newFrom, currentRangeLength);
       
       const todayEnd = endOfDay(new Date());
@@ -224,11 +186,16 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     }
     const finalFrom = startOfDay(newFrom);
     const finalTo = endOfDay(newTo);
-    setDateRange({ from: finalFrom, to: finalTo });
-  }, [dateRange]);
 
-  const formattedDateRange = dateRange.from && dateRange.to
-    ? `${format(dateRange.from, "MMM dd, yyyy")} – ${format(dateRange.to, "MMM dd, yyyy")}`
+    const currentPath = `/dashboard/${activeStreamer?.userName}/analytics`;
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set("from", format(finalFrom, "yyyy-MM-dd"));
+    newSearchParams.set("to", format(finalTo, "yyyy-MM-dd"));
+    router.push(`${currentPath}?${newSearchParams.toString()}`, { scroll: false });
+  }, [parsedFrom, parsedTo, activeStreamer?.userName, router]);
+
+  const formattedDateRange = parsedFrom && parsedTo
+    ? `${format(parsedFrom, "MMM dd, yyyy")} – ${format(parsedTo, "MMM dd, yyyy")}`
     : "Select a date range";
 
   if (!streamerId) {
@@ -273,7 +240,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
             <SelectItem value="thismonth">This Month</SelectItem>
             <SelectItem value="lastmonth">Last Month</SelectItem>
             <SelectItem value="thisyear">This Year</SelectItem>
-            <SelectItem value="custom">Custom Range</SelectItem> {/* Added Custom Range */}
+            <SelectItem value="custom">Custom Range</SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
@@ -290,7 +257,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
-        <div className="grid grid-cols-3 flex-1"> {/* Изменено с grid-cols-5 на grid-cols-3 */}
+        <div className="grid grid-cols-3 flex-1">
           {overviewItems.map((item, index) => (
             <AnalyticsItemDisplay
               key={index}

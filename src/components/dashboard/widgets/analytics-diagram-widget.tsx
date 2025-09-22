@@ -37,31 +37,12 @@ export const AnalyticsDiagramWidget: React.FC<AnalyticsDiagramWidgetProps> = ({ 
   const [diagramType, setDiagramType] = useState<AnalyticsDiagramType>(AnalyticsDiagramType.Week); // Изменено на Week
   const [itemType, setItemType] = useState<AnalyticsItemType>(AnalyticsItemType.StreamViewers);
   
-  // Инициализируем dateRange из URL или устанавливаем значение по умолчанию
-  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>(() => {
-    const urlFrom = searchParams.get("from");
-    const urlTo = searchParams.get("to");
-    if (urlFrom && urlTo) {
-      return { from: parseISO(urlFrom), to: parseISO(urlTo) };
-    }
-    // Значение по умолчанию, если в URL нет параметров
-    const today = new Date();
-    return { from: startOfDay(subDays(today, 6)), to: endOfDay(today) };
-  });
+  // Directly read from and to from URL search parameters
+  const urlFrom = searchParams.get("from");
+  const urlTo = searchParams.get("to");
 
-  // Эффект для обновления dateRange при изменении URL-параметров
-  useEffect(() => {
-    const urlFrom = searchParams.get("from");
-    const urlTo = searchParams.get("to");
-
-    if (urlFrom && urlTo) {
-      setDateRange({ from: parseISO(urlFrom), to: parseISO(urlTo) });
-    } else {
-      // Если параметры удалены из URL, возвращаемся к значению по умолчанию
-      const today = new Date();
-      setDateRange({ from: startOfDay(subDays(today, 6)), to: endOfDay(today) });
-    }
-  }, [searchParams]); // Зависимость от searchParams
+  const parsedFrom = urlFrom ? startOfDay(parseISO(urlFrom)) : undefined;
+  const parsedTo = urlTo ? endOfDay(parseISO(urlTo)) : undefined;
 
   const { data, loading, error } = useGetAnalyticsDiagramQuery({
     variables: {
@@ -69,11 +50,11 @@ export const AnalyticsDiagramWidget: React.FC<AnalyticsDiagramWidgetProps> = ({ 
         broadcasterId: streamerId,
         analyticsDiagramType: diagramType,
         type: itemType,
-        from: dateRange.from?.toISOString() || "", // Используем dateRange из состояния
-        to: dateRange.to?.toISOString() || "",     // Используем dateRange из состояния
+        from: parsedFrom?.toISOString() || "",
+        to: parsedTo?.toISOString() || "",
       },
     },
-    skip: !streamerId || !dateRange.from || !dateRange.to,
+    skip: !streamerId || !parsedFrom || !parsedTo,
   });
 
   const chartData = useMemo(() => {
