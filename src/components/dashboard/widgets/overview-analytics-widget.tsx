@@ -22,6 +22,7 @@ import {
   differenceInDays,
   addDays,
   parseISO,
+  isSameDay,
 } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -97,6 +98,25 @@ export const OverviewAnalyticsWidget: React.FC = () => {
 
   const analyticsData = data?.overviewAnalytics;
 
+  // Helper to check if a date range matches a preset
+  const getPresetFromDates = useCallback((from: Date, to: Date): string => {
+    const today = new Date();
+    const presets = {
+      "last7days": { from: startOfDay(subDays(today, 6)), to: endOfDay(today) },
+      "last30days": { from: startOfDay(subDays(today, 29)), to: endOfDay(today) },
+      "thismonth": { from: startOfMonth(today), to: endOfDay(today) },
+      "lastmonth": { from: startOfMonth(subMonths(today, 1)), to: endOfMonth(subMonths(today, 1)) },
+      "thisyear": { from: new Date(today.getFullYear(), 0, 1), to: endOfDay(today) },
+    };
+
+    for (const [key, presetDates] of Object.entries(presets)) {
+      if (isSameDay(from, presetDates.from) && isSameDay(to, presetDates.to)) {
+        return key;
+      }
+    }
+    return "custom";
+  }, []);
+
   // Function to apply presets, now also updates URL
   const applyPreset = useCallback((preset: string, updateUrl: boolean = true) => {
     const today = new Date();
@@ -139,8 +159,10 @@ export const OverviewAnalyticsWidget: React.FC = () => {
       const urlPreset = searchParams.get("preset");
 
       if (urlFrom && urlTo) {
-        setDateRange({ from: parseISO(urlFrom), to: parseISO(urlTo) });
-        setSelectedPreset("custom");
+        const fromDate = parseISO(urlFrom);
+        const toDate = parseISO(urlTo);
+        setDateRange({ from: fromDate, to: toDate });
+        setSelectedPreset(getPresetFromDates(fromDate, toDate)); // Determine preset from URL dates
       } else if (urlPreset) {
         applyPreset(urlPreset, false); // Don't update URL again on initial load
       } else {
@@ -148,7 +170,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
       }
       isInitialMount.current = false;
     }
-  }, [searchParams, applyPreset]);
+  }, [searchParams, applyPreset, getPresetFromDates]);
 
   // Effect to update URL when dateRange or selectedPreset changes
   useEffect(() => {
@@ -196,9 +218,11 @@ export const OverviewAnalyticsWidget: React.FC = () => {
         newFrom = subDays(newTo, currentRangeLength);
       }
     }
-    setDateRange({ from: startOfDay(newFrom), to: endOfDay(newTo) });
-    setSelectedPreset("custom");
-  }, [dateRange]);
+    const finalFrom = startOfDay(newFrom);
+    const finalTo = endOfDay(newTo);
+    setDateRange({ from: finalFrom, to: finalTo });
+    setSelectedPreset(getPresetFromDates(finalFrom, finalTo)); // Determine preset after navigation
+  }, [dateRange, getPresetFromDates]);
 
   const formattedDateRange = dateRange.from && dateRange.to
     ? `${format(dateRange.from, "MMM dd, yyyy")} – ${format(dateRange.to, "MMM dd, yyyy")}`
