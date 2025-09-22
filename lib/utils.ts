@@ -1,6 +1,85 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { intervalToDuration, formatDuration } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export const getMinioUrl = (fileName: string | null | undefined): string => {
+  if (!fileName || typeof fileName !== 'string') {
+    // Возвращаем путь к изображению-заглушке, если fileName null, undefined или не строка
+    return "/placeholder.jpg"; 
+  }
+  
+  // Если это уже локальный статический путь, возвращаем его напрямую
+  if (fileName.startsWith('/')) {
+    return fileName;
+  }
+  
+  // Убедимся, что NEXT_PUBLIC_MINIO_URL определен
+  if (!process.env.NEXT_PUBLIC_MINIO_URL) {
+    console.error("NEXT_PUBLIC_MINIO_URL is not defined. Minio URLs might be broken. Falling back to provided filename.");
+    return fileName; // Если URL отсутствует, возвращаем само имя файла (которое здесь является строкой)
+  }
+  
+  // Формируем полный URL Minio
+  return `${process.env.NEXT_PUBLIC_MINIO_URL}/${fileName}`;
+};
+
+// Helper function to format duration from milliseconds into HH:MM:SS
+export const formatVodDuration = (milliseconds: number): string => {
+  if (isNaN(milliseconds) || milliseconds < 0) return "00:00";
+  
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  const parts = [];
+  if (hours > 0) parts.push(String(hours).padStart(2, '0'));
+  parts.push(String(minutes).padStart(2, '0'));
+  parts.push(String(remainingSeconds).padStart(2, '0'));
+
+  return parts.join(':');
+};
+
+// Helper function to format live stream duration in HH:MM:SS
+export const formatLiveDuration = (startDate: string | null | undefined): string => {
+  if (!startDate) return "00:00:00";
+  
+  const start = new Date(startDate);
+  const now = new Date();
+
+  if (isNaN(start.getTime())) return "00:00:00";
+
+  const duration = intervalToDuration({ start, end: now });
+
+  const hours = duration.hours ? String(duration.hours).padStart(2, '0') : '00';
+  const minutes = duration.minutes ? String(duration.minutes).padStart(2, '0') : '00';
+  const seconds = duration.seconds ? String(duration.seconds).padStart(2, '0') : '00';
+
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+export const formatAnalyticsValue = (type: string, value: number): string => {
+  switch (type) {
+    case 'STREAM_TIME':
+      const totalMinutes = Math.round(value / 60); // Assuming value is in seconds
+      if (totalMinutes < 60) return `${totalMinutes}m`;
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      return `${hours}h ${minutes}m`;
+    case 'STREAM_VIEWERS':
+    case 'UNIQUE_VIEWERS':
+      if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+      return value.toFixed(1); // For average viewers, keep one decimal
+    case 'FOLLOWER':
+      if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+      return value.toString();
+    case 'UNIQUE_CHATTERS':
+      return value.toString();
+    default:
+      return value.toString();
+  }
+};

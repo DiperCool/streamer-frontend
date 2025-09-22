@@ -13,6 +13,7 @@ import { useDashboard } from "@/src/contexts/DashboardContext";
 import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget";
 import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget";
 import { SessionInfoWidget } from "@/src/components/dashboard/widgets/session-info-widget";
+import { OverviewAnalyticsWidget } from "@/src/components/dashboard/widgets/overview-analytics-widget"; // Import the new widget
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
 const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
@@ -20,7 +21,7 @@ const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
 export enum DashboardWidgetType {
   SessionInfo = "SessionInfo",
   StreamPreview = "StreamPreview",
-  ActivityFeed = "ActivityFeed",
+  OverviewAnalytics = "OverviewAnalytics", // Renamed from ActivityFeed
   Chat = "Chat",
   StreamInfo = "StreamInfo",
   ModActions = "ModActions",
@@ -29,7 +30,7 @@ export enum DashboardWidgetType {
 const DEFAULT_ACTIVE_WIDGETS: DashboardWidgetType[] = [
   DashboardWidgetType.SessionInfo,
   DashboardWidgetType.StreamPreview,
-  DashboardWidgetType.ActivityFeed,
+  DashboardWidgetType.OverviewAnalytics, // Use new widget type
   DashboardWidgetType.Chat,
   DashboardWidgetType.StreamInfo,
   DashboardWidgetType.ModActions,
@@ -66,16 +67,9 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             </CardContent>
           </Card>
         );
-      case DashboardWidgetType.ActivityFeed:
+      case DashboardWidgetType.OverviewAnalytics: // Use new widget type
         return (
-          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-              <CardTitle className="text-white text-base">Activity Feed</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col">
-              Activity Feed content goes here.
-            </CardContent>
-          </Card>
+          <OverviewAnalyticsWidget />
         );
       case DashboardWidgetType.Chat:
         return (
@@ -123,7 +117,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   const leftColumnWidgetsOrder = [
     DashboardWidgetType.SessionInfo,
     DashboardWidgetType.StreamPreview,
-    DashboardWidgetType.ActivityFeed,
+    DashboardWidgetType.OverviewAnalytics, // Use new widget type
   ];
   const topRightSectionWidgetsOrder = [
     DashboardWidgetType.Chat,

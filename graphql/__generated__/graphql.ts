@@ -21,6 +21,24 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export type AnalyticsDiagramItem = {
+  __typename?: 'AnalyticsDiagramItem';
+  title: Scalars['String']['output'];
+  value: Scalars['Long']['output'];
+};
+
+export enum AnalyticsDiagramType {
+  Day = 'DAY',
+  Month = 'MONTH',
+  Week = 'WEEK'
+}
+
+export enum AnalyticsItemType {
+  Follower = 'FOLLOWER',
+  StreamTime = 'STREAM_TIME',
+  StreamViewers = 'STREAM_VIEWERS'
+}
+
 /** Defines when a policy shall be executed. */
 export enum ApplyPolicy {
   /** After the resolver was executed. */
@@ -370,9 +388,29 @@ export type FollowResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type GetAnalyticsDiagramInput = {
+  analyticsDiagramType: AnalyticsDiagramType;
+  broadcasterId: Scalars['String']['input'];
+  from: Scalars['DateTime']['input'];
+  to: Scalars['DateTime']['input'];
+  type: AnalyticsItemType;
+};
+
 export type GetEmailResponse = {
   __typename?: 'GetEmailResponse';
   email: Scalars['String']['output'];
+};
+
+export type GetOverviewAnalyticsInput = {
+  broadcasterId: Scalars['String']['input'];
+  from: Scalars['DateTime']['input'];
+  to: Scalars['DateTime']['input'];
+};
+
+export type GetOverviewAnalyticsResponse = {
+  __typename?: 'GetOverviewAnalyticsResponse';
+  days: Scalars['Int']['output'];
+  items: Array<OverviewAnalyticsItem>;
 };
 
 export type LongOperationFilterInput = {
@@ -677,6 +715,12 @@ export type NotificationsEdge = {
   node: NotificationDto;
 };
 
+export type OverviewAnalyticsItem = {
+  __typename?: 'OverviewAnalyticsItem';
+  type: AnalyticsItemType;
+  value: Scalars['Float']['output'];
+};
+
 /** Information about pagination in a connection. */
 export type PageInfo = {
   __typename?: 'PageInfo';
@@ -751,6 +795,7 @@ export type ProfileDto = {
 
 export type Query = {
   __typename?: 'Query';
+  analyticsDiagram: Array<AnalyticsDiagramItem>;
   bannedUsers?: Maybe<BannedUsersConnection>;
   banners: Array<BannerDto>;
   categories?: Maybe<CategoriesConnection>;
@@ -769,6 +814,7 @@ export type Query = {
   mySystemRole: SystemRoleDto;
   notificationSettings: NotificationSettingsDto;
   notifications?: Maybe<NotificationsConnection>;
+  overviewAnalytics: GetOverviewAnalyticsResponse;
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
@@ -785,6 +831,11 @@ export type Query = {
   vod: VodDto;
   vodSettings: VodSettingsDto;
   vods?: Maybe<VodsConnection>;
+};
+
+
+export type QueryAnalyticsDiagramArgs = {
+  param: GetAnalyticsDiagramInput;
 };
 
 
@@ -888,6 +939,11 @@ export type QueryNotificationsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<Array<NotificationDtoSortInput>>;
   where?: InputMaybe<NotificationDtoFilterInput>;
+};
+
+
+export type QueryOverviewAnalyticsArgs = {
+  param: GetOverviewAnalyticsInput;
 };
 
 
@@ -1680,6 +1736,20 @@ export type VodsEdge = {
   node: VodDto;
 };
 
+export type GetAnalyticsDiagramQueryVariables = Exact<{
+  param: GetAnalyticsDiagramInput;
+}>;
+
+
+export type GetAnalyticsDiagramQuery = { __typename?: 'Query', analyticsDiagram: Array<{ __typename?: 'AnalyticsDiagramItem', title: string, value: number }> };
+
+export type GetOverviewAnalyticsQueryVariables = Exact<{
+  param: GetOverviewAnalyticsInput;
+}>;
+
+
+export type GetOverviewAnalyticsQuery = { __typename?: 'Query', overviewAnalytics: { __typename?: 'GetOverviewAnalyticsResponse', days: number, items: Array<{ __typename?: 'OverviewAnalyticsItem', type: AnalyticsItemType, value: number }> } };
+
 export type CreateBannerMutationVariables = Exact<{
   banner: CreateBannerInput;
 }>;
@@ -2270,6 +2340,91 @@ export type GetVodSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetVodSettingsQuery = { __typename?: 'Query', vodSettings: { __typename?: 'VodSettingsDto', id: string, vodEnabled: boolean } };
 
 
+export const GetAnalyticsDiagramDocument = gql`
+    query GetAnalyticsDiagram($param: GetAnalyticsDiagramInput!) {
+  analyticsDiagram(param: $param) {
+    title
+    value
+  }
+}
+    `;
+
+/**
+ * __useGetAnalyticsDiagramQuery__
+ *
+ * To run a query within a React component, call `useGetAnalyticsDiagramQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAnalyticsDiagramQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAnalyticsDiagramQuery({
+ *   variables: {
+ *      param: // value for 'param'
+ *   },
+ * });
+ */
+export function useGetAnalyticsDiagramQuery(baseOptions: Apollo.QueryHookOptions<GetAnalyticsDiagramQuery, GetAnalyticsDiagramQueryVariables> & ({ variables: GetAnalyticsDiagramQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAnalyticsDiagramQuery, GetAnalyticsDiagramQueryVariables>(GetAnalyticsDiagramDocument, options);
+      }
+export function useGetAnalyticsDiagramLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAnalyticsDiagramQuery, GetAnalyticsDiagramQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAnalyticsDiagramQuery, GetAnalyticsDiagramQueryVariables>(GetAnalyticsDiagramDocument, options);
+        }
+export function useGetAnalyticsDiagramSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAnalyticsDiagramQuery, GetAnalyticsDiagramQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetAnalyticsDiagramQuery, GetAnalyticsDiagramQueryVariables>(GetAnalyticsDiagramDocument, options);
+        }
+export type GetAnalyticsDiagramQueryHookResult = ReturnType<typeof useGetAnalyticsDiagramQuery>;
+export type GetAnalyticsDiagramLazyQueryHookResult = ReturnType<typeof useGetAnalyticsDiagramLazyQuery>;
+export type GetAnalyticsDiagramSuspenseQueryHookResult = ReturnType<typeof useGetAnalyticsDiagramSuspenseQuery>;
+export type GetAnalyticsDiagramQueryResult = Apollo.QueryResult<GetAnalyticsDiagramQuery, GetAnalyticsDiagramQueryVariables>;
+export const GetOverviewAnalyticsDocument = gql`
+    query GetOverviewAnalytics($param: GetOverviewAnalyticsInput!) {
+  overviewAnalytics(param: $param) {
+    days
+    items {
+      type
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetOverviewAnalyticsQuery__
+ *
+ * To run a query within a React component, call `useGetOverviewAnalyticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOverviewAnalyticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOverviewAnalyticsQuery({
+ *   variables: {
+ *      param: // value for 'param'
+ *   },
+ * });
+ */
+export function useGetOverviewAnalyticsQuery(baseOptions: Apollo.QueryHookOptions<GetOverviewAnalyticsQuery, GetOverviewAnalyticsQueryVariables> & ({ variables: GetOverviewAnalyticsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOverviewAnalyticsQuery, GetOverviewAnalyticsQueryVariables>(GetOverviewAnalyticsDocument, options);
+      }
+export function useGetOverviewAnalyticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOverviewAnalyticsQuery, GetOverviewAnalyticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOverviewAnalyticsQuery, GetOverviewAnalyticsQueryVariables>(GetOverviewAnalyticsDocument, options);
+        }
+export function useGetOverviewAnalyticsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetOverviewAnalyticsQuery, GetOverviewAnalyticsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetOverviewAnalyticsQuery, GetOverviewAnalyticsQueryVariables>(GetOverviewAnalyticsDocument, options);
+        }
+export type GetOverviewAnalyticsQueryHookResult = ReturnType<typeof useGetOverviewAnalyticsQuery>;
+export type GetOverviewAnalyticsLazyQueryHookResult = ReturnType<typeof useGetOverviewAnalyticsLazyQuery>;
+export type GetOverviewAnalyticsSuspenseQueryHookResult = ReturnType<typeof useGetOverviewAnalyticsSuspenseQuery>;
+export type GetOverviewAnalyticsQueryResult = Apollo.QueryResult<GetOverviewAnalyticsQuery, GetOverviewAnalyticsQueryVariables>;
 export const CreateBannerDocument = gql`
     mutation CreateBanner($banner: CreateBannerInput!) {
   createBanner(banner: $banner) {
