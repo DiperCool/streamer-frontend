@@ -1060,12 +1060,14 @@ input FollowInput {
 
 input GetAnalyticsDiagramInput {
     analyticsDiagramType: AnalyticsDiagramType!
+    broadcasterId: String!
     from: DateTime!
     to: DateTime!
     type: AnalyticsItemType!
 }
 
 input GetOverviewAnalyticsInput {
+    broadcasterId: String!
     from: DateTime!
     to: DateTime!
 }
