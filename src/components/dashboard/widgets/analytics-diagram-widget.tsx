@@ -77,20 +77,13 @@ export const AnalyticsDiagramWidget: React.FC = () => {
     if (!data?.analyticsDiagram) return [];
 
     return data.analyticsDiagram.map((item) => {
-      let formattedTitle = item.title;
-      if (diagramType === AnalyticsDiagramType.Day) {
-        formattedTitle = format(new Date(item.title), "MMM dd");
-      } else if (diagramType === AnalyticsDiagramType.Week) {
-        formattedTitle = `Week ${format(new Date(item.title), "ww")}`;
-      } else if (diagramType === AnalyticsDiagramType.Month) {
-        formattedTitle = format(new Date(item.title), "MMM yyyy");
-      }
+      // Удалена логика форматирования item.title
       return {
-        name: formattedTitle,
+        name: item.title, // Используем item.title напрямую
         value: item.value,
       };
     });
-  }, [data, diagramType]);
+  }, [data, diagramType]); // diagramType больше не влияет на форматирование title, но остается в зависимостях, если другие части useMemo его используют.
 
   const getChartItemTitle = (itemType: AnalyticsItemType) => {
     switch (itemType) {
