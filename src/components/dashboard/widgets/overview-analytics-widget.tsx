@@ -152,6 +152,8 @@ export const OverviewAnalyticsWidget: React.FC = () => {
         newTo = endOfDay(today);
         break;
       default:
+        // If preset is 'custom', we don't change dates here,
+        // as 'custom' implies dates are already set manually or derived.
         return;
     }
     setDateRange({ from: newFrom, to: newTo });
@@ -173,7 +175,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
       }
       isInitialMount.current = false;
     }
-  }, [searchParams, applyPreset]); // Removed getPresetFromDates from dependencies as it's used in useMemo
+  }, [searchParams, applyPreset]);
 
   // Effect to update URL when dateRange changes
   useEffect(() => {
@@ -223,7 +225,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
     const finalFrom = startOfDay(newFrom);
     const finalTo = endOfDay(newTo);
     setDateRange({ from: finalFrom, to: finalTo });
-  }, [dateRange]); // Removed getPresetFromDates from dependencies as it's used in useMemo
+  }, [dateRange]);
 
   const formattedDateRange = dateRange.from && dateRange.to
     ? `${format(dateRange.from, "MMM dd, yyyy")} – ${format(dateRange.to, "MMM dd, yyyy")}`
@@ -271,6 +273,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
             <SelectItem value="thismonth">This Month</SelectItem>
             <SelectItem value="lastmonth">Last Month</SelectItem>
             <SelectItem value="thisyear">This Year</SelectItem>
+            <SelectItem value="custom">Custom Range</SelectItem> {/* Added Custom Range */}
           </SelectContent>
         </Select>
       </CardHeader>
