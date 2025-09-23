@@ -77,3 +77,40 @@ export const GET_MY_FOLLOWINGS = gql`
         }
     }
 `
+
+export const GET_MY_FOLLOWERS = gql`
+    query GetMyFollowers(
+        $after: String
+        $before: String
+        $first: Int
+        $last: Int
+        $order: [FollowerDtoSortInput!]
+        $where: FollowerDtoFilterInput
+    ) {
+        myFollowers(
+            after: $after
+            before: $before
+            first: $first
+            last: $last
+            order: $order
+            where: $where
+        ) {
+            nodes {
+                followerStreamerId
+                followedAt
+                followerStreamer {
+                    id
+                    userName
+                    avatar
+                    isLive
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                hasPreviousPage
+                startCursor
+            }
+        }
+    }
+`
