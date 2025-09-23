@@ -20,9 +20,6 @@ export default function ChannelLayout({
 
   // Determine the active tab based on the current pathname
   const getActiveTab = () => {
-    if (pathname.includes(`/dashboard/${streamerUsername}/channel/chat/banned-users`)) {
-      return "banned-users";
-    }
     if (pathname.includes(`/dashboard/${streamerUsername}/channel/chat`)) {
       return "chat-settings";
     }
@@ -30,17 +27,40 @@ export default function ChannelLayout({
       return "roles";
     }
     if (pathname.includes(`/dashboard/${streamerUsername}/channel/community`)) {
-      return "community";
+      return "community"; // Теперь это будет ссылка на макет сообщества
     }
-    // Removed notifications tab check
     return "stream-info"; // Default tab
   };
   const activeTab = getActiveTab();
 
   return (
     <div className="space-y-8">
-      {/* Удален заголовок Channel Management */}
-      {/* Удалены Tabs и все связанные с ними компоненты */}
+      <h1 className="text-3xl font-bold mb-2 text-white">Channel Management</h1> {/* Добавлен заголовок */}
+
+      <Tabs value={activeTab} className="w-full">
+        <TabsList className="bg-gray-900 mb-8" currentValue={activeTab}>
+          <Link href={`/dashboard/${streamerUsername}/channel/stream-info`} passHref>
+            <TabsTrigger value="stream-info">
+              Stream Info
+            </TabsTrigger>
+          </Link>
+          <Link href={`/dashboard/${streamerUsername}/channel/chat`} passHref>
+            <TabsTrigger value="chat-settings">
+              Chat
+            </TabsTrigger>
+          </Link>
+          <Link href={`/dashboard/${streamerUsername}/channel/roles`} passHref>
+            <TabsTrigger value="roles">
+              Roles
+            </TabsTrigger>
+          </Link>
+          <Link href={`/dashboard/${streamerUsername}/channel/community/overview`} passHref> {/* Обновлена ссылка */}
+            <TabsTrigger value="community">
+              Community
+            </TabsTrigger>
+          </Link>
+        </TabsList>
+      </Tabs>
       {children}
     </div>
   );

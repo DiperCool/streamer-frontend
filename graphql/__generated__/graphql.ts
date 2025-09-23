@@ -24,7 +24,7 @@ export type Scalars = {
 export type AnalyticsDiagramItem = {
   __typename?: 'AnalyticsDiagramItem';
   title: Scalars['String']['output'];
-  value: Scalars['Long']['output'];
+  value: Scalars['Float']['output'];
 };
 
 export enum AnalyticsDiagramType {
@@ -388,6 +388,25 @@ export type FollowResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type FollowerDto = {
+  __typename?: 'FollowerDto';
+  followedAt?: Maybe<Scalars['DateTime']['output']>;
+  followerStreamer?: Maybe<StreamerDto>;
+  followerStreamerId: Scalars['String']['output'];
+};
+
+export type FollowerDtoFilterInput = {
+  and?: InputMaybe<Array<FollowerDtoFilterInput>>;
+  followedAt?: InputMaybe<DateTimeOperationFilterInput>;
+  followerStreamerId?: InputMaybe<StringOperationFilterInput>;
+  or?: InputMaybe<Array<FollowerDtoFilterInput>>;
+};
+
+export type FollowerDtoSortInput = {
+  followedAt?: InputMaybe<SortEnumType>;
+  followerStreamerId?: InputMaybe<SortEnumType>;
+};
+
 export type GetAnalyticsDiagramInput = {
   analyticsDiagramType: AnalyticsDiagramType;
   broadcasterId: Scalars['String']['input'];
@@ -621,6 +640,26 @@ export type MutationUploadArgs = {
 };
 
 /** A connection to a list of items. */
+export type MyFollowersConnection = {
+  __typename?: 'MyFollowersConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<MyFollowersEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<FollowerDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type MyFollowersEdge = {
+  __typename?: 'MyFollowersEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: FollowerDto;
+};
+
+/** A connection to a list of items. */
 export type MyFollowingsConnection = {
   __typename?: 'MyFollowingsConnection';
   /** A list of edges. */
@@ -808,6 +847,7 @@ export type Query = {
   currentStream: StreamDto;
   me: StreamerMeDto;
   myEmail: GetEmailResponse;
+  myFollowers?: Maybe<MyFollowersConnection>;
   myFollowings?: Maybe<MyFollowingsConnection>;
   myRole: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
@@ -903,6 +943,17 @@ export type QueryChatMessagesHistoryArgs = {
 
 export type QueryCurrentStreamArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryMyFollowersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<FollowerDtoSortInput>>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<FollowerDtoFilterInput>;
 };
 
 
@@ -2203,6 +2254,18 @@ export type GetMyFollowingsQueryVariables = Exact<{
 
 
 export type GetMyFollowingsQuery = { __typename?: 'Query', myFollowings?: { __typename?: 'MyFollowingsConnection', nodes?: Array<{ __typename?: 'StreamerFollowerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean, currentStream?: { __typename?: 'StreamDto', id: string, title: string, currentViewers: number, category?: { __typename?: 'CategoryDto', id: string, title: string } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetMyFollowersQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<FollowerDtoSortInput> | FollowerDtoSortInput>;
+  where?: InputMaybe<FollowerDtoFilterInput>;
+}>;
+
+
+export type GetMyFollowersQuery = { __typename?: 'Query', myFollowers?: { __typename?: 'MyFollowersConnection', nodes?: Array<{ __typename?: 'FollowerDto', followerStreamerId: string, followedAt?: string | null, followerStreamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type StreamUpdatedSubscriptionVariables = Exact<{
   streamId: Scalars['UUID']['input'];
@@ -5102,6 +5165,73 @@ export type GetMyFollowingsQueryHookResult = ReturnType<typeof useGetMyFollowing
 export type GetMyFollowingsLazyQueryHookResult = ReturnType<typeof useGetMyFollowingsLazyQuery>;
 export type GetMyFollowingsSuspenseQueryHookResult = ReturnType<typeof useGetMyFollowingsSuspenseQuery>;
 export type GetMyFollowingsQueryResult = Apollo.QueryResult<GetMyFollowingsQuery, GetMyFollowingsQueryVariables>;
+export const GetMyFollowersDocument = gql`
+    query GetMyFollowers($after: String, $before: String, $first: Int, $last: Int, $order: [FollowerDtoSortInput!], $where: FollowerDtoFilterInput) {
+  myFollowers(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    where: $where
+  ) {
+    nodes {
+      followerStreamerId
+      followedAt
+      followerStreamer {
+        id
+        userName
+        avatar
+        isLive
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetMyFollowersQuery__
+ *
+ * To run a query within a React component, call `useGetMyFollowersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyFollowersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyFollowersQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetMyFollowersQuery(baseOptions?: Apollo.QueryHookOptions<GetMyFollowersQuery, GetMyFollowersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMyFollowersQuery, GetMyFollowersQueryVariables>(GetMyFollowersDocument, options);
+      }
+export function useGetMyFollowersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyFollowersQuery, GetMyFollowersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMyFollowersQuery, GetMyFollowersQueryVariables>(GetMyFollowersDocument, options);
+        }
+export function useGetMyFollowersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMyFollowersQuery, GetMyFollowersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetMyFollowersQuery, GetMyFollowersQueryVariables>(GetMyFollowersDocument, options);
+        }
+export type GetMyFollowersQueryHookResult = ReturnType<typeof useGetMyFollowersQuery>;
+export type GetMyFollowersLazyQueryHookResult = ReturnType<typeof useGetMyFollowersLazyQuery>;
+export type GetMyFollowersSuspenseQueryHookResult = ReturnType<typeof useGetMyFollowersSuspenseQuery>;
+export type GetMyFollowersQueryResult = Apollo.QueryResult<GetMyFollowersQuery, GetMyFollowersQueryVariables>;
 export const StreamUpdatedDocument = gql`
     subscription StreamUpdated($streamId: UUID!) {
   streamUpdated(streamId: $streamId) {

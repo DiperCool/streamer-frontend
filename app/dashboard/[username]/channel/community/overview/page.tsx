@@ -2,7 +2,7 @@
 
 import React from "react"
 
-export default function CommunityPage() {
+export default function CommunityOverviewPage() {
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-semibold mb-6">Community Settings</h2>
