@@ -27,7 +27,7 @@ export default function ChannelLayout({
       return "roles";
     }
     if (pathname.includes(`/dashboard/${streamerUsername}/channel/community`)) {
-      return "community"; // Теперь это будет ссылка на макет сообщества
+      return "community"; 
     }
     return "stream-info"; // Default tab
   };
@@ -35,7 +35,7 @@ export default function ChannelLayout({
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold mb-2 text-white">Channel Management</h1> {/* Добавлен заголовок */}
+      <h1 className="text-3xl font-bold mb-2 text-white">Channel Management</h1>
 
       <Tabs value={activeTab} className="w-full">
         <TabsList className="bg-gray-900 mb-8" currentValue={activeTab}>
@@ -54,7 +54,7 @@ export default function ChannelLayout({
               Roles
             </TabsTrigger>
           </Link>
-          <Link href={`/dashboard/${streamerUsername}/channel/community/overview`} passHref> {/* Обновлена ссылка */}
+          <Link href={`/dashboard/${streamerUsername}/channel/community`} passHref> {/* Обновлена ссылка на базовый URL */}
             <TabsTrigger value="community">
               Community
             </TabsTrigger>

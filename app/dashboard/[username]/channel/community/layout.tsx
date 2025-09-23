@@ -24,24 +24,18 @@ export default function CommunityLayout({
 
   // Determine the active tab based on the current pathname
   const getActiveTab = () => {
-    if (pathname.includes(`/dashboard/${streamerUsername}/channel/community/followers`)) {
-      return "followers";
-    }
-    return "overview"; // Default tab
+    // Поскольку остается только одна вкладка, она всегда будет активной
+    return "followers"; 
   };
   const activeTab = getActiveTab();
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold mb-2 text-white">Community Management</h1>
+      <h1 className="text-3xl font-bold mb-2 text-white">Followers Management</h1>
 
       <Tabs value={activeTab} className="w-full">
         <TabsList className="bg-gray-900 mb-8" currentValue={activeTab}>
-          <Link href={`/dashboard/${streamerUsername}/channel/community/overview`} passHref>
-            <TabsTrigger value="overview">
-              Overview
-            </TabsTrigger>
-          </Link>
+          {/* Удалена вкладка Overview */}
           <Link href={`/dashboard/${streamerUsername}/channel/community/followers`} passHref>
             <TabsTrigger value="followers">
               Followers
