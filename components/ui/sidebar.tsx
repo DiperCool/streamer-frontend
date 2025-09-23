@@ -65,7 +65,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                       </SidebarNavItem>
                     </Link>
                     <Link href={`${dashboardBaseUrl}/channel/chat`} passHref>
-                      <SidebarNavItem icon={<MessageSquare />} active={pathname.startsWith(`${dashboardBaseUrl}/channel/chat`)}> {/* Обновлено */}
+                      <SidebarNavItem icon={<MessageSquare />} active={pathname.startsWith(`${dashboardBaseUrl}/channel/chat`)}>
                         Chat
                       </SidebarNavItem>
                     </Link>
@@ -75,7 +75,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                       </SidebarNavItem>
                     </Link>
                     <Link href={`${dashboardBaseUrl}/channel/community`} passHref>
-                      <SidebarNavItem icon={<Users />} active={pathname === `${dashboardBaseUrl}/channel/community`}>
+                      <SidebarNavItem icon={<Users />} active={pathname.startsWith(`${dashboardBaseUrl}/channel/community`)}> {/* ИЗМЕНЕНО ЗДЕСЬ */}
                         Community
                       </SidebarNavItem>
                     </Link>
@@ -83,7 +83,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
 
                   <CollapsibleSidebarNav title="Content" icon={<Video />} active={isContentActive}>
                     <Link href={`${dashboardBaseUrl}/content/vods`} passHref>
-                      <SidebarNavItem icon={<Video />} active={pathname.startsWith(`${dashboardBaseUrl}/content/vods`)}> {/* Обновлено */}
+                      <SidebarNavItem icon={<Video />} active={pathname.startsWith(`${dashboardBaseUrl}/content/vods`)}>
                         VODs
                       </SidebarNavItem>
                     </Link>
