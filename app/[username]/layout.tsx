@@ -133,7 +133,7 @@ export default function StreamerProfileLayout({
     if (lastSegment === username) return 'home';
     if (lastSegment === 'about') return 'about';
     if (lastSegment === 'videos') return 'videos';
-    if (lastSegment === 'clips') return 'clips';
+    // Removed 'clips' tab logic
     return 'home';
   };
   const activeTab = getActiveTab();
@@ -229,9 +229,7 @@ export default function StreamerProfileLayout({
                 <Link href={`/${username}/videos`} passHref>
                   <TabsTrigger value="videos">Videos</TabsTrigger>
                 </Link>
-                <Link href={`/${username}/clips`} passHref>
-                  <TabsTrigger value="clips">Clips</TabsTrigger>
-                </Link>
+                {/* Removed Clips tab */}
               </TabsList>
             </Tabs>
           </div>
