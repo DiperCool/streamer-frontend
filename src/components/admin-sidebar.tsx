@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Home, Users, Video, List } from "lucide-react"
+import { Users, Video, List } from "lucide-react" // Удален Home
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
@@ -15,21 +15,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onCloseClick }) => {
 
   return (
     <SidebarNav>
-      <Link href="/admins" passHref>
-        <SidebarNavItem icon={<Home />} active={pathname === "/admins"}>
-          Admin Home
-        </SidebarNavItem>
-      </Link>
+      {/* Удален Link и SidebarNavItem для Admin Home */}
       <Link href="/admins/streamers" passHref>
         <SidebarNavItem icon={<Users />} active={pathname.startsWith("/admins/streamers")}>
           Streamers
         </SidebarNavItem>
       </Link>
-      <Link href="/admins/vods" passHref>
-        <SidebarNavItem icon={<Video />} active={pathname.startsWith("/admins/vods")}>
-          Vods
-        </SidebarNavItem>
-      </Link>
+      {/* Удален Link и SidebarNavItem для Vods */}
       <Link href="/admins/categories" passHref>
         <SidebarNavItem icon={<List />} active={pathname.startsWith("/admins/categories")}>
           Categories
