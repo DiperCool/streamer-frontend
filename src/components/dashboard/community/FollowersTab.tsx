@@ -152,9 +152,12 @@ export const FollowersTab: React.FC = () => {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                      View Profile
-                    </Button>
+                    {/* Оборачиваем кнопку в Link для навигации */}
+                    <Link href={`/${follower.followerStreamer?.userName}`} passHref>
+                      <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+                        View Profile
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
