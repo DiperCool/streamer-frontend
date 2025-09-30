@@ -18,13 +18,13 @@ export const getMinioUrl = (fileName: string | null | undefined): string => {
   }
   
   // Убедимся, что NEXT_PUBLIC_MINIO_URL определен
-  if (!process.env.NEXT_PUBLIC_MINIO_URL) {
+  if (!process.env.NEXT_PUBLIC_BLOB_URL) {
     console.error("NEXT_PUBLIC_MINIO_URL is not defined. Minio URLs might be broken. Falling back to provided filename.");
     return fileName; // Если URL отсутствует, возвращаем само имя файла (которое здесь является строкой)
   }
   
   // Формируем полный URL Minio
-  return `${process.env.NEXT_PUBLIC_MINIO_URL}/${fileName}`;
+  return `${process.env.NEXT_PUBLIC_BLOB_URL}/${fileName}`;
 };
 
 // Helper function to format duration from milliseconds into HH:MM:SS
