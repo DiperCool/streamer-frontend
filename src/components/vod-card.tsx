@@ -24,8 +24,6 @@ interface VodCardProps {
   isCurrentStream?: boolean // To show "Current Stream" badge
 }
 
-// Удалена локальная функция formatDuration, теперь используется formatVodDuration из utils/utils.ts
-
 export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
   const thumbnailUrl = vod.preview ? getMinioUrl(vod.preview) : "/placeholder.jpg"
   const timeAgo = formatDistanceToNowStrict(new Date(vod.createdAt), { addSuffix: true });
@@ -104,30 +102,8 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
             )}
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              onClick={(e) => e.stopPropagation()} // Prevent navigating when opening dropdown
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-48 bg-gray-700 border-gray-600 text-white">
-            <DropdownMenuItem className="hover:bg-green-600 hover:text-white cursor-pointer">
-              Add to Watchlist
-            </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-green-600 hover:text-white cursor-pointer">
-              Share
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-gray-600" />
-            <DropdownMenuItem className="hover:bg-red-600 hover:text-white cursor-pointer text-red-400">
-              Report
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Заполнитель для сохранения макета */}
+        <div className="h-8 w-8 flex-shrink-0" />
       </div>
     </div>
   )
