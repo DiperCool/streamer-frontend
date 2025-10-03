@@ -93,8 +93,8 @@ export default function StreamerVideosPage({ params }: { params: { username: str
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-end mb-6"> {/* Изменено: убран justify-between, оставлен justify-end */}
-        <span className="text-gray-400 hidden sm:block mr-2">Sort by:</span> {/* Добавлен hidden sm:block и mr-2 */}
+      <div className="flex items-center justify-start mb-6"> {/* Изменено: justify-end на justify-start */}
+        <span className="text-gray-400 hidden sm:block mr-2">Sort by:</span>
         <Select value={sortBy} onValueChange={handleSortChange}>
           <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
             <SelectValue placeholder="Select a sort option" />
