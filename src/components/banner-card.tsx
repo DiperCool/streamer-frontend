@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { useRemoveBannerMutation } from "@/graphql/__generated__/graphql";
 import { EditBannerDialog } from "./edit-banner-dialog";
+import { cn } from "@/lib/utils"; // Импортируем cn
 
 interface BannerCardProps {
   banner: BannerDto;
@@ -71,7 +72,6 @@ export const BannerCard: React.FC<BannerCardProps> = ({
         fill
         style={{ objectFit: "cover" }}
         sizes="(max-width: 768px) 100vw, 50vw"
-        // Добавлены классы для небольшого увеличения и смещения изображения
         className="absolute inset-0 w-full h-full transform scale-[1.01] translate-x-[-0.5%] translate-y-[-0.5%]" 
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
@@ -80,7 +80,7 @@ export const BannerCard: React.FC<BannerCardProps> = ({
 
   return (
     <div
-      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg"
+      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg flex flex-col" // Добавлены flex flex-col
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -90,12 +90,18 @@ export const BannerCard: React.FC<BannerCardProps> = ({
           href={banner.url} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="block relative w-full aspect-video overflow-hidden transition-transform duration-200 group-hover:scale-105"
+          className={cn(
+            "block relative w-full overflow-hidden transition-transform duration-200 group-hover:scale-105",
+            hasTextContent ? "aspect-video" : "flex-1" // Условное применение aspect-video или flex-1
+          )}
         >
           {imageContent}
         </Link>
       ) : (
-        <div className="relative w-full aspect-video overflow-hidden transition-transform duration-200 group-hover:scale-105">
+        <div className={cn(
+          "relative w-full overflow-hidden transition-transform duration-200 group-hover:scale-105",
+          hasTextContent ? "aspect-video" : "flex-1" // Условное применение aspect-video или flex-1
+        )}>
           {imageContent}
         </div>
       )}
