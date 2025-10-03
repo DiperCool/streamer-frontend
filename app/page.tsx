@@ -181,7 +181,7 @@ export default function HomePage() {
                     ))}
                   </div>
                 </div>
-              )}
+              ): null}
             </div>
           )}
         </>
