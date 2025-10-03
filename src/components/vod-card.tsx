@@ -54,14 +54,14 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
             </div>
           )}
           {isCurrentStream && (
-            <Badge className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+            <Badge variant="statusCurrentStream" className="absolute top-2 left-2 px-2 py-1 rounded-md text-xs font-semibold z-10">
               Current Stream
             </Badge>
           )}
-          <Badge className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+          <Badge variant="infoViewers" className="absolute bottom-2 left-2 px-2 py-1 rounded-md text-xs font-semibold z-10">
             {formatVodDuration(vod.duration)}
           </Badge>
-          <Badge className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+          <Badge variant="infoViewers" className="absolute bottom-2 right-2 px-2 py-1 rounded-md text-xs font-semibold z-10">
             {vod.views} views
           </Badge>
         </div>
@@ -84,18 +84,18 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
           </div>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {vod.category?.title && (
-              <Badge variant="tag">
+              <Badge variant="itemCategory">
                 {vod.category.title}
               </Badge>
             )}
             {vod.language && (
-              <Badge variant="tag">
+              <Badge variant="itemLanguage">
                 {vod.language}
               </Badge>
             )}
             {vod.tags && vod.tags.length > 0 && (
               vod.tags.map((tag) => (
-                <Badge key={tag.id} variant="tag">
+                <Badge key={tag.id} variant="itemTag">
                   {tag.title}
                 </Badge>
               ))

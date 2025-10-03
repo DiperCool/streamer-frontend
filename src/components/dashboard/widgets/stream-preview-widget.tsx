@@ -120,7 +120,7 @@ export const StreamPreviewWidget: React.FC = () => {
           />
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <div className="flex items-center space-x-2 bg-gray-800 p-3 rounded-md shadow-lg">
-              <Badge className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs font-semibold">
+              <Badge variant="statusOffline" className="px-2 py-1 rounded-full text-xs font-semibold">
                 OFFLINE
               </Badge>
               <span className="text-white text-base font-semibold">

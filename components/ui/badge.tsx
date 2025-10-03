@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -10,13 +12,22 @@ const badgeVariants = cva(
       variant: {
         default:
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary:
+        secondary: // Existing secondary variant, will be replaced by more specific ones where needed
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
-        // Обновленный вариант 'tag' с зеленым текстом по умолчанию и зеленым фоном/белым текстом при наведении
-        tag: "border-transparent bg-gray-700 text-green-400 hover:bg-green-600 hover:text-white",
+        // New variants based on user request and existing usage
+        statusLive: "border-transparent bg-red-600 text-white", // For 'LIVE' status
+        statusOffline: "border-transparent bg-gray-600 text-gray-300", // For 'OFFLINE' status
+        statusCurrentStream: "border-transparent bg-purple-600 text-white", // For 'Current Stream' status
+        infoViewers: "border-transparent bg-black/70 text-white", // For viewer counts, duration
+        infoFollowers: "border-transparent bg-gray-700 text-white hover:bg-green-600 hover:text-white", // For follower counts
+        itemCategory: "border-transparent bg-green-600 text-white hover:bg-green-700", // For category items
+        itemLanguage: "border-transparent bg-gray-700 text-white hover:bg-green-600 hover:text-white", // For language tags
+        itemTag: "border-transparent bg-gray-700 text-white hover:bg-green-600 hover:text-white", // For general tags
+        vodPublic: "border-transparent bg-green-600 text-white", // For public VOD type
+        vodPrivate: "border-transparent bg-gray-600 text-gray-300", // For private VOD type
       },
     },
     defaultVariants: {

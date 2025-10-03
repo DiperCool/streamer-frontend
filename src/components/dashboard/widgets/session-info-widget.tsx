@@ -154,11 +154,11 @@ export const SessionInfoWidget: React.FC = () => {
         <div className="flex flex-col items-center justify-center border-r border-gray-700 p-2">
           <div className="flex items-center justify-center h-8">
             {isLive ? (
-              <Badge className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+              <Badge variant="statusLive" className="px-2 py-1 rounded-full text-xs font-semibold">
                 LIVE
               </Badge>
             ) : (
-              <Badge className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs font-semibold">
+              <Badge variant="statusOffline" className="px-2 py-1 rounded-full text-xs font-semibold">
                 OFFLINE
               </Badge>
             )}

@@ -351,7 +351,7 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
               )}
               <div className="flex flex-wrap gap-2 mt-2">
                 {currentTags.map((tag) => (
-                  <Badge key={tag} variant="tag">
+                  <Badge key={tag} variant="itemTag">
                     {tag}
                     <Button
                       variant="ghost"

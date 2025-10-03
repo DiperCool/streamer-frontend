@@ -95,13 +95,13 @@ export const StreamInfoWidget: React.FC = () => {
               <span className="text-green-400 text-base font-semibold">{currentCategory.title}</span>
               <div className="flex flex-wrap gap-2 items-center">
                 {streamInfo?.language && (
-                  <Badge variant="tag">
+                  <Badge variant="itemLanguage">
                     {streamInfo.language}
                   </Badge>
                 )}
                 {streamInfo?.tags && streamInfo.tags.length > 0 && (
                   streamInfo.tags.map((tag) => (
-                    <Badge key={tag.id} variant="tag">
+                    <Badge key={tag.id} variant="itemTag">
                       {tag.title}
                     </Badge>
                   ))

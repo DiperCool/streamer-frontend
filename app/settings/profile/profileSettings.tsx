@@ -57,7 +57,7 @@ export const ProfileSettings = () => {
                         <div>
                             <div className="flex items-center space-x-2 mb-1">
                                 <h3 className="text-lg font-semibold text-white">About {streamer.me.userName}</h3>
-                                <Badge variant="secondary" className="bg-gray-700 text-gray-300">
+                                <Badge variant="infoFollowers">
                                     <Users className="w-3 h-3 mr-1" />
                                     {streamer.me.followers} Followers
                                 </Badge>

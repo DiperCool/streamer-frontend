@@ -135,7 +135,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         <div className="flex flex-col flex-1 py-0">
           <h1 className="text-4xl font-bold text-white mb-2">{category.title}</h1>
           <div className="flex items-center space-x-2 text-gray-400 text-lg">
-            <Badge className="bg-gray-800 text-white px-2 py-1 rounded-md text-sm font-semibold flex items-center">
+            <Badge variant="infoViewers" className="px-2 py-1 rounded-md text-sm font-semibold flex items-center">
               <span className="h-2 w-2 rounded-full bg-red-500 mr-1" />
               {category.watchers} watching
             </Badge>

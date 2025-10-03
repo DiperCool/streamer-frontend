@@ -83,7 +83,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
               </AvatarFallback>
             </Avatar>
             {isLive && (
-              <Badge className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+              <Badge variant="statusLive" className="absolute bottom-0 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-semibold">
                 LIVE
               </Badge>
             )}
@@ -161,18 +161,18 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
       {isLive && (
         <div className="flex items-center flex-wrap gap-2 mt-2">
           {streamInfo?.category?.title && (
-            <Badge variant="tag">
+            <Badge variant="itemCategory">
               {streamInfo.category.title}
             </Badge>
           )}
           {displayLanguage && (
-            <Badge variant="tag">
+            <Badge variant="itemLanguage">
               {displayLanguage}
             </Badge>
           )}
           {displayTags && displayTags.length > 0 && (
             displayTags.map((tag) => (
-              <Badge key={tag.id} variant="tag">
+              <Badge key={tag.id} variant="itemTag">
                 {tag.title}
               </Badge>
             ))

@@ -142,11 +142,11 @@ export const FollowersTab: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     {follower.followerStreamer?.isLive ? (
-                      <Badge className="bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                      <Badge variant="statusLive" className="px-2 py-0.5 rounded-full text-xs font-semibold">
                         LIVE
                       </Badge>
                     ) : (
-                      <Badge className="bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full text-xs font-semibold">
+                      <Badge variant="statusOffline" className="px-2 py-0.5 rounded-full text-xs font-semibold">
                         OFFLINE
                       </Badge>
                     )}

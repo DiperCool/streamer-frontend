@@ -19,7 +19,7 @@ export function StreamerAboutSection({ streamer, profile }: StreamerAboutSection
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <h2 className="text-xl font-semibold text-white">About {streamer.userName}</h2>
-            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs flex items-center">
+            <Badge variant="infoFollowers" className="px-2 py-1 rounded-full text-xs flex items-center">
               <BadgeCheck className="w-3 h-3 mr-1" />
               {streamer.followers} Followers
             </Badge>

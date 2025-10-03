@@ -34,11 +34,11 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           {stream.active && (
-            <Badge className="absolute top-2.5 left-2.5 bg-red-600 text-white px-2 py-1 rounded-md text-sm font-semibold z-10">
+            <Badge variant="statusLive" className="absolute top-2.5 left-2.5 px-2 py-1 rounded-md text-sm font-semibold z-10">
               LIVE
             </Badge>
           )}
-          <Badge className="absolute bottom-2.5 left-2.5 bg-black/70 text-white px-2 py-1 rounded-md text-sm font-semibold z-10 flex items-center">
+          <Badge variant="infoViewers" className="absolute bottom-2.5 left-2.5 px-2 py-1 rounded-md text-sm font-semibold z-10 flex items-center">
             <Users className="w-3.5 h-3.5 mr-1" />
             {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers} watching
           </Badge>
@@ -59,17 +59,17 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
             
             <div className="flex flex-wrap gap-1.5 mt-2">
               {stream.category?.title && (
-                <Badge variant="tag">
+                <Badge variant="itemCategory">
                   {stream.category.title}
                 </Badge>
               )}
               {stream.language && (
-                <Badge variant="tag">
+                <Badge variant="itemLanguage">
                   {stream.language}
                 </Badge>
               )}
               {stream.tags.map((tag) => (
-                <Badge key={tag.id} variant="tag">
+                <Badge key={tag.id} variant="itemTag">
                   {tag.title}
                 </Badge>
               ))}

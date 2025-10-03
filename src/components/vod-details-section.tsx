@@ -109,18 +109,18 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
             )}
             <div className="flex flex-wrap gap-2 mt-2">
               {vod.category?.title && (
-                <Badge variant="tag">
+                <Badge variant="itemCategory">
                   {vod.category.title}
                 </Badge>
               )}
               {vod.language && (
-                <Badge variant="tag">
+                <Badge variant="itemLanguage">
                   {vod.language}
                 </Badge>
               )}
               {vod.tags && vod.tags.length > 0 && (
                 vod.tags.map((tag) => (
-                  <Badge key={tag.id} variant="tag">
+                  <Badge key={tag.id} variant="itemTag">
                     {tag.title}
                   </Badge>
                 ))

@@ -32,7 +32,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
             {category.title}
           </h3>
           {category.watchers > 0 && (
-            <Badge className="bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold mt-1 flex items-center w-fit">
+            <Badge variant="infoViewers" className="px-2 py-1 rounded-md text-xs font-semibold mt-1 flex items-center w-fit">
               <Users className="w-3 h-3 mr-1" />
               {category.watchers} watching
             </Badge>

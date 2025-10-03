@@ -33,10 +33,10 @@ export const LiveStreamIndicators: React.FC<LiveStreamIndicatorsProps> = ({ isLi
 
   return (
     <>
-      <Badge className="absolute bottom-4 left-4 bg-red-600 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+      <Badge variant="statusLive" className="absolute bottom-4 left-4 px-2 py-1 rounded-md text-xs font-semibold z-10">
         LIVE
       </Badge>
-      <Badge className="absolute bottom-4 left-20 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-semibold z-10">
+      <Badge variant="infoViewers" className="absolute bottom-4 left-20 px-2 py-1 rounded-md text-xs font-semibold z-10">
         {liveDuration}
       </Badge>
     </>
