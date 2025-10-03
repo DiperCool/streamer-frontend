@@ -152,21 +152,21 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       {/* Контейнер для фильтров и сортировки: flex-col на мобильных, flex-row и justify-end на sm+ */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
         {/* Tag Select Input */}
-        <div className="flex items-center space-x-2"> {/* Убраны классы ширины отсюда */}
+        <div className="flex items-center space-x-2 w-full sm:w-auto"> {/* Добавлен w-full sm:w-auto */}
           <span className="text-gray-400 hidden sm:block">Filter by Tag:</span> {/* Скрыто на мобильных */}
           <TagSelectInput
             value={selectedTagId}
             onValueChange={setSelectedTagId}
             placeholder="All Tags"
-            className="w-full sm:w-[180px]" // Применяем ширину напрямую к компоненту
+            className="w-full sm:w-[180px]" // w-full на мобильных, sm:w-[180px] на sm+
           />
         </div>
 
         {/* Sort By Select */}
-        <div className="flex items-center space-x-2"> {/* Убраны классы ширины отсюда */}
+        <div className="flex items-center space-x-2 w-full sm:w-auto"> {/* Добавлен w-full sm:w-auto */}
           <span className="text-gray-400 hidden sm:block">Sort by:</span> {/* Скрыто на мобильных */}
           <Select value={sortBy} onValueChange={(value: SortEnumType) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-white"> {/* Применяем ширину напрямую к триггеру */}
+            <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-white"> {/* w-full на мобильных, sm:w-[180px] на sm+ */}
               <SelectValue placeholder="Select a sort option" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700 text-white">
