@@ -2,11 +2,11 @@
 
 import React from "react"
 import { useAuth0 } from "@auth0/auth0-react"
-import { useGetStreamerQuery, useGetVodsQuery, SortEnumType } from "@/graphql/__generated__/graphql" // Импортируем useGetStreamerQuery и useGetVodsQuery
+import { useGetStreamerQuery, useGetVodsQuery, SortEnumType } from "@/graphql/__generated__/graphql"
 import { Loader2 } from "lucide-react"
-import { VodCard } from "@/src/components/vod-card" // Импортируем VodCard
-import Link from "next/link" // Импортируем Link
-import { Button } from "@/components/ui/button" // Импортируем Button
+import { VodCard } from "@/src/components/vod-card"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function StreamerRootProfilePage({ params }: { params: { username: string } }) {
   const { username } = params
@@ -25,10 +25,10 @@ export default function StreamerRootProfilePage({ params }: { params: { username
   } = useGetVodsQuery({
     variables: {
       streamerId: streamerId ?? "",
-      first: 4, // Ограничиваем до 4 видео
-      order: [{ createdAt: SortEnumType.Desc }], // Сортируем по дате создания (самые новые)
+      first: 4,
+      order: [{ createdAt: SortEnumType.Desc }],
     },
-    skip: !streamerId, // Пропускаем запрос, если streamerId недоступен
+    skip: !streamerId,
   });
 
   if (isLoading || streamerLoading || vodsLoading) {
@@ -48,13 +48,12 @@ export default function StreamerRootProfilePage({ params }: { params: { username
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Latest Videos Section */}
       {vods.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">Latest Videos</h3>
             <Link href={`/${username}/videos`} passHref>
-              <Button variant="ghost" className="text-green-500 hover:text-green-400">
+              <Button variant="ghost" className="text-green-500 hover:text-white"> {/* Изменено здесь */}
                 Show More
               </Button>
             </Link>
@@ -66,8 +65,6 @@ export default function StreamerRootProfilePage({ params }: { params: { username
           </div>
         </div>
       )}
-
-      {/* Здесь может быть дополнительный контент для домашней страницы, например, расписание и т.д. */}
     </div>
   )
 }
