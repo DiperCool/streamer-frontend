@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-      <html lang="en" className="bg-background"> {/* Добавлен className="bg-background" */}
+      <html lang="en" className="bg-gray-900"> {/* Изменено: bg-background на bg-gray-900 */}
       <body className={inter.className}>
       <App>
         <DashboardProvider>
