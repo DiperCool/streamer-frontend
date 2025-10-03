@@ -2,7 +2,6 @@ import { intervalToDuration, formatDuration } from "date-fns";
 
 export const getMinioUrl = (fileName: string | null | undefined): string => {
   if (!fileName || typeof fileName !== 'string') {
-    // Возвращаем путь к изображению-заглушке, если fileName null, undefined или не строка
     return "/placeholder.jpg"; 
   }
   
@@ -11,14 +10,15 @@ export const getMinioUrl = (fileName: string | null | undefined): string => {
     return fileName;
   }
   
-  // Убедимся, что NEXT_PUBLIC_MINIO_URL определен
+  // Убедимся, что NEXT_PUBLIC_BLOB_URL определен
   if (!process.env.NEXT_PUBLIC_BLOB_URL) {
-    console.error("NEXT_PUBLIC_MINIO_URL is not defined. Minio URLs might be broken. Falling back to provided filename.");
+    console.error("NEXT_PUBLIC_BLOB_URL is not defined. Minio URLs might be broken. Falling back to provided filename.");
     return fileName; // Если URL отсутствует, возвращаем само имя файла (которое здесь является строкой)
   }
   
   // Формируем полный URL Minio
-  return `${process.env.NEXT_PUBLIC_BLOB_URL}/${fileName}`;
+  const fullUrl = `${process.env.NEXT_PUBLIC_BLOB_URL}/${fileName}`;
+  return fullUrl;
 };
 
 // Helper function to format duration from milliseconds into HH:MM:SS
@@ -26,7 +26,7 @@ export const formatVodDuration = (milliseconds: number): string => {
   if (isNaN(milliseconds) || milliseconds < 0) return "00:00";
   
   const totalSeconds = Math.floor(milliseconds / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
+  const hours = Math.floor((totalSeconds % 3600) / 60);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const remainingSeconds = totalSeconds % 60;
 

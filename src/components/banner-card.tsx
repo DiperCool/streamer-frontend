@@ -80,27 +80,25 @@ export const BannerCard: React.FC<BannerCardProps> = ({
 
   return (
     <div
-      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg flex flex-col" // Добавлены flex flex-col
+      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image container (with optional Link) - now applies scaling and overflow-hidden */}
+      {/* Image container (with optional Link) - always apply aspect-video */}
       {banner.url ? (
         <Link 
           href={banner.url} 
           target="_blank" 
           rel="noopener noreferrer" 
           className={cn(
-            "block relative w-full overflow-hidden transition-transform duration-200 group-hover:scale-105",
-            hasTextContent ? "aspect-video" : "flex-1" // Условное применение aspect-video или flex-1
+            "block relative w-full overflow-hidden transition-transform duration-200 group-hover:scale-105 aspect-video" // Всегда aspect-video
           )}
         >
           {imageContent}
         </Link>
       ) : (
         <div className={cn(
-          "relative w-full overflow-hidden transition-transform duration-200 group-hover:scale-105",
-          hasTextContent ? "aspect-video" : "flex-1" // Условное применение aspect-video или flex-1
+          "relative w-full overflow-hidden transition-transform duration-200 group-hover:scale-105 aspect-video" // Всегда aspect-video
         )}>
           {imageContent}
         </div>
