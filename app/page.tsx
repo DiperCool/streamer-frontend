@@ -3,10 +3,10 @@
 import React, { useCallback, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import {
-  useGetTopStreamsQuery,
-  useGetTopCategoriesQuery,
-  StreamDto,
-  SortEnumType,
+    useGetTopStreamsQuery,
+    useGetTopCategoriesQuery,
+    StreamDto,
+    SortEnumType,
 } from "@/graphql/__generated__/graphql"
 import { Loader2, Users } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -24,190 +24,274 @@ import { VerticalStreamCard } from "@/src/components/vertical-stream-card";
 import { Button } from "@/components/ui/button"
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth0()
-  const isMobile = useIsMobile();
+    const { isAuthenticated, isLoading: authLoading } = useAuth0()
+    const isMobile = useIsMobile();
 
-  const { data: topStreamsData, loading: topStreamsLoading, error: topStreamsError } = useGetTopStreamsQuery();
-  const topStreams = topStreamsData?.topStreams || [];
+    const { data: topStreamsData, loading: topStreamsLoading, error: topStreamsError } = useGetTopStreamsQuery();
+    const topStreams = topStreamsData?.topStreams || [];
 
-  const { data: topCategoriesData, loading: topCategoriesLoading, error: topCategoriesError } = useGetTopCategoriesQuery();
-  const topCategories = topCategoriesData?.topCategories || [];
+    const { data: topCategoriesData, loading: topCategoriesLoading, error: topCategoriesError } = useGetTopCategoriesQuery();
+    const topCategories = topCategoriesData?.topCategories || [];
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const handleSelectStream = useCallback((index: number) => {
-    setSelectedIndex(index);
-  }, []);
+    const handleSelectStream = useCallback((index: number) => {
+        setSelectedIndex(index);
+    }, []);
 
-  if (authLoading || topStreamsLoading || topCategoriesLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <Loader2 className="h-12 w-12 animate-spin text-green-500" />
-      </div>
-    )
-  }
-
-  if (topStreamsError || topCategoriesError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-        <p className="text-red-500">Error loading data: {topStreamsError?.message || topCategoriesError?.message}</p>
-      </div>
-    );
-  }
-
-  const featuredStream = topStreams[selectedIndex];
-
-  if (!featuredStream && topStreams.length === 0) {
-    return (
-      <div className="py-8 px-4 text-center">
-        <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
-        <p className="text-gray-500">No live streams currently available. Check back later!</p>
-      </div>
-    );
-  }
-
-  const streamerName = featuredStream.streamer?.userName || "Unknown Streamer";
-  const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
-  const currentViewers = featuredStream.currentViewers || 0;
-  const streamerFollowers = featuredStream.streamer?.followers || 0;
-
-  const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
-
-  return (
-    <div className="bg-gray-900 text-white w-full px-4">
-      {topStreams.length > 0 ? (
-        <>
-          {isMobile ? (
-            <div className="py-8">
-              <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
-                {topStreams.map((stream) => (
-                  <div key={stream.id}>
-                    <TopStreamCard stream={stream} />
-                  </div>
-                ))}
-              </div>
+    if (authLoading || topStreamsLoading || topCategoriesLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-900">
+                <Loader2 className="h-12 w-12 animate-spin text-green-500" />
             </div>
-          ) : (
-            <div className="py-4">
-              {topStreams.length === 1 ? (
-                <div className="flex w-full items-stretch">
-                  <div className="flex-1 relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
-                    {hasStreamSources ? (
-                      <StreamPlayer
-                        key={featuredStream.id}
-                        sources={featuredStream.sources}
-                        isPlayerMaximized={false}
-                        onTogglePlayerMaximize={() => {}}
-                        showPlayerControls={false}
-                        isLive={featuredStream.active}
-                        startedAt={featuredStream.started}
-                        showOverlays={true}
-                      />
-                    ) : (
-                      <NextImage
-                        src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
-                        alt={featuredStream.title || "Stream preview"}
-                        fill
-                        style={{ objectFit: "cover" }}
-                        sizes="(max-width: 768px) 100vw, 80vw"
-                        priority
-                        className="absolute inset-0 w-full h-full"
-                      />
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10 flex flex-col">
-                      <div className="flex items-center text-sm text-gray-400 mb-2">
-                        <div className="flex items-center flex-wrap gap-1.5">
-                          {featuredStream.category?.title && (
-                            <Badge variant="itemCategory">
-                              {featuredStream.category.title}
-                            </Badge>
-                          )}
-                          {featuredStream.language && (
-                            <Badge variant="itemLanguage">
-                              {featuredStream.language}
-                            </Badge>
-                          )}
-                          {featuredStream.tags.map((tag) => (
-                            <Badge key={tag.id} variant="itemTag">
-                              {tag.title}
-                            </Badge>
-                          ))}
-                          {featuredStream.active && currentViewers !== undefined && (
-                            <Badge variant="infoViewers" className="px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
-                              <Users className="w-3.5 h-3.5 mr-1" />
-                              {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
-                            </Badge>
-                          )}
+        )
+    }
+
+    if (topStreamsError || topCategoriesError) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+                <p className="text-red-500">Error loading data: {topStreamsError?.message || topCategoriesError?.message}</p>
+            </div>
+        );
+    }
+
+    const featuredStream = topStreams[selectedIndex];
+
+    if (!featuredStream && topStreams.length === 0) {
+        return (
+            <div className="py-8 px-4 text-center">
+                <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
+                <p className="text-gray-500">No live streams currently available. Check back later!</p>
+            </div>
+        );
+    }
+
+    const streamerName = featuredStream.streamer?.userName || "Unknown Streamer";
+    const streamerAvatar = featuredStream.streamer?.avatar || "/placeholder-user.jpg";
+    const currentViewers = featuredStream.currentViewers || 0;
+    const streamerFollowers = featuredStream.streamer?.followers || 0;
+
+    const hasStreamSources = featuredStream.sources && featuredStream.sources.length > 0;
+
+    return (
+        <div className="bg-gray-900 text-white w-full px-4">
+            {topStreams.length > 0 ? (
+                <>
+                    {isMobile ? (
+                        <div className="py-8">
+                            <h1 className="text-3xl font-bold text-white mb-6">Top Live Streams</h1>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+                                {topStreams.map((stream) => (
+                                    <div key={stream.id}>
+                                        <TopStreamCard stream={stream} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                      </div>
-                      <h2 className="text-5xl font-bold text-white truncate mt-1.5 mb-4">
-                        {featuredStream.title || "Untitled Stream"}
-                      </h2>
-                      <div className="flex items-center mt-auto">
-                        <Link href={`/${streamerName}`} passHref>
-                          <Button variant="default" size="lg" className="bg-green-600 hover:bg-green-700 text-white">
-                            Watch Live
-                          </Button>
-                        </Link>
-                        <div className="flex items-center space-x-2 ml-4">
-                          <Link href={`/${streamerName}`} passHref>
-                            <Avatar className="w-9 h-9 border-2 border-green-500 cursor-pointer">
-                              <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
-                              <AvatarFallback className="bg-green-600 text-white text-sm">
-                                {streamerName.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                          </Link>
-                          <div className="flex flex-col items-start">
-                            <Link href={`/${streamerName}`} passHref>
-                              <p className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">{streamerName}</p>
-                            </Link>
-                            <span className="text-sm text-gray-400">
+                    ) : (
+                        <div className="py-4">
+                            {topStreams.length === 1 ? (
+                                // Single stream layout: full width
+                                <div className="flex w-full items-stretch">
+                                    <div className="flex-1 relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
+                                        {hasStreamSources ? (
+                                            <StreamPlayer
+                                                key={featuredStream.id}
+                                                sources={featuredStream.sources}
+                                                isPlayerMaximized={false}
+                                                onTogglePlayerMaximize={() => {}}
+                                                showPlayerControls={false}
+                                                isLive={featuredStream.active}
+                                                startedAt={featuredStream.started}
+                                                showOverlays={true}
+                                            />
+                                        ) : (
+                                            <NextImage
+                                                src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
+                                                alt={featuredStream.title || "Stream preview"}
+                                                fill
+                                                style={{ objectFit: "cover" }}
+                                                sizes="(max-width: 768px) 100vw, 80vw"
+                                                priority
+                                                className="absolute inset-0 w-full h-full"
+                                            />
+                                        )}
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10 flex flex-col">
+                                            <div className="flex items-center text-sm text-gray-400 mb-2">
+                                                <div className="flex items-center flex-wrap gap-1.5">
+                                                    {featuredStream.category?.title && (
+                                                        <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                                                            {featuredStream.category.title}
+                                                        </Badge>
+                                                    )}
+                                                    {featuredStream.language && (
+                                                        <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                                                            {featuredStream.language}
+                                                        </Badge>
+                                                    )}
+                                                    {featuredStream.tags.map((tag) => (
+                                                        <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                                                            {tag.title}
+                                                        </Badge>
+                                                    ))}
+                                                    {featuredStream.active && currentViewers !== undefined && (
+                                                        <Badge className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
+                                                            <Users className="w-3.5 h-3.5 mr-1" />
+                                                            {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <h2 className="text-5xl font-bold text-white truncate mt-1.5 mb-4">
+                                                {featuredStream.title || "Untitled Stream"}
+                                            </h2>
+                                            <div className="flex items-center mt-auto">
+                                                <Link href={`/${streamerName}`} passHref>
+                                                    <Button variant="default" size="lg" className="bg-green-600 hover:bg-green-700 text-white">
+                                                        Watch Live
+                                                    </Button>
+                                                </Link>
+                                                <div className="flex items-center space-x-2 ml-4">
+                                                    <Link href={`/${streamerName}`} passHref>
+                                                        <Avatar className="w-9 h-9 border-2 border-green-500 cursor-pointer">
+                                                            <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+                                                            <AvatarFallback className="bg-green-600 text-white text-sm">
+                                                                {streamerName.charAt(0).toUpperCase()}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                    </Link>
+                                                    <div className="flex flex-col items-start">
+                                                        <Link href={`/${streamerName}`} passHref>
+                                                            <p className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">{streamerName}</p>
+                                                        </Link>
+                                                        <span className="text-sm text-gray-400">
                               {streamerFollowers >= 1000 ? `${(streamerFollowers / 1000).toFixed(1)}K` : streamerFollowers} followers
                             </span>
-                          </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Multiple streams layout: existing two-column
+                                <div className="flex w-full items-stretch">
+                                    <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
+                                        {hasStreamSources ? (
+                                            <StreamPlayer
+                                                key={featuredStream.id}
+                                                sources={featuredStream.sources}
+                                                isPlayerMaximized={false}
+                                                onTogglePlayerMaximize={() => {}}
+                                                showPlayerControls={false}
+                                                isLive={featuredStream.active}
+                                                startedAt={featuredStream.started}
+                                                showOverlays={true}
+                                            />
+                                        ) : (
+                                            <NextImage
+                                                src={getMinioUrl(featuredStream.preview || "/placeholder.jpg")}
+                                                alt={featuredStream.title || "Stream preview"}
+                                                fill
+                                                style={{ objectFit: "cover" }}
+                                                sizes="(max-width: 768px) 100vw, 80vw"
+                                                priority
+                                                className="absolute inset-0 w-full h-full"
+                                            />
+                                        )}
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-10 flex flex-col">
+                                            <div className="flex items-center text-sm text-gray-400 mb-2">
+                                                <div className="flex items-center flex-wrap gap-1.5">
+                                                    {featuredStream.category?.title && (
+                                                        <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                                                            {featuredStream.category.title}
+                                                        </Badge>
+                                                    )}
+                                                    {featuredStream.language && (
+                                                        <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                                                            {featuredStream.language}
+                                                        </Badge>
+                                                    )}
+                                                    {featuredStream.tags.map((tag) => (
+                                                        <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                                                            {tag.title}
+                                                        </Badge>
+                                                    ))}
+                                                    {featuredStream.active && currentViewers !== undefined && (
+                                                        <Badge className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs font-semibold flex items-center">
+                                                            <Users className="w-3.5 h-3.5 mr-1" />
+                                                            {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <h2 className="text-5xl font-bold text-white truncate mt-1.5 mb-4">
+                                                {featuredStream.title || "Untitled Stream"}
+                                            </h2>
+                                            <div className="flex items-center mt-auto">
+                                                <Link href={`/${streamerName}`} passHref>
+                                                    <Button variant="default" size="lg" className="bg-green-600 hover:bg-green-700 text-white">
+                                                        Watch Live
+                                                    </Button>
+                                                </Link>
+                                                <div className="flex items-center space-x-2 ml-4">
+                                                    <Link href={`/${streamerName}`} passHref>
+                                                        <Avatar className="w-9 h-9 border-2 border-green-500 cursor-pointer">
+                                                            <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
+                                                            <AvatarFallback className="bg-green-600 text-white text-sm">
+                                                                {streamerName.charAt(0).toUpperCase()}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                    </Link>
+                                                    <div className="flex flex-col items-start">
+                                                        <Link href={`/${streamerName}`} passHref>
+                                                            <p className="text-lg font-bold text-white hover:text-green-400 cursor-pointer">{streamerName}</p>
+                                                        </Link>
+                                                        <span className="text-sm text-gray-400">
+                              {streamerFollowers >= 1000 ? `${(streamerFollowers / 1000).toFixed(1)}K` : streamerFollowers} followers
+                            </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 ml-5 flex flex-col space-y-3">
+                                        {topStreams.slice(1, 4).map((stream) => (
+                                            <VerticalStreamCard
+                                                key={stream.id}
+                                                stream={stream}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 ml-5 flex flex-col space-y-3">
-                    {topStreams.slice(1, 4).map((stream) => (
-                      <VerticalStreamCard
-                        key={stream.id}
-                        stream={stream}
-                      />
-                    ))}
-                  </div>
+                    )}
+                </>
+            ) : (
+                <div className="py-8 px-4 text-center">
+                    <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
+                    <p className="text-gray-500">No live streams currently available. Check back later!</p>
                 </div>
-              ): null}
+            )}
+
+            <div className="py-8">
+                {topCategories.length > 0 && (
+                    <>
+                        <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
+                            {topCategories.map(category => (
+                                <CategoryCard key={category.id} category={category} />
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {topCategories.map(category => (
+                    <StreamsByCategorySection key={category.id} category={category} />
+                ))}
             </div>
-          )}
-        </>
-      ) : (
-        <div className="py-8 px-4 text-center">
-          <h1 className="text-3xl font-bold mb-4">Welcome to Streamer</h1>
-          <p className="text-gray-500">No live streams currently available. Check back later!</p>
         </div>
-      )}
-
-      <div className="py-8">
-        {topCategories.length > 0 && (
-          <>
-            <h2 className="text-2xl font-bold text-white mb-4">Top Categories</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
-              {topCategories.map(category => (
-                <CategoryCard key={category.id} category={category} />
-              ))}
-            </div>
-          </>
-        )}
-
-        {topCategories.map(category => (
-          <StreamsByCategorySection key={category.id} category={category} />
-        ))}
-      </div>
-    </div>
-  )
+    )
 }
