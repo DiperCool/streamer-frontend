@@ -61,44 +61,51 @@ export const BannerCard: React.FC<BannerCardProps> = ({
     }
   };
 
+  const hasTextContent = banner.title || banner.description;
+
+  const imageContent = (
+    <>
+      <Image
+        src={getMinioUrl(banner.image!)}
+        alt={banner.title || "Banner image"}
+        fill
+        style={{ objectFit: "cover" }}
+        sizes="(max-width: 768px) 100vw, 50vw"
+        className="absolute inset-0 w-full h-full" // Image now fills its parent without its own scaling
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+    </>
+  );
+
   return (
     <div
-      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg" // Removed aspect-video here
+      className="group relative w-full rounded-lg overflow-hidden bg-gray-800 shadow-lg"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image container (with optional Link) */}
+      {/* Image container (with optional Link) - now applies scaling and overflow-hidden */}
       {banner.url ? (
-        <Link href={banner.url} target="_blank" rel="noopener noreferrer" className="block relative w-full aspect-video">
-          <Image
-            src={getMinioUrl(banner.image!)}
-            alt={banner.title || "Banner image"}
-            fill
-            style={{ objectFit: "cover" }}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="transition-transform duration-200 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" /> {/* Only gradient overlay */}
+        <Link 
+          href={banner.url} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="block relative w-full aspect-video overflow-hidden transition-transform duration-200 group-hover:scale-105"
+        >
+          {imageContent}
         </Link>
       ) : (
-        <div className="relative w-full aspect-video">
-          <Image
-            src={getMinioUrl(banner.image!)}
-            alt={banner.title || "Banner image"}
-            fill
-            style={{ objectFit: "cover" }}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="transition-transform duration-200 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" /> {/* Only gradient overlay */}
+        <div className="relative w-full aspect-video overflow-hidden transition-transform duration-200 group-hover:scale-105">
+          {imageContent}
         </div>
       )}
 
-      {/* Title and Description below the image */}
-      <div className="p-4">
-        <h3 className="text-xl font-semibold text-white">{banner.title}</h3>
-        {banner.description && <p className="text-gray-300 text-sm mt-1">{banner.description}</p>}
-      </div>
+      {/* Title and Description below the image - conditionally rendered */}
+      {hasTextContent && (
+        <div className="p-4">
+          {banner.title && <h3 className="text-xl font-semibold text-white">{banner.title}</h3>}
+          {banner.description && <p className="text-gray-300 text-sm mt-1">{banner.description}</p>}
+        </div>
+      )}
 
       {canManageBanners && isHovered && (
         <div className="absolute top-2 right-2 flex space-x-2 z-10">
