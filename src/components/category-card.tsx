@@ -18,14 +18,14 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
 
   return (
     <Link href={`/category/${category.slug}`} passHref> {/* Updated link */}
-      <Card className="group relative w-full aspect-square rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+      <Card className="group relative w-full aspect-square rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200 cursor-pointer transition-transform duration-200 group-hover:scale-105"> {/* Масштабирование перенесено сюда */}
         <Image
           src={imageUrl}
           alt={category.title}
           fill
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
           style={{ objectFit: "cover" }}
-          className="transition-transform duration-200 group-hover:scale-105"
+          className="transform scale-[1.01] translate-x-[-0.5%] translate-y-[-0.5%]" // Добавлено небольшое переполнение
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
           <h3 className="text-lg font-semibold text-white line-clamp-1 group-hover:text-green-400 transition-colors">

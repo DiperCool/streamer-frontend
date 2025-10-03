@@ -24,14 +24,14 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
     <Link href={`/${streamerName}`} passHref>
       <div className="group relative w-full cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
         {/* Stream Preview Image */}
-        <div className="relative w-full aspect-video">
+        <div className="relative w-full aspect-video overflow-hidden transition-transform duration-200 group-hover:scale-105"> {/* Масштабирование перенесено сюда */}
           <Image
             src={previewUrl}
             alt={stream.title || "Stream preview"}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             style={{ objectFit: "cover" }}
-            className="transition-transform duration-200 group-hover:scale-105"
+            className="transform scale-[1.01] translate-x-[-0.5%] translate-y-[-0.5%]" // Добавлено небольшое переполнение
           />
           {/* Overlay for darkening */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
