@@ -28,6 +28,11 @@ export default function StreamerAboutPage({ params }: { params: { username: stri
     skip: !isAuthenticated || authLoading || !streamerData?.streamer.id,
   });
 
+  // Добавлены логи для отладки
+  console.log("AboutPage - isAuthenticated:", isAuthenticated);
+  console.log("AboutPage - streamerData:", streamerData);
+  console.log("AboutPage - streamerId (from streamerData):", streamerData?.streamer?.id);
+
   if (streamerLoading || profileLoading || authLoading || streamerInteractionLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -39,7 +44,7 @@ export default function StreamerAboutPage({ params }: { params: { username: stri
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
   // canManageBanners теперь используется только для определения, может ли пользователь редактировать/добавлять баннеры
-  const canManageBanners = streamerInteractionData?.streamerInteraction?.permissions?.isAll || streamerInteractionData?.streamerInteraction?.permissions?.isBanners;
+  const canManageBanners = (isAuthenticated && (streamerInteractionData?.streamerInteraction?.permissions?.isAll || streamerInteractionData?.streamerInteraction?.permissions?.isBanners)) || false;
 
   if (!streamer || !streamerProfile) {
     return (
@@ -49,12 +54,14 @@ export default function StreamerAboutPage({ params }: { params: { username: stri
     )
   }
 
+  console.log("AboutPage - streamer.id (passed to banners section):", streamer.id);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <StreamerAboutSection streamer={streamer} profile={streamerProfile} />
       
       {/* StreamerBannersSection теперь всегда рендерится */}
-      <StreamerBannersSection streamerId={streamer.id} canManageBanners={canManageBanners ?? false} className="mt-8" />
+      <StreamerBannersSection streamerId={streamer.id} canManageBanners={canManageBanners} className="mt-8" />
     </div>
   )
 }

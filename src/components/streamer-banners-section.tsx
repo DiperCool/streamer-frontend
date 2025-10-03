@@ -23,12 +23,21 @@ export const StreamerBannersSection: React.FC<StreamerBannersSectionProps> = ({
 }) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
+  console.log("StreamerBannersSection - streamerId:", streamerId);
+  console.log("StreamerBannersSection - canManageBanners:", canManageBanners);
+
   const { data: bannersData, loading: bannersLoading, error: bannersError, refetch: refetchBanners } = useGetBannersQuery({
     variables: { streamerId },
     skip: !streamerId,
   });
 
+  // Добавлены логи для отладки
+  console.log("StreamerBannersSection - bannersLoading:", bannersLoading);
+  console.log("StreamerBannersSection - bannersError:", bannersError);
+  console.log("StreamerBannersSection - bannersData:", bannersData);
+
   const banners = bannersData?.banners || [];
+  console.log("StreamerBannersSection - banners.length:", banners.length);
 
   if (bannersLoading) {
     return (
@@ -75,7 +84,6 @@ export const StreamerBannersSection: React.FC<StreamerBannersSectionProps> = ({
             </div>
           )}
         </div>
-        {/* Сообщение "No banners found" теперь отображается, если баннеров нет, независимо от canManageBanners */}
         {banners.length === 0 && !bannersLoading && (
             <p className="text-gray-400 text-center py-10">No banners found for this channel.</p>
         )}
