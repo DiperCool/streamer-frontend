@@ -200,7 +200,7 @@ export default function StreamerProfileLayout({
 
         <div className={cn(
           "transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "px-4 py-2" : "px-4 py-2"
+          isPlayerMaximized ? "py-2" : "py-2" // Удален px-4
         )}>
           <StreamerInfoBar
             streamer={streamer}
@@ -215,7 +215,7 @@ export default function StreamerProfileLayout({
 
         <div className={cn(
           "flex-grow transition-all duration-300 ease-in-out",
-          isPlayerMaximized ? "hidden" : "px-4 py-2"
+          isPlayerMaximized ? "hidden" : "py-2" // Удален px-4
         )}>
           <div className="border-b border-gray-800 mb-2">
             <Tabs value={activeTab} className="w-full">
