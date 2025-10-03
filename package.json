@@ -53,6 +53,7 @@
     "clsx": "^2.1.1",
     "cmdk": "latest",
     "date-fns": "latest",
+    "emoji-picker-react": "^4.13.3",
     "graphql": "^16.11.0",
     "graphql-ws": "latest",
     "input-otp": "latest",
