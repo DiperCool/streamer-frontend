@@ -250,9 +250,9 @@ const Navbar = React.forwardRef<HTMLDivElement, NavbarProps>(
                               <DropdownMenuItem onClick={() => router.push(`/dashboard/${currentAuthUserStreamer?.userName || userName}`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                                 <LayoutDashboard className="h-4 w-4 mr-2" /> Creator Dashboard
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
+                              {/* <DropdownMenuItem onClick={() => console.log('Subscriptions clicked')} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                                 <Sparkles className="h-4 w-4 mr-2" /> Subscriptions
-                              </DropdownMenuItem>
+                              </DropdownMenuItem> */}
                               <DropdownMenuItem onClick={() => router.push(`/settings/profile`)} className="cursor-pointer flex items-center text-gray-300 hover:bg-green-600 hover:text-white">
                                 <Settings className="h-4 w-4 mr-2" /> Settings
                               </DropdownMenuItem>
