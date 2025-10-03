@@ -71,7 +71,8 @@ export const BannerCard: React.FC<BannerCardProps> = ({
         fill
         style={{ objectFit: "cover" }}
         sizes="(max-width: 768px) 100vw, 50vw"
-        className="absolute inset-0 w-full h-full" // Image now fills its parent without its own scaling
+        // Добавлены классы для небольшого увеличения и смещения изображения
+        className="absolute inset-0 w-full h-full transform scale-[1.01] translate-x-[-0.5%] translate-y-[-0.5%]" 
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
     </>
