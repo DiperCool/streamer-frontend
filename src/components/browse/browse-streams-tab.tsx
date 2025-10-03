@@ -99,7 +99,7 @@ export const BrowseStreamsTab: React.FC = () => {
             value={selectedTagId}
             onValueChange={setSelectedTagId}
             placeholder="All Tags"
-            className="w-full sm:w-[180px]" // Занимает всю доступную ширину внутри родительского w-full, фиксированная ширина на sm+
+            className="w-full sm:w-[180px]" // w-full на мобильных, sm:w-[180px] на sm+
           />
         </div>
 
@@ -107,7 +107,7 @@ export const BrowseStreamsTab: React.FC = () => {
         <div className="flex items-center space-x-2 w-full sm:w-auto"> {/* w-full на мобильных, sm:w-auto на sm+ */}
           <span className="text-gray-400 hidden sm:block">Sort by:</span> {/* Скрыто на мобильных */}
           <Select value={sortBy} onValueChange={(value: SortEnumType) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-white"> {/* Занимает всю доступную ширину внутри родительского w-full, фиксированная ширина на sm+ */}
+            <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-white"> {/* w-full на мобильных, sm:w-[180px] на sm+ */}
               <SelectValue placeholder="Select a sort option" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700 text-white">
