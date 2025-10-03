@@ -90,24 +90,24 @@ export const BrowseStreamsTab: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Changed flex-row to flex-col on mobile, and added space-y for vertical spacing */}
+      {/* Возвращено к flex-col на мобильных, flex-row на sm+ */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
         {/* Tag Select Input */}
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400 hidden sm:block">Filter by Tag:</span> {/* Hide label on mobile */}
+        <div className="flex items-center space-x-2 w-full sm:flex-1"> {/* w-full на мобильных, flex-1 на sm+ */}
+          <span className="text-gray-400 hidden sm:block">Filter by Tag:</span> {/* Скрыто на мобильных */}
           <TagSelectInput
             value={selectedTagId}
             onValueChange={setSelectedTagId}
             placeholder="All Tags"
-            className="w-full sm:w-[180px]" // Make full width on mobile, fixed on sm+
+            className="w-full" // Занимает всю доступную ширину внутри родительского flex-1
           />
         </div>
 
         {/* Sort By Select */}
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400 hidden sm:block">Sort by:</span> {/* Hide label on mobile */}
+        <div className="flex items-center space-x-2 w-full sm:flex-1"> {/* w-full на мобильных, flex-1 на sm+ */}
+          <span className="text-gray-400 hidden sm:block">Sort by:</span> {/* Скрыто на мобильных */}
           <Select value={sortBy} onValueChange={(value: SortEnumType) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-white"> {/* Make full width on mobile, fixed on sm+ */}
+            <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white"> {/* Занимает всю доступную ширину внутри родительского flex-1 */}
               <SelectValue placeholder="Select a sort option" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700 text-white">
