@@ -75,6 +75,10 @@ export const StreamerBannersSection: React.FC<StreamerBannersSectionProps> = ({
             </div>
           )}
         </div>
+        {/* Сообщение "No banners found" теперь отображается, если баннеров нет, независимо от canManageBanners */}
+        {banners.length === 0 && !bannersLoading && (
+            <p className="text-gray-400 text-center py-10">No banners found for this channel.</p>
+        )}
       </CardContent>
 
       {canManageBanners && (

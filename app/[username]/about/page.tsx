@@ -38,6 +38,7 @@ export default function StreamerAboutPage({ params }: { params: { username: stri
 
   const streamerProfile = profileData?.profile
   const streamer = streamerData?.streamer
+  // canManageBanners теперь используется только для определения, может ли пользователь редактировать/добавлять баннеры
   const canManageBanners = streamerInteractionData?.streamerInteraction?.permissions?.isAll || streamerInteractionData?.streamerInteraction?.permissions?.isBanners;
 
   if (!streamer || !streamerProfile) {
@@ -52,7 +53,7 @@ export default function StreamerAboutPage({ params }: { params: { username: stri
     <div className="container mx-auto px-4 py-8">
       <StreamerAboutSection streamer={streamer} profile={streamerProfile} />
       
-      {/* Добавлен отступ mt-8 */}
+      {/* StreamerBannersSection теперь всегда рендерится */}
       <StreamerBannersSection streamerId={streamer.id} canManageBanners={canManageBanners ?? false} className="mt-8" />
     </div>
   )
