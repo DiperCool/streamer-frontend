@@ -65,18 +65,20 @@ export const formatLiveDuration = (startDate: string | null | undefined): string
 export const formatAnalyticsValue = (type: string, value: number): string => {
   switch (type) {
     case 'STREAM_TIME':
-      const totalMinutes = Math.round(value / 60); // Assuming value is in seconds
+      const totalMinutes = Math.ceil(value / 60); // Округляем минуты в большую сторону
       if (totalMinutes < 60) return `${totalMinutes}m`;
       const hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
       return `${hours}h ${minutes}m`;
     case 'STREAM_VIEWERS':
-      if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-      return value.toFixed(1); // For average viewers, keep one decimal
+      const viewers = Math.ceil(value); // Округляем зрителей в большую сторону
+      if (viewers >= 1000) return `${(viewers / 1000).toFixed(0)}K`; // Округляем до целых тысяч
+      return viewers.toString();
     case 'FOLLOWER':
-      if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-      return value.toString();
+      const followers = Math.ceil(value); // Округляем подписчиков в большую сторону
+      if (followers >= 1000) return `${(followers / 1000).toFixed(0)}K`; // Округляем до целых тысяч
+      return followers.toString();
     default:
-      return value.toString();
+      return Math.ceil(value).toString(); // По умолчанию округляем в большую сторону
   }
 };
