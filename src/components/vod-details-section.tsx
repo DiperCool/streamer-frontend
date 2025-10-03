@@ -69,7 +69,6 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
   return (
     <div className="bg-gray-900 text-white">
       <div className="flex items-start justify-between mb-4">
-        {/* Left Section: Avatar, Name, Title, Description, Tags */}
         <div className="flex items-start space-x-4 flex-1">
           <Link href={`/${streamer.userName}`} passHref>
             <Avatar className="w-16 h-16 cursor-pointer">
@@ -84,7 +83,7 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
               <Link href={`/${streamer.userName}`} passHref>
                 <h1 className="text-2xl font-bold text-white hover:text-green-400 cursor-pointer">{streamer.userName}</h1>
               </Link>
-              <CheckCircle className="w-4 h-4 text-green-500" /> {/* Verified badge */}
+              <CheckCircle className="w-4 h-4 text-green-500" />
             </div>
             <h2 className="text-lg font-semibold text-white mb-2">{vod.title || "Untitled VOD"}</h2>
             {vod.description && (
@@ -92,7 +91,7 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
                 <p className={showFullDescription ? "" : "line-clamp-2"}>
                   {vod.description}
                 </p>
-                {vod.description.length > 150 && ( // Simple check for description length
+                {vod.description.length > 150 && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -109,19 +108,19 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
               </div>
             )}
             <div className="flex flex-wrap gap-2 mt-2">
-              {vod.category?.title && ( // Display category first
-                <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
+              {vod.category?.title && (
+                <Badge variant="tag">
                   {vod.category.title}
                 </Badge>
               )}
               {vod.language && (
-                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                <Badge variant="tag">
                   {vod.language}
                 </Badge>
               )}
               {vod.tags && vod.tags.length > 0 && (
                 vod.tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                  <Badge key={tag.id} variant="tag">
                     {tag.title}
                   </Badge>
                 ))
@@ -130,14 +129,13 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
           </div>
         </div>
 
-        {/* Right Section: Action Buttons and Stats */}
         <div className="flex flex-col items-end space-y-2 ml-4">
           <div className="flex items-center space-x-2">
             {!isAuthenticated && (
               <Button
                 variant="default"
                 className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => console.log("Login to follow")} // Placeholder for login action
+                onClick={() => console.log("Login to follow")}
               >
                 Follow
               </Button>
@@ -191,7 +189,6 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
             <span>{vod.views} views</span>
             <span>•</span>
             <span>{timeAgo}</span>
-            {/* Удалены кнопки Share2 и Settings */}
           </div>
         </div>
       </div>

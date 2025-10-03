@@ -91,7 +91,6 @@ export default function HomePage() {
           ) : (
             <div className="py-4">
               {topStreams.length === 1 ? (
-                // Single stream layout: full width
                 <div className="flex w-full items-stretch">
                   <div className="flex-1 relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
                     {hasStreamSources ? (
@@ -120,17 +119,17 @@ export default function HomePage() {
                       <div className="flex items-center text-sm text-gray-400 mb-2">
                         <div className="flex items-center flex-wrap gap-1.5">
                           {featuredStream.category?.title && (
-                            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            <Badge variant="tag">
                               {featuredStream.category.title}
                             </Badge>
                           )}
                           {featuredStream.language && (
-                            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            <Badge variant="tag">
                               {featuredStream.language}
                             </Badge>
                           )}
                           {featuredStream.tags.map((tag) => (
-                            <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            <Badge key={tag.id} variant="tag">
                               {tag.title}
                             </Badge>
                           ))}
@@ -174,7 +173,6 @@ export default function HomePage() {
                   </div>
                 </div>
               ) : (
-                // Multiple streams layout: existing two-column
                 <div className="flex w-full items-stretch">
                   <div className="flex-[4] relative bg-gray-800 rounded-lg overflow-hidden aspect-[16/5]">
                     {hasStreamSources ? (
@@ -203,17 +201,17 @@ export default function HomePage() {
                       <div className="flex items-center text-sm text-gray-400 mb-2">
                         <div className="flex items-center flex-wrap gap-1.5">
                           {featuredStream.category?.title && (
-                            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            <Badge variant="tag">
                               {featuredStream.category.title}
                             </Badge>
                           )}
                           {featuredStream.language && (
-                            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            <Badge variant="tag">
                               {featuredStream.language}
                             </Badge>
                           )}
                           {featuredStream.tags.map((tag) => (
-                            <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                            <Badge key={tag.id} variant="tag">
                               {tag.title}
                             </Badge>
                           ))}

@@ -20,13 +20,13 @@ import { TagSelectInput } from "@/src/components/ui/tag-select-input"
 import Image from "next/image"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge" // Import Badge
+import { Badge } from "@/components/ui/badge"
 
-const STREAMS_PER_PAGE = 15; // Consistent with browse-streams-tab
+const STREAMS_PER_PAGE = 15;
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
   const { slug } = params;
-  const [sortBy, setSortBy] = useState<SortEnumType>(SortEnumType.Desc); // Default to Most Viewers
+  const [sortBy, setSortBy] = useState<SortEnumType>(SortEnumType.Desc);
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -54,14 +54,13 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       order: [{ currentViewers: sortBy }],
       tag: selectedTagId,
     },
-    skip: !categoryId, // Skip stream query if categoryId is not yet available
+    skip: !categoryId,
     notifyOnNetworkStatusChange: true,
   });
 
-  // Refetch streams when sort order or selected tag changes
   useEffect(() => {
-    if (categoryId) { // Only refetch if categoryId is available
-      setCurrentPage(1); // Reset page when filters change
+    if (categoryId) {
+      setCurrentPage(1);
       refetch();
     }
   }, [sortBy, selectedTagId, categoryId, refetch]);
@@ -76,7 +75,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
           first: STREAMS_PER_PAGE,
           order: [{ currentViewers: sortBy }],
           tag: selectedTagId,
-          categoryId: categoryId, // Ensure categoryId is passed to fetchMore
+          categoryId: categoryId,
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult || !fetchMoreResult.streams?.nodes) {
@@ -122,24 +121,20 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Category Header */}
       <div className="flex items-start space-x-6 mb-8">
-        {/* Image on left */}
-        <div className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-lg bg-gray-700"> {/* Adjusted size and added fallback background */}
+        <div className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden shadow-lg bg-gray-700">
           <Image
             src={imageUrl}
             alt={category.title}
             fill
             style={{ objectFit: "cover" }}
-            sizes="80px" // Adjusted sizes prop for w-20
+            sizes="80px"
             priority
           />
         </div>
-        {/* Text content on right */}
-        <div className="flex flex-col flex-1 py-0"> {/* Adjusted padding */}
+        <div className="flex flex-col flex-1 py-0">
           <h1 className="text-4xl font-bold text-white mb-2">{category.title}</h1>
           <div className="flex items-center space-x-2 text-gray-400 text-lg">
-            {/* Watching count as a badge */}
             <Badge className="bg-gray-800 text-white px-2 py-1 rounded-md text-sm font-semibold flex items-center">
               <span className="h-2 w-2 rounded-full bg-red-500 mr-1" />
               {category.watchers} watching
@@ -148,25 +143,21 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
 
-      {/* Filters */}
-      {/* Контейнер для фильтров и сортировки: flex-col на мобильных, flex-row и justify-end на sm+ */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
-        {/* Tag Select Input */}
-        <div className="flex items-center space-x-2"> {/* Убраны классы ширины отсюда */}
-          <span className="text-gray-400 hidden sm:block">Filter by Tag:</span> {/* Скрыто на мобильных */}
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-400 hidden sm:block">Filter by Tag:</span>
           <TagSelectInput
             value={selectedTagId}
             onValueChange={setSelectedTagId}
             placeholder="All Tags"
-            className="w-[180px]" // Фиксированная ширина 180px
+            className="w-[180px]"
           />
         </div>
 
-        {/* Sort By Select */}
-        <div className="flex items-center space-x-2"> {/* Убраны классы ширины отсюда */}
-          <span className="text-gray-400 hidden sm:block">Sort by:</span> {/* Скрыто на мобильных */}
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-400 hidden sm:block">Sort by:</span>
           <Select value={sortBy} onValueChange={(value: SortEnumType) => setSortBy(value)}>
-            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white"> {/* Фиксированная ширина 180px */}
+            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
               <SelectValue placeholder="Select a sort option" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700 text-white">
@@ -177,7 +168,6 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
 
-      {/* Streams List */}
       {streams.length === 0 && !streamsLoading ? (
         <p className="text-gray-400 text-center py-10">No live streams currently available in this category.</p>
       ) : (
@@ -204,5 +194,5 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -69,7 +69,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
   const displayTitle = currentStream?.title;
   const displayLanguage = currentStream?.language;
   const displayTags = currentStream?.tags;
-  const currentViewers = currentStream?.currentViewers; // Получаем количество зрителей
+  const currentViewers = currentStream?.currentViewers;
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
@@ -98,7 +98,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
               <p className="text-lg font-normal text-white uppercase mt-1">{displayTitle}</p>
             )}
 
-            <div className="flex items-center space-x-2 text-gray-400"> {/* Контейнер для подписчиков и зрителей */}
+            <div className="flex items-center space-x-2 text-gray-400">
               <p>{streamer.followers} followers</p>
               {isLive && currentViewers !== undefined && (
                 <>
@@ -161,18 +161,18 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
       {isLive && (
         <div className="flex items-center flex-wrap gap-2 mt-2">
           {streamInfo?.category?.title && (
-            <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-1 rounded-full text-xs font-semibold">
+            <Badge variant="tag">
               {streamInfo.category.title}
             </Badge>
           )}
           {displayLanguage && (
-            <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+            <Badge variant="tag">
               {displayLanguage}
             </Badge>
           )}
           {displayTags && displayTags.length > 0 && (
             displayTags.map((tag) => (
-              <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+              <Badge key={tag.id} variant="tag">
                 {tag.title}
               </Badge>
             ))

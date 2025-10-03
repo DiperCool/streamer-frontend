@@ -36,18 +36,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { CategorySelectInput } from "@/src/components/ui/category-select-input"; // Import the new component
+import { CategorySelectInput } from "@/src/components/ui/category-select-input";
 
 const streamInfoSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title must be at most 100 characters"),
   language: z.string().min(1, "Language is required"),
   categoryId: z.string().uuid("Invalid category ID").nullable(),
-  tagsInput: z.string().optional(), // For the input field to add new tags
+  tagsInput: z.string().optional(),
   tags: z.array(z.string()
     .min(1, "Tag cannot be empty")
     .max(25, "Tag must be at most 25 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Tags can only contain letters, numbers, and underscores")
-  ).max(10, "You can add up to 10 tags").optional(), // Actual tags array
+  ).max(10, "You can add up to 10 tags").optional(),
 });
 
 type StreamInfoFormValues = z.infer<typeof streamInfoSchema>;
@@ -67,7 +67,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
 }) => {
   const { data: streamInfoData, loading: streamInfoLoading, error: streamInfoError } = useGetStreamInfoQuery({
     variables: { streamerId },
-    skip: !streamerId || !isOpen, // Only fetch when dialog is open and streamerId is available
+    skip: !streamerId || !isOpen,
   });
 
   const { data: categoriesData, loading: categoriesLoading, error: categoriesError } = useGetCategoriesQuery({
@@ -84,7 +84,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
     setValue,
     setError,
     clearErrors,
-    trigger, // Import trigger
+    trigger,
     formState: { errors, isDirty },
   } = useForm<StreamInfoFormValues>({
     resolver: zodResolver(streamInfoSchema),
@@ -108,11 +108,11 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
         language: info.language || "English",
         categoryId: info.category?.id || null,
         tags: info.tags?.map(tag => tag.title) || [],
-        tagsInput: "", // Clear tags input on open
+        tagsInput: "",
       });
     } else if (!isOpen) {
-      reset(); // Reset form when dialog closes
-      clearErrors(); // Clear any form errors
+      reset();
+      clearErrors();
     }
   }, [isOpen, streamInfoData, reset, clearErrors]);
 
@@ -123,7 +123,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
       if (!inputVal) return;
 
       const newTagsToAdd = inputVal
-        .split(/[, ]+/) // Split by commas or spaces
+        .split(/[, ]+/)
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
@@ -161,15 +161,15 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
         setValue("tags", updatedTags, { shouldDirty: true, shouldValidate: true });
         setValue("tagsInput", "");
         clearErrors("tagsInput");
-        clearErrors("tags"); // Clear array-level errors too
-        trigger("tags"); // Trigger validation for the tags array
+        clearErrors("tags");
+        trigger("tags");
       }
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
     setValue("tags", currentTags.filter((tag) => tag !== tagToRemove), { shouldDirty: true });
-    trigger("tags"); // Trigger validation for the tags array
+    trigger("tags");
     clearErrors("tags");
   };
 
@@ -184,7 +184,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
             title: values.title,
             language: values.language,
             categoryId: values.categoryId,
-            tags: values.tags || [], // Ensure tags array is passed
+            tags: values.tags || [],
           },
         },
       });
@@ -259,7 +259,7 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
               )}
               <div className="flex flex-wrap gap-2 mt-2">
                 {currentTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs flex items-center">
+                  <Badge key={tag} variant="tag">
                     {tag}
                     <Button
                       variant="ghost"
@@ -295,7 +295,6 @@ export const EditStreamInfoDialog: React.FC<EditStreamInfoDialogProps> = ({
                   <SelectItem value="French">French</SelectItem>
                   <SelectItem value="German">German</SelectItem>
                   <SelectItem value="Russian">Russian</SelectItem>
-                  {/* Add more languages as needed */}
                 </SelectContent>
               </Select>
               {errors.language && (

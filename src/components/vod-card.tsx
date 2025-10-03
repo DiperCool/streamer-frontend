@@ -4,8 +4,8 @@ import React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { MoreVertical } from "lucide-react"
-import { VodDto, VodType } from "@/graphql/__generated__/graphql" // Import VodType
-import { getMinioUrl, formatVodDuration } from "@/utils/utils" // Импортируем formatVodDuration
+import { VodDto, VodType } from "@/graphql/__generated__/graphql"
+import { getMinioUrl, formatVodDuration } from "@/utils/utils"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -16,12 +16,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNowStrict } from "date-fns"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" // Import Avatar components
-import { cn } from "@/lib/utils" // Import cn for conditional classNames
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 
 interface VodCardProps {
   vod: VodDto
-  isCurrentStream?: boolean // To show "Current Stream" badge
+  isCurrentStream?: boolean
 }
 
 export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
@@ -45,7 +45,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
             style={{ objectFit: "cover" }}
             className={cn(
               "transition-transform duration-200 group-hover:scale-105",
-              isPrivate && "filter brightness-50" // Darken if private
+              isPrivate && "filter brightness-50"
             )}
           />
           {isPrivate && (
@@ -71,7 +71,7 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
           <h3 className="text-base font-semibold text-white line-clamp-2 group-hover:text-green-400 transition-colors">
             {vod.title || "Untitled Video"}
           </h3>
-          <div className="flex items-center mt-1"> {/* Container for avatar and time ago */}
+          <div className="flex items-center mt-1">
             <Avatar className="w-6 h-6 mr-2">
               <AvatarImage src={getMinioUrl(streamerAvatar!)} alt={streamerName} />
               <AvatarFallback className="bg-gray-600 text-white text-xs">
@@ -82,27 +82,26 @@ export function VodCard({ vod, isCurrentStream = false }: VodCardProps) {
               {timeAgo}
             </p>
           </div>
-          <div className="flex flex-wrap gap-1.5 mt-2"> {/* Added category, language, and tags */}
+          <div className="flex flex-wrap gap-1.5 mt-2">
             {vod.category?.title && (
-              <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold">
+              <Badge variant="tag">
                 {vod.category.title}
               </Badge>
             )}
             {vod.language && (
-              <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+              <Badge variant="tag">
                 {vod.language}
               </Badge>
             )}
             {vod.tags && vod.tags.length > 0 && (
               vod.tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                <Badge key={tag.id} variant="tag">
                   {tag.title}
                 </Badge>
               ))
             )}
           </div>
         </div>
-        {/* Заполнитель для сохранения макета */}
         <div className="h-8 w-8 flex-shrink-0" />
       </div>
     </div>

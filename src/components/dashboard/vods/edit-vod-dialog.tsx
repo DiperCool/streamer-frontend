@@ -51,13 +51,12 @@ const editVodSchema = z.object({
   type: z.nativeEnum(VodType, {
     errorMap: () => ({ message: "Please select a VOD type" }),
   }),
-  tagsInput: z.string().optional(), // For the input field to add new tags
+  tagsInput: z.string().optional(),
   tags: z.array(z.string()
     .min(1, "Tag cannot be empty")
     .max(25, "Tag must be at most 25 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Tags can only contain letters, numbers, and underscores")
-  ).max(10, "You can add up to 10 tags").optional(), // Actual tags array
-  // Removed: preview: z.string().optional(),
+  ).max(10, "You can add up to 10 tags").optional(),
 });
 
 type EditVodFormValues = z.infer<typeof editVodSchema>;
@@ -99,7 +98,6 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
       },
     ],
   });
-  // Removed: const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const {
     register,
@@ -122,7 +120,6 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
       type: VodType.Public,
       tagsInput: "",
       tags: [],
-      // Removed: preview: "",
     },
   });
 
@@ -146,14 +143,11 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
         categoryId: vod.category?.id || null,
         type: vod.type,
         tags: vod.tags?.map(tag => tag.title) || [],
-        // Removed: preview: vod.preview || "",
         tagsInput: "",
       });
-      // Removed: setPreviewImageUrl(vod.preview ? getMinioUrl(vod.preview) : null);
     } else if (!isOpen) {
       reset();
       clearErrors();
-      // Removed: setPreviewImageUrl(null);
     }
   }, [isOpen, reset, vodData, clearErrors]);
 
@@ -213,11 +207,6 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
     clearErrors("tags");
   };
 
-  // Removed: const handlePreviewUpload = (fileName: string) => {
-  //   setValue("preview", fileName, { shouldDirty: true, shouldValidate: true });
-  //   setPreviewImageUrl(getMinioUrl(fileName));
-  // };
-
   const onSubmit = async (values: EditVodFormValues) => {
     try {
       await updateVodMutation({
@@ -230,7 +219,6 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
             categoryId: values.categoryId,
             type: values.type,
             tags: values.tags || [],
-            // Removed: preview: values.preview || "",
           },
         },
       });
@@ -363,7 +351,7 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
               )}
               <div className="flex flex-wrap gap-2 mt-2">
                 {currentTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs flex items-center">
+                  <Badge key={tag} variant="tag">
                     {tag}
                     <Button
                       variant="ghost"
@@ -383,8 +371,6 @@ export const EditVodDialog: React.FC<EditVodDialogProps> = ({
                 <p className="text-red-500 text-sm mt-1">{errors.tags.message}</p>
               )}
             </div>
-
-            {/* Removed Preview Image section */}
 
             <DialogFooter>
               <Button

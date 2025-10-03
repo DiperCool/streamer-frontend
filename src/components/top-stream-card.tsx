@@ -23,32 +23,27 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
   return (
     <Link href={`/${streamerName}`} passHref>
       <div className="group relative w-full cursor-pointer rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
-        {/* Stream Preview Image */}
-        <div className="relative w-full aspect-video overflow-hidden transition-transform duration-200 group-hover:scale-105"> {/* Масштабирование перенесено сюда */}
+        <div className="relative w-full aspect-video overflow-hidden transition-transform duration-200 group-hover:scale-105">
           <Image
             src={previewUrl}
             alt={stream.title || "Stream preview"}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             style={{ objectFit: "cover" }}
-            className="transform scale-[1.01] translate-x-[-0.5%] translate-y-[-0.5%]" // Добавлено небольшое переполнение
+            className="transform scale-[1.01] translate-x-[-0.5%] translate-y-[-0.5%]"
           />
-          {/* Overlay for darkening */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-          {/* Live Badge */}
           {stream.active && (
             <Badge className="absolute top-2.5 left-2.5 bg-red-600 text-white px-2 py-1 rounded-md text-sm font-semibold z-10">
               LIVE
             </Badge>
           )}
-          {/* Viewers Count */}
           <Badge className="absolute bottom-2.5 left-2.5 bg-black/70 text-white px-2 py-1 rounded-md text-sm font-semibold z-10 flex items-center">
             <Users className="w-3.5 h-3.5 mr-1" />
             {currentViewers >= 1000 ? `${(currentViewers / 1000).toFixed(1)}K` : currentViewers} watching
           </Badge>
         </div>
 
-        {/* Streamer Info and Title */}
         <div className="p-3.5 flex items-start space-x-3">
           <Avatar className="w-11 h-11 flex-shrink-0">
             <AvatarImage src={getMinioUrl(streamerAvatar)} alt={streamerName} />
@@ -62,20 +57,19 @@ export function TopStreamCard({ stream }: TopStreamCardProps) {
             </h3>
             <p className="text-base text-gray-400">{streamerName}</p>
             
-            {/* Category, Language, and Tags as badges */}
             <div className="flex flex-wrap gap-1.5 mt-2">
               {stream.category?.title && (
-                <Badge variant="secondary" className="bg-gray-700 text-green-400 px-2 py-0.5 rounded-full text-sm">
+                <Badge variant="tag">
                   {stream.category.title}
                 </Badge>
               )}
               {stream.language && (
-                <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-sm">
+                <Badge variant="tag">
                   {stream.language}
                 </Badge>
               )}
               {stream.tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-sm">
+                <Badge key={tag.id} variant="tag">
                   {tag.title}
                 </Badge>
               ))}

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Edit } from "lucide-react"; // Added Edit icon
+import { Loader2, Edit } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { EditStreamInfoDialog } from "./edit-stream-info-dialog"; // Import the new dialog
+import { EditStreamInfoDialog } from "./edit-stream-info-dialog";
 import { getMinioUrl } from "@/utils/utils";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export const StreamInfoWidget: React.FC = () => {
   const { activeStreamer } = useDashboard();
   const streamerId = activeStreamer?.id ?? "";
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for dialog visibility
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { data: streamInfoData, loading: streamInfoLoading, error: streamInfoError, refetch: refetchStreamInfo } = useGetStreamInfoQuery({
     variables: { streamerId },
@@ -69,9 +69,8 @@ export const StreamInfoWidget: React.FC = () => {
   const currentCategory = categories.find(cat => cat.id === streamInfo?.categoryId);
 
   return (
-    <div className="flex-1 p-3 flex flex-col overflow-y-auto custom-scrollbar"> {/* Removed space-y-4 */}
-      {/* Title */}
-      <div className="flex items-center justify-between mb-4"> {/* Added mb-4 */}
+    <div className="flex-1 p-3 flex flex-col overflow-y-auto custom-scrollbar">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-white">{streamInfo?.title || "Untitled Stream"}</h3>
         <Button
           variant="ghost"
@@ -83,27 +82,26 @@ export const StreamInfoWidget: React.FC = () => {
         </Button>
       </div>
 
-      {/* Category (Image + Title), Language and Tags */}
-      <div className="flex items-start space-x-4 mb-4"> {/* Added mb-4 */}
+      <div className="flex items-start space-x-4 mb-4">
         {currentCategory ? (
           <>
-            <Avatar className="h-12 w-12 rounded-md"> {/* Increased size */}
+            <Avatar className="h-12 w-12 rounded-md">
               <AvatarImage src={getMinioUrl(currentCategory.image)} alt={currentCategory.title} />
               <AvatarFallback className="bg-gray-600 text-white text-xs">
                 {currentCategory.title.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col space-y-1"> {/* Container for title, language, and tags */}
+            <div className="flex flex-col space-y-1">
               <span className="text-green-400 text-base font-semibold">{currentCategory.title}</span>
-              <div className="flex flex-wrap gap-2 items-center"> {/* Language and Tags */}
+              <div className="flex flex-wrap gap-2 items-center">
                 {streamInfo?.language && (
-                  <Badge variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                  <Badge variant="tag">
                     {streamInfo.language}
                   </Badge>
                 )}
                 {streamInfo?.tags && streamInfo.tags.length > 0 && (
                   streamInfo.tags.map((tag) => (
-                    <Badge key={tag.id} variant="secondary" className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
+                    <Badge key={tag.id} variant="tag">
                       {tag.title}
                     </Badge>
                   ))
@@ -119,7 +117,6 @@ export const StreamInfoWidget: React.FC = () => {
         )}
       </div>
 
-      {/* Edit Button - pushed to bottom */}
       <Button
         variant="secondary"
         className="w-full mt-auto bg-gray-700 hover:bg-gray-600 text-white"
@@ -128,7 +125,6 @@ export const StreamInfoWidget: React.FC = () => {
         <Edit className="h-5 w-5 mr-2" /> Edit
       </Button>
 
-      {/* Edit Dialog */}
       {streamerId && (
         <EditStreamInfoDialog
           isOpen={isEditDialogOpen}

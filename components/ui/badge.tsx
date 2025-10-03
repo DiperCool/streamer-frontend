@@ -15,6 +15,8 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // Обновленный вариант 'tag' с зеленым текстом по умолчанию и зеленым фоном/белым текстом при наведении
+        tag: "border-transparent bg-gray-700 text-green-400 hover:bg-green-600 hover:text-white",
       },
     },
     defaultVariants: {
