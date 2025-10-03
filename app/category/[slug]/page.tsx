@@ -149,22 +149,24 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center justify-end space-x-4 mb-6">
+      {/* Changed flex-row to flex-col on mobile, and added space-y for vertical spacing */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
         {/* Tag Select Input */}
         <div className="flex items-center space-x-2">
-          <span className="text-gray-400">Filter by Tag:</span>
+          <span className="text-gray-400 hidden sm:block">Filter by Tag:</span> {/* Hide label on mobile */}
           <TagSelectInput
             value={selectedTagId}
             onValueChange={setSelectedTagId}
             placeholder="All Tags"
+            className="w-full sm:w-[180px]" // Make full width on mobile, fixed on sm+
           />
         </div>
 
         {/* Sort By Select */}
         <div className="flex items-center space-x-2">
-          <span className="text-gray-400">Sort by:</span>
+          <span className="text-gray-400 hidden sm:block">Sort by:</span> {/* Hide label on mobile */}
           <Select value={sortBy} onValueChange={(value: SortEnumType) => setSortBy(value)}>
-            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
+            <SelectTrigger className="w-full sm:w-[180px] bg-gray-800 border-gray-700 text-white"> {/* Make full width on mobile, fixed on sm+ */}
               <SelectValue placeholder="Select a sort option" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700 text-white">
