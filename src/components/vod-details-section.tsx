@@ -191,12 +191,7 @@ export function VodDetailsSection({ vod, streamer, profile }: VodDetailsSectionP
             <span>{vod.views} views</span>
             <span>•</span>
             <span>{timeAgo}</span>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-              <Share2 className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-              <Settings className="w-4 h-4" />
-            </Button>
+            {/* Удалены кнопки Share2 и Settings */}
           </div>
         </div>
       </div>
