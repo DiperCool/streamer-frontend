@@ -114,6 +114,7 @@ export const BannerCard: React.FC<BannerCardProps> = ({
         </div>
       )}
 
+      {/* Action buttons (Edit/Delete) - only visible if canManageBanners is true and hovered */}
       {canManageBanners && isHovered && (
         <div className="absolute top-2 right-2 flex space-x-2 z-10">
           <Button
@@ -143,6 +144,7 @@ export const BannerCard: React.FC<BannerCardProps> = ({
         </div>
       )}
 
+      {/* Dialogs for editing and deleting - only rendered if canManageBanners is true */}
       {canManageBanners && (
         <>
           <EditBannerDialog
