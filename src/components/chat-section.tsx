@@ -36,6 +36,8 @@ import { getMinioUrl } from "@/utils/utils"
 import { useAuth0 } from "@auth0/auth0-react"
 import { toast } from "sonner"
 import { useDashboard } from "@/src/contexts/DashboardContext"
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react'; // Импортируем EmojiPicker
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"; // Импортируем Popover
 
 interface ChatSectionProps {
   onCloseChat?: () => void
@@ -114,6 +116,7 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
   const [listHeight, setListHeight] = useState(0);
   const [listWidth, setListWidth] = useState(0);
   const [slowModeCooldown, setSlowModeCooldown] = useState(0);
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false); // Состояние для открытия/закрытия эмодзи-пикера
 
   const { data: chatData, loading: chatLoading, refetch: refetchChat } = useGetChatQuery({
     variables: { streamerId },
@@ -177,6 +180,9 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     handleSubmit,
     reset,
     formState: { errors },
+    setValue, // Добавляем setValue для обновления поля ввода
+    watch,    // Добавляем watch для чтения текущего значения поля ввода
+    trigger,  // Добавляем trigger для принудительной валидации
   } = useForm<MessageForm>({
     resolver: zodResolver(messageSchema),
     defaultValues: {
@@ -629,6 +635,12 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
     }
   }, []);
 
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setValue("message", watch("message") + emojiData.emoji, { shouldDirty: true });
+    setIsEmojiPickerOpen(false);
+    trigger("message"); // Принудительная валидация поля сообщения
+  };
+
   const itemData = React.useMemo(() => ({
     messages: reversedMessages,
     onReply: setReplyToMessage,
@@ -765,12 +777,17 @@ export function ChatSection({ onCloseChat, streamerId, hideCardWrapper = false }
               }}
               disabled={sendingMessage}
             />
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-              <Smile className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
-              <Gift className="h-5 w-5" />
-            </Button>
+            <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                  <Smile className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-700 text-white">
+                <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" />
+              </PopoverContent>
+            </Popover>
+            {/* Кнопка Gift удалена */}
             <Button
               variant="default"
               size="icon"
