@@ -93,21 +93,18 @@ export default function StreamerVideosPage({ params }: { params: { username: str
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-white">Videos</h2>
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400">Sort by:</span>
-          <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
-              <SelectValue placeholder="Select a sort option" />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700 text-white">
-              <SelectItem value={SortEnumType.Desc}>Most Recent</SelectItem>
-              <SelectItem value={SortEnumType.Asc}>Oldest</SelectItem>
-              {/* Add more sort options as needed, e.g., Most Viewed */}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex items-center justify-end mb-6"> {/* Изменено: убран justify-between, оставлен justify-end */}
+        <span className="text-gray-400 hidden sm:block mr-2">Sort by:</span> {/* Добавлен hidden sm:block и mr-2 */}
+        <Select value={sortBy} onValueChange={handleSortChange}>
+          <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
+            <SelectValue placeholder="Select a sort option" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-800 border-gray-700 text-white">
+            <SelectItem value={SortEnumType.Desc}>Most Recent</SelectItem>
+            <SelectItem value={SortEnumType.Asc}>Oldest</SelectItem>
+            {/* Add more sort options as needed, e.g., Most Viewed */}
+          </SelectContent>
+        </Select>
       </div>
 
       {vods.length === 0 && !vodsLoading ? (
