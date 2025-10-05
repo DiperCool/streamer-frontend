@@ -27,12 +27,12 @@ export const getMinioUrl = (fileName: string | null | undefined): string => {
   return fullUrl;
 };
 
-// Helper function to format duration from milliseconds into HH:MM:SS
-export const formatVodDuration = (milliseconds: number): string => {
-  if (isNaN(milliseconds) || milliseconds < 0) return "00:00";
+// Helper function to format duration from seconds into HH:MM:SS
+export const formatVodDuration = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) return "00:00";
   
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const hours = Math.floor((totalSeconds % 3600) / 60);
+  const totalSeconds = Math.floor(seconds); // Input is already in seconds
+  const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const remainingSeconds = totalSeconds % 60;
 

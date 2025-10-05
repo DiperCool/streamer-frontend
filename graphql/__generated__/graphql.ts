@@ -127,6 +127,63 @@ export type BooleanOperationFilterInput = {
   neq?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type BotDto = {
+  __typename?: 'BotDto';
+  id: Scalars['UUID']['output'];
+  state: BotState;
+  streamVideoUrl: Scalars['String']['output'];
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+};
+
+export type BotDtoFilterInput = {
+  and?: InputMaybe<Array<BotDtoFilterInput>>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<BotDtoFilterInput>>;
+  state?: InputMaybe<BotStateOperationFilterInput>;
+  streamVideoUrl?: InputMaybe<StringOperationFilterInput>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type BotDtoSortInput = {
+  id?: InputMaybe<SortEnumType>;
+  state?: InputMaybe<SortEnumType>;
+  streamVideoUrl?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+};
+
+export enum BotState {
+  Active = 'ACTIVE',
+  Stopped = 'STOPPED'
+}
+
+export type BotStateOperationFilterInput = {
+  eq?: InputMaybe<BotState>;
+  in?: InputMaybe<Array<BotState>>;
+  neq?: InputMaybe<BotState>;
+  nin?: InputMaybe<Array<BotState>>;
+};
+
+/** A connection to a list of items. */
+export type BotsConnection = {
+  __typename?: 'BotsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<BotsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<BotDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type BotsEdge = {
+  __typename?: 'BotsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: BotDto;
+};
+
 /** A connection to a list of items. */
 export type CategoriesConnection = {
   __typename?: 'CategoriesConnection';
@@ -273,6 +330,17 @@ export type CreateBannerResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type CreateBotInput = {
+  state: BotState;
+  streamVideoUrl: Scalars['String']['input'];
+  streamerId: Scalars['String']['input'];
+};
+
+export type CreateBotResponse = {
+  __typename?: 'CreateBotResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type CreateCategoryInput = {
   image: Scalars['String']['input'];
   title: Scalars['String']['input'];
@@ -327,6 +395,17 @@ export type DeleteMessageInput = {
 
 export type DeleteMessageResponse = {
   __typename?: 'DeleteMessageResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type EditBotInput = {
+  id: Scalars['UUID']['input'];
+  state: BotState;
+  streamVideoUrl: Scalars['String']['input'];
+};
+
+export type EditBotResponse = {
+  __typename?: 'EditBotResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -390,7 +469,7 @@ export type FollowResponse = {
 
 export type FollowerDto = {
   __typename?: 'FollowerDto';
-  followedAt?: Maybe<Scalars['DateTime']['output']>;
+  followedAt: Scalars['DateTime']['output'];
   followerStreamer?: Maybe<StreamerDto>;
   followerStreamerId: Scalars['String']['output'];
 };
@@ -451,10 +530,12 @@ export type Mutation = {
   __typename?: 'Mutation';
   banUser: BanUserResponse;
   createBanner: CreateBannerResponse;
+  createBot: CreateBotResponse;
   createCategory: CreateCategoryResponse;
   createMessage: CreateMessageResponse;
   createRole: CreateRoleResponse;
   deleteMessage: DeleteMessageResponse;
+  editBot: EditBotResponse;
   editNotificationSettings: EditNotificationSettingsResponse;
   editRole: EditRoleResponse;
   editVodSettings: EditVodSettingsResponse;
@@ -464,6 +545,7 @@ export type Mutation = {
   readAllNotifications: ReadAllNotificationsResponse;
   readNotification: ReadNotificationResponse;
   removeBanner: RemoveBannerResponse;
+  removeBot: RemoveBotResponse;
   removeCategory: RemoveCategoryResponse;
   removeRole: RemoveRoleResponse;
   removeVod: RemoveVodResponse;
@@ -495,6 +577,11 @@ export type MutationCreateBannerArgs = {
 };
 
 
+export type MutationCreateBotArgs = {
+  input: CreateBotInput;
+};
+
+
 export type MutationCreateCategoryArgs = {
   input: CreateCategoryInput;
 };
@@ -512,6 +599,11 @@ export type MutationCreateRoleArgs = {
 
 export type MutationDeleteMessageArgs = {
   request: DeleteMessageInput;
+};
+
+
+export type MutationEditBotArgs = {
+  input: EditBotInput;
 };
 
 
@@ -552,6 +644,11 @@ export type MutationReadNotificationArgs = {
 
 export type MutationRemoveBannerArgs = {
   banner: RemoveBannerInput;
+};
+
+
+export type MutationRemoveBotArgs = {
+  input: RemoveBotInput;
 };
 
 
@@ -837,6 +934,7 @@ export type Query = {
   analyticsDiagram: Array<AnalyticsDiagramItem>;
   bannedUsers?: Maybe<BannedUsersConnection>;
   banners: Array<BannerDto>;
+  bots?: Maybe<BotsConnection>;
   categories?: Maybe<CategoriesConnection>;
   category: CategoryDto;
   categoryBySlug: CategoryDto;
@@ -845,6 +943,7 @@ export type Query = {
   chatMessagesHistory: Array<ChatMessageDto>;
   chatSettings: ChatSettingsDto;
   currentStream: StreamDto;
+  gBot: BotDto;
   me: StreamerMeDto;
   myEmail: GetEmailResponse;
   myFollowers?: Maybe<MyFollowersConnection>;
@@ -892,6 +991,17 @@ export type QueryBannedUsersArgs = {
 
 export type QueryBannersArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryBotsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<BotDtoSortInput>>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<BotDtoFilterInput>;
 };
 
 
@@ -943,6 +1053,11 @@ export type QueryChatMessagesHistoryArgs = {
 
 export type QueryCurrentStreamArgs = {
   streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryGBotArgs = {
+  id: Scalars['UUID']['input'];
 };
 
 
@@ -1110,6 +1225,15 @@ export type RemoveBannerInput = {
 
 export type RemoveBannerResponse = {
   __typename?: 'RemoveBannerResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type RemoveBotInput = {
+  id: Scalars['UUID']['input'];
+};
+
+export type RemoveBotResponse = {
+  __typename?: 'RemoveBotResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -1829,6 +1953,47 @@ export type GetBannersQueryVariables = Exact<{
 
 export type GetBannersQuery = { __typename?: 'Query', banners: Array<{ __typename?: 'BannerDto', id: string, title?: string | null, description?: string | null, image?: string | null, url?: string | null }> };
 
+export type CreateBotMutationVariables = Exact<{
+  input: CreateBotInput;
+}>;
+
+
+export type CreateBotMutation = { __typename?: 'Mutation', createBot: { __typename?: 'CreateBotResponse', id: string } };
+
+export type EditBotMutationVariables = Exact<{
+  input: EditBotInput;
+}>;
+
+
+export type EditBotMutation = { __typename?: 'Mutation', editBot: { __typename?: 'EditBotResponse', id: string } };
+
+export type RemoveBotMutationVariables = Exact<{
+  input: RemoveBotInput;
+}>;
+
+
+export type RemoveBotMutation = { __typename?: 'Mutation', removeBot: { __typename?: 'RemoveBotResponse', id: string } };
+
+export type GetBotsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<BotDtoSortInput> | BotDtoSortInput>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<BotDtoFilterInput>;
+}>;
+
+
+export type GetBotsQuery = { __typename?: 'Query', bots?: { __typename?: 'BotsConnection', nodes?: Array<{ __typename?: 'BotDto', id: string, state: BotState, streamVideoUrl: string, streamerId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetBotByIdQueryVariables = Exact<{
+  id: Scalars['UUID']['input'];
+}>;
+
+
+export type GetBotByIdQuery = { __typename?: 'Query', gBot: { __typename?: 'BotDto', id: string, state: BotState, streamVideoUrl: string, streamerId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+
 export type CreateCategoryMutationVariables = Exact<{
   input: CreateCategoryInput;
 }>;
@@ -2265,7 +2430,7 @@ export type GetMyFollowersQueryVariables = Exact<{
 }>;
 
 
-export type GetMyFollowersQuery = { __typename?: 'Query', myFollowers?: { __typename?: 'MyFollowersConnection', nodes?: Array<{ __typename?: 'FollowerDto', followerStreamerId: string, followedAt?: string | null, followerStreamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetMyFollowersQuery = { __typename?: 'Query', myFollowers?: { __typename?: 'MyFollowersConnection', nodes?: Array<{ __typename?: 'FollowerDto', followerStreamerId: string, followedAt: string, followerStreamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type StreamUpdatedSubscriptionVariables = Exact<{
   streamId: Scalars['UUID']['input'];
@@ -2631,6 +2796,223 @@ export type GetBannersQueryHookResult = ReturnType<typeof useGetBannersQuery>;
 export type GetBannersLazyQueryHookResult = ReturnType<typeof useGetBannersLazyQuery>;
 export type GetBannersSuspenseQueryHookResult = ReturnType<typeof useGetBannersSuspenseQuery>;
 export type GetBannersQueryResult = Apollo.QueryResult<GetBannersQuery, GetBannersQueryVariables>;
+export const CreateBotDocument = gql`
+    mutation CreateBot($input: CreateBotInput!) {
+  createBot(input: $input) {
+    id
+  }
+}
+    `;
+export type CreateBotMutationFn = Apollo.MutationFunction<CreateBotMutation, CreateBotMutationVariables>;
+
+/**
+ * __useCreateBotMutation__
+ *
+ * To run a mutation, you first call `useCreateBotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateBotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createBotMutation, { data, loading, error }] = useCreateBotMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateBotMutation(baseOptions?: Apollo.MutationHookOptions<CreateBotMutation, CreateBotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateBotMutation, CreateBotMutationVariables>(CreateBotDocument, options);
+      }
+export type CreateBotMutationHookResult = ReturnType<typeof useCreateBotMutation>;
+export type CreateBotMutationResult = Apollo.MutationResult<CreateBotMutation>;
+export type CreateBotMutationOptions = Apollo.BaseMutationOptions<CreateBotMutation, CreateBotMutationVariables>;
+export const EditBotDocument = gql`
+    mutation EditBot($input: EditBotInput!) {
+  editBot(input: $input) {
+    id
+  }
+}
+    `;
+export type EditBotMutationFn = Apollo.MutationFunction<EditBotMutation, EditBotMutationVariables>;
+
+/**
+ * __useEditBotMutation__
+ *
+ * To run a mutation, you first call `useEditBotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditBotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editBotMutation, { data, loading, error }] = useEditBotMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useEditBotMutation(baseOptions?: Apollo.MutationHookOptions<EditBotMutation, EditBotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditBotMutation, EditBotMutationVariables>(EditBotDocument, options);
+      }
+export type EditBotMutationHookResult = ReturnType<typeof useEditBotMutation>;
+export type EditBotMutationResult = Apollo.MutationResult<EditBotMutation>;
+export type EditBotMutationOptions = Apollo.BaseMutationOptions<EditBotMutation, EditBotMutationVariables>;
+export const RemoveBotDocument = gql`
+    mutation RemoveBot($input: RemoveBotInput!) {
+  removeBot(input: $input) {
+    id
+  }
+}
+    `;
+export type RemoveBotMutationFn = Apollo.MutationFunction<RemoveBotMutation, RemoveBotMutationVariables>;
+
+/**
+ * __useRemoveBotMutation__
+ *
+ * To run a mutation, you first call `useRemoveBotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveBotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeBotMutation, { data, loading, error }] = useRemoveBotMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useRemoveBotMutation(baseOptions?: Apollo.MutationHookOptions<RemoveBotMutation, RemoveBotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveBotMutation, RemoveBotMutationVariables>(RemoveBotDocument, options);
+      }
+export type RemoveBotMutationHookResult = ReturnType<typeof useRemoveBotMutation>;
+export type RemoveBotMutationResult = Apollo.MutationResult<RemoveBotMutation>;
+export type RemoveBotMutationOptions = Apollo.BaseMutationOptions<RemoveBotMutation, RemoveBotMutationVariables>;
+export const GetBotsDocument = gql`
+    query GetBots($after: String, $before: String, $first: Int, $last: Int, $order: [BotDtoSortInput!], $search: String, $where: BotDtoFilterInput) {
+  bots(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    search: $search
+    where: $where
+  ) {
+    nodes {
+      id
+      state
+      streamVideoUrl
+      streamerId
+      streamer {
+        id
+        userName
+        avatar
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetBotsQuery__
+ *
+ * To run a query within a React component, call `useGetBotsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBotsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBotsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      search: // value for 'search'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useGetBotsQuery(baseOptions?: Apollo.QueryHookOptions<GetBotsQuery, GetBotsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBotsQuery, GetBotsQueryVariables>(GetBotsDocument, options);
+      }
+export function useGetBotsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBotsQuery, GetBotsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBotsQuery, GetBotsQueryVariables>(GetBotsDocument, options);
+        }
+export function useGetBotsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBotsQuery, GetBotsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBotsQuery, GetBotsQueryVariables>(GetBotsDocument, options);
+        }
+export type GetBotsQueryHookResult = ReturnType<typeof useGetBotsQuery>;
+export type GetBotsLazyQueryHookResult = ReturnType<typeof useGetBotsLazyQuery>;
+export type GetBotsSuspenseQueryHookResult = ReturnType<typeof useGetBotsSuspenseQuery>;
+export type GetBotsQueryResult = Apollo.QueryResult<GetBotsQuery, GetBotsQueryVariables>;
+export const GetBotByIdDocument = gql`
+    query GetBotById($id: UUID!) {
+  gBot(id: $id) {
+    id
+    state
+    streamVideoUrl
+    streamerId
+    streamer {
+      id
+      userName
+      avatar
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetBotByIdQuery__
+ *
+ * To run a query within a React component, call `useGetBotByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBotByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBotByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetBotByIdQuery(baseOptions: Apollo.QueryHookOptions<GetBotByIdQuery, GetBotByIdQueryVariables> & ({ variables: GetBotByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBotByIdQuery, GetBotByIdQueryVariables>(GetBotByIdDocument, options);
+      }
+export function useGetBotByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBotByIdQuery, GetBotByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBotByIdQuery, GetBotByIdQueryVariables>(GetBotByIdDocument, options);
+        }
+export function useGetBotByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBotByIdQuery, GetBotByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBotByIdQuery, GetBotByIdQueryVariables>(GetBotByIdDocument, options);
+        }
+export type GetBotByIdQueryHookResult = ReturnType<typeof useGetBotByIdQuery>;
+export type GetBotByIdLazyQueryHookResult = ReturnType<typeof useGetBotByIdLazyQuery>;
+export type GetBotByIdSuspenseQueryHookResult = ReturnType<typeof useGetBotByIdSuspenseQuery>;
+export type GetBotByIdQueryResult = Apollo.QueryResult<GetBotByIdQuery, GetBotByIdQueryVariables>;
 export const CreateCategoryDocument = gql`
     mutation CreateCategory($input: CreateCategoryInput!) {
   createCategory(input: $input) {
