@@ -18,7 +18,7 @@ export const EDIT_BOT = gql`
 
 export const REMOVE_BOT = gql`
     mutation RemoveBot($input: RemoveBotInput!) {
-        removeBote(input: $input) { # Обратите внимание: в схеме опечатка 'removeBote' вместо 'removeBot'
+        removeBot(input: $input) { # Исправлено с removeBote на removeBot
             id
         }
     }

@@ -257,7 +257,7 @@ type Mutation {
     readAllNotifications: ReadAllNotificationsResponse!
     readNotification(readNotification: ReadNotificationInput!): ReadNotificationResponse!
     removeBanner(banner: RemoveBannerInput!): RemoveBannerResponse!
-    removeBote(input: RemoveBotInput!): RemoveBotResponse!
+    removeBot(input: RemoveBotInput!): RemoveBotResponse!
     removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
     removeVod(request: RemoveVodInput!): RemoveVodResponse!
