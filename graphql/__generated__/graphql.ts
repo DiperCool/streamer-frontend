@@ -122,6 +122,11 @@ export type BannerDto = {
   url?: Maybe<Scalars['String']['output']>;
 };
 
+export type BecomePartnerResponse = {
+  __typename?: 'BecomePartnerResponse';
+  id: Scalars['String']['output'];
+};
+
 export type BooleanOperationFilterInput = {
   eq?: InputMaybe<Scalars['Boolean']['input']>;
   neq?: InputMaybe<Scalars['Boolean']['input']>;
@@ -374,6 +379,11 @@ export type CreateRoleResponse = {
   id: Scalars['UUID']['output'];
 };
 
+export type CreateSetupIntentResponse = {
+  __typename?: 'CreateSetupIntentResponse';
+  clientSecret: Scalars['String']['output'];
+};
+
 export type DateTimeOperationFilterInput = {
   eq?: InputMaybe<Scalars['DateTime']['input']>;
   gt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -526,14 +536,21 @@ export type LongOperationFilterInput = {
   nlte?: InputMaybe<Scalars['Long']['input']>;
 };
 
+export type MakePaymentMethodDefaultResponse = {
+  __typename?: 'MakePaymentMethodDefaultResponse';
+  id: Scalars['UUID']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   banUser: BanUserResponse;
+  becomePartner: BecomePartnerResponse;
   createBanner: CreateBannerResponse;
   createBot: CreateBotResponse;
   createCategory: CreateCategoryResponse;
   createMessage: CreateMessageResponse;
   createRole: CreateRoleResponse;
+  createSetupIntent: CreateSetupIntentResponse;
   deleteMessage: DeleteMessageResponse;
   editBot: EditBotResponse;
   editNotificationSettings: EditNotificationSettingsResponse;
@@ -541,12 +558,15 @@ export type Mutation = {
   editVodSettings: EditVodSettingsResponse;
   finishAuth: FinishAuthResponse;
   follow: FollowResponse;
+  generateOnboardingLink: OnboardingLinkResponse;
+  makePaymentMethodDefault: MakePaymentMethodDefaultResponse;
   pinMessage: PinMessageResponse;
   readAllNotifications: ReadAllNotificationsResponse;
   readNotification: ReadNotificationResponse;
   removeBanner: RemoveBannerResponse;
   removeBot: RemoveBotResponse;
   removeCategory: RemoveCategoryResponse;
+  removePaymentMethod: RemovePaymentMethodResponse;
   removeRole: RemoveRoleResponse;
   removeVod: RemoveVodResponse;
   unbanUser: UnbanUserResponse;
@@ -632,6 +652,11 @@ export type MutationFollowArgs = {
 };
 
 
+export type MutationMakePaymentMethodDefaultArgs = {
+  paymentMethodId: Scalars['UUID']['input'];
+};
+
+
 export type MutationPinMessageArgs = {
   pinMessage: PinMessageInput;
 };
@@ -654,6 +679,11 @@ export type MutationRemoveBotArgs = {
 
 export type MutationRemoveCategoryArgs = {
   input: RemoveCategoryInput;
+};
+
+
+export type MutationRemovePaymentMethodArgs = {
+  paymentMethodId: Scalars['UUID']['input'];
 };
 
 
@@ -851,6 +881,11 @@ export type NotificationsEdge = {
   node: NotificationDto;
 };
 
+export type OnboardingLinkResponse = {
+  __typename?: 'OnboardingLinkResponse';
+  onboardingLink: Scalars['String']['output'];
+};
+
 export type OverviewAnalyticsItem = {
   __typename?: 'OverviewAnalyticsItem';
   type: AnalyticsItemType;
@@ -868,6 +903,16 @@ export type PageInfo = {
   hasPreviousPage: Scalars['Boolean']['output'];
   /** When paginating backwards, the cursor to continue. */
   startCursor?: Maybe<Scalars['String']['output']>;
+};
+
+export type PaymentMethodDto = {
+  __typename?: 'PaymentMethodDto';
+  cardBrand: Scalars['String']['output'];
+  cardExpMonth: Scalars['Long']['output'];
+  cardExpYear: Scalars['Long']['output'];
+  cardLast4: Scalars['String']['output'];
+  id: Scalars['UUID']['output'];
+  isDefault: Scalars['Boolean']['output'];
 };
 
 export type PermissionsFlags = {
@@ -954,6 +999,7 @@ export type Query = {
   notificationSettings: NotificationSettingsDto;
   notifications?: Maybe<NotificationsConnection>;
   overviewAnalytics: GetOverviewAnalyticsResponse;
+  paymentMethods: Array<PaymentMethodDto>;
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
@@ -1243,6 +1289,11 @@ export type RemoveCategoryInput = {
 
 export type RemoveCategoryResponse = {
   __typename?: 'RemoveCategoryResponse';
+  id: Scalars['UUID']['output'];
+};
+
+export type RemovePaymentMethodResponse = {
+  __typename?: 'RemovePaymentMethodResponse';
   id: Scalars['UUID']['output'];
 };
 
@@ -2232,6 +2283,40 @@ export type SubscribeNotificationCreatedSubscriptionVariables = Exact<{ [key: st
 
 
 export type SubscribeNotificationCreatedSubscription = { __typename?: 'Subscription', subscribeNotificationCreated: Array<{ __typename?: 'NotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null } | null }> };
+
+export type BecomePartnerMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BecomePartnerMutation = { __typename?: 'Mutation', becomePartner: { __typename?: 'BecomePartnerResponse', id: string } };
+
+export type GenerateOnboardingLinkMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GenerateOnboardingLinkMutation = { __typename?: 'Mutation', generateOnboardingLink: { __typename?: 'OnboardingLinkResponse', onboardingLink: string } };
+
+export type CreateSetupIntentMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateSetupIntentMutation = { __typename?: 'Mutation', createSetupIntent: { __typename?: 'CreateSetupIntentResponse', clientSecret: string } };
+
+export type MakePaymentMethodDefaultMutationVariables = Exact<{
+  paymentMethodId: Scalars['UUID']['input'];
+}>;
+
+
+export type MakePaymentMethodDefaultMutation = { __typename?: 'Mutation', makePaymentMethodDefault: { __typename?: 'MakePaymentMethodDefaultResponse', id: string } };
+
+export type RemovePaymentMethodMutationVariables = Exact<{
+  paymentMethodId: Scalars['UUID']['input'];
+}>;
+
+
+export type RemovePaymentMethodMutation = { __typename?: 'Mutation', removePaymentMethod: { __typename?: 'RemovePaymentMethodResponse', id: string } };
+
+export type GetPaymentMethodsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPaymentMethodsQuery = { __typename?: 'Query', paymentMethods: Array<{ __typename?: 'PaymentMethodDto', id: string, cardBrand: string, cardLast4: string, cardExpMonth: number, cardExpYear: number, isDefault: boolean }> };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -4464,6 +4549,212 @@ export function useSubscribeNotificationCreatedSubscription(baseOptions?: Apollo
       }
 export type SubscribeNotificationCreatedSubscriptionHookResult = ReturnType<typeof useSubscribeNotificationCreatedSubscription>;
 export type SubscribeNotificationCreatedSubscriptionResult = Apollo.SubscriptionResult<SubscribeNotificationCreatedSubscription>;
+export const BecomePartnerDocument = gql`
+    mutation BecomePartner {
+  becomePartner {
+    id
+  }
+}
+    `;
+export type BecomePartnerMutationFn = Apollo.MutationFunction<BecomePartnerMutation, BecomePartnerMutationVariables>;
+
+/**
+ * __useBecomePartnerMutation__
+ *
+ * To run a mutation, you first call `useBecomePartnerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useBecomePartnerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [becomePartnerMutation, { data, loading, error }] = useBecomePartnerMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useBecomePartnerMutation(baseOptions?: Apollo.MutationHookOptions<BecomePartnerMutation, BecomePartnerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<BecomePartnerMutation, BecomePartnerMutationVariables>(BecomePartnerDocument, options);
+      }
+export type BecomePartnerMutationHookResult = ReturnType<typeof useBecomePartnerMutation>;
+export type BecomePartnerMutationResult = Apollo.MutationResult<BecomePartnerMutation>;
+export type BecomePartnerMutationOptions = Apollo.BaseMutationOptions<BecomePartnerMutation, BecomePartnerMutationVariables>;
+export const GenerateOnboardingLinkDocument = gql`
+    mutation GenerateOnboardingLink {
+  generateOnboardingLink {
+    onboardingLink
+  }
+}
+    `;
+export type GenerateOnboardingLinkMutationFn = Apollo.MutationFunction<GenerateOnboardingLinkMutation, GenerateOnboardingLinkMutationVariables>;
+
+/**
+ * __useGenerateOnboardingLinkMutation__
+ *
+ * To run a mutation, you first call `useGenerateOnboardingLinkMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateOnboardingLinkMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateOnboardingLinkMutation, { data, loading, error }] = useGenerateOnboardingLinkMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGenerateOnboardingLinkMutation(baseOptions?: Apollo.MutationHookOptions<GenerateOnboardingLinkMutation, GenerateOnboardingLinkMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateOnboardingLinkMutation, GenerateOnboardingLinkMutationVariables>(GenerateOnboardingLinkDocument, options);
+      }
+export type GenerateOnboardingLinkMutationHookResult = ReturnType<typeof useGenerateOnboardingLinkMutation>;
+export type GenerateOnboardingLinkMutationResult = Apollo.MutationResult<GenerateOnboardingLinkMutation>;
+export type GenerateOnboardingLinkMutationOptions = Apollo.BaseMutationOptions<GenerateOnboardingLinkMutation, GenerateOnboardingLinkMutationVariables>;
+export const CreateSetupIntentDocument = gql`
+    mutation CreateSetupIntent {
+  createSetupIntent {
+    clientSecret
+  }
+}
+    `;
+export type CreateSetupIntentMutationFn = Apollo.MutationFunction<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>;
+
+/**
+ * __useCreateSetupIntentMutation__
+ *
+ * To run a mutation, you first call `useCreateSetupIntentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateSetupIntentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createSetupIntentMutation, { data, loading, error }] = useCreateSetupIntentMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCreateSetupIntentMutation(baseOptions?: Apollo.MutationHookOptions<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>(CreateSetupIntentDocument, options);
+      }
+export type CreateSetupIntentMutationHookResult = ReturnType<typeof useCreateSetupIntentMutation>;
+export type CreateSetupIntentMutationResult = Apollo.MutationResult<CreateSetupIntentMutation>;
+export type CreateSetupIntentMutationOptions = Apollo.BaseMutationOptions<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>;
+export const MakePaymentMethodDefaultDocument = gql`
+    mutation MakePaymentMethodDefault($paymentMethodId: UUID!) {
+  makePaymentMethodDefault(paymentMethodId: $paymentMethodId) {
+    id
+  }
+}
+    `;
+export type MakePaymentMethodDefaultMutationFn = Apollo.MutationFunction<MakePaymentMethodDefaultMutation, MakePaymentMethodDefaultMutationVariables>;
+
+/**
+ * __useMakePaymentMethodDefaultMutation__
+ *
+ * To run a mutation, you first call `useMakePaymentMethodDefaultMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMakePaymentMethodDefaultMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [makePaymentMethodDefaultMutation, { data, loading, error }] = useMakePaymentMethodDefaultMutation({
+ *   variables: {
+ *      paymentMethodId: // value for 'paymentMethodId'
+ *   },
+ * });
+ */
+export function useMakePaymentMethodDefaultMutation(baseOptions?: Apollo.MutationHookOptions<MakePaymentMethodDefaultMutation, MakePaymentMethodDefaultMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MakePaymentMethodDefaultMutation, MakePaymentMethodDefaultMutationVariables>(MakePaymentMethodDefaultDocument, options);
+      }
+export type MakePaymentMethodDefaultMutationHookResult = ReturnType<typeof useMakePaymentMethodDefaultMutation>;
+export type MakePaymentMethodDefaultMutationResult = Apollo.MutationResult<MakePaymentMethodDefaultMutation>;
+export type MakePaymentMethodDefaultMutationOptions = Apollo.BaseMutationOptions<MakePaymentMethodDefaultMutation, MakePaymentMethodDefaultMutationVariables>;
+export const RemovePaymentMethodDocument = gql`
+    mutation RemovePaymentMethod($paymentMethodId: UUID!) {
+  removePaymentMethod(paymentMethodId: $paymentMethodId) {
+    id
+  }
+}
+    `;
+export type RemovePaymentMethodMutationFn = Apollo.MutationFunction<RemovePaymentMethodMutation, RemovePaymentMethodMutationVariables>;
+
+/**
+ * __useRemovePaymentMethodMutation__
+ *
+ * To run a mutation, you first call `useRemovePaymentMethodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemovePaymentMethodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removePaymentMethodMutation, { data, loading, error }] = useRemovePaymentMethodMutation({
+ *   variables: {
+ *      paymentMethodId: // value for 'paymentMethodId'
+ *   },
+ * });
+ */
+export function useRemovePaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<RemovePaymentMethodMutation, RemovePaymentMethodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemovePaymentMethodMutation, RemovePaymentMethodMutationVariables>(RemovePaymentMethodDocument, options);
+      }
+export type RemovePaymentMethodMutationHookResult = ReturnType<typeof useRemovePaymentMethodMutation>;
+export type RemovePaymentMethodMutationResult = Apollo.MutationResult<RemovePaymentMethodMutation>;
+export type RemovePaymentMethodMutationOptions = Apollo.BaseMutationOptions<RemovePaymentMethodMutation, RemovePaymentMethodMutationVariables>;
+export const GetPaymentMethodsDocument = gql`
+    query GetPaymentMethods {
+  paymentMethods {
+    id
+    cardBrand
+    cardLast4
+    cardExpMonth
+    cardExpYear
+    isDefault
+  }
+}
+    `;
+
+/**
+ * __useGetPaymentMethodsQuery__
+ *
+ * To run a query within a React component, call `useGetPaymentMethodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPaymentMethodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPaymentMethodsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetPaymentMethodsQuery(baseOptions?: Apollo.QueryHookOptions<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>(GetPaymentMethodsDocument, options);
+      }
+export function useGetPaymentMethodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>(GetPaymentMethodsDocument, options);
+        }
+export function useGetPaymentMethodsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>(GetPaymentMethodsDocument, options);
+        }
+export type GetPaymentMethodsQueryHookResult = ReturnType<typeof useGetPaymentMethodsQuery>;
+export type GetPaymentMethodsLazyQueryHookResult = ReturnType<typeof useGetPaymentMethodsLazyQuery>;
+export type GetPaymentMethodsSuspenseQueryHookResult = ReturnType<typeof useGetPaymentMethodsSuspenseQuery>;
+export type GetPaymentMethodsQueryResult = Apollo.QueryResult<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>;
 export const UpdateProfileDocument = gql`
     mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {

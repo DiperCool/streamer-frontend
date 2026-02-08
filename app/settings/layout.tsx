@@ -20,7 +20,10 @@ export default function SettingsLayout({
       return "stream-key";
     }
     if (pathname.includes("/settings/notifications")) {
-      return "notifications"; // New tab
+      return "notifications";
+    }
+    if (pathname.includes("/settings/payment-methods")) { // New tab check
+      return "payment-methods";
     }
     return "profile"; 
   };
@@ -48,8 +51,13 @@ export default function SettingsLayout({
               </TabsTrigger>
             </Link>
             <Link href="/settings/notifications" passHref>
-              <TabsTrigger value="notifications"> {/* New TabsTrigger */}
+              <TabsTrigger value="notifications">
                 Notifications
+              </TabsTrigger>
+            </Link>
+            <Link href="/settings/payment-methods" passHref> {/* New TabsTrigger */}
+              <TabsTrigger value="payment-methods">
+                Payment Methods
               </TabsTrigger>
             </Link>
           </TabsList>
