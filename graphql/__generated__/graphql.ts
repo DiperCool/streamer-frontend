@@ -592,6 +592,11 @@ export type MutationBanUserArgs = {
 };
 
 
+export type MutationBecomePartnerArgs = {
+  streamerId: Scalars['String']['input'];
+};
+
+
 export type MutationCreateBannerArgs = {
   banner: CreateBannerInput;
 };
@@ -649,6 +654,11 @@ export type MutationFinishAuthArgs = {
 
 export type MutationFollowArgs = {
   follow: FollowInput;
+};
+
+
+export type MutationGenerateOnboardingLinkArgs = {
+  streamerId: Scalars['String']['input'];
 };
 
 
@@ -927,6 +937,7 @@ export type PermissionsFlags = {
   isBanners: Scalars['Boolean']['output'];
   isChat: Scalars['Boolean']['output'];
   isNone: Scalars['Boolean']['output'];
+  isPayments: Scalars['Boolean']['output'];
   isRoles: Scalars['Boolean']['output'];
   isStream: Scalars['Boolean']['output'];
   isVod: Scalars['Boolean']['output'];
@@ -937,6 +948,7 @@ export type PermissionsFlagsInput = {
   isBanners?: InputMaybe<Scalars['Boolean']['input']>;
   isChat?: InputMaybe<Scalars['Boolean']['input']>;
   isNone?: InputMaybe<Scalars['Boolean']['input']>;
+  isPayments?: InputMaybe<Scalars['Boolean']['input']>;
   isRoles?: InputMaybe<Scalars['Boolean']['input']>;
   isStream?: InputMaybe<Scalars['Boolean']['input']>;
   isVod?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2294,12 +2306,16 @@ export type SubscribeNotificationCreatedSubscriptionVariables = Exact<{ [key: st
 
 export type SubscribeNotificationCreatedSubscription = { __typename?: 'Subscription', subscribeNotificationCreated: Array<{ __typename?: 'NotificationDto', id: string, createdAt: string, seen: boolean, discriminator: string, streamer?: { __typename?: 'StreamerDto', id: string, isLive: boolean, userName?: string | null, avatar?: string | null } | null }> };
 
-export type BecomePartnerMutationVariables = Exact<{ [key: string]: never; }>;
+export type BecomePartnerMutationVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
 
 
 export type BecomePartnerMutation = { __typename?: 'Mutation', becomePartner: { __typename?: 'BecomePartnerResponse', id: string } };
 
-export type GenerateOnboardingLinkMutationVariables = Exact<{ [key: string]: never; }>;
+export type GenerateOnboardingLinkMutationVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
 
 
 export type GenerateOnboardingLinkMutation = { __typename?: 'Mutation', generateOnboardingLink: { __typename?: 'OnboardingLinkResponse', onboardingLink: string } };
@@ -4570,8 +4586,8 @@ export function useSubscribeNotificationCreatedSubscription(baseOptions?: Apollo
 export type SubscribeNotificationCreatedSubscriptionHookResult = ReturnType<typeof useSubscribeNotificationCreatedSubscription>;
 export type SubscribeNotificationCreatedSubscriptionResult = Apollo.SubscriptionResult<SubscribeNotificationCreatedSubscription>;
 export const BecomePartnerDocument = gql`
-    mutation BecomePartner {
-  becomePartner {
+    mutation BecomePartner($streamerId: String!) {
+  becomePartner(streamerId: $streamerId) {
     id
   }
 }
@@ -4591,6 +4607,7 @@ export type BecomePartnerMutationFn = Apollo.MutationFunction<BecomePartnerMutat
  * @example
  * const [becomePartnerMutation, { data, loading, error }] = useBecomePartnerMutation({
  *   variables: {
+ *      streamerId: // value for 'streamerId'
  *   },
  * });
  */
@@ -4602,8 +4619,8 @@ export type BecomePartnerMutationHookResult = ReturnType<typeof useBecomePartner
 export type BecomePartnerMutationResult = Apollo.MutationResult<BecomePartnerMutation>;
 export type BecomePartnerMutationOptions = Apollo.BaseMutationOptions<BecomePartnerMutation, BecomePartnerMutationVariables>;
 export const GenerateOnboardingLinkDocument = gql`
-    mutation GenerateOnboardingLink {
-  generateOnboardingLink {
+    mutation GenerateOnboardingLink($streamerId: String!) {
+  generateOnboardingLink(streamerId: $streamerId) {
     onboardingLink
   }
 }
@@ -4623,6 +4640,7 @@ export type GenerateOnboardingLinkMutationFn = Apollo.MutationFunction<GenerateO
  * @example
  * const [generateOnboardingLinkMutation, { data, loading, error }] = useGenerateOnboardingLinkMutation({
  *   variables: {
+ *      streamerId: // value for 'streamerId'
  *   },
  * });
  */

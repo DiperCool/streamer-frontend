@@ -253,7 +253,7 @@ type MakePaymentMethodDefaultResponse {
 
 type Mutation {
     banUser(request: BanUserInput!): BanUserResponse!
-    becomePartner: BecomePartnerResponse!
+    becomePartner(streamerId: String!): BecomePartnerResponse!
     createBanner(banner: CreateBannerInput!): CreateBannerResponse!
     createBot(input: CreateBotInput!): CreateBotResponse!
     createCategory(input: CreateCategoryInput!): CreateCategoryResponse!
@@ -267,7 +267,7 @@ type Mutation {
     editVodSettings(request: EditVodSettingsInput!): EditVodSettingsResponse!
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
-    generateOnboardingLink: OnboardingLinkResponse!
+    generateOnboardingLink(streamerId: String!): OnboardingLinkResponse!
     makePaymentMethodDefault(paymentMethodId: UUID!): MakePaymentMethodDefaultResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
     readAllNotifications: ReadAllNotificationsResponse!
@@ -422,6 +422,7 @@ type PermissionsFlags {
     isBanners: Boolean!
     isChat: Boolean!
     isNone: Boolean!
+    isPayments: Boolean!
     isRoles: Boolean!
     isStream: Boolean!
     isVod: Boolean!
@@ -1298,6 +1299,7 @@ input PermissionsFlagsInput {
     isBanners: Boolean
     isChat: Boolean
     isNone: Boolean
+    isPayments: Boolean
     isRoles: Boolean
     isStream: Boolean
     isVod: Boolean
