@@ -905,6 +905,12 @@ export type PageInfo = {
   startCursor?: Maybe<Scalars['String']['output']>;
 };
 
+export type PaymentMethodDeletedDto = {
+  __typename?: 'PaymentMethodDeletedDto';
+  paymentMethodId: Scalars['UUID']['output'];
+  streamerId: Scalars['String']['output'];
+};
+
 export type PaymentMethodDto = {
   __typename?: 'PaymentMethodDto';
   cardBrand: Scalars['String']['output'];
@@ -1609,9 +1615,13 @@ export type Subscription = {
   chatMessageDeleted: ChatMessageDto;
   chatUpdated: ChatDto;
   notificationCreated: NotificationDto;
+  paymentMethodCreated: PaymentMethodDto;
+  paymentMethodDeleted: PaymentMethodDeletedDto;
   streamUpdated: StreamDto;
   streamerUpdated: StreamerDto;
   subscribeNotificationCreated: Array<NotificationDto>;
+  subscribePaymentMethodCreated: Array<PaymentMethodDto>;
+  subscribePaymentMethodDeleted: Array<PaymentMethodDeletedDto>;
   subscribeWatchStream: Array<StreamWatcher>;
   userBanned: BannedUserDto;
   userUnbanned: BannedUserDto;
@@ -2317,6 +2327,16 @@ export type GetPaymentMethodsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetPaymentMethodsQuery = { __typename?: 'Query', paymentMethods: Array<{ __typename?: 'PaymentMethodDto', id: string, cardBrand: string, cardLast4: string, cardExpMonth: number, cardExpYear: number, isDefault: boolean }> };
+
+export type PaymentMethodCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PaymentMethodCreatedSubscription = { __typename?: 'Subscription', paymentMethodCreated: { __typename?: 'PaymentMethodDto', id: string, cardBrand: string, cardLast4: string, cardExpMonth: number, cardExpYear: number, isDefault: boolean } };
+
+export type PaymentMethodDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PaymentMethodDeletedSubscription = { __typename?: 'Subscription', paymentMethodDeleted: { __typename?: 'PaymentMethodDeletedDto', paymentMethodId: string, streamerId: string } };
 
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
@@ -4755,6 +4775,70 @@ export type GetPaymentMethodsQueryHookResult = ReturnType<typeof useGetPaymentMe
 export type GetPaymentMethodsLazyQueryHookResult = ReturnType<typeof useGetPaymentMethodsLazyQuery>;
 export type GetPaymentMethodsSuspenseQueryHookResult = ReturnType<typeof useGetPaymentMethodsSuspenseQuery>;
 export type GetPaymentMethodsQueryResult = Apollo.QueryResult<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>;
+export const PaymentMethodCreatedDocument = gql`
+    subscription PaymentMethodCreated {
+  paymentMethodCreated {
+    id
+    cardBrand
+    cardLast4
+    cardExpMonth
+    cardExpYear
+    isDefault
+  }
+}
+    `;
+
+/**
+ * __usePaymentMethodCreatedSubscription__
+ *
+ * To run a query within a React component, call `usePaymentMethodCreatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentMethodCreatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentMethodCreatedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePaymentMethodCreatedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<PaymentMethodCreatedSubscription, PaymentMethodCreatedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<PaymentMethodCreatedSubscription, PaymentMethodCreatedSubscriptionVariables>(PaymentMethodCreatedDocument, options);
+      }
+export type PaymentMethodCreatedSubscriptionHookResult = ReturnType<typeof usePaymentMethodCreatedSubscription>;
+export type PaymentMethodCreatedSubscriptionResult = Apollo.SubscriptionResult<PaymentMethodCreatedSubscription>;
+export const PaymentMethodDeletedDocument = gql`
+    subscription PaymentMethodDeleted {
+  paymentMethodDeleted {
+    paymentMethodId
+    streamerId
+  }
+}
+    `;
+
+/**
+ * __usePaymentMethodDeletedSubscription__
+ *
+ * To run a query within a React component, call `usePaymentMethodDeletedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentMethodDeletedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentMethodDeletedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePaymentMethodDeletedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<PaymentMethodDeletedSubscription, PaymentMethodDeletedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<PaymentMethodDeletedSubscription, PaymentMethodDeletedSubscriptionVariables>(PaymentMethodDeletedDocument, options);
+      }
+export type PaymentMethodDeletedSubscriptionHookResult = ReturnType<typeof usePaymentMethodDeletedSubscription>;
+export type PaymentMethodDeletedSubscriptionResult = Apollo.SubscriptionResult<PaymentMethodDeletedSubscription>;
 export const UpdateProfileDocument = gql`
     mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {

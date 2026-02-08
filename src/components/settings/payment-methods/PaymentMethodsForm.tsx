@@ -8,6 +8,9 @@ import {
   useGetPaymentMethodsQuery,
   useMakePaymentMethodDefaultMutation,
   useRemovePaymentMethodMutation,
+  usePaymentMethodCreatedSubscription,
+  usePaymentMethodDeletedSubscription,
+  useGetMeQuery,
 } from "@/graphql/__generated__/graphql";
 import { toast } from "sonner";
 import { AddPaymentMethodDialog } from "@/src/components/settings/payment-methods/AddPaymentMethodDialog";
@@ -31,6 +34,27 @@ export function PaymentMethodsForm() {
   const { data, loading, error, refetch } = useGetPaymentMethodsQuery();
   const [makeDefaultMutation, { loading: makeDefaultLoading }] = useMakePaymentMethodDefaultMutation();
   const [removePaymentMethodMutation, { loading: removeLoading }] = useRemovePaymentMethodMutation();
+
+  const { data: meData } = useGetMeQuery();
+  const streamerId = meData?.me?.id;
+
+  usePaymentMethodCreatedSubscription({
+    skip: !streamerId,
+    onData: ({ client, data }) => {
+      if (data?.data?.paymentMethodCreated) {
+        client.refetchQueries({ include: ["GetPaymentMethods"] });
+      }
+    },
+  });
+
+  usePaymentMethodDeletedSubscription({
+    skip: !streamerId,
+    onData: ({ client, data }) => {
+      if (data?.data?.paymentMethodDeleted) {
+        client.refetchQueries({ include: ["GetPaymentMethods"] });
+      }
+    },
+  });
 
   const paymentMethods = data?.paymentMethods || [];
 

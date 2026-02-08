@@ -4,11 +4,13 @@ This document outlines the core technologies and best practices to follow when d
 
 ## Tech Stack Overview
 
+*   **GraphQL Files**: GraphQL operations (queries, mutations, subscriptions) are defined as `gql` tagged template literals within `.ts` files. These `.ts` files are stored in the `graphql` folder.
+*   **GraphQL Hooks**: Hooks are auto-generated from the `codegen` library.
 *   **Framework**: Next.js (React framework for server-side rendering and routing)
 *   **Language**: TypeScript (for type safety and improved developer experience)
 *   **Styling**: Tailwind CSS (utility-first CSS framework for rapid UI development)
 *   **UI Library**: shadcn/ui (re-usable UI components built on Radix UI primitives)
-*   **GraphQL Client**: Apollo Client (for managing GraphQL data and interactions with the backend)
+*   **GraphQL Client**: Apollo Client (for managing GraphQL data and interactions with the backend). GraphQL documentation can be found in ./local.graphql.
 *   **Authentication**: Auth0 (for user authentication and authorization)
 *   **Icons**: Lucide React (a collection of beautiful and customizable SVG icons)
 *   **Form Management**: React Hook Form (for efficient form handling)

@@ -403,6 +403,11 @@ type PageInfo {
     startCursor: String
 }
 
+type PaymentMethodDeletedDto {
+    paymentMethodId: UUID!
+    streamerId: String!
+}
+
 type PaymentMethodDto {
     cardBrand: String!
     cardExpMonth: Long!
@@ -832,9 +837,13 @@ type Subscription {
     chatMessageDeleted(chatId: UUID!): ChatMessageDto!
     chatUpdated(chatId: UUID!): ChatDto!
     notificationCreated: NotificationDto!
+    paymentMethodCreated: PaymentMethodDto!
+    paymentMethodDeleted: PaymentMethodDeletedDto!
     streamUpdated(streamId: UUID!): StreamDto!
     streamerUpdated(streamerId: String!): StreamerDto!
     subscribeNotificationCreated: [NotificationDto!]!
+    subscribePaymentMethodCreated: [PaymentMethodDto!]!
+    subscribePaymentMethodDeleted: [PaymentMethodDeletedDto!]!
     subscribeWatchStream(streamId: UUID!): [StreamWatcher!]!
     userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
     userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
