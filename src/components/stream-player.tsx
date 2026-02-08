@@ -22,7 +22,7 @@ interface StreamPlayerProps {
 
 interface HlsPlayerComponentProps {
   src: string;
-  playerRef: React.RefObject<HTMLVideoElement>; // Изменено: теперь ожидает RefObject<HTMLVideoElement>
+  playerRef: React.RefObject<HTMLVideoElement>;
   hlsConfig: any;
   isMuted: boolean;
 }
@@ -43,10 +43,10 @@ const HlsPlayerComponent = React.memo(function HlsPlayerComponent({ src, playerR
   );
 });
 
-export const StreamPlayer = React.memo(function StreamPlayer({ 
-  sources, 
-  isPlayerMaximized, 
-  onTogglePlayerMaximize, 
+export const StreamPlayer = React.memo(function StreamPlayer({
+  sources,
+  isPlayerMaximized,
+  onTogglePlayerMaximize,
   showPlayerControls = true,
   isLive = false,
   startedAt,
@@ -111,7 +111,7 @@ export const StreamPlayer = React.memo(function StreamPlayer({
         hlsConfig={hlsConfig}
         isMuted={isMuted}
       />
-      
+
       {showOverlays && (
         <>
           <div className="absolute inset-0 bg-black/50 z-10" />

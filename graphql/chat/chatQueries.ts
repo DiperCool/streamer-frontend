@@ -72,8 +72,8 @@ export const GET_CHAT_MESSAGES = gql`
                 isDeleted
                 message
                 type
-                senderId # Added senderId
-                replyId # Added replyId
+                senderId
+                replyId
                 sender {
                     id
                     userName

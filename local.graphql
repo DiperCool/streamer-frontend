@@ -72,6 +72,10 @@ type BannerDto {
     url: String
 }
 
+type BecomePartnerResponse {
+    id: String!
+}
+
 type BotDto {
     id: UUID!
     state: BotState!
@@ -192,6 +196,10 @@ type CreateRoleResponse {
     id: UUID!
 }
 
+type CreateSetupIntentResponse {
+    clientSecret: String!
+}
+
 type DeleteMessageResponse {
     id: UUID!
 }
@@ -239,13 +247,19 @@ type GetOverviewAnalyticsResponse {
     items: [OverviewAnalyticsItem!]!
 }
 
+type MakePaymentMethodDefaultResponse {
+    id: UUID!
+}
+
 type Mutation {
     banUser(request: BanUserInput!): BanUserResponse!
+    becomePartner: BecomePartnerResponse!
     createBanner(banner: CreateBannerInput!): CreateBannerResponse!
     createBot(input: CreateBotInput!): CreateBotResponse!
     createCategory(input: CreateCategoryInput!): CreateCategoryResponse!
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
+    createSetupIntent: CreateSetupIntentResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
     editBot(input: EditBotInput!): EditBotResponse!
     editNotificationSettings(readNotification: EditNotificationSettingsInput!): EditNotificationSettingsResponse!
@@ -253,12 +267,15 @@ type Mutation {
     editVodSettings(request: EditVodSettingsInput!): EditVodSettingsResponse!
     finishAuth(input: FinishAuthInput!): FinishAuthResponse!
     follow(follow: FollowInput!): FollowResponse!
+    generateOnboardingLink: OnboardingLinkResponse!
+    makePaymentMethodDefault(paymentMethodId: UUID!): MakePaymentMethodDefaultResponse!
     pinMessage(pinMessage: PinMessageInput!): PinMessageResponse!
     readAllNotifications: ReadAllNotificationsResponse!
     readNotification(readNotification: ReadNotificationInput!): ReadNotificationResponse!
     removeBanner(banner: RemoveBannerInput!): RemoveBannerResponse!
     removeBot(input: RemoveBotInput!): RemoveBotResponse!
     removeCategory(input: RemoveCategoryInput!): RemoveCategoryResponse!
+    removePaymentMethod(paymentMethodId: UUID!): RemovePaymentMethodResponse!
     removeRole(input: RemoveRoleInput!): RemoveRoleResponse!
     removeVod(request: RemoveVodInput!): RemoveVodResponse!
     unbanUser(request: UnbanUserInput!): UnbanUserResponse!
@@ -365,6 +382,10 @@ type NotificationsEdge {
     node: NotificationDto!
 }
 
+type OnboardingLinkResponse {
+    onboardingLink: String!
+}
+
 type OverviewAnalyticsItem {
     type: AnalyticsItemType!
     value: Float!
@@ -380,6 +401,15 @@ type PageInfo {
     hasPreviousPage: Boolean!
     "When paginating backwards, the cursor to continue."
     startCursor: String
+}
+
+type PaymentMethodDto {
+    cardBrand: String!
+    cardExpMonth: Long!
+    cardExpYear: Long!
+    cardLast4: String!
+    id: UUID!
+    isDefault: Boolean!
 }
 
 type PermissionsFlags {
@@ -535,6 +565,7 @@ type Query {
         where: NotificationDtoFilterInput
     ): NotificationsConnection
     overviewAnalytics(param: GetOverviewAnalyticsInput!): GetOverviewAnalyticsResponse!
+    paymentMethods: [PaymentMethodDto!]!
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
     roles(
@@ -632,6 +663,10 @@ type RemoveBotResponse {
 }
 
 type RemoveCategoryResponse {
+    id: UUID!
+}
+
+type RemovePaymentMethodResponse {
     id: UUID!
 }
 
