@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { StreamerSubscribeButton } from "./streamer-subscribe-button" // Import the new component
 
 interface StreamerInfoBarProps {
   streamer: StreamerDto
@@ -70,6 +71,7 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
   const displayLanguage = currentStream?.language;
   const displayTags = currentStream?.tags;
   const currentViewers = currentStream?.currentViewers;
+  const subscriptionEnabled = streamer.subscriptionEnabled ?? false;
 
   return (
     <div className="container mx-auto px-4 py-6 bg-gray-900 text-white">
@@ -154,6 +156,9 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
                 </Button>
               )}
             </>
+          )}
+          {streamer.id && streamer.userName && subscriptionEnabled && (
+            <StreamerSubscribeButton streamerId={streamer.id} streamerUserName={streamer.userName} />
           )}
         </div>
       </div>

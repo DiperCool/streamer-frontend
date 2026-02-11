@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react"
 import { VodCard } from "@/src/components/vod-card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import StreamerSubscribeButton from "@/src/components/streamer-subscribe-button"
+import { StreamerSubscribeButton } from "@/src/components/streamer-subscribe-button" // Import the new component
 
 export default function StreamerRootProfilePage({ params }: { params: { username: string } }) {
   const { username } = params
@@ -17,7 +17,9 @@ export default function StreamerRootProfilePage({ params }: { params: { username
     variables: { userName: username },
   })
 
-  const streamerId = streamerData?.streamer.id;
+  const streamer = streamerData?.streamer;
+  const streamerId = streamer?.id;
+  const subscriptionEnabled = streamer?.subscriptionEnabled ?? false;
 
   const {
     data: vodsData,
@@ -40,7 +42,6 @@ export default function StreamerRootProfilePage({ params }: { params: { username
     )
   }
 
-  const streamer = streamerData?.streamer;
   const vods = vodsData?.vods?.nodes || [];
 
   if (vodsError) {
@@ -51,7 +52,9 @@ export default function StreamerRootProfilePage({ params }: { params: { username
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-semibold text-white">Streamer Profile</h3> {/* Placeholder for streamer info */}
-        {streamerId && <StreamerSubscribeButton streamerId={streamerId} />} {/* Moved subscribe button here */}
+        {streamerId && subscriptionEnabled && (
+          <StreamerSubscribeButton streamerId={streamerId} streamerUserName={username} />
+        )}
       </div>
 
       {vods.length > 0 && (
