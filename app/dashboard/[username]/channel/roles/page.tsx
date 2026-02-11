@@ -78,6 +78,9 @@ const createRoleSchema = z.object({
   isChat: z.boolean().optional(),
   isStream: z.boolean().optional(),
   isRoles: z.boolean().optional(),
+  isVod: z.boolean().optional(),
+  isBanners: z.boolean().optional(),
+  isRevenue: z.boolean().optional(),
   isAll: z.boolean().optional(),
 });
 
@@ -86,6 +89,9 @@ const editRoleSchema = z.object({
   isChat: z.boolean().optional(),
   isStream: z.boolean().optional(),
   isRoles: z.boolean().optional(),
+  isVod: z.boolean().optional(),
+  isBanners: z.boolean().optional(),
+  isRevenue: z.boolean().optional(),
   isAll: z.boolean().optional(),
 });
 
@@ -99,6 +105,9 @@ const formatPermissions = (permissions: PermissionsFlagsInput) => {
   if (permissions.isChat) activePermissions.push("Chat");
   if (permissions.isStream) activePermissions.push("Stream");
   if (permissions.isRoles) activePermissions.push("Roles");
+  if (permissions.isVod) activePermissions.push("VOD");
+  if (permissions.isBanners) activePermissions.push("Banners");
+  if (permissions.isRevenue) activePermissions.push("Revenue");
   if (activePermissions.length === 0) return "None";
   return activePermissions.join(", ");
 };
@@ -136,6 +145,9 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
       isChat: false,
       isStream: false,
       isRoles: false,
+      isVod: false,
+      isBanners: false,
+      isRevenue: false,
       isAll: false,
     },
   });
@@ -163,7 +175,10 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
         isChat: values.isChat,
         isStream: values.isStream,
         isRoles: values.isRoles,
-        isNone: !values.isAll && !values.isChat && !values.isStream && !values.isRoles,
+        isVod: values.isVod,
+        isBanners: values.isBanners,
+        isRevenue: values.isRevenue,
+        isNone: !values.isAll && !values.isChat && !values.isStream && !values.isRoles && !values.isVod && !values.isBanners && !values.isRevenue,
       };
 
       await createRoleMutation({
@@ -263,6 +278,9 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                   setValue("isChat", checked, { shouldDirty: true });
                   setValue("isStream", checked, { shouldDirty: true });
                   setValue("isRoles", checked, { shouldDirty: true });
+                  setValue("isVod", checked, { shouldDirty: true });
+                  setValue("isBanners", checked, { shouldDirty: true });
+                  setValue("isRevenue", checked, { shouldDirty: true });
                 }}
                 className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
               />
@@ -293,6 +311,33 @@ const CreateRoleDialog: React.FC<CreateRoleDialogProps> = ({
                     id="isRoles"
                     checked={watch("isRoles")}
                     onCheckedChange={(checked) => setValue("isRoles", checked, { shouldDirty: true })}
+                    className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isVod" className="text-gray-300">VOD Management</Label>
+                  <Switch
+                    id="isVod"
+                    checked={watch("isVod")}
+                    onCheckedChange={(checked) => setValue("isVod", checked, { shouldDirty: true })}
+                    className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isBanners" className="text-gray-300">Banners Management</Label>
+                  <Switch
+                    id="isBanners"
+                    checked={watch("isBanners")}
+                    onCheckedChange={(checked) => setValue("isBanners", checked, { shouldDirty: true })}
+                    className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isRevenue" className="text-gray-300">Revenue Management</Label>
+                  <Switch
+                    id="isRevenue"
+                    checked={watch("isRevenue")}
+                    onCheckedChange={(checked) => setValue("isRevenue", checked, { shouldDirty: true })}
                     className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
@@ -362,6 +407,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
       isChat: false,
       isStream: false,
       isRoles: false,
+      isVod: false,
+      isBanners: false,
+      isRevenue: false,
       isAll: false,
     },
   });
@@ -384,6 +432,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
         isChat: role.permissions.isChat,
         isStream: role.permissions.isStream,
         isRoles: role.permissions.isRoles,
+        isVod: role.permissions.isVod,
+        isBanners: role.permissions.isBanners,
+        isRevenue: role.permissions.isRevenue,
         isAll: role.permissions.isAll,
       });
     }
@@ -396,7 +447,10 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
         isChat: values.isChat,
         isStream: values.isStream,
         isRoles: values.isRoles,
-        isNone: !values.isAll && !values.isChat && !values.isStream && !values.isRoles,
+        isVod: values.isVod,
+        isBanners: values.isBanners,
+        isRevenue: values.isRevenue,
+        isNone: !values.isAll && !values.isChat && !values.isStream && !values.isRoles && !values.isVod && !values.isBanners && !values.isRevenue,
       };
 
       await editRoleMutation({
@@ -453,6 +507,9 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                     setValue("isChat", checked, { shouldDirty: true });
                     setValue("isStream", checked, { shouldDirty: true });
                     setValue("isRoles", checked, { shouldDirty: true });
+                    setValue("isVod", checked, { shouldDirty: true });
+                    setValue("isBanners", checked, { shouldDirty: true });
+                    setValue("isRevenue", checked, { shouldDirty: true });
                   }}
                   className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                 />
@@ -484,6 +541,34 @@ const EditRoleDialog: React.FC<EditRoleDialogProps> = ({
                       checked={watch("isRoles")}
                       onCheckedChange={(checked) => setValue("isRoles", checked, { shouldDirty: true })}
                       className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="editIsVod" className="text-gray-300">VOD Management</Label>
+                    <Switch
+                        id="editIsVod"
+                        checked={watch("isVod")}
+                        onCheckedChange={(checked) => setValue("isVod", checked, { shouldDirty: true })}
+                        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="editIsBanners" className="text-gray-300">Banners Management</Label>
+                    <Switch
+                        id="editIsBanners"
+                        checked={watch("isBanners")}
+                        onCheckedChange={(checked) => setValue("isBanners", checked, { shouldDirty: true })}
+                        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="editIsRevenue" className="text-gray-300">Revenue Management</Label>
+                    <Switch
+                        id="editIsRevenue"
+                        checked={watch("isRevenue")}
+                        onCheckedChange={(checked) => setValue("isRevenue", checked, { shouldDirty: true })}
+                        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-600"
                     />
                   </div>
                 </>

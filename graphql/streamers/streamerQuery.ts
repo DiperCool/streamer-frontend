@@ -8,6 +8,7 @@ export const GET_STREAMER = gql`
             userName
             followers
             isLive
+            subscriptionEnabled
         }
     }
 `
@@ -47,6 +48,8 @@ export const GET_STREAMER_INTERACTION = gql`
                 isRoles
                 isStream
                 isVod
+                isBanners
+                isRevenue
             }
         }
     }

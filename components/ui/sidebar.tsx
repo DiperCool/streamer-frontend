@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog, Info, Bell } from "lucide-react" // Добавлен импорт Bell
+import { Home, Heart, Menu, BarChart2, Monitor, Video, Users, Settings, MessageSquare, Key, UserCog, Info, Bell, Coins } from "lucide-react" // Добавлен импорт Bell
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CollapsibleSidebarNav } from "./collapsible-sidebar-nav"
@@ -55,6 +55,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                   <Link href={`${dashboardBaseUrl}/analytics`} passHref>
                     <SidebarNavItem icon={<BarChart2 />} active={pathname === `${dashboardBaseUrl}/analytics`}>
                       Analytics
+                    </SidebarNavItem>
+                  </Link>
+                  <Link href={`${dashboardBaseUrl}/revenue`} passHref>
+                    <SidebarNavItem icon={<Coins />} active={pathname === `${dashboardBaseUrl}/revenue`}>
+                      Revenue
                     </SidebarNavItem>
                   </Link>
 

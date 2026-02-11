@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react"
 import { VodCard } from "@/src/components/vod-card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import StreamerSubscribeButton from "@/src/components/streamer-subscribe-button"
 
 export default function StreamerRootProfilePage({ params }: { params: { username: string } }) {
   const { username } = params
@@ -48,12 +49,18 @@ export default function StreamerRootProfilePage({ params }: { params: { username
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-semibold text-white">Streamer Profile</h3> {/* Placeholder for streamer info */}
+        {streamerId && <StreamerSubscribeButton streamerId={streamerId} />} {/* Moved subscribe button here */}
+      </div>
+
       {vods.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">Latest Videos</h3>
+
             <Link href={`/${username}/videos`} passHref>
-              <Button variant="ghost" className="text-green-500 hover:text-white"> {/* Изменено здесь */}
+              <Button variant="ghost" className="text-green-500 hover:text-white">
                 Show More
               </Button>
             </Link>

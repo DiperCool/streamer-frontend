@@ -192,6 +192,10 @@ type CreateMessageResponse {
     messageId: UUID!
 }
 
+type CreatePaymentIntentResponse {
+    clientSecret: String!
+}
+
 type CreateRoleResponse {
     id: UUID!
 }
@@ -258,6 +262,7 @@ type Mutation {
     createBot(input: CreateBotInput!): CreateBotResponse!
     createCategory(input: CreateCategoryInput!): CreateCategoryResponse!
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
+    createPaymentIntent(paymentMethodId: String!, subscriptionPlanId: UUID!): CreatePaymentIntentResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
     createSetupIntent: CreateSetupIntentResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
@@ -403,6 +408,13 @@ type PageInfo {
     startCursor: String
 }
 
+type PartnerDto {
+    id: UUID!
+    streamerId: String!
+    stripeAccountId: String
+    stripeOnboardingStatus: StripeOnboardingStatus!
+}
+
 type PaymentMethodDeletedDto {
     paymentMethodId: UUID!
     streamerId: String!
@@ -422,7 +434,7 @@ type PermissionsFlags {
     isBanners: Boolean!
     isChat: Boolean!
     isNone: Boolean!
-    isPayments: Boolean!
+    isRevenue: Boolean!
     isRoles: Boolean!
     isStream: Boolean!
     isVod: Boolean!
@@ -571,6 +583,7 @@ type Query {
         where: NotificationDtoFilterInput
     ): NotificationsConnection
     overviewAnalytics(param: GetOverviewAnalyticsInput!): GetOverviewAnalyticsResponse!
+    partner(streamerId: String!): PartnerDto!
     paymentMethods: [PaymentMethodDto!]!
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
@@ -591,7 +604,7 @@ type Query {
     search(search: String!): [SearchResult!]!
     streamInfo(streamerId: String!): StreamInfoDto!
     streamSettings: StreamSettingsDto!
-    streamer(userName: String!): StreamerDto!
+    streamer(userName: String!): StreamerSummaryDto!
     streamerInteraction(streamerId: String!): StreamerInteractionDto!
     streamers(
         "Returns the elements in the list that come after the specified cursor."
@@ -621,6 +634,7 @@ type Query {
         tag: UUID,
         where: StreamDtoFilterInput
     ): StreamsConnection
+    subscriptionPlansByStreamerId(streamerId: String!): [SubscriptionPlanDto!]!
     tags(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -797,6 +811,15 @@ type StreamerMeDto {
     userName: String
 }
 
+type StreamerSummaryDto {
+    avatar: String
+    followers: Long!
+    id: String!
+    isLive: Boolean!
+    subscriptionEnabled: Boolean!
+    userName: String
+}
+
 "A connection to a list of items."
 type StreamersConnection {
     "A list of edges."
@@ -849,6 +872,13 @@ type Subscription {
     userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
     userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
     watchStream(streamId: UUID!): StreamWatcher!
+}
+
+type SubscriptionPlanDto {
+    id: UUID!
+    name: String!
+    price: Decimal!
+    streamerId: String!
 }
 
 type SystemRoleDto {
@@ -1028,6 +1058,12 @@ enum StreamSourceType {
     WEB_RTC
 }
 
+enum StripeOnboardingStatus {
+    COMPLETED
+    IN_PROGRESS
+    NOT_STARTED
+}
+
 enum SystemRoleType {
     ADMINISTRATOR
 }
@@ -1039,6 +1075,9 @@ enum VodType {
 
 "The `DateTime` scalar represents an ISO-8601 compliant date time type."
 scalar DateTime
+
+"The `Decimal` scalar type represents a decimal floating-point number."
+scalar Decimal
 
 "The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1."
 scalar Long
@@ -1299,7 +1338,7 @@ input PermissionsFlagsInput {
     isBanners: Boolean
     isChat: Boolean
     isNone: Boolean
-    isPayments: Boolean
+    isRevenue: Boolean
     isRoles: Boolean
     isStream: Boolean
     isVod: Boolean

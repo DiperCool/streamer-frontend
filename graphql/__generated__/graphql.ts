@@ -16,6 +16,7 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   DateTime: { input: string; output: string; }
+  Decimal: { input: any; output: any; }
   Long: { input: number; output: number; }
   UUID: { input: string; output: string; }
   Upload: { input: any; output: any; }
@@ -367,6 +368,11 @@ export type CreateMessageResponse = {
   messageId: Scalars['UUID']['output'];
 };
 
+export type CreatePaymentIntentResponse = {
+  __typename?: 'CreatePaymentIntentResponse';
+  clientSecret: Scalars['String']['output'];
+};
+
 export type CreateRoleInput = {
   broadcasterId: Scalars['String']['input'];
   permissions: PermissionsFlagsInput;
@@ -549,6 +555,7 @@ export type Mutation = {
   createBot: CreateBotResponse;
   createCategory: CreateCategoryResponse;
   createMessage: CreateMessageResponse;
+  createPaymentIntent: CreatePaymentIntentResponse;
   createRole: CreateRoleResponse;
   createSetupIntent: CreateSetupIntentResponse;
   deleteMessage: DeleteMessageResponse;
@@ -614,6 +621,12 @@ export type MutationCreateCategoryArgs = {
 
 export type MutationCreateMessageArgs = {
   request: CreateMessageInput;
+};
+
+
+export type MutationCreatePaymentIntentArgs = {
+  paymentMethodId: Scalars['String']['input'];
+  subscriptionPlanId: Scalars['UUID']['input'];
 };
 
 
@@ -915,6 +928,14 @@ export type PageInfo = {
   startCursor?: Maybe<Scalars['String']['output']>;
 };
 
+export type PartnerDto = {
+  __typename?: 'PartnerDto';
+  id: Scalars['UUID']['output'];
+  streamerId: Scalars['String']['output'];
+  stripeAccountId?: Maybe<Scalars['String']['output']>;
+  stripeOnboardingStatus: StripeOnboardingStatus;
+};
+
 export type PaymentMethodDeletedDto = {
   __typename?: 'PaymentMethodDeletedDto';
   paymentMethodId: Scalars['UUID']['output'];
@@ -937,7 +958,7 @@ export type PermissionsFlags = {
   isBanners: Scalars['Boolean']['output'];
   isChat: Scalars['Boolean']['output'];
   isNone: Scalars['Boolean']['output'];
-  isPayments: Scalars['Boolean']['output'];
+  isRevenue: Scalars['Boolean']['output'];
   isRoles: Scalars['Boolean']['output'];
   isStream: Scalars['Boolean']['output'];
   isVod: Scalars['Boolean']['output'];
@@ -948,7 +969,7 @@ export type PermissionsFlagsInput = {
   isBanners?: InputMaybe<Scalars['Boolean']['input']>;
   isChat?: InputMaybe<Scalars['Boolean']['input']>;
   isNone?: InputMaybe<Scalars['Boolean']['input']>;
-  isPayments?: InputMaybe<Scalars['Boolean']['input']>;
+  isRevenue?: InputMaybe<Scalars['Boolean']['input']>;
   isRoles?: InputMaybe<Scalars['Boolean']['input']>;
   isStream?: InputMaybe<Scalars['Boolean']['input']>;
   isVod?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1017,6 +1038,7 @@ export type Query = {
   notificationSettings: NotificationSettingsDto;
   notifications?: Maybe<NotificationsConnection>;
   overviewAnalytics: GetOverviewAnalyticsResponse;
+  partner: PartnerDto;
   paymentMethods: Array<PaymentMethodDto>;
   profile: ProfileDto;
   role: RoleDto;
@@ -1024,10 +1046,11 @@ export type Query = {
   search: Array<SearchResult>;
   streamInfo: StreamInfoDto;
   streamSettings: StreamSettingsDto;
-  streamer: StreamerDto;
+  streamer: StreamerSummaryDto;
   streamerInteraction: StreamerInteractionDto;
   streamers?: Maybe<StreamersConnection>;
   streams?: Maybe<StreamsConnection>;
+  subscriptionPlansByStreamerId: Array<SubscriptionPlanDto>;
   tags?: Maybe<TagsConnection>;
   topCategories: Array<CategoryDto>;
   topStreams: Array<StreamDto>;
@@ -1177,6 +1200,11 @@ export type QueryOverviewAnalyticsArgs = {
 };
 
 
+export type QueryPartnerArgs = {
+  streamerId: Scalars['String']['input'];
+};
+
+
 export type QueryProfileArgs = {
   streamerId: Scalars['String']['input'];
 };
@@ -1240,6 +1268,11 @@ export type QueryStreamsArgs = {
   order?: InputMaybe<Array<StreamDtoSortInput>>;
   tag?: InputMaybe<Scalars['UUID']['input']>;
   where?: InputMaybe<StreamDtoFilterInput>;
+};
+
+
+export type QuerySubscriptionPlansByStreamerIdArgs = {
+  streamerId: Scalars['String']['input'];
 };
 
 
@@ -1566,6 +1599,16 @@ export type StreamerMeDto = {
   userName?: Maybe<Scalars['String']['output']>;
 };
 
+export type StreamerSummaryDto = {
+  __typename?: 'StreamerSummaryDto';
+  avatar?: Maybe<Scalars['String']['output']>;
+  followers: Scalars['Long']['output'];
+  id: Scalars['String']['output'];
+  isLive: Scalars['Boolean']['output'];
+  subscriptionEnabled: Scalars['Boolean']['output'];
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
 /** A connection to a list of items. */
 export type StreamersConnection = {
   __typename?: 'StreamersConnection';
@@ -1620,6 +1663,12 @@ export type StringOperationFilterInput = {
   or?: InputMaybe<Array<StringOperationFilterInput>>;
   startsWith?: InputMaybe<Scalars['String']['input']>;
 };
+
+export enum StripeOnboardingStatus {
+  Completed = 'COMPLETED',
+  InProgress = 'IN_PROGRESS',
+  NotStarted = 'NOT_STARTED'
+}
 
 export type Subscription = {
   __typename?: 'Subscription';
@@ -1685,6 +1734,14 @@ export type SubscriptionUserUnbannedArgs = {
 
 export type SubscriptionWatchStreamArgs = {
   streamId: Scalars['UUID']['input'];
+};
+
+export type SubscriptionPlanDto = {
+  __typename?: 'SubscriptionPlanDto';
+  id: Scalars['UUID']['output'];
+  name: Scalars['String']['output'];
+  price: Scalars['Decimal']['output'];
+  streamerId: Scalars['String']['output'];
 };
 
 export type SystemRoleDto = {
@@ -2320,6 +2377,13 @@ export type GenerateOnboardingLinkMutationVariables = Exact<{
 
 export type GenerateOnboardingLinkMutation = { __typename?: 'Mutation', generateOnboardingLink: { __typename?: 'OnboardingLinkResponse', onboardingLink: string } };
 
+export type GetPartnerQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type GetPartnerQuery = { __typename?: 'Query', partner: { __typename?: 'PartnerDto', id: string, streamerId: string, stripeAccountId?: string | null, stripeOnboardingStatus: StripeOnboardingStatus } };
+
 export type CreateSetupIntentMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2441,14 +2505,14 @@ export type GetMyRoleQueryVariables = Exact<{
 }>;
 
 
-export type GetMyRoleQuery = { __typename?: 'Query', myRole: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+export type GetMyRoleQuery = { __typename?: 'Query', myRole: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean, isBanners: boolean, isRevenue: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 export type GetRoleByIdQueryVariables = Exact<{
   roleId: Scalars['UUID']['input'];
 }>;
 
 
-export type GetRoleByIdQuery = { __typename?: 'Query', role: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
+export type GetRoleByIdQuery = { __typename?: 'Query', role: { __typename?: 'RoleDto', id: string, type: RoleType, streamerId: string, broadcasterId: string, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean, isBanners: boolean, isRevenue: boolean }, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, broadcaster?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } };
 
 export type SearchQueryVariables = Exact<{
   search: Scalars['String']['input'];
@@ -2490,7 +2554,7 @@ export type GetStreamerQueryVariables = Exact<{
 }>;
 
 
-export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean } };
+export type GetStreamerQuery = { __typename?: 'Query', streamer: { __typename?: 'StreamerSummaryDto', id: string, avatar?: string | null, userName?: string | null, followers: number, isLive: boolean, subscriptionEnabled: boolean } };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2507,7 +2571,7 @@ export type StreamerInteractionQueryVariables = Exact<{
 }>;
 
 
-export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null, banned: boolean, bannedUntil?: string | null, lastTimeMessage?: string | null, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean } } };
+export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null, banned: boolean, bannedUntil?: string | null, lastTimeMessage?: string | null, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean, isBanners: boolean, isRevenue: boolean } } };
 
 export type StreamerUpdatedSubscriptionVariables = Exact<{
   streamerId: Scalars['String']['input'];
@@ -2624,6 +2688,21 @@ export type GetTopStreamsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetTopStreamsQuery = { __typename?: 'Query', topStreams: Array<{ __typename?: 'StreamDto', id: string, title: string, preview?: string | null, currentViewers: number, language: string, started: string, active: boolean, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }>, category?: { __typename?: 'CategoryDto', id: string, title: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> };
+
+export type CreatePaymentIntentMutationVariables = Exact<{
+  paymentMethodId: Scalars['String']['input'];
+  subscriptionPlanId: Scalars['UUID']['input'];
+}>;
+
+
+export type CreatePaymentIntentMutation = { __typename?: 'Mutation', createPaymentIntent: { __typename?: 'CreatePaymentIntentResponse', clientSecret: string } };
+
+export type GetSubscriptionPlansByStreamerIdQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type GetSubscriptionPlansByStreamerIdQuery = { __typename?: 'Query', subscriptionPlansByStreamerId: Array<{ __typename?: 'SubscriptionPlanDto', id: string, name: string, price: any, streamerId: string }> };
 
 export type GetMySystemRoleQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4651,6 +4730,49 @@ export function useGenerateOnboardingLinkMutation(baseOptions?: Apollo.MutationH
 export type GenerateOnboardingLinkMutationHookResult = ReturnType<typeof useGenerateOnboardingLinkMutation>;
 export type GenerateOnboardingLinkMutationResult = Apollo.MutationResult<GenerateOnboardingLinkMutation>;
 export type GenerateOnboardingLinkMutationOptions = Apollo.BaseMutationOptions<GenerateOnboardingLinkMutation, GenerateOnboardingLinkMutationVariables>;
+export const GetPartnerDocument = gql`
+    query GetPartner($streamerId: String!) {
+  partner(streamerId: $streamerId) {
+    id
+    streamerId
+    stripeAccountId
+    stripeOnboardingStatus
+  }
+}
+    `;
+
+/**
+ * __useGetPartnerQuery__
+ *
+ * To run a query within a React component, call `useGetPartnerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPartnerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPartnerQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useGetPartnerQuery(baseOptions: Apollo.QueryHookOptions<GetPartnerQuery, GetPartnerQueryVariables> & ({ variables: GetPartnerQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPartnerQuery, GetPartnerQueryVariables>(GetPartnerDocument, options);
+      }
+export function useGetPartnerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPartnerQuery, GetPartnerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPartnerQuery, GetPartnerQueryVariables>(GetPartnerDocument, options);
+        }
+export function useGetPartnerSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetPartnerQuery, GetPartnerQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetPartnerQuery, GetPartnerQueryVariables>(GetPartnerDocument, options);
+        }
+export type GetPartnerQueryHookResult = ReturnType<typeof useGetPartnerQuery>;
+export type GetPartnerLazyQueryHookResult = ReturnType<typeof useGetPartnerLazyQuery>;
+export type GetPartnerSuspenseQueryHookResult = ReturnType<typeof useGetPartnerSuspenseQuery>;
+export type GetPartnerQueryResult = Apollo.QueryResult<GetPartnerQuery, GetPartnerQueryVariables>;
 export const CreateSetupIntentDocument = gql`
     mutation CreateSetupIntent {
   createSetupIntent {
@@ -5305,6 +5427,8 @@ export const GetMyRoleDocument = gql`
       isRoles
       isStream
       isVod
+      isBanners
+      isRevenue
     }
     streamer {
       id
@@ -5366,6 +5490,8 @@ export const GetRoleByIdDocument = gql`
       isRoles
       isStream
       isVod
+      isBanners
+      isRevenue
     }
     streamer {
       id
@@ -5596,6 +5722,7 @@ export const GetStreamerDocument = gql`
     userName
     followers
     isLive
+    subscriptionEnabled
   }
 }
     `;
@@ -5731,6 +5858,8 @@ export const StreamerInteractionDocument = gql`
       isRoles
       isStream
       isVod
+      isBanners
+      isRevenue
     }
   }
 }
@@ -6496,6 +6625,86 @@ export type GetTopStreamsQueryHookResult = ReturnType<typeof useGetTopStreamsQue
 export type GetTopStreamsLazyQueryHookResult = ReturnType<typeof useGetTopStreamsLazyQuery>;
 export type GetTopStreamsSuspenseQueryHookResult = ReturnType<typeof useGetTopStreamsSuspenseQuery>;
 export type GetTopStreamsQueryResult = Apollo.QueryResult<GetTopStreamsQuery, GetTopStreamsQueryVariables>;
+export const CreatePaymentIntentDocument = gql`
+    mutation CreatePaymentIntent($paymentMethodId: String!, $subscriptionPlanId: UUID!) {
+  createPaymentIntent(
+    paymentMethodId: $paymentMethodId
+    subscriptionPlanId: $subscriptionPlanId
+  ) {
+    clientSecret
+  }
+}
+    `;
+export type CreatePaymentIntentMutationFn = Apollo.MutationFunction<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>;
+
+/**
+ * __useCreatePaymentIntentMutation__
+ *
+ * To run a mutation, you first call `useCreatePaymentIntentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePaymentIntentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPaymentIntentMutation, { data, loading, error }] = useCreatePaymentIntentMutation({
+ *   variables: {
+ *      paymentMethodId: // value for 'paymentMethodId'
+ *      subscriptionPlanId: // value for 'subscriptionPlanId'
+ *   },
+ * });
+ */
+export function useCreatePaymentIntentMutation(baseOptions?: Apollo.MutationHookOptions<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>(CreatePaymentIntentDocument, options);
+      }
+export type CreatePaymentIntentMutationHookResult = ReturnType<typeof useCreatePaymentIntentMutation>;
+export type CreatePaymentIntentMutationResult = Apollo.MutationResult<CreatePaymentIntentMutation>;
+export type CreatePaymentIntentMutationOptions = Apollo.BaseMutationOptions<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>;
+export const GetSubscriptionPlansByStreamerIdDocument = gql`
+    query GetSubscriptionPlansByStreamerId($streamerId: String!) {
+  subscriptionPlansByStreamerId(streamerId: $streamerId) {
+    id
+    name
+    price
+    streamerId
+  }
+}
+    `;
+
+/**
+ * __useGetSubscriptionPlansByStreamerIdQuery__
+ *
+ * To run a query within a React component, call `useGetSubscriptionPlansByStreamerIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetSubscriptionPlansByStreamerIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetSubscriptionPlansByStreamerIdQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useGetSubscriptionPlansByStreamerIdQuery(baseOptions: Apollo.QueryHookOptions<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables> & ({ variables: GetSubscriptionPlansByStreamerIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables>(GetSubscriptionPlansByStreamerIdDocument, options);
+      }
+export function useGetSubscriptionPlansByStreamerIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables>(GetSubscriptionPlansByStreamerIdDocument, options);
+        }
+export function useGetSubscriptionPlansByStreamerIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables>(GetSubscriptionPlansByStreamerIdDocument, options);
+        }
+export type GetSubscriptionPlansByStreamerIdQueryHookResult = ReturnType<typeof useGetSubscriptionPlansByStreamerIdQuery>;
+export type GetSubscriptionPlansByStreamerIdLazyQueryHookResult = ReturnType<typeof useGetSubscriptionPlansByStreamerIdLazyQuery>;
+export type GetSubscriptionPlansByStreamerIdSuspenseQueryHookResult = ReturnType<typeof useGetSubscriptionPlansByStreamerIdSuspenseQuery>;
+export type GetSubscriptionPlansByStreamerIdQueryResult = Apollo.QueryResult<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables>;
 export const GetMySystemRoleDocument = gql`
     query GetMySystemRole {
   mySystemRole {
