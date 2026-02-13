@@ -158,7 +158,12 @@ export function StreamerInfoBar({ streamer, profile, currentStream, streamInfo, 
             </>
           )}
           {streamer.id && streamer.userName && subscriptionEnabled && (
-            <StreamerSubscribeButton streamerId={streamer.id} streamerUserName={streamer.userName} />
+            <StreamerSubscribeButton
+              streamerId={streamer.id}
+              streamerUserName={streamer.userName}
+              userSubscription={streamerInteractionData?.streamerInteraction?.subscription}
+              isLoading={interactionLoading}
+            />
           )}
         </div>
       </div>

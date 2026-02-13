@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { intervalToDuration, formatDuration } from "date-fns";
+import { intervalToDuration, formatDuration, format } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -80,5 +80,19 @@ export const formatAnalyticsValue = (type: string, value: number): string => {
       return followers.toString();
     default:
       return Math.ceil(value).toString(); // По умолчанию округляем в большую сторону
+  }
+};
+
+export const formatDate = (dateString: string | undefined | null): string => {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date string");
+    }
+    return format(date, "MM/dd/yyyy");
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "";
   }
 };
