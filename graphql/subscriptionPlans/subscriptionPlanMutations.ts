@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client"
 
-export const CREATE_PAYMENT_INTENT = gql`
-    mutation CreatePaymentIntent($paymentMethodId: String!, $subscriptionPlanId: UUID!) {
-        createPaymentIntent(paymentMethodId: $paymentMethodId, subscriptionPlanId: $subscriptionPlanId) {
+export const CREATE_SUBSCRIPTION = gql`
+    mutation CreateSubscription($paymentMethodId: UUID!, $subscriptionPlanId: UUID!) {
+        createSubscription(paymentMethodId: $paymentMethodId, subscriptionPlanId: $subscriptionPlanId) {
             clientSecret
         }
     }

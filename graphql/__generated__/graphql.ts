@@ -368,11 +368,6 @@ export type CreateMessageResponse = {
   messageId: Scalars['UUID']['output'];
 };
 
-export type CreatePaymentIntentResponse = {
-  __typename?: 'CreatePaymentIntentResponse';
-  clientSecret: Scalars['String']['output'];
-};
-
 export type CreateRoleInput = {
   broadcasterId: Scalars['String']['input'];
   permissions: PermissionsFlagsInput;
@@ -387,6 +382,11 @@ export type CreateRoleResponse = {
 
 export type CreateSetupIntentResponse = {
   __typename?: 'CreateSetupIntentResponse';
+  clientSecret: Scalars['String']['output'];
+};
+
+export type CreateSubscriptionResponse = {
+  __typename?: 'CreateSubscriptionResponse';
   clientSecret: Scalars['String']['output'];
 };
 
@@ -555,9 +555,9 @@ export type Mutation = {
   createBot: CreateBotResponse;
   createCategory: CreateCategoryResponse;
   createMessage: CreateMessageResponse;
-  createPaymentIntent: CreatePaymentIntentResponse;
   createRole: CreateRoleResponse;
   createSetupIntent: CreateSetupIntentResponse;
+  createSubscription: CreateSubscriptionResponse;
   deleteMessage: DeleteMessageResponse;
   editBot: EditBotResponse;
   editNotificationSettings: EditNotificationSettingsResponse;
@@ -624,14 +624,14 @@ export type MutationCreateMessageArgs = {
 };
 
 
-export type MutationCreatePaymentIntentArgs = {
-  paymentMethodId: Scalars['String']['input'];
-  subscriptionPlanId: Scalars['UUID']['input'];
+export type MutationCreateRoleArgs = {
+  input: CreateRoleInput;
 };
 
 
-export type MutationCreateRoleArgs = {
-  input: CreateRoleInput;
+export type MutationCreateSubscriptionArgs = {
+  paymentMethodId: Scalars['UUID']['input'];
+  subscriptionPlanId: Scalars['UUID']['input'];
 };
 
 
@@ -2689,13 +2689,13 @@ export type GetTopStreamsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetTopStreamsQuery = { __typename?: 'Query', topStreams: Array<{ __typename?: 'StreamDto', id: string, title: string, preview?: string | null, currentViewers: number, language: string, started: string, active: boolean, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null, isLive: boolean, followers: number } | null, sources: Array<{ __typename?: 'StreamSourceDto', streamId: string, url: string, sourceType: StreamSourceType }>, category?: { __typename?: 'CategoryDto', id: string, title: string, image: string } | null, tags: Array<{ __typename?: 'TagDto', id: string, title: string }> }> };
 
-export type CreatePaymentIntentMutationVariables = Exact<{
-  paymentMethodId: Scalars['String']['input'];
+export type CreateSubscriptionMutationVariables = Exact<{
+  paymentMethodId: Scalars['UUID']['input'];
   subscriptionPlanId: Scalars['UUID']['input'];
 }>;
 
 
-export type CreatePaymentIntentMutation = { __typename?: 'Mutation', createPaymentIntent: { __typename?: 'CreatePaymentIntentResponse', clientSecret: string } };
+export type CreateSubscriptionMutation = { __typename?: 'Mutation', createSubscription: { __typename?: 'CreateSubscriptionResponse', clientSecret: string } };
 
 export type GetSubscriptionPlansByStreamerIdQueryVariables = Exact<{
   streamerId: Scalars['String']['input'];
@@ -6625,9 +6625,9 @@ export type GetTopStreamsQueryHookResult = ReturnType<typeof useGetTopStreamsQue
 export type GetTopStreamsLazyQueryHookResult = ReturnType<typeof useGetTopStreamsLazyQuery>;
 export type GetTopStreamsSuspenseQueryHookResult = ReturnType<typeof useGetTopStreamsSuspenseQuery>;
 export type GetTopStreamsQueryResult = Apollo.QueryResult<GetTopStreamsQuery, GetTopStreamsQueryVariables>;
-export const CreatePaymentIntentDocument = gql`
-    mutation CreatePaymentIntent($paymentMethodId: String!, $subscriptionPlanId: UUID!) {
-  createPaymentIntent(
+export const CreateSubscriptionDocument = gql`
+    mutation CreateSubscription($paymentMethodId: UUID!, $subscriptionPlanId: UUID!) {
+  createSubscription(
     paymentMethodId: $paymentMethodId
     subscriptionPlanId: $subscriptionPlanId
   ) {
@@ -6635,33 +6635,33 @@ export const CreatePaymentIntentDocument = gql`
   }
 }
     `;
-export type CreatePaymentIntentMutationFn = Apollo.MutationFunction<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>;
+export type CreateSubscriptionMutationFn = Apollo.MutationFunction<CreateSubscriptionMutation, CreateSubscriptionMutationVariables>;
 
 /**
- * __useCreatePaymentIntentMutation__
+ * __useCreateSubscriptionMutation__
  *
- * To run a mutation, you first call `useCreatePaymentIntentMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreatePaymentIntentMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateSubscriptionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateSubscriptionMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createPaymentIntentMutation, { data, loading, error }] = useCreatePaymentIntentMutation({
+ * const [createSubscriptionMutation, { data, loading, error }] = useCreateSubscriptionMutation({
  *   variables: {
  *      paymentMethodId: // value for 'paymentMethodId'
  *      subscriptionPlanId: // value for 'subscriptionPlanId'
  *   },
  * });
  */
-export function useCreatePaymentIntentMutation(baseOptions?: Apollo.MutationHookOptions<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>) {
+export function useCreateSubscriptionMutation(baseOptions?: Apollo.MutationHookOptions<CreateSubscriptionMutation, CreateSubscriptionMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>(CreatePaymentIntentDocument, options);
+        return Apollo.useMutation<CreateSubscriptionMutation, CreateSubscriptionMutationVariables>(CreateSubscriptionDocument, options);
       }
-export type CreatePaymentIntentMutationHookResult = ReturnType<typeof useCreatePaymentIntentMutation>;
-export type CreatePaymentIntentMutationResult = Apollo.MutationResult<CreatePaymentIntentMutation>;
-export type CreatePaymentIntentMutationOptions = Apollo.BaseMutationOptions<CreatePaymentIntentMutation, CreatePaymentIntentMutationVariables>;
+export type CreateSubscriptionMutationHookResult = ReturnType<typeof useCreateSubscriptionMutation>;
+export type CreateSubscriptionMutationResult = Apollo.MutationResult<CreateSubscriptionMutation>;
+export type CreateSubscriptionMutationOptions = Apollo.BaseMutationOptions<CreateSubscriptionMutation, CreateSubscriptionMutationVariables>;
 export const GetSubscriptionPlansByStreamerIdDocument = gql`
     query GetSubscriptionPlansByStreamerId($streamerId: String!) {
   subscriptionPlansByStreamerId(streamerId: $streamerId) {

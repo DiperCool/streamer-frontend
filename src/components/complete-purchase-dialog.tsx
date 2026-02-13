@@ -15,9 +15,10 @@ import { Loader2, CreditCard, Plus } from "lucide-react";
 import {
   useGetPaymentMethodsQuery,
   useMakePaymentMethodDefaultMutation,
-  useCreatePaymentIntentMutation,
+  useGetMeQuery, // Added to get streamerId for subscription
+  usePaymentMethodCreatedSubscription, // Added to listen for new payment methods
   SubscriptionPlanDto,
-  PaymentMethodDto,
+  PaymentMethodDto, useCreateSubscriptionMutation,
 } from "@/graphql/__generated__/graphql";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -42,13 +43,31 @@ export const CompletePurchaseDialog: React.FC<CompletePurchaseDialogProps> = ({
   const elements = useElements();
 
   const { data: paymentMethodsData, loading: paymentMethodsLoading, error: paymentMethodsError, refetch: refetchPaymentMethods } = useGetPaymentMethodsQuery();
-  const [makeDefaultMutation, { loading: makeDefaultLoading }] = useMakePaymentMethodDefaultMutation();
-  const [createPaymentIntentMutation, { loading: createPaymentLoading }] = useCreatePaymentIntentMutation();
+  const [createSubscriptionMutation, { loading: createSubLoading }] = useCreateSubscriptionMutation();
+  const { data: meData } = useGetMeQuery(); // Get user data to obtain streamerId
+  const streamerId = meData?.me?.id;
 
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string | null>(null);
   const [isAddCardDialogOpen, setIsAddCardDialogOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentErrorMessage, setPaymentErrorMessage] = useState<string | null>(null);
+
+  // Listen for payment method created events
+  usePaymentMethodCreatedSubscription({
+    skip: !streamerId || !isOpen, // Only listen if streamerId is available and dialog is open
+    onData: async ({ client, data }) => {
+      if (data?.data?.paymentMethodCreated) {
+        toast.info("New payment method detected, updating list.");
+        const { data: newPaymentMethodsData } = await refetchPaymentMethods(); // Refetch to get the newly added method
+        if (newPaymentMethodsData?.paymentMethods && newPaymentMethodsData.paymentMethods.length > 0) {
+          // Attempt to select the newly created method, or default/first
+          const newlyCreatedMethod = newPaymentMethodsData.paymentMethods.find(pm => pm.id === data.data?.paymentMethodCreated?.id);
+          const defaultMethod = newPaymentMethodsData.paymentMethods.find(pm => pm.isDefault);
+          setSelectedPaymentMethodId(newlyCreatedMethod?.id || defaultMethod?.id || newPaymentMethodsData.paymentMethods[0].id);
+        }
+      }
+    },
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -64,18 +83,7 @@ export const CompletePurchaseDialog: React.FC<CompletePurchaseDialogProps> = ({
     }
   }, [isOpen, paymentMethodsData]);
 
-  const handleSetDefault = async (paymentMethodId: string) => {
-    try {
-      await makeDefaultMutation({
-        variables: { paymentMethodId },
-      });
-      refetchPaymentMethods();
-      toast.success("Default payment method updated!");
-    } catch (err: any) {
-      console.error("Failed to set default payment method:", err);
-      toast.error(err.graphQLErrors?.[0]?.message || "Failed to set default. Please try again.");
-    }
-  };
+
 
   const handlePayNow = async () => {
     if (!selectedPaymentMethodId) {
@@ -91,14 +99,14 @@ export const CompletePurchaseDialog: React.FC<CompletePurchaseDialogProps> = ({
     setPaymentErrorMessage(null);
 
     try {
-      const { data } = await createPaymentIntentMutation({
+      const { data } = await createSubscriptionMutation({
         variables: {
           paymentMethodId: selectedPaymentMethodId,
           subscriptionPlanId: selectedPlan.id,
         },
       });
 
-      const clientSecret = data?.createPaymentIntent.clientSecret;
+      const clientSecret = data?.createSubscription.clientSecret;
 
       if (!clientSecret) {
         throw new Error("Failed to get client secret from backend.");
@@ -126,7 +134,7 @@ export const CompletePurchaseDialog: React.FC<CompletePurchaseDialogProps> = ({
   };
 
   const paymentMethods = paymentMethodsData?.paymentMethods || [];
-  const isLoading = paymentMethodsLoading || makeDefaultLoading || createPaymentLoading || isProcessingPayment;
+  const isLoading = paymentMethodsLoading || createSubLoading || isProcessingPayment;
 
   return (
     <>
@@ -189,25 +197,10 @@ export const CompletePurchaseDialog: React.FC<CompletePurchaseDialogProps> = ({
                             <p className="font-medium text-white">{method.cardBrand.toUpperCase()} ending in {method.cardLast4}</p>
                             <p className="text-xs text-gray-400">Expires {method.cardExpMonth}/{method.cardExpYear}</p>
                           </div>
-                        </Label>
-                      </div>
-                      {!method.isDefault && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent radio group from changing
-                            handleSetDefault(method.id);
-                          }}
-                          disabled={makeDefaultLoading}
-                          className="text-green-500 hover:bg-gray-600 hover:text-white"
-                        >
-                          Set as Default
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </RadioGroup>
+                                  </Label>
+                                </div>
+                              </div>
+                            ))}                </RadioGroup>
               )}
 
               <Button
@@ -252,10 +245,19 @@ export const CompletePurchaseDialog: React.FC<CompletePurchaseDialogProps> = ({
 
       <AddPaymentMethodDialog
         isOpen={isAddCardDialogOpen}
-        onOpenChange={(open) => {
+        onOpenChange={async (open) => {
           setIsAddCardDialogOpen(open);
           if (!open) {
-            refetchPaymentMethods(); // Refetch payment methods after dialog closes
+            // Await refetch to ensure paymentMethodsData is up-to-date
+            // This is important even with subscriptions to handle potential race conditions
+            // or ensure the UI state for selection is aligned with the latest data.
+            const { data: newPaymentMethodsData } = await refetchPaymentMethods(); 
+            if (newPaymentMethodsData?.paymentMethods && newPaymentMethodsData.paymentMethods.length > 0) {
+              const defaultMethod = newPaymentMethodsData.paymentMethods.find(pm => pm.isDefault);
+              setSelectedPaymentMethodId(defaultMethod?.id || newPaymentMethodsData.paymentMethods[0].id);
+            } else {
+              setSelectedPaymentMethodId(null);
+            }
           }
         }}
         refetchPaymentMethods={refetchPaymentMethods}

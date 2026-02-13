@@ -192,15 +192,15 @@ type CreateMessageResponse {
     messageId: UUID!
 }
 
-type CreatePaymentIntentResponse {
-    clientSecret: String!
-}
-
 type CreateRoleResponse {
     id: UUID!
 }
 
 type CreateSetupIntentResponse {
+    clientSecret: String!
+}
+
+type CreateSubscriptionResponse {
     clientSecret: String!
 }
 
@@ -262,9 +262,9 @@ type Mutation {
     createBot(input: CreateBotInput!): CreateBotResponse!
     createCategory(input: CreateCategoryInput!): CreateCategoryResponse!
     createMessage(request: CreateMessageInput!): CreateMessageResponse!
-    createPaymentIntent(paymentMethodId: String!, subscriptionPlanId: UUID!): CreatePaymentIntentResponse!
     createRole(input: CreateRoleInput!): CreateRoleResponse!
     createSetupIntent: CreateSetupIntentResponse!
+    createSubscription(paymentMethodId: UUID!, subscriptionPlanId: UUID!): CreateSubscriptionResponse!
     deleteMessage(request: DeleteMessageInput!): DeleteMessageResponse!
     editBot(input: EditBotInput!): EditBotResponse!
     editNotificationSettings(readNotification: EditNotificationSettingsInput!): EditNotificationSettingsResponse!

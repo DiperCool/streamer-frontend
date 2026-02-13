@@ -50,13 +50,6 @@ export default function StreamerRootProfilePage({ params }: { params: { username
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold text-white">Streamer Profile</h3> {/* Placeholder for streamer info */}
-        {streamerId && subscriptionEnabled && (
-          <StreamerSubscribeButton streamerId={streamerId} streamerUserName={username} />
-        )}
-      </div>
-
       {vods.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
