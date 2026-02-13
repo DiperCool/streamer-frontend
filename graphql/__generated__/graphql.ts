@@ -1586,6 +1586,7 @@ export type StreamerInteractionDto = {
   followedAt?: Maybe<Scalars['DateTime']['output']>;
   lastTimeMessage?: Maybe<Scalars['DateTime']['output']>;
   permissions: PermissionsFlags;
+  subscription: SubscriptionDto;
 };
 
 export type StreamerMeDto = {
@@ -1736,6 +1737,17 @@ export type SubscriptionWatchStreamArgs = {
   streamId: Scalars['UUID']['input'];
 };
 
+export type SubscriptionDto = {
+  __typename?: 'SubscriptionDto';
+  createdAt: Scalars['DateTime']['output'];
+  currentPeriodEnd: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  status: SubscriptionStatus;
+  streamerId: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  userId: Scalars['String']['output'];
+};
+
 export type SubscriptionPlanDto = {
   __typename?: 'SubscriptionPlanDto';
   id: Scalars['UUID']['output'];
@@ -1743,6 +1755,13 @@ export type SubscriptionPlanDto = {
   price: Scalars['Decimal']['output'];
   streamerId: Scalars['String']['output'];
 };
+
+export enum SubscriptionStatus {
+  Active = 'ACTIVE',
+  Canceled = 'CANCELED',
+  Incomplete = 'INCOMPLETE',
+  PastDue = 'PAST_DUE'
+}
 
 export type SystemRoleDto = {
   __typename?: 'SystemRoleDto';
@@ -2571,7 +2590,7 @@ export type StreamerInteractionQueryVariables = Exact<{
 }>;
 
 
-export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null, banned: boolean, bannedUntil?: string | null, lastTimeMessage?: string | null, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean, isBanners: boolean, isRevenue: boolean } } };
+export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null, banned: boolean, bannedUntil?: string | null, lastTimeMessage?: string | null, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean, isBanners: boolean, isRevenue: boolean }, subscription: { __typename?: 'SubscriptionDto', createdAt: string, currentPeriodEnd: string, id: string, status: SubscriptionStatus, title: string } } };
 
 export type StreamerUpdatedSubscriptionVariables = Exact<{
   streamerId: Scalars['String']['input'];
@@ -5860,6 +5879,13 @@ export const StreamerInteractionDocument = gql`
       isVod
       isBanners
       isRevenue
+    }
+    subscription {
+      createdAt
+      currentPeriodEnd
+      id
+      status
+      title
     }
   }
 }

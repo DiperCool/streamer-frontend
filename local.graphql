@@ -799,6 +799,7 @@ type StreamerInteractionDto {
     followedAt: DateTime
     lastTimeMessage: DateTime
     permissions: PermissionsFlags!
+    subscription: SubscriptionDto!
 }
 
 type StreamerMeDto {
@@ -872,6 +873,16 @@ type Subscription {
     userBanned(broadcasterId: String!, userId: String!): BannedUserDto!
     userUnbanned(broadcasterId: String!, userId: String!): BannedUserDto!
     watchStream(streamId: UUID!): StreamWatcher!
+}
+
+type SubscriptionDto {
+    createdAt: DateTime!
+    currentPeriodEnd: DateTime!
+    id: UUID!
+    status: SubscriptionStatus!
+    streamerId: String!
+    title: String!
+    userId: String!
 }
 
 type SubscriptionPlanDto {
@@ -1062,6 +1073,13 @@ enum StripeOnboardingStatus {
     COMPLETED
     IN_PROGRESS
     NOT_STARTED
+}
+
+enum SubscriptionStatus {
+    ACTIVE
+    CANCELED
+    INCOMPLETE
+    PAST_DUE
 }
 
 enum SystemRoleType {

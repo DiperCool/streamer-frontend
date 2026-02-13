@@ -51,6 +51,13 @@ export const GET_STREAMER_INTERACTION = gql`
                 isBanners
                 isRevenue
             }
+            subscription {
+                createdAt
+                currentPeriodEnd
+                id
+                status
+                title
+            }
         }
     }
 `
