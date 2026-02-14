@@ -354,6 +354,24 @@ type MyRolesEdge {
     node: RoleDto!
 }
 
+"A connection to a list of items."
+type MySubscriptionsConnection {
+    "A list of edges."
+    edges: [MySubscriptionsEdge!]
+    "A flattened list of the nodes."
+    nodes: [SubscriptionDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type MySubscriptionsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: SubscriptionDto!
+}
+
 type NotificationDto {
     createdAt: DateTime!
     discriminator: String!
@@ -568,6 +586,16 @@ type Query {
         order: [RoleDtoSortInput!],
         where: RoleDtoFilterInput
     ): MyRolesConnection
+    mySubscriptions(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int
+    ): MySubscriptionsConnection
     mySystemRole: SystemRoleDto!
     notificationSettings: NotificationSettingsDto!
     notifications(
@@ -799,7 +827,7 @@ type StreamerInteractionDto {
     followedAt: DateTime
     lastTimeMessage: DateTime
     permissions: PermissionsFlags!
-    subscription: SubscriptionDto!
+    subscription: SubscriptionDto
 }
 
 type StreamerMeDto {
@@ -880,6 +908,7 @@ type SubscriptionDto {
     currentPeriodEnd: DateTime!
     id: UUID!
     status: SubscriptionStatus!
+    streamer: StreamerDto
     streamerId: String!
     title: String!
     userId: String!

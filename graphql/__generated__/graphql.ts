@@ -849,6 +849,26 @@ export type MyRolesEdge = {
   node: RoleDto;
 };
 
+/** A connection to a list of items. */
+export type MySubscriptionsConnection = {
+  __typename?: 'MySubscriptionsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<MySubscriptionsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<SubscriptionDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type MySubscriptionsEdge = {
+  __typename?: 'MySubscriptionsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: SubscriptionDto;
+};
+
 export type NotificationDto = {
   __typename?: 'NotificationDto';
   createdAt: Scalars['DateTime']['output'];
@@ -1034,6 +1054,7 @@ export type Query = {
   myFollowings?: Maybe<MyFollowingsConnection>;
   myRole: RoleDto;
   myRoles?: Maybe<MyRolesConnection>;
+  mySubscriptions?: Maybe<MySubscriptionsConnection>;
   mySystemRole: SystemRoleDto;
   notificationSettings: NotificationSettingsDto;
   notifications?: Maybe<NotificationsConnection>;
@@ -1182,6 +1203,14 @@ export type QueryMyRolesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<Array<RoleDtoSortInput>>;
   where?: InputMaybe<RoleDtoFilterInput>;
+};
+
+
+export type QueryMySubscriptionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1586,7 +1615,7 @@ export type StreamerInteractionDto = {
   followedAt?: Maybe<Scalars['DateTime']['output']>;
   lastTimeMessage?: Maybe<Scalars['DateTime']['output']>;
   permissions: PermissionsFlags;
-  subscription: SubscriptionDto;
+  subscription?: Maybe<SubscriptionDto>;
 };
 
 export type StreamerMeDto = {
@@ -1743,6 +1772,7 @@ export type SubscriptionDto = {
   currentPeriodEnd: Scalars['DateTime']['output'];
   id: Scalars['UUID']['output'];
   status: SubscriptionStatus;
+  streamer?: Maybe<StreamerDto>;
   streamerId: Scalars['String']['output'];
   title: Scalars['String']['output'];
   userId: Scalars['String']['output'];
@@ -2590,7 +2620,7 @@ export type StreamerInteractionQueryVariables = Exact<{
 }>;
 
 
-export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null, banned: boolean, bannedUntil?: string | null, lastTimeMessage?: string | null, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean, isBanners: boolean, isRevenue: boolean }, subscription: { __typename?: 'SubscriptionDto', createdAt: string, currentPeriodEnd: string, id: string, status: SubscriptionStatus, title: string } } };
+export type StreamerInteractionQuery = { __typename?: 'Query', streamerInteraction: { __typename?: 'StreamerInteractionDto', followed: boolean, followedAt?: string | null, banned: boolean, bannedUntil?: string | null, lastTimeMessage?: string | null, permissions: { __typename?: 'PermissionsFlags', isAll: boolean, isChat: boolean, isNone: boolean, isRoles: boolean, isStream: boolean, isVod: boolean, isBanners: boolean, isRevenue: boolean }, subscription?: { __typename?: 'SubscriptionDto', createdAt: string, currentPeriodEnd: string, id: string, status: SubscriptionStatus, title: string } | null } };
 
 export type StreamerUpdatedSubscriptionVariables = Exact<{
   streamerId: Scalars['String']['input'];
@@ -2722,6 +2752,16 @@ export type GetSubscriptionPlansByStreamerIdQueryVariables = Exact<{
 
 
 export type GetSubscriptionPlansByStreamerIdQuery = { __typename?: 'Query', subscriptionPlansByStreamerId: Array<{ __typename?: 'SubscriptionPlanDto', id: string, name: string, price: any, streamerId: string }> };
+
+export type MySubscriptionsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type MySubscriptionsQuery = { __typename?: 'Query', mySubscriptions?: { __typename?: 'MySubscriptionsConnection', edges?: Array<{ __typename?: 'MySubscriptionsEdge', node: { __typename?: 'SubscriptionDto', id: string, title: string, createdAt: string, currentPeriodEnd: string, status: SubscriptionStatus, streamerId: string, userId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetMySystemRoleQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6731,6 +6771,70 @@ export type GetSubscriptionPlansByStreamerIdQueryHookResult = ReturnType<typeof 
 export type GetSubscriptionPlansByStreamerIdLazyQueryHookResult = ReturnType<typeof useGetSubscriptionPlansByStreamerIdLazyQuery>;
 export type GetSubscriptionPlansByStreamerIdSuspenseQueryHookResult = ReturnType<typeof useGetSubscriptionPlansByStreamerIdSuspenseQuery>;
 export type GetSubscriptionPlansByStreamerIdQueryResult = Apollo.QueryResult<GetSubscriptionPlansByStreamerIdQuery, GetSubscriptionPlansByStreamerIdQueryVariables>;
+export const MySubscriptionsDocument = gql`
+    query MySubscriptions($first: Int, $after: String, $last: Int, $before: String) {
+  mySubscriptions(first: $first, after: $after, last: $last, before: $before) {
+    edges {
+      node {
+        id
+        title
+        createdAt
+        currentPeriodEnd
+        status
+        streamerId
+        userId
+        streamer {
+          id
+          userName
+          avatar
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useMySubscriptionsQuery__
+ *
+ * To run a query within a React component, call `useMySubscriptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMySubscriptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMySubscriptionsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      last: // value for 'last'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useMySubscriptionsQuery(baseOptions?: Apollo.QueryHookOptions<MySubscriptionsQuery, MySubscriptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MySubscriptionsQuery, MySubscriptionsQueryVariables>(MySubscriptionsDocument, options);
+      }
+export function useMySubscriptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MySubscriptionsQuery, MySubscriptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MySubscriptionsQuery, MySubscriptionsQueryVariables>(MySubscriptionsDocument, options);
+        }
+export function useMySubscriptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MySubscriptionsQuery, MySubscriptionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MySubscriptionsQuery, MySubscriptionsQueryVariables>(MySubscriptionsDocument, options);
+        }
+export type MySubscriptionsQueryHookResult = ReturnType<typeof useMySubscriptionsQuery>;
+export type MySubscriptionsLazyQueryHookResult = ReturnType<typeof useMySubscriptionsLazyQuery>;
+export type MySubscriptionsSuspenseQueryHookResult = ReturnType<typeof useMySubscriptionsSuspenseQuery>;
+export type MySubscriptionsQueryResult = Apollo.QueryResult<MySubscriptionsQuery, MySubscriptionsQueryVariables>;
 export const GetMySystemRoleDocument = gql`
     query GetMySystemRole {
   mySystemRole {
