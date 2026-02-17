@@ -405,6 +405,21 @@ export type DateTimeOperationFilterInput = {
   nlte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+export type DecimalOperationFilterInput = {
+  eq?: InputMaybe<Scalars['Decimal']['input']>;
+  gt?: InputMaybe<Scalars['Decimal']['input']>;
+  gte?: InputMaybe<Scalars['Decimal']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['Decimal']['input']>>>;
+  lt?: InputMaybe<Scalars['Decimal']['input']>;
+  lte?: InputMaybe<Scalars['Decimal']['input']>;
+  neq?: InputMaybe<Scalars['Decimal']['input']>;
+  ngt?: InputMaybe<Scalars['Decimal']['input']>;
+  ngte?: InputMaybe<Scalars['Decimal']['input']>;
+  nin?: InputMaybe<Array<InputMaybe<Scalars['Decimal']['input']>>>;
+  nlt?: InputMaybe<Scalars['Decimal']['input']>;
+  nlte?: InputMaybe<Scalars['Decimal']['input']>;
+};
+
 export type DeleteMessageInput = {
   messageId: Scalars['UUID']['input'];
 };
@@ -869,6 +884,26 @@ export type MySubscriptionsEdge = {
   node: SubscriptionDto;
 };
 
+/** A connection to a list of items. */
+export type MyTransactionsConnection = {
+  __typename?: 'MyTransactionsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<MyTransactionsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<UserTransactionDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type MyTransactionsEdge = {
+  __typename?: 'MyTransactionsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: UserTransactionDto;
+};
+
 export type NotificationDto = {
   __typename?: 'NotificationDto';
   createdAt: Scalars['DateTime']['output'];
@@ -1056,6 +1091,7 @@ export type Query = {
   myRoles?: Maybe<MyRolesConnection>;
   mySubscriptions?: Maybe<MySubscriptionsConnection>;
   mySystemRole: SystemRoleDto;
+  myTransactions?: Maybe<MyTransactionsConnection>;
   notificationSettings: NotificationSettingsDto;
   notifications?: Maybe<NotificationsConnection>;
   overviewAnalytics: GetOverviewAnalyticsResponse;
@@ -1211,6 +1247,16 @@ export type QueryMySubscriptionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryMyTransactionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<UserTransactionDtoSortInput>>;
+  where?: InputMaybe<UserTransactionDtoFilterInput>;
 };
 
 
@@ -1842,6 +1888,31 @@ export type TagsEdge = {
   node: TagDto;
 };
 
+export enum TransactionStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Refunded = 'REFUNDED',
+  Succeeded = 'SUCCEEDED'
+}
+
+export type TransactionStatusOperationFilterInput = {
+  eq?: InputMaybe<TransactionStatus>;
+  in?: InputMaybe<Array<TransactionStatus>>;
+  neq?: InputMaybe<TransactionStatus>;
+  nin?: InputMaybe<Array<TransactionStatus>>;
+};
+
+export enum TransactionType {
+  Subscription = 'SUBSCRIPTION'
+}
+
+export type TransactionTypeOperationFilterInput = {
+  eq?: InputMaybe<TransactionType>;
+  in?: InputMaybe<Array<TransactionType>>;
+  neq?: InputMaybe<TransactionType>;
+  nin?: InputMaybe<Array<TransactionType>>;
+};
+
 export type UnbanUserInput = {
   broadcasterId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
@@ -1984,6 +2055,40 @@ export type UploadFileInput = {
 export type UploadFileResponse = {
   __typename?: 'UploadFileResponse';
   fileName: Scalars['String']['output'];
+};
+
+export type UserTransactionDto = {
+  __typename?: 'UserTransactionDto';
+  createdAt: Scalars['DateTime']['output'];
+  grossAmount: Scalars['Decimal']['output'];
+  id: Scalars['UUID']['output'];
+  status: TransactionStatus;
+  streamer?: Maybe<StreamerDto>;
+  streamerId: Scalars['String']['output'];
+  stripeInvoiceUrl?: Maybe<Scalars['String']['output']>;
+  transactionType: TransactionType;
+};
+
+export type UserTransactionDtoFilterInput = {
+  and?: InputMaybe<Array<UserTransactionDtoFilterInput>>;
+  createdAt?: InputMaybe<DateTimeOperationFilterInput>;
+  grossAmount?: InputMaybe<DecimalOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<UserTransactionDtoFilterInput>>;
+  status?: InputMaybe<TransactionStatusOperationFilterInput>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+  stripeInvoiceUrl?: InputMaybe<StringOperationFilterInput>;
+  transactionType?: InputMaybe<TransactionTypeOperationFilterInput>;
+};
+
+export type UserTransactionDtoSortInput = {
+  createdAt?: InputMaybe<SortEnumType>;
+  grossAmount?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  status?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+  stripeInvoiceUrl?: InputMaybe<SortEnumType>;
+  transactionType?: InputMaybe<SortEnumType>;
 };
 
 export type UuidOperationFilterInput = {
@@ -2779,6 +2884,18 @@ export type GetTagsQueryVariables = Exact<{
 
 
 export type GetTagsQuery = { __typename?: 'Query', tags?: { __typename?: 'TagsConnection', nodes?: Array<{ __typename?: 'TagDto', id: string, title: string }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type MyTransactionsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<UserTransactionDtoSortInput> | UserTransactionDtoSortInput>;
+  where?: InputMaybe<UserTransactionDtoFilterInput>;
+}>;
+
+
+export type MyTransactionsQuery = { __typename?: 'Query', myTransactions?: { __typename?: 'MyTransactionsConnection', nodes?: Array<{ __typename?: 'UserTransactionDto', createdAt: string, grossAmount: any, id: string, status: TransactionStatus, streamerId: string, stripeInvoiceUrl?: string | null, transactionType: TransactionType, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type RemoveVodMutationVariables = Exact<{
   request: RemoveVodInput;
@@ -6943,6 +7060,77 @@ export type GetTagsQueryHookResult = ReturnType<typeof useGetTagsQuery>;
 export type GetTagsLazyQueryHookResult = ReturnType<typeof useGetTagsLazyQuery>;
 export type GetTagsSuspenseQueryHookResult = ReturnType<typeof useGetTagsSuspenseQuery>;
 export type GetTagsQueryResult = Apollo.QueryResult<GetTagsQuery, GetTagsQueryVariables>;
+export const MyTransactionsDocument = gql`
+    query MyTransactions($after: String, $before: String, $first: Int, $last: Int, $order: [UserTransactionDtoSortInput!], $where: UserTransactionDtoFilterInput) {
+  myTransactions(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    order: $order
+    where: $where
+  ) {
+    nodes {
+      createdAt
+      grossAmount
+      id
+      status
+      streamerId
+      stripeInvoiceUrl
+      transactionType
+      streamer {
+        id
+        userName
+        avatar
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useMyTransactionsQuery__
+ *
+ * To run a query within a React component, call `useMyTransactionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyTransactionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyTransactionsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      order: // value for 'order'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function useMyTransactionsQuery(baseOptions?: Apollo.QueryHookOptions<MyTransactionsQuery, MyTransactionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MyTransactionsQuery, MyTransactionsQueryVariables>(MyTransactionsDocument, options);
+      }
+export function useMyTransactionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MyTransactionsQuery, MyTransactionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MyTransactionsQuery, MyTransactionsQueryVariables>(MyTransactionsDocument, options);
+        }
+export function useMyTransactionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MyTransactionsQuery, MyTransactionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MyTransactionsQuery, MyTransactionsQueryVariables>(MyTransactionsDocument, options);
+        }
+export type MyTransactionsQueryHookResult = ReturnType<typeof useMyTransactionsQuery>;
+export type MyTransactionsLazyQueryHookResult = ReturnType<typeof useMyTransactionsLazyQuery>;
+export type MyTransactionsSuspenseQueryHookResult = ReturnType<typeof useMyTransactionsSuspenseQuery>;
+export type MyTransactionsQueryResult = Apollo.QueryResult<MyTransactionsQuery, MyTransactionsQueryVariables>;
 export const RemoveVodDocument = gql`
     mutation RemoveVod($request: RemoveVodInput!) {
   removeVod(request: $request) {

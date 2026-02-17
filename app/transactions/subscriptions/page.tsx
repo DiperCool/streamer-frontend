@@ -14,15 +14,68 @@ import { useMySubscriptionsQuery } from "@/graphql/__generated__/graphql"
 import { Loader2 } from "lucide-react"
 import Image from "next/image" // Import Image component
 import { getMinioUrl } from "@/utils/utils" // Import getMinioUrl
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+
+const PAGE_SIZE = 15
 
 export default function SubscriptionsPage() {
-  const { data, loading, error } = useMySubscriptionsQuery()
+  const { data, loading, error, fetchMore } = useMySubscriptionsQuery({
+    variables: {
+      first: PAGE_SIZE,
+    },
+  })
 
-  if (loading) {
+  const handleLoadMore = () => {
+    fetchMore({
+      variables: {
+        first: PAGE_SIZE,
+        after: data?.mySubscriptions?.pageInfo?.endCursor,
+      },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult || !fetchMoreResult.mySubscriptions) return prev;
+
+        const newEdges = fetchMoreResult.mySubscriptions.edges || [];
+        const newPageInfo = fetchMoreResult.mySubscriptions.pageInfo;
+
+        if (!prev.mySubscriptions) {
+          return {
+            mySubscriptions: {
+              ...fetchMoreResult.mySubscriptions,
+              edges: newEdges,
+              pageInfo: newPageInfo,
+            },
+          };
+        }
+
+        const oldEdges = prev.mySubscriptions.edges || [];
+
+        return {
+          mySubscriptions: {
+            ...prev.mySubscriptions,
+            edges: [...oldEdges, ...newEdges],
+            pageInfo: newPageInfo,
+          },
+        };
+      },
+    })
+  }
+
+  if (loading && !data) { // Show full skeleton only on initial load
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-      </div>
+      <Card className="bg-gray-800 border-gray-700 text-white">
+        <CardHeader>
+          <CardTitle>My Active Subscriptions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-1/2 bg-gray-700" />
+            <Skeleton className="h-10 w-full bg-gray-700" />
+            <Skeleton className="h-10 w-full bg-gray-700" />
+            <Skeleton className="h-10 w-full bg-gray-700" />
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -37,6 +90,7 @@ export default function SubscriptionsPage() {
   const subscriptions = data?.mySubscriptions?.edges
     ?.map((edge) => edge?.node)
     .filter(Boolean)
+  const hasNextPage = data?.mySubscriptions?.pageInfo?.hasNextPage
 
   return (
     <Card className="bg-gray-800 border-gray-700 text-white">
@@ -84,6 +138,21 @@ export default function SubscriptionsPage() {
           </Table>
         ) : (
           <p>You don't have any active subscriptions yet.</p>
+        )}
+        {hasNextPage && (
+          <div className="flex justify-center mt-4">
+            <Button
+              onClick={handleLoadMore}
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+              ) : (
+                "Load More"
+              )}
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
