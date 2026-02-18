@@ -1098,6 +1098,7 @@ enum AnalyticsItemType {
     FOLLOWER
     STREAM_TIME
     STREAM_VIEWERS
+    SUBSCRIPTIONS
 }
 
 "Defines when a policy shall be executed."

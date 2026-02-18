@@ -73,6 +73,7 @@ export const AnalyticsDiagramWidget: React.FC<AnalyticsDiagramWidgetProps> = ({ 
       case AnalyticsItemType.StreamViewers: return "Average Viewers";
       case AnalyticsItemType.StreamTime: return "Time Streamed";
       case AnalyticsItemType.Follower: return "Follows";
+      case AnalyticsItemType.Subscriptions: return "Subscriptions";
       default: return String(itemType);
     }
   };
@@ -139,6 +140,7 @@ export const AnalyticsDiagramWidget: React.FC<AnalyticsDiagramWidgetProps> = ({ 
               <SelectItem value={AnalyticsItemType.StreamViewers}>Average Viewers</SelectItem>
               <SelectItem value={AnalyticsItemType.Follower}>Follows</SelectItem>
               <SelectItem value={AnalyticsItemType.StreamTime}>Time Streamed</SelectItem>
+              <SelectItem value={AnalyticsItemType.Subscriptions}>Subscriptions</SelectItem>
             </SelectContent>
           </Select>
         </div>

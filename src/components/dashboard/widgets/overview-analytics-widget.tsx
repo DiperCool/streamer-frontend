@@ -48,6 +48,7 @@ const AnalyticsItemDisplay: React.FC<AnalyticsItemDisplayProps> = ({ type, value
       case AnalyticsItemType.StreamTime: return "Time Streamed";
       case AnalyticsItemType.UniqueViewers: return "Unique Viewers";
       case AnalyticsItemType.Follower: return "Follows";
+      case AnalyticsItemType.Subscriptions: return "Subscriptions";
       default: return itemType;
     }
   };
@@ -257,7 +258,7 @@ export const OverviewAnalyticsWidget: React.FC = () => {
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
-        <div className="grid grid-cols-3 flex-1">
+        <div className="grid grid-cols-4 flex-1">
           {overviewItems.map((item, index) => (
             <AnalyticsItemDisplay
               key={index}

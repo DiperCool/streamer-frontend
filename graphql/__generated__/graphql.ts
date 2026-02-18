@@ -37,7 +37,8 @@ export enum AnalyticsDiagramType {
 export enum AnalyticsItemType {
   Follower = 'FOLLOWER',
   StreamTime = 'STREAM_TIME',
-  StreamViewers = 'STREAM_VIEWERS'
+  StreamViewers = 'STREAM_VIEWERS',
+  Subscriptions = 'SUBSCRIPTIONS'
 }
 
 /** Defines when a policy shall be executed. */
