@@ -47,3 +47,48 @@ export const GetStreamerSubscriptionsStats = gql`
     }
   }
 `;
+
+export const Subscriptions = gql`
+  query Subscriptions(
+    $streamerId: String!
+    $first: Int
+    $after: String
+    $last: Int
+    $before: String
+    $order: [SubscriptionDtoSortInput!]
+    $search: String
+    $where: SubscriptionDtoFilterInput
+  ) {
+    subscriptions(
+      streamerId: $streamerId
+      first: $first
+      after: $after
+      last: $last
+      before: $before
+      order: $order
+      search: $search
+      where: $where
+    ) {
+      nodes {
+        id
+        title
+        createdAt
+        currentPeriodEnd
+        status
+        streamerId
+        userId
+        user {
+          id
+          userName
+          avatar
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
+      }
+    }
+  }
+`;
