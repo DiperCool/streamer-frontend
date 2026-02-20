@@ -543,6 +543,12 @@ export type GetOverviewAnalyticsResponse = {
   items: Array<OverviewAnalyticsItem>;
 };
 
+export type GetStreamerSubscriptionsStatsResponse = {
+  __typename?: 'GetStreamerSubscriptionsStatsResponse';
+  activeSubscriptionsCount: Scalars['Int']['output'];
+  futurePayoutAmount: Scalars['Decimal']['output'];
+};
+
 export type LongOperationFilterInput = {
   eq?: InputMaybe<Scalars['Long']['input']>;
   gt?: InputMaybe<Scalars['Long']['input']>;
@@ -1008,6 +1014,78 @@ export type PaymentMethodDto = {
   isDefault: Scalars['Boolean']['output'];
 };
 
+export type PayoutDto = {
+  __typename?: 'PayoutDto';
+  amount: Scalars['Decimal']['output'];
+  arrivalDate: Scalars['DateTime']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  currency: Scalars['String']['output'];
+  failureMessage?: Maybe<Scalars['String']['output']>;
+  id: Scalars['UUID']['output'];
+  status: PayoutStatus;
+  streamerId: Scalars['String']['output'];
+  stripePayoutId: Scalars['String']['output'];
+};
+
+export type PayoutDtoFilterInput = {
+  amount?: InputMaybe<DecimalOperationFilterInput>;
+  and?: InputMaybe<Array<PayoutDtoFilterInput>>;
+  arrivalDate?: InputMaybe<DateTimeOperationFilterInput>;
+  createdAt?: InputMaybe<DateTimeOperationFilterInput>;
+  currency?: InputMaybe<StringOperationFilterInput>;
+  failureMessage?: InputMaybe<StringOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  or?: InputMaybe<Array<PayoutDtoFilterInput>>;
+  status?: InputMaybe<PayoutStatusOperationFilterInput>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+  stripePayoutId?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type PayoutDtoSortInput = {
+  amount?: InputMaybe<SortEnumType>;
+  arrivalDate?: InputMaybe<SortEnumType>;
+  createdAt?: InputMaybe<SortEnumType>;
+  currency?: InputMaybe<SortEnumType>;
+  failureMessage?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  status?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
+  stripePayoutId?: InputMaybe<SortEnumType>;
+};
+
+export enum PayoutStatus {
+  Failed = 'FAILED',
+  Paid = 'PAID',
+  Pending = 'PENDING'
+}
+
+export type PayoutStatusOperationFilterInput = {
+  eq?: InputMaybe<PayoutStatus>;
+  in?: InputMaybe<Array<PayoutStatus>>;
+  neq?: InputMaybe<PayoutStatus>;
+  nin?: InputMaybe<Array<PayoutStatus>>;
+};
+
+/** A connection to a list of items. */
+export type PayoutsConnection = {
+  __typename?: 'PayoutsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<PayoutsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<PayoutDto>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type PayoutsEdge = {
+  __typename?: 'PayoutsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: PayoutDto;
+};
+
 export type PermissionsFlags = {
   __typename?: 'PermissionsFlags';
   isAll: Scalars['Boolean']['output'];
@@ -1098,6 +1176,7 @@ export type Query = {
   overviewAnalytics: GetOverviewAnalyticsResponse;
   partner: PartnerDto;
   paymentMethods: Array<PaymentMethodDto>;
+  payouts?: Maybe<PayoutsConnection>;
   profile: ProfileDto;
   role: RoleDto;
   roles?: Maybe<RolesConnection>;
@@ -1106,6 +1185,7 @@ export type Query = {
   streamSettings: StreamSettingsDto;
   streamer: StreamerSummaryDto;
   streamerInteraction: StreamerInteractionDto;
+  streamerSubscriptionsStats: GetStreamerSubscriptionsStatsResponse;
   streamers?: Maybe<StreamersConnection>;
   streams?: Maybe<StreamsConnection>;
   subscriptionPlansByStreamerId: Array<SubscriptionPlanDto>;
@@ -1281,6 +1361,17 @@ export type QueryPartnerArgs = {
 };
 
 
+export type QueryPayoutsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<PayoutDtoSortInput>>;
+  streamerId: Scalars['String']['input'];
+  where?: InputMaybe<PayoutDtoFilterInput>;
+};
+
+
 export type QueryProfileArgs = {
   streamerId: Scalars['String']['input'];
 };
@@ -1319,6 +1410,11 @@ export type QueryStreamerArgs = {
 
 
 export type QueryStreamerInteractionArgs = {
+  streamerId: Scalars['String']['input'];
+};
+
+
+export type QueryStreamerSubscriptionsStatsArgs = {
   streamerId: Scalars['String']['input'];
 };
 
@@ -2573,6 +2669,19 @@ export type PaymentMethodDeletedSubscriptionVariables = Exact<{ [key: string]: n
 
 export type PaymentMethodDeletedSubscription = { __typename?: 'Subscription', paymentMethodDeleted: { __typename?: 'PaymentMethodDeletedDto', paymentMethodId: string, streamerId: string } };
 
+export type PayoutsQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  order?: InputMaybe<Array<PayoutDtoSortInput> | PayoutDtoSortInput>;
+  where?: InputMaybe<PayoutDtoFilterInput>;
+}>;
+
+
+export type PayoutsQuery = { __typename?: 'Query', payouts?: { __typename?: 'PayoutsConnection', nodes?: Array<{ __typename?: 'PayoutDto', id: string, amount: any, arrivalDate: string, createdAt: string, currency: string, failureMessage?: string | null, status: PayoutStatus, streamerId: string, stripePayoutId: string }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
 }>;
@@ -2868,6 +2977,13 @@ export type MySubscriptionsQueryVariables = Exact<{
 
 
 export type MySubscriptionsQuery = { __typename?: 'Query', mySubscriptions?: { __typename?: 'MySubscriptionsConnection', edges?: Array<{ __typename?: 'MySubscriptionsEdge', node: { __typename?: 'SubscriptionDto', id: string, title: string, createdAt: string, currentPeriodEnd: string, status: SubscriptionStatus, streamerId: string, userId: string, streamer?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null } }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type GetStreamerSubscriptionsStatsQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type GetStreamerSubscriptionsStatsQuery = { __typename?: 'Query', streamerSubscriptionsStats: { __typename?: 'GetStreamerSubscriptionsStatsResponse', activeSubscriptionsCount: number, futurePayoutAmount: any } };
 
 export type GetMySystemRoleQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5156,6 +5272,76 @@ export function usePaymentMethodDeletedSubscription(baseOptions?: Apollo.Subscri
       }
 export type PaymentMethodDeletedSubscriptionHookResult = ReturnType<typeof usePaymentMethodDeletedSubscription>;
 export type PaymentMethodDeletedSubscriptionResult = Apollo.SubscriptionResult<PaymentMethodDeletedSubscription>;
+export const PayoutsDocument = gql`
+    query Payouts($streamerId: String!, $first: Int, $after: String, $last: Int, $before: String, $order: [PayoutDtoSortInput!], $where: PayoutDtoFilterInput) {
+  payouts(
+    streamerId: $streamerId
+    first: $first
+    after: $after
+    last: $last
+    before: $before
+    order: $order
+    where: $where
+  ) {
+    nodes {
+      id
+      amount
+      arrivalDate
+      createdAt
+      currency
+      failureMessage
+      status
+      streamerId
+      stripePayoutId
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __usePayoutsQuery__
+ *
+ * To run a query within a React component, call `usePayoutsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePayoutsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePayoutsQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      last: // value for 'last'
+ *      before: // value for 'before'
+ *      order: // value for 'order'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function usePayoutsQuery(baseOptions: Apollo.QueryHookOptions<PayoutsQuery, PayoutsQueryVariables> & ({ variables: PayoutsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PayoutsQuery, PayoutsQueryVariables>(PayoutsDocument, options);
+      }
+export function usePayoutsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PayoutsQuery, PayoutsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PayoutsQuery, PayoutsQueryVariables>(PayoutsDocument, options);
+        }
+export function usePayoutsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PayoutsQuery, PayoutsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PayoutsQuery, PayoutsQueryVariables>(PayoutsDocument, options);
+        }
+export type PayoutsQueryHookResult = ReturnType<typeof usePayoutsQuery>;
+export type PayoutsLazyQueryHookResult = ReturnType<typeof usePayoutsLazyQuery>;
+export type PayoutsSuspenseQueryHookResult = ReturnType<typeof usePayoutsSuspenseQuery>;
+export type PayoutsQueryResult = Apollo.QueryResult<PayoutsQuery, PayoutsQueryVariables>;
 export const UpdateProfileDocument = gql`
     mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {
@@ -6953,6 +7139,47 @@ export type MySubscriptionsQueryHookResult = ReturnType<typeof useMySubscription
 export type MySubscriptionsLazyQueryHookResult = ReturnType<typeof useMySubscriptionsLazyQuery>;
 export type MySubscriptionsSuspenseQueryHookResult = ReturnType<typeof useMySubscriptionsSuspenseQuery>;
 export type MySubscriptionsQueryResult = Apollo.QueryResult<MySubscriptionsQuery, MySubscriptionsQueryVariables>;
+export const GetStreamerSubscriptionsStatsDocument = gql`
+    query GetStreamerSubscriptionsStats($streamerId: String!) {
+  streamerSubscriptionsStats(streamerId: $streamerId) {
+    activeSubscriptionsCount
+    futurePayoutAmount
+  }
+}
+    `;
+
+/**
+ * __useGetStreamerSubscriptionsStatsQuery__
+ *
+ * To run a query within a React component, call `useGetStreamerSubscriptionsStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetStreamerSubscriptionsStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetStreamerSubscriptionsStatsQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useGetStreamerSubscriptionsStatsQuery(baseOptions: Apollo.QueryHookOptions<GetStreamerSubscriptionsStatsQuery, GetStreamerSubscriptionsStatsQueryVariables> & ({ variables: GetStreamerSubscriptionsStatsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetStreamerSubscriptionsStatsQuery, GetStreamerSubscriptionsStatsQueryVariables>(GetStreamerSubscriptionsStatsDocument, options);
+      }
+export function useGetStreamerSubscriptionsStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetStreamerSubscriptionsStatsQuery, GetStreamerSubscriptionsStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetStreamerSubscriptionsStatsQuery, GetStreamerSubscriptionsStatsQueryVariables>(GetStreamerSubscriptionsStatsDocument, options);
+        }
+export function useGetStreamerSubscriptionsStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetStreamerSubscriptionsStatsQuery, GetStreamerSubscriptionsStatsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetStreamerSubscriptionsStatsQuery, GetStreamerSubscriptionsStatsQueryVariables>(GetStreamerSubscriptionsStatsDocument, options);
+        }
+export type GetStreamerSubscriptionsStatsQueryHookResult = ReturnType<typeof useGetStreamerSubscriptionsStatsQuery>;
+export type GetStreamerSubscriptionsStatsLazyQueryHookResult = ReturnType<typeof useGetStreamerSubscriptionsStatsLazyQuery>;
+export type GetStreamerSubscriptionsStatsSuspenseQueryHookResult = ReturnType<typeof useGetStreamerSubscriptionsStatsSuspenseQuery>;
+export type GetStreamerSubscriptionsStatsQueryResult = Apollo.QueryResult<GetStreamerSubscriptionsStatsQuery, GetStreamerSubscriptionsStatsQueryVariables>;
 export const GetMySystemRoleDocument = gql`
     query GetMySystemRole {
   mySystemRole {

@@ -38,3 +38,12 @@ export const MySubscriptions = gql`
     }
   }
 `;
+
+export const GetStreamerSubscriptionsStats = gql`
+  query GetStreamerSubscriptionsStats($streamerId: String!) {
+    streamerSubscriptionsStats(streamerId: $streamerId) {
+      activeSubscriptionsCount
+      futurePayoutAmount
+    }
+  }
+`;

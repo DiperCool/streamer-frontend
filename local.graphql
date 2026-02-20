@@ -251,6 +251,11 @@ type GetOverviewAnalyticsResponse {
     items: [OverviewAnalyticsItem!]!
 }
 
+type GetStreamerSubscriptionsStatsResponse {
+    activeSubscriptionsCount: Int!
+    futurePayoutAmount: Decimal!
+}
+
 type MakePaymentMethodDefaultResponse {
     id: UUID!
 }
@@ -465,6 +470,36 @@ type PaymentMethodDto {
     isDefault: Boolean!
 }
 
+type PayoutDto {
+    amount: Decimal!
+    arrivalDate: DateTime!
+    createdAt: DateTime!
+    currency: String!
+    failureMessage: String
+    id: UUID!
+    status: PayoutStatus!
+    streamerId: String!
+    stripePayoutId: String!
+}
+
+"A connection to a list of items."
+type PayoutsConnection {
+    "A list of edges."
+    edges: [PayoutsEdge!]
+    "A flattened list of the nodes."
+    nodes: [PayoutDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type PayoutsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: PayoutDto!
+}
+
 type PermissionsFlags {
     isAll: Boolean!
     isBanners: Boolean!
@@ -643,6 +678,19 @@ type Query {
     overviewAnalytics(param: GetOverviewAnalyticsInput!): GetOverviewAnalyticsResponse!
     partner(streamerId: String!): PartnerDto!
     paymentMethods: [PaymentMethodDto!]!
+    payouts(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [PayoutDtoSortInput!],
+        streamerId: String!,
+        where: PayoutDtoFilterInput
+    ): PayoutsConnection
     profile(streamerId: String!): ProfileDto!
     role(id: UUID!): RoleDto!
     roles(
@@ -664,6 +712,7 @@ type Query {
     streamSettings: StreamSettingsDto!
     streamer(userName: String!): StreamerSummaryDto!
     streamerInteraction(streamerId: String!): StreamerInteractionDto!
+    streamerSubscriptionsStats(streamerId: String!): GetStreamerSubscriptionsStatsResponse!
     streamers(
         "Returns the elements in the list that come after the specified cursor."
         after: String,
@@ -1120,6 +1169,12 @@ enum ChatMessageType {
     USER_MESSAGE
 }
 
+enum PayoutStatus {
+    FAILED
+    PAID
+    PENDING
+}
+
 enum RoleType {
     ADMINISTRATOR
     BROADCASTER
@@ -1446,6 +1501,39 @@ input NotificationDtoSortInput {
     id: SortEnumType
     seen: SortEnumType
     streamerId: SortEnumType
+}
+
+input PayoutDtoFilterInput {
+    amount: DecimalOperationFilterInput
+    and: [PayoutDtoFilterInput!]
+    arrivalDate: DateTimeOperationFilterInput
+    createdAt: DateTimeOperationFilterInput
+    currency: StringOperationFilterInput
+    failureMessage: StringOperationFilterInput
+    id: UuidOperationFilterInput
+    or: [PayoutDtoFilterInput!]
+    status: PayoutStatusOperationFilterInput
+    streamerId: StringOperationFilterInput
+    stripePayoutId: StringOperationFilterInput
+}
+
+input PayoutDtoSortInput {
+    amount: SortEnumType
+    arrivalDate: SortEnumType
+    createdAt: SortEnumType
+    currency: SortEnumType
+    failureMessage: SortEnumType
+    id: SortEnumType
+    status: SortEnumType
+    streamerId: SortEnumType
+    stripePayoutId: SortEnumType
+}
+
+input PayoutStatusOperationFilterInput {
+    eq: PayoutStatus
+    in: [PayoutStatus!]
+    neq: PayoutStatus
+    nin: [PayoutStatus!]
 }
 
 input PermissionsFlagsInput {
