@@ -19,6 +19,7 @@ export const MySubscriptions = gql`
           title
           createdAt
           currentPeriodEnd
+          currentStreak
           status
           streamerId
           userId
@@ -74,6 +75,7 @@ export const Subscriptions = gql`
         title
         createdAt
         currentPeriodEnd
+        currentStreak
         status
         streamerId
         userId

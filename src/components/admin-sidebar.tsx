@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Users, Video, List, Bot } from "lucide-react" // Добавлен импорт Bot
+import { Users, Video, List, Bot, Coins } from "lucide-react" // Добавлен импорт Bot
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SidebarNav, SidebarNavItem } from "@/components/ui/sidebar"
@@ -28,6 +28,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ onCloseClick }) => {
       <Link href="/admins/bots" passHref> {/* Новый пункт меню для ботов */}
         <SidebarNavItem icon={<Bot />} active={pathname.startsWith("/admins/bots")}>
           Bots
+        </SidebarNavItem>
+      </Link>
+      <Link href="/admins/revenue" passHref>
+        <SidebarNavItem icon={<Coins />} active={pathname.startsWith("/admins/revenue")}>
+          Revenue
         </SidebarNavItem>
       </Link>
     </SidebarNav>

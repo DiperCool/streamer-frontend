@@ -104,6 +104,7 @@ export default function SubscriptionsPage() {
               <TableRow>
                 <TableHead>Streamer</TableHead>
                 <TableHead>Title</TableHead>
+                <TableHead>Streak</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Ends</TableHead>
@@ -125,6 +126,7 @@ export default function SubscriptionsPage() {
                     {sub.streamer?.userName || "N/A"}
                   </TableCell>
                   <TableCell>{sub.title}</TableCell>
+                  <TableCell>{sub.currentStreak ?? "N/A"}</TableCell>
                   <TableCell>{sub.status}</TableCell>
                   <TableCell>
                     {new Date(sub.createdAt).toLocaleDateString()}

@@ -26,6 +26,42 @@ directive @listSize(
     slicingArguments: [String!]
 ) on FIELD_DEFINITION
 
+"A connection to a list of items."
+type AdminPayoutsConnection {
+    "A list of edges."
+    edges: [AdminPayoutsEdge!]
+    "A flattened list of the nodes."
+    nodes: [PayoutDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type AdminPayoutsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: PayoutDto!
+}
+
+"A connection to a list of items."
+type AdminTransactionsConnection {
+    "A list of edges."
+    edges: [AdminTransactionsEdge!]
+    "A flattened list of the nodes."
+    nodes: [TransactionDto!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type AdminTransactionsEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: TransactionDto!
+}
+
 type AnalyticsDiagramItem {
     title: String!
     value: Float!
@@ -240,6 +276,14 @@ type FollowerDto {
     followedAt: DateTime!
     followerStreamer: StreamerDto
     followerStreamerId: String!
+}
+
+type GetAdminTransactionStatisticsResponse {
+    successfulPayoutsCount: Int!
+    totalGrossVolume: Decimal!
+    totalPaidOut: Decimal!
+    totalPlatformNet: Decimal!
+    transactionsCount: Int!
 }
 
 type GetEmailResponse {
@@ -478,6 +522,7 @@ type PayoutDto {
     failureMessage: String
     id: UUID!
     status: PayoutStatus!
+    streamer: StreamerDto
     streamerId: String!
     stripePayoutId: String!
 }
@@ -536,6 +581,35 @@ type ProfileDto {
 }
 
 type Query {
+    adminPayouts(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        fromDate: DateTime,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [PayoutDtoSortInput!],
+        toDate: DateTime,
+        where: PayoutDtoFilterInput
+    ): AdminPayoutsConnection
+    adminTransactionStatistics(fromDate: DateTime!, toDate: DateTime!): GetAdminTransactionStatisticsResponse!
+    adminTransactions(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        fromDate: DateTime,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [TransactionDtoSortInput!],
+        toDate: DateTime,
+        where: TransactionDtoFilterInput
+    ): AdminTransactionsConnection
     analyticsDiagram(param: GetAnalyticsDiagramInput!): [AnalyticsDiagramItem!]!
     bannedUsers(
         "Returns the elements in the list that come after the specified cursor."
@@ -999,6 +1073,7 @@ type Subscription {
 type SubscriptionDto {
     createdAt: DateTime!
     currentPeriodEnd: DateTime!
+    currentStreak: Int!
     id: UUID!
     status: SubscriptionStatus!
     streamer: StreamerDto
@@ -1060,6 +1135,21 @@ type TagsEdge {
     cursor: String!
     "The item at the end of the edge."
     node: TagDto!
+}
+
+type TransactionDto {
+    createdAt: DateTime!
+    grossAmount: Decimal!
+    id: UUID!
+    platformFee: Decimal!
+    status: TransactionStatus!
+    streamer: StreamerDto
+    streamerId: String!
+    streamerNet: Decimal!
+    stripeInvoiceUrl: String
+    transactionType: TransactionType!
+    user: StreamerDto
+    userId: String!
 }
 
 type UnbanUserResponse {
@@ -1503,6 +1593,21 @@ input GetOverviewAnalyticsInput {
     to: DateTime!
 }
 
+input IntOperationFilterInput {
+    eq: Int
+    gt: Int
+    gte: Int
+    in: [Int]
+    lt: Int
+    lte: Int
+    neq: Int
+    ngt: Int
+    ngte: Int
+    nin: [Int]
+    nlt: Int
+    nlte: Int
+}
+
 input LongOperationFilterInput {
     eq: Long
     gt: Long
@@ -1722,6 +1827,7 @@ input SubscriptionDtoFilterInput {
     and: [SubscriptionDtoFilterInput!]
     createdAt: DateTimeOperationFilterInput
     currentPeriodEnd: DateTimeOperationFilterInput
+    currentStreak: IntOperationFilterInput
     id: UuidOperationFilterInput
     or: [SubscriptionDtoFilterInput!]
     status: SubscriptionStatusOperationFilterInput
@@ -1733,6 +1839,7 @@ input SubscriptionDtoFilterInput {
 input SubscriptionDtoSortInput {
     createdAt: SortEnumType
     currentPeriodEnd: SortEnumType
+    currentStreak: SortEnumType
     id: SortEnumType
     status: SortEnumType
     streamerId: SortEnumType
@@ -1757,6 +1864,34 @@ input TagDtoFilterInput {
 input TagDtoSortInput {
     id: SortEnumType
     title: SortEnumType
+}
+
+input TransactionDtoFilterInput {
+    and: [TransactionDtoFilterInput!]
+    createdAt: DateTimeOperationFilterInput
+    grossAmount: DecimalOperationFilterInput
+    id: UuidOperationFilterInput
+    or: [TransactionDtoFilterInput!]
+    platformFee: DecimalOperationFilterInput
+    status: TransactionStatusOperationFilterInput
+    streamerId: StringOperationFilterInput
+    streamerNet: DecimalOperationFilterInput
+    stripeInvoiceUrl: StringOperationFilterInput
+    transactionType: TransactionTypeOperationFilterInput
+    userId: StringOperationFilterInput
+}
+
+input TransactionDtoSortInput {
+    createdAt: SortEnumType
+    grossAmount: SortEnumType
+    id: SortEnumType
+    platformFee: SortEnumType
+    status: SortEnumType
+    streamerId: SortEnumType
+    streamerNet: SortEnumType
+    stripeInvoiceUrl: SortEnumType
+    transactionType: SortEnumType
+    userId: SortEnumType
 }
 
 input TransactionStatusOperationFilterInput {

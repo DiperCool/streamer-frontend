@@ -138,6 +138,7 @@ export const SubscriptionsTab: React.FC = () => {
                 <TableRow className="border-gray-700 hover:bg-transparent">
                   <TableHead className="text-gray-300">Subscriber</TableHead>
                   <TableHead className="text-gray-300">Plan</TableHead>
+                  <TableHead className="text-gray-300">Streak</TableHead>
                   <TableHead className="text-gray-300">Status</TableHead>
                   <TableHead className="text-gray-300">Started At</TableHead>
                   <TableHead className="text-gray-300">Next Payout/Renewal</TableHead>
@@ -165,7 +166,9 @@ export const SubscriptionsTab: React.FC = () => {
                         <span className="text-[10px] text-gray-500 uppercase tracking-wider">Subscription</span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-gray-300">
+                      {sub.currentStreak ?? "N/A"}
+                    </TableCell>                    <TableCell>
                       {getStatusBadge(sub.status)}
                     </TableCell>
                     <TableCell className="text-gray-300 whitespace-nowrap">

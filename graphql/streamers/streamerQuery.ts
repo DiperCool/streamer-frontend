@@ -54,6 +54,7 @@ export const GET_STREAMER_INTERACTION = gql`
             subscription {
                 createdAt
                 currentPeriodEnd
+                currentStreak
                 id
                 status
                 title
