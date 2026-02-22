@@ -178,6 +178,7 @@ type ChatMessageDto {
     id: UUID!
     isActive: Boolean!
     isDeleted: Boolean!
+    isUserSubscribed: Boolean!
     message: String!
     reply: ChatMessageDto
     replyId: UUID
@@ -1442,6 +1443,7 @@ input ChatMessageDtoFilterInput {
     id: UuidOperationFilterInput
     isActive: BooleanOperationFilterInput
     isDeleted: BooleanOperationFilterInput
+    isUserSubscribed: BooleanOperationFilterInput
     message: StringOperationFilterInput
     or: [ChatMessageDtoFilterInput!]
     replyId: UuidOperationFilterInput
@@ -1454,6 +1456,7 @@ input ChatMessageDtoSortInput {
     id: SortEnumType
     isActive: SortEnumType
     isDeleted: SortEnumType
+    isUserSubscribed: SortEnumType
     message: SortEnumType
     replyId: SortEnumType
     senderId: SortEnumType

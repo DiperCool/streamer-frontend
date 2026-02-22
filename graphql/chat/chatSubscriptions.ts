@@ -7,6 +7,7 @@ export const CHAT_MESSAGE_CREATED_SUBSCRIPTION = gql`
             id
             isActive
             isDeleted
+            isUserSubscribed
             message
             replyId
             senderId
@@ -36,6 +37,7 @@ export const CHAT_MESSAGE_DELETED_SUBSCRIPTION = gql`
             id
             isActive
             isDeleted
+            isUserSubscribed
             message
             replyId
             senderId

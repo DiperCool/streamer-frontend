@@ -70,6 +70,7 @@ export const GET_CHAT_MESSAGES = gql`
                 createdAt
                 isActive
                 isDeleted
+                isUserSubscribed
                 message
                 type
                 senderId
@@ -127,6 +128,7 @@ export const GET_CHAT_MESSAGES_HISTORY = gql`
             id
             isActive
             isDeleted
+            isUserSubscribed
             message
             replyId
             senderId

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { format, isToday } from "date-fns"
-import { MessageSquareReply, MoreHorizontal, X, Pin, UserX } from "lucide-react"
+import { MessageSquareReply, MoreHorizontal, X, Pin, UserX, Crown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getMinioUrl } from "@/utils/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -106,7 +106,13 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                   </span>
                 </div>
               )}
-              <span className="font-semibold text-green-400">{message.sender?.userName}:</span>{" "}
+              <span className={cn(
+                "font-semibold",
+                message.isUserSubscribed ? "text-yellow-400" : "text-green-400"
+              )}>
+                {message.isUserSubscribed && <Crown className="h-4 w-4 mr-1 inline-block" />}
+                {message.sender?.userName}:
+              </span>{" "}
               <span>{isMessageDeleted ? "[deleted]" : message.message}</span>
               <span className="text-gray-500 text-xs ml-2">{formattedTime}</span>
               {isPinned && (

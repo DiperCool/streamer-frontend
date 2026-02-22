@@ -292,6 +292,7 @@ export type ChatMessageDto = {
   id: Scalars['UUID']['output'];
   isActive: Scalars['Boolean']['output'];
   isDeleted: Scalars['Boolean']['output'];
+  isUserSubscribed: Scalars['Boolean']['output'];
   message: Scalars['String']['output'];
   reply?: Maybe<ChatMessageDto>;
   replyId?: Maybe<Scalars['UUID']['output']>;
@@ -306,6 +307,7 @@ export type ChatMessageDtoFilterInput = {
   id?: InputMaybe<UuidOperationFilterInput>;
   isActive?: InputMaybe<BooleanOperationFilterInput>;
   isDeleted?: InputMaybe<BooleanOperationFilterInput>;
+  isUserSubscribed?: InputMaybe<BooleanOperationFilterInput>;
   message?: InputMaybe<StringOperationFilterInput>;
   or?: InputMaybe<Array<ChatMessageDtoFilterInput>>;
   replyId?: InputMaybe<UuidOperationFilterInput>;
@@ -318,6 +320,7 @@ export type ChatMessageDtoSortInput = {
   id?: InputMaybe<SortEnumType>;
   isActive?: InputMaybe<SortEnumType>;
   isDeleted?: InputMaybe<SortEnumType>;
+  isUserSubscribed?: InputMaybe<SortEnumType>;
   message?: InputMaybe<SortEnumType>;
   replyId?: InputMaybe<SortEnumType>;
   senderId?: InputMaybe<SortEnumType>;
@@ -2703,7 +2706,7 @@ export type GetChatMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', nodes?: Array<{ __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, message: string, type: ChatMessageType, senderId: string, replyId?: string | null, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName?: string | null } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type GetChatMessagesQuery = { __typename?: 'Query', chatMessages?: { __typename?: 'ChatMessagesConnection', nodes?: Array<{ __typename?: 'ChatMessageDto', id: string, createdAt: string, isActive: boolean, isDeleted: boolean, isUserSubscribed: boolean, message: string, type: ChatMessageType, senderId: string, replyId?: string | null, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', userName?: string | null } | null } | null }> | null, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type GetChatSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2718,7 +2721,7 @@ export type GetChatMessagesHistoryQueryVariables = Exact<{
 }>;
 
 
-export type GetChatMessagesHistoryQuery = { __typename?: 'Query', chatMessagesHistory: Array<{ __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null }> };
+export type GetChatMessagesHistoryQuery = { __typename?: 'Query', chatMessagesHistory: Array<{ __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, isUserSubscribed: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null }> };
 
 export type GetBannedUsersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2738,14 +2741,14 @@ export type ChatMessageCreatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } };
+export type ChatMessageCreatedSubscription = { __typename?: 'Subscription', chatMessageCreated: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, isUserSubscribed: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } };
 
 export type ChatMessageDeletedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
 }>;
 
 
-export type ChatMessageDeletedSubscription = { __typename?: 'Subscription', chatMessageDeleted: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } };
+export type ChatMessageDeletedSubscription = { __typename?: 'Subscription', chatMessageDeleted: { __typename?: 'ChatMessageDto', createdAt: string, id: string, isActive: boolean, isDeleted: boolean, isUserSubscribed: boolean, message: string, replyId?: string | null, senderId: string, type: ChatMessageType, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null, avatar?: string | null } | null, reply?: { __typename?: 'ChatMessageDto', id: string, isDeleted: boolean, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } };
 
 export type ChatUpdatedSubscriptionVariables = Exact<{
   chatId: Scalars['UUID']['input'];
@@ -4383,6 +4386,7 @@ export const GetChatMessagesDocument = gql`
       createdAt
       isActive
       isDeleted
+      isUserSubscribed
       message
       type
       senderId
@@ -4504,6 +4508,7 @@ export const GetChatMessagesHistoryDocument = gql`
     id
     isActive
     isDeleted
+    isUserSubscribed
     message
     replyId
     senderId
@@ -4645,6 +4650,7 @@ export const ChatMessageCreatedDocument = gql`
     id
     isActive
     isDeleted
+    isUserSubscribed
     message
     replyId
     senderId
@@ -4696,6 +4702,7 @@ export const ChatMessageDeletedDocument = gql`
     id
     isActive
     isDeleted
+    isUserSubscribed
     message
     replyId
     senderId
