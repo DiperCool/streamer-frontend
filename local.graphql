@@ -26,6 +26,8 @@ directive @listSize(
     slicingArguments: [String!]
 ) on FIELD_DEFINITION
 
+union ModeratorAction = BanActionDto | ChatModeActionDto | PinActionDto | StreamCategoryActionDto | StreamLanguageActionDto | StreamNameActionDto | UnbanActionDto | UnpinActionDto
+
 "A connection to a list of items."
 type AdminPayoutsConnection {
     "A list of edges."
@@ -65,6 +67,19 @@ type AdminTransactionsEdge {
 type AnalyticsDiagramItem {
     title: String!
     value: Float!
+}
+
+type BanActionDto {
+    bannedUntil: DateTime
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    reason: String
+    streamerId: String!
+    targetUser: StreamerDto
+    targetUserId: String!
 }
 
 type BanUserResponse {
@@ -205,6 +220,16 @@ type ChatMessagesEdge {
     node: ChatMessageDto!
 }
 
+type ChatModeActionDto {
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    newChatMode: String!
+    streamerId: String!
+}
+
 type ChatSettingsDto {
     bannedWords: [String!]!
     followersOnly: Boolean!
@@ -303,6 +328,24 @@ type GetStreamerSubscriptionsStatsResponse {
 
 type MakePaymentMethodDefaultResponse {
     id: UUID!
+}
+
+"A connection to a list of items."
+type ModerationActivitiesConnection {
+    "A list of edges."
+    edges: [ModerationActivitiesEdge!]
+    "A flattened list of the nodes."
+    nodes: [ModeratorAction!]
+    "Information to aid in pagination."
+    pageInfo: PageInfo!
+}
+
+"An edge in a connection."
+type ModerationActivitiesEdge {
+    "A cursor for use in pagination."
+    cursor: String!
+    "The item at the end of the edge."
+    node: ModeratorAction!
 }
 
 type Mutation {
@@ -557,6 +600,17 @@ type PermissionsFlags {
     isVod: Boolean!
 }
 
+type PinActionDto {
+    chatMessage: ChatMessageDto
+    chatMessageId: UUID!
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    streamerId: String!
+}
+
 type PinMessageResponse {
     id: UUID!
 }
@@ -674,6 +728,19 @@ type Query {
     currentStream(streamerId: String!): StreamDto!
     gBot(id: UUID!): BotDto!
     me: StreamerMeDto!
+    moderationActivities(
+        "Returns the elements in the list that come after the specified cursor."
+        after: String,
+        "Returns the elements in the list that come before the specified cursor."
+        before: String,
+        "Returns the first _n_ elements from the list."
+        first: Int,
+        "Returns the last _n_ elements from the list."
+        last: Int,
+        order: [ModeratorActionDtoSortInput!],
+        streamerId: String!,
+        where: ModeratorActionDtoFilterInput
+    ): ModerationActivitiesConnection
     myEmail: GetEmailResponse!
     myFollowers(
         "Returns the elements in the list that come after the specified cursor."
@@ -929,6 +996,16 @@ type SearchResult {
     title: String!
 }
 
+type StreamCategoryActionDto {
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    newCategory: String!
+    streamerId: String!
+}
+
 type StreamDto {
     active: Boolean!
     category: CategoryDto
@@ -953,6 +1030,26 @@ type StreamInfoDto {
     streamerId: String!
     tags: [TagDto!]!
     title: String
+}
+
+type StreamLanguageActionDto {
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    newLanguage: String!
+    streamerId: String!
+}
+
+type StreamNameActionDto {
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    newStreamName: String!
+    streamerId: String!
 }
 
 type StreamSettingsDto {
@@ -1057,6 +1154,7 @@ type Subscription {
     chatMessageCreated(chatId: UUID!): ChatMessageDto!
     chatMessageDeleted(chatId: UUID!): ChatMessageDto!
     chatUpdated(chatId: UUID!): ChatDto!
+    moderationActivityCreated(streamerId: String!): ModeratorAction!
     notificationCreated: NotificationDto!
     paymentMethodCreated: PaymentMethodDto!
     paymentMethodDeleted: PaymentMethodDeletedDto!
@@ -1153,12 +1251,34 @@ type TransactionDto {
     userId: String!
 }
 
+type UnbanActionDto {
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    streamerId: String!
+    targetUser: StreamerDto
+    targetUserId: String!
+}
+
 type UnbanUserResponse {
     id: UUID!
 }
 
 type UnfollowResponse {
     id: UUID!
+}
+
+type UnpinActionDto {
+    chatMessage: ChatMessageDto
+    chatMessageId: UUID!
+    createdDate: DateTime!
+    id: UUID!
+    moderator: StreamerDto
+    moderatorId: String!
+    name: String!
+    streamerId: String!
 }
 
 type UnpinMessageResponse {
@@ -1624,6 +1744,24 @@ input LongOperationFilterInput {
     nin: [Long]
     nlt: Long
     nlte: Long
+}
+
+input ModeratorActionDtoFilterInput {
+    and: [ModeratorActionDtoFilterInput!]
+    createdDate: DateTimeOperationFilterInput
+    id: UuidOperationFilterInput
+    moderatorId: StringOperationFilterInput
+    name: StringOperationFilterInput
+    or: [ModeratorActionDtoFilterInput!]
+    streamerId: StringOperationFilterInput
+}
+
+input ModeratorActionDtoSortInput {
+    createdDate: SortEnumType
+    id: SortEnumType
+    moderatorId: SortEnumType
+    name: SortEnumType
+    streamerId: SortEnumType
 }
 
 input NotificationDtoFilterInput {

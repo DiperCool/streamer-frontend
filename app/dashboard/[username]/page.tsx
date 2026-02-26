@@ -12,6 +12,7 @@ import { ChatSection } from "@/src/components/chat-section";
 import { useDashboard } from "@/src/contexts/DashboardContext";
 import { StreamPreviewWidget } from "@/src/components/dashboard/widgets/stream-preview-widget";
 import { StreamInfoWidget } from "@/src/components/dashboard/widgets/stream-info-widget";
+import { ModActionsWidget } from "@/src/components/dashboard/widgets/ModActionsWidget";
 import { SessionInfoWidget } from "@/src/components/dashboard/widgets/session-info-widget";
 
 const LOCAL_STORAGE_KEY_PREFIX = "dashboard_layout_";
@@ -110,9 +111,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
               <CardTitle className="text-white text-base">Mod Actions</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col">
-              Mod Actions content goes here.
-            </CardContent>
+            <ModActionsWidget streamerId={activeStreamer?.id ?? ""} />
           </Card>
         );
       default:

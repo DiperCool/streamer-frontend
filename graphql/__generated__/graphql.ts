@@ -91,6 +91,20 @@ export enum ApplyPolicy {
   Validation = 'VALIDATION'
 }
 
+export type BanActionDto = {
+  __typename?: 'BanActionDto';
+  bannedUntil?: Maybe<Scalars['DateTime']['output']>;
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  streamerId: Scalars['String']['output'];
+  targetUser?: Maybe<StreamerDto>;
+  targetUserId: Scalars['String']['output'];
+};
+
 export type BanUserInput = {
   banUntil: Scalars['DateTime']['input'];
   broadcasterId: Scalars['String']['input'];
@@ -356,6 +370,17 @@ export type ChatMessagesEdge = {
   cursor: Scalars['String']['output'];
   /** The item at the end of the edge. */
   node: ChatMessageDto;
+};
+
+export type ChatModeActionDto = {
+  __typename?: 'ChatModeActionDto';
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  newChatMode: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
 };
 
 export type ChatSettingsDto = {
@@ -634,6 +659,46 @@ export type LongOperationFilterInput = {
 export type MakePaymentMethodDefaultResponse = {
   __typename?: 'MakePaymentMethodDefaultResponse';
   id: Scalars['UUID']['output'];
+};
+
+/** A connection to a list of items. */
+export type ModerationActivitiesConnection = {
+  __typename?: 'ModerationActivitiesConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<ModerationActivitiesEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<ModeratorAction>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+};
+
+/** An edge in a connection. */
+export type ModerationActivitiesEdge = {
+  __typename?: 'ModerationActivitiesEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: ModeratorAction;
+};
+
+export type ModeratorAction = BanActionDto | ChatModeActionDto | PinActionDto | StreamCategoryActionDto | StreamLanguageActionDto | StreamNameActionDto | UnbanActionDto | UnpinActionDto;
+
+export type ModeratorActionDtoFilterInput = {
+  and?: InputMaybe<Array<ModeratorActionDtoFilterInput>>;
+  createdDate?: InputMaybe<DateTimeOperationFilterInput>;
+  id?: InputMaybe<UuidOperationFilterInput>;
+  moderatorId?: InputMaybe<StringOperationFilterInput>;
+  name?: InputMaybe<StringOperationFilterInput>;
+  or?: InputMaybe<Array<ModeratorActionDtoFilterInput>>;
+  streamerId?: InputMaybe<StringOperationFilterInput>;
+};
+
+export type ModeratorActionDtoSortInput = {
+  createdDate?: InputMaybe<SortEnumType>;
+  id?: InputMaybe<SortEnumType>;
+  moderatorId?: InputMaybe<SortEnumType>;
+  name?: InputMaybe<SortEnumType>;
+  streamerId?: InputMaybe<SortEnumType>;
 };
 
 export type Mutation = {
@@ -1184,6 +1249,18 @@ export type PermissionsOperationFilterInput = {
   nin?: InputMaybe<Array<PermissionsFlagsInput>>;
 };
 
+export type PinActionDto = {
+  __typename?: 'PinActionDto';
+  chatMessage?: Maybe<ChatMessageDto>;
+  chatMessageId: Scalars['UUID']['output'];
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
+};
+
 export type PinMessageInput = {
   messageId: Scalars['UUID']['input'];
 };
@@ -1234,6 +1311,7 @@ export type Query = {
   currentStream: StreamDto;
   gBot: BotDto;
   me: StreamerMeDto;
+  moderationActivities?: Maybe<ModerationActivitiesConnection>;
   myEmail: GetEmailResponse;
   myFollowers?: Maybe<MyFollowersConnection>;
   myFollowings?: Maybe<MyFollowingsConnection>;
@@ -1385,6 +1463,17 @@ export type QueryCurrentStreamArgs = {
 
 export type QueryGBotArgs = {
   id: Scalars['UUID']['input'];
+};
+
+
+export type QueryModerationActivitiesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<ModeratorActionDtoSortInput>>;
+  streamerId: Scalars['String']['input'];
+  where?: InputMaybe<ModeratorActionDtoFilterInput>;
 };
 
 
@@ -1731,6 +1820,17 @@ export enum SortEnumType {
   Desc = 'DESC'
 }
 
+export type StreamCategoryActionDto = {
+  __typename?: 'StreamCategoryActionDto';
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  newCategory: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
+};
+
 export type StreamDto = {
   __typename?: 'StreamDto';
   active: Scalars['Boolean']['output'];
@@ -1783,6 +1883,28 @@ export type StreamInfoDto = {
   streamerId: Scalars['String']['output'];
   tags: Array<TagDto>;
   title?: Maybe<Scalars['String']['output']>;
+};
+
+export type StreamLanguageActionDto = {
+  __typename?: 'StreamLanguageActionDto';
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  newLanguage: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
+};
+
+export type StreamNameActionDto = {
+  __typename?: 'StreamNameActionDto';
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  newStreamName: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
 };
 
 export type StreamSettingsDto = {
@@ -1962,6 +2084,7 @@ export type Subscription = {
   chatMessageCreated: ChatMessageDto;
   chatMessageDeleted: ChatMessageDto;
   chatUpdated: ChatDto;
+  moderationActivityCreated: ModeratorAction;
   notificationCreated: NotificationDto;
   paymentMethodCreated: PaymentMethodDto;
   paymentMethodDeleted: PaymentMethodDeletedDto;
@@ -1989,6 +2112,11 @@ export type SubscriptionChatMessageDeletedArgs = {
 
 export type SubscriptionChatUpdatedArgs = {
   chatId: Scalars['UUID']['input'];
+};
+
+
+export type SubscriptionModerationActivityCreatedArgs = {
+  streamerId: Scalars['String']['input'];
 };
 
 
@@ -2221,6 +2349,18 @@ export type TransactionTypeOperationFilterInput = {
   nin?: InputMaybe<Array<TransactionType>>;
 };
 
+export type UnbanActionDto = {
+  __typename?: 'UnbanActionDto';
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
+  targetUser?: Maybe<StreamerDto>;
+  targetUserId: Scalars['String']['output'];
+};
+
 export type UnbanUserInput = {
   broadcasterId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
@@ -2238,6 +2378,18 @@ export type UnfollowInput = {
 export type UnfollowResponse = {
   __typename?: 'UnfollowResponse';
   id: Scalars['UUID']['output'];
+};
+
+export type UnpinActionDto = {
+  __typename?: 'UnpinActionDto';
+  chatMessage?: Maybe<ChatMessageDto>;
+  chatMessageId: Scalars['UUID']['output'];
+  createdDate: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  moderator?: Maybe<StreamerDto>;
+  moderatorId: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  streamerId: Scalars['String']['output'];
 };
 
 export type UnpinMessageInput = {
@@ -2779,6 +2931,24 @@ export type UploadFileMutationVariables = Exact<{
 
 
 export type UploadFileMutation = { __typename?: 'Mutation', upload: { __typename?: 'UploadFileResponse', fileName: string } };
+
+export type ModerationActionsQueryVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  where?: InputMaybe<ModeratorActionDtoFilterInput>;
+  order?: InputMaybe<Array<ModeratorActionDtoSortInput> | ModeratorActionDtoSortInput>;
+}>;
+
+
+export type ModerationActionsQuery = { __typename?: 'Query', moderationActivities?: { __typename?: 'ModerationActivitiesConnection', edges?: Array<{ __typename?: 'ModerationActivitiesEdge', node: { __typename?: 'BanActionDto', id: string, name: string, createdDate: string, bannedUntil?: string | null, reason?: string | null, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null, targetUser?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'ChatModeActionDto', id: string, name: string, createdDate: string, newChatMode: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'PinActionDto', id: string, name: string, createdDate: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null, chatMessage?: { __typename?: 'ChatMessageDto', id: string, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } | { __typename?: 'StreamCategoryActionDto', id: string, name: string, createdDate: string, newCategory: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'StreamLanguageActionDto', id: string, name: string, createdDate: string, newLanguage: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'StreamNameActionDto', id: string, name: string, createdDate: string, newStreamName: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'UnbanActionDto', id: string, name: string, createdDate: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null, targetUser?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'UnpinActionDto', id: string, name: string, createdDate: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null, chatMessage?: { __typename?: 'ChatMessageDto', id: string, message: string, sender?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | null } }> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null } } | null };
+
+export type ModerationActivityCreatedSubscriptionVariables = Exact<{
+  streamerId: Scalars['String']['input'];
+}>;
+
+
+export type ModerationActivityCreatedSubscription = { __typename?: 'Subscription', moderationActivityCreated: { __typename?: 'BanActionDto', id: string, name: string, createdDate: string, bannedUntil?: string | null, reason?: string | null, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null, targetUser?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'ChatModeActionDto', id: string, name: string, createdDate: string, newChatMode: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'PinActionDto', id: string, name: string, createdDate: string, chatMessageId: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'StreamCategoryActionDto', id: string, name: string, createdDate: string, newCategory: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'StreamLanguageActionDto', id: string, name: string, createdDate: string, newLanguage: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'StreamNameActionDto', id: string, name: string, createdDate: string, newStreamName: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'UnbanActionDto', id: string, name: string, createdDate: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null, targetUser?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } | { __typename?: 'UnpinActionDto', id: string, name: string, createdDate: string, chatMessageId: string, moderator?: { __typename?: 'StreamerDto', id: string, userName?: string | null } | null } };
 
 export type ReadNotificationMutationVariables = Exact<{
   readNotification: ReadNotificationInput;
@@ -4939,6 +5109,282 @@ export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
 export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
 export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
+export const ModerationActionsDocument = gql`
+    query ModerationActions($streamerId: String!, $first: Int, $after: String, $where: ModeratorActionDtoFilterInput, $order: [ModeratorActionDtoSortInput!]) {
+  moderationActivities(
+    streamerId: $streamerId
+    first: $first
+    after: $after
+    where: $where
+    order: $order
+  ) {
+    edges {
+      node {
+        ... on BanActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          targetUser {
+            id
+            userName
+          }
+          bannedUntil
+          reason
+        }
+        ... on UnbanActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          targetUser {
+            id
+            userName
+          }
+        }
+        ... on ChatModeActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          newChatMode
+        }
+        ... on PinActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          chatMessage {
+            id
+            message
+            sender {
+              id
+              userName
+            }
+          }
+        }
+        ... on UnpinActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          chatMessage {
+            id
+            message
+            sender {
+              id
+              userName
+            }
+          }
+        }
+        ... on StreamNameActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          newStreamName
+        }
+        ... on StreamLanguageActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          newLanguage
+        }
+        ... on StreamCategoryActionDto {
+          id
+          name
+          createdDate
+          moderator {
+            id
+            userName
+          }
+          newCategory
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+    `;
+
+/**
+ * __useModerationActionsQuery__
+ *
+ * To run a query within a React component, call `useModerationActionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useModerationActionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useModerationActionsQuery({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      where: // value for 'where'
+ *      order: // value for 'order'
+ *   },
+ * });
+ */
+export function useModerationActionsQuery(baseOptions: Apollo.QueryHookOptions<ModerationActionsQuery, ModerationActionsQueryVariables> & ({ variables: ModerationActionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ModerationActionsQuery, ModerationActionsQueryVariables>(ModerationActionsDocument, options);
+      }
+export function useModerationActionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ModerationActionsQuery, ModerationActionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ModerationActionsQuery, ModerationActionsQueryVariables>(ModerationActionsDocument, options);
+        }
+export function useModerationActionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ModerationActionsQuery, ModerationActionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ModerationActionsQuery, ModerationActionsQueryVariables>(ModerationActionsDocument, options);
+        }
+export type ModerationActionsQueryHookResult = ReturnType<typeof useModerationActionsQuery>;
+export type ModerationActionsLazyQueryHookResult = ReturnType<typeof useModerationActionsLazyQuery>;
+export type ModerationActionsSuspenseQueryHookResult = ReturnType<typeof useModerationActionsSuspenseQuery>;
+export type ModerationActionsQueryResult = Apollo.QueryResult<ModerationActionsQuery, ModerationActionsQueryVariables>;
+export const ModerationActivityCreatedDocument = gql`
+    subscription ModerationActivityCreated($streamerId: String!) {
+  moderationActivityCreated(streamerId: $streamerId) {
+    ... on BanActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      targetUser {
+        id
+        userName
+      }
+      bannedUntil
+      reason
+    }
+    ... on UnbanActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      targetUser {
+        id
+        userName
+      }
+    }
+    ... on ChatModeActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      newChatMode
+    }
+    ... on PinActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      chatMessageId
+    }
+    ... on UnpinActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      chatMessageId
+    }
+    ... on StreamNameActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      newStreamName
+    }
+    ... on StreamLanguageActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      newLanguage
+    }
+    ... on StreamCategoryActionDto {
+      id
+      name
+      createdDate
+      moderator {
+        id
+        userName
+      }
+      newCategory
+    }
+  }
+}
+    `;
+
+/**
+ * __useModerationActivityCreatedSubscription__
+ *
+ * To run a query within a React component, call `useModerationActivityCreatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useModerationActivityCreatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useModerationActivityCreatedSubscription({
+ *   variables: {
+ *      streamerId: // value for 'streamerId'
+ *   },
+ * });
+ */
+export function useModerationActivityCreatedSubscription(baseOptions: Apollo.SubscriptionHookOptions<ModerationActivityCreatedSubscription, ModerationActivityCreatedSubscriptionVariables> & ({ variables: ModerationActivityCreatedSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ModerationActivityCreatedSubscription, ModerationActivityCreatedSubscriptionVariables>(ModerationActivityCreatedDocument, options);
+      }
+export type ModerationActivityCreatedSubscriptionHookResult = ReturnType<typeof useModerationActivityCreatedSubscription>;
+export type ModerationActivityCreatedSubscriptionResult = Apollo.SubscriptionResult<ModerationActivityCreatedSubscription>;
 export const ReadNotificationDocument = gql`
     mutation ReadNotification($readNotification: ReadNotificationInput!) {
   readNotification(readNotification: $readNotification) {
