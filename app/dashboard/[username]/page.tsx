@@ -21,7 +21,6 @@ const ACTIVE_WIDGETS_KEY_SUFFIX = "_active_widgets";
 export enum DashboardWidgetType {
   SessionInfo = "SessionInfo",
   StreamPreview = "StreamPreview",
-  ActivityFeed = "ActivityFeed",
   Chat = "Chat",
   StreamInfo = "StreamInfo",
   ModActions = "ModActions",
@@ -30,7 +29,6 @@ export enum DashboardWidgetType {
 const DEFAULT_ACTIVE_WIDGETS: DashboardWidgetType[] = [
   DashboardWidgetType.SessionInfo,
   DashboardWidgetType.StreamPreview,
-  DashboardWidgetType.ActivityFeed,
   DashboardWidgetType.Chat,
   DashboardWidgetType.StreamInfo,
   DashboardWidgetType.ModActions,
@@ -67,17 +65,7 @@ export default function DashboardHomePage({ params }: { params: { username: stri
             </CardContent>
           </Card>
         );
-      case DashboardWidgetType.ActivityFeed:
-        return (
-          <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between p-3 border-b border-gray-700">
-              <CardTitle className="text-white text-base">Activity Feed</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 p-3 text-gray-400 text-sm flex items-center justify-center flex-col">
-              Activity Feed content goes here.
-            </CardContent>
-          </Card>
-        );
+
       case DashboardWidgetType.Chat:
         return (
           <Card className="h-full bg-gray-800 border-gray-700 flex flex-col">
@@ -122,7 +110,6 @@ export default function DashboardHomePage({ params }: { params: { username: stri
   const leftColumnWidgetsOrder = [
     DashboardWidgetType.SessionInfo,
     DashboardWidgetType.StreamPreview,
-    DashboardWidgetType.ActivityFeed,
   ];
   const topRightSectionWidgetsOrder = [
     DashboardWidgetType.Chat,
